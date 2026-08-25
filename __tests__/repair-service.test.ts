@@ -1,0 +1,807 @@
+/**
+ * __tests__/repair-service.test.ts
+ * Comprehensive Tier 1 & Tier 2 Integration Test Suite for Kuro Mobile Repair Service.
+ */
+
+import {
+  mapFirestoreRepairTicketDoc,
+  mapFirestoreRepairDoc,
+  subscribeTenantRepairTickets,
+  subscribeSingleRepairTicket,
+  subscribeRepairTicket,
+  fetchTenantRepairTickets,
+  getRepairTicket,
+  generateRepairNumber,
+  createRepairTicket,
+  updateRepairTicketStatus,
+  appendRepairAction,
+  appendRepairNote,
+  appendRepairAttachment,
+  addRepairAttachment,
+  uploadRepairDamagePhoto,
+  syncRepairToRtdbLedger,
+  updateEquipmentRepairCondition,
+} from '@/services/repair-service';
+import * as firestore from 'firebase/firestore';
+import * as rtdb from 'firebase/database';
+import * as storage from 'firebase/storage';
+
+// Global mock references
+const mockFirestore = firestore as jest.Mocked<any>;
+const mockRtdb = rtdb as jest.Mocked<any>;
+const mockStorage = storage as jest.Mocked<any>;
+
+// Mock global fetch for photo upload
+const mockBlob = { size: 1024, type: 'image/jpeg' };
+global.fetch = jest.fn().mockImplementation(() =>
+  Promise.resolve({
+    blob: () => Promise.resolve(mockBlob),
+  })
+) as jest.Mock;
+
+describe('repair-service', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // ==========================================================================
+  // 1. DEFENSIVE DOCUMENT MAPPER SUITE (SVC-MAP)
+  // ==========================================================================
+  describe('mapFirestoreRepairTicketDoc & mapFirestoreRepairDoc', () => {
+    it('SVC-MAP-01: Maps complete Firestore document with Timestamps (Tier 1)', () => {
+      const rawDoc = {
+        id: 't-100',
+        data: () => ({
+          id: 't-100',
+          tenantId: 'tenant-alpha',
+          repairNumber: 1042,
+          rentmanId: 'rm-99',
+          equipment: {
+            id: 'eq-1',
+            name: 'Robe BMFL',
+            serialNumber: 'SN-001',
+            barcode: 'BAR-001',
+            category: 'Lighting',
+            quantity: 2,
+          },
+          repairType: 'Internal',
+          priority: 'High',
+          status: 'Under Repair',
+          condition: 'Out of Service',
+          billingStatus: 'Internal',
+          assignee: { id: 'u-1', name: 'Alex Tech' },
+          assigneeId: 'u-1',
+          requestedBy: 'Lead Tech',
+          repairPeriodStart: { _seconds: 1756118400, _nanoseconds: 0 },
+          repairPeriodEnd: { _seconds: 1756204800, _nanoseconds: 0 },
+          actions: [
+            {
+              id: 'act-1',
+              user: { id: 'u-1', name: 'Alex Tech' },
+              action: 'Initial diagnostic',
+              timestamp: { _seconds: 1756118500, _nanoseconds: 0 },
+              tenantId: 'tenant-alpha',
+            },
+          ],
+          notes: [
+            {
+              id: 'n-1',
+              content: 'Fan motor faulty',
+              user: { name: 'Alex Tech' },
+              timestamp: { _seconds: 1756118600, _nanoseconds: 0 },
+            },
+          ],
+          attachments: [
+            {
+              id: 'att-1',
+              type: 'Photo',
+              url: 'https://storage.kuro.app/photo.jpg',
+              uploadedAt: { _seconds: 1756118700, _nanoseconds: 0 },
+            },
+          ],
+          partsUsed: [
+            {
+              id: 'p-1',
+              name: 'Fan 12V',
+              quantity: 2,
+              cost: 15.0,
+            },
+          ],
+          createdAt: { _seconds: 1756118400, _nanoseconds: 0 },
+          updatedAt: { _seconds: 1756118800, _nanoseconds: 0 },
+        }),
+      };
+
+      const ticket = mapFirestoreRepairTicketDoc(rawDoc);
+      expect(ticket.id).toBe('t-100');
+      expect(ticket.tenantId).toBe('tenant-alpha');
+      expect(ticket.repairNumber).toBe(1042);
+      expect(ticket.equipment.name).toBe('Robe BMFL');
+      expect(ticket.equipment.quantity).toBe(2);
+      expect(ticket.status).toBe('Under Repair');
+      expect(ticket.condition).toBe('Out of Service');
+      expect(ticket.actions).toHaveLength(1);
+      expect(ticket.actions?.[0].action).toBe('Initial diagnostic');
+      expect(ticket.notes).toHaveLength(1);
+      expect(ticket.notes?.[0].content).toBe('Fan motor faulty');
+      expect(ticket.attachments).toHaveLength(1);
+      expect(ticket.partsUsed).toHaveLength(1);
+      expect(ticket.createdAt).toBe(new Date(1756118400 * 1000).toISOString());
+    });
+
+    it('SVC-MAP-02: mapFirestoreRepairDoc alias produces identical mapped result (Tier 1)', () => {
+      const raw = { id: 't-2', name: 'Test', status: 'Operational' };
+      const res1 = mapFirestoreRepairTicketDoc(raw);
+      const res2 = mapFirestoreRepairDoc(raw);
+      expect(res1).toEqual(res2);
+    });
+
+    it('SVC-MAP-03: Defensive defaults for missing or corrupted doc fields (Tier 2)', () => {
+      const emptyDoc = { id: 'empty-1' };
+      const ticket = mapFirestoreRepairTicketDoc(emptyDoc);
+
+      expect(ticket.id).toBe('empty-1');
+      expect(ticket.equipment.name).toBe('Unnamed Equipment');
+      expect(ticket.status).toBe('Under Repair');
+      expect(ticket.condition).toBe('Out of Service');
+      expect(ticket.actions).toEqual([]);
+      expect(ticket.notes).toEqual([]);
+      expect(ticket.attachments).toEqual([]);
+      expect(ticket.partsUsed).toEqual([]);
+      expect(ticket.costs).toBe(0);
+    });
+
+    it('SVC-MAP-04: Resolves condition from status when condition is missing (Tier 2)', () => {
+      const opDoc = { id: 'op-1', status: 'Operational' };
+      expect(mapFirestoreRepairTicketDoc(opDoc).condition).toBe('Available to Use');
+
+      const compDoc = { id: 'comp-1', status: 'Completed' };
+      expect(mapFirestoreRepairTicketDoc(compDoc).condition).toBe('Available to Use');
+
+      const repDoc = { id: 'rep-1', status: 'Under Repair' };
+      expect(mapFirestoreRepairTicketDoc(repDoc).condition).toBe('Out of Service');
+    });
+
+    it('SVC-MAP-05: Handles corrupt non-array fields safely without crashing (Tier 2)', () => {
+      const corruptDoc = {
+        id: 'corrupt-1',
+        actions: 'invalid_string' as any,
+        notes: null as any,
+        attachments: 12345 as any,
+        partsUsed: {} as any,
+      };
+
+      const ticket = mapFirestoreRepairTicketDoc(corruptDoc);
+      expect(ticket.actions).toEqual([]);
+      expect(ticket.notes).toEqual([]);
+      expect(ticket.attachments).toEqual([]);
+      expect(ticket.partsUsed).toEqual([]);
+    });
+  });
+
+  // ==========================================================================
+  // 2. REAL-TIME TENANT SUBSCRIPTION SUITE (SVC-SUB)
+  // ==========================================================================
+  describe('subscribeTenantRepairTickets', () => {
+    it('SVC-SUB-01: Subscribes with tenant filter and receives tickets (Tier 1)', () => {
+      let snapshotCallback: (snap: any) => void = () => {};
+      mockFirestore.onSnapshot.mockImplementation((_query: any, callback: any) => {
+        snapshotCallback = callback;
+        return jest.fn(); // mock unsubscribe
+      });
+
+      const onUpdate = jest.fn();
+      const unsub = subscribeTenantRepairTickets('tenant-alpha', onUpdate);
+
+      expect(mockFirestore.collection).toHaveBeenCalledWith(mockFirestore.getFirestore(), 'tickets');
+      expect(mockFirestore.where).toHaveBeenCalledWith('tenantId', '==', 'tenant-alpha');
+
+      // Trigger snapshot event
+      const mockDocs = [
+        {
+          id: 't-1',
+          data: () => ({
+            id: 't-1',
+            tenantId: 'tenant-alpha',
+            repairNumber: 101,
+            equipment: { name: 'Item 1' },
+            createdAt: '2026-08-25T10:00:00Z',
+          }),
+        },
+      ];
+      snapshotCallback(mockDocs);
+
+      expect(onUpdate).toHaveBeenCalledTimes(1);
+      expect(onUpdate.mock.calls[0][0]).toHaveLength(1);
+      expect(onUpdate.mock.calls[0][0][0].id).toBe('t-1');
+
+      unsub();
+    });
+
+    it('SVC-SUB-02: Unsubscribe unregisters Firestore snapshot listener (Tier 1)', () => {
+      const mockUnsubSpy = jest.fn();
+      mockFirestore.onSnapshot.mockReturnValue(mockUnsubSpy);
+
+      const unsub = subscribeTenantRepairTickets('tenant-alpha', jest.fn());
+      unsub();
+      expect(mockUnsubSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('SVC-SUB-03: Empty tenantId returns empty array and noop unsub without registering listener (Tier 2)', () => {
+      const onUpdate = jest.fn();
+      const unsub = subscribeTenantRepairTickets('', onUpdate);
+
+      expect(onUpdate).toHaveBeenCalledWith([]);
+      expect(mockFirestore.onSnapshot).not.toHaveBeenCalled();
+      expect(() => unsub()).not.toThrow();
+    });
+
+    it('SVC-SUB-04: Cross-tenant data leakage prevention in live stream (Tier 2)', () => {
+      let snapshotCallback: (snap: any) => void = () => {};
+      mockFirestore.onSnapshot.mockImplementation((_q: any, cb: any) => {
+        snapshotCallback = cb;
+        return jest.fn();
+      });
+
+      const onUpdate = jest.fn();
+      subscribeTenantRepairTickets('tenant-alpha', onUpdate);
+
+      // Emulate dirty snapshot containing another tenant's doc
+      const mockDocs = [
+        {
+          id: 't-valid',
+          data: () => ({ id: 't-valid', tenantId: 'tenant-alpha', equipment: { name: 'Valid' } }),
+        },
+        {
+          id: 't-leak',
+          data: () => ({ id: 't-leak', tenantId: 'tenant-beta', equipment: { name: 'Leak' } }),
+        },
+      ];
+      snapshotCallback(mockDocs);
+
+      const emitted = onUpdate.mock.calls[0][0];
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0].id).toBe('t-valid');
+    });
+
+    it('SVC-SUB-05: Filters out archived tickets in live stream (Tier 2)', () => {
+      let snapshotCallback: (snap: any) => void = () => {};
+      mockFirestore.onSnapshot.mockImplementation((_q: any, cb: any) => {
+        snapshotCallback = cb;
+        return jest.fn();
+      });
+
+      const onUpdate = jest.fn();
+      subscribeTenantRepairTickets('tenant-alpha', onUpdate);
+
+      const mockDocs = [
+        {
+          id: 't-active',
+          data: () => ({ id: 't-active', tenantId: 'tenant-alpha', archived: false }),
+        },
+        {
+          id: 't-archived',
+          data: () => ({ id: 't-archived', tenantId: 'tenant-alpha', archived: true }),
+        },
+      ];
+      snapshotCallback(mockDocs);
+
+      const emitted = onUpdate.mock.calls[0][0];
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0].id).toBe('t-active');
+    });
+
+    it('SVC-SUB-06: Error callback handles stream failures (Tier 2)', () => {
+      let errorCallback: (err: any) => void = () => {};
+      mockFirestore.onSnapshot.mockImplementation((_q: any, _success: any, errCb: any) => {
+        errorCallback = errCb;
+        return jest.fn();
+      });
+
+      const onError = jest.fn();
+      subscribeTenantRepairTickets('tenant-alpha', jest.fn(), onError);
+
+      const error = new Error('Permission denied');
+      errorCallback(error);
+
+      expect(onError).toHaveBeenCalledWith(error);
+    });
+  });
+
+  // ==========================================================================
+  // 3. SINGLE TICKET SUBSCRIPTION SUITE (SVC-SGT)
+  // ==========================================================================
+  describe('subscribeSingleRepairTicket & subscribeRepairTicket', () => {
+    it('SVC-SGT-01: Subscribes to single ticket by ID and receives ticket (Tier 1)', () => {
+      let snapshotCallback: (snap: any) => void = () => {};
+      mockFirestore.onSnapshot.mockImplementation((_ref: any, cb: any) => {
+        snapshotCallback = cb;
+        return jest.fn();
+      });
+
+      const onUpdate = jest.fn();
+      subscribeSingleRepairTicket('t-100', 'tenant-alpha', onUpdate);
+
+      const mockSnap = {
+        exists: () => true,
+        id: 't-100',
+        data: () => ({
+          id: 't-100',
+          tenantId: 'tenant-alpha',
+          equipment: { name: 'GrandMA3' },
+          status: 'Under Repair',
+        }),
+      };
+      snapshotCallback(mockSnap);
+
+      expect(onUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 't-100', status: 'Under Repair' })
+      );
+    });
+
+    it('SVC-SGT-02: subscribeRepairTicket alias works identically (Tier 1)', () => {
+      expect(subscribeRepairTicket).toBe(subscribeSingleRepairTicket);
+    });
+
+    it('SVC-SGT-03: Cross-tenant single ticket access emits null (Tier 2)', () => {
+      let snapshotCallback: (snap: any) => void = () => {};
+      mockFirestore.onSnapshot.mockImplementation((_ref: any, cb: any) => {
+        snapshotCallback = cb;
+        return jest.fn();
+      });
+
+      const onUpdate = jest.fn();
+      subscribeSingleRepairTicket('t-100', 'tenant-alpha', onUpdate);
+
+      const mockSnap = {
+        exists: () => true,
+        id: 't-100',
+        data: () => ({
+          id: 't-100',
+          tenantId: 'tenant-other-beta', // Mismatched tenant
+        }),
+      };
+      snapshotCallback(mockSnap);
+
+      expect(onUpdate).toHaveBeenCalledWith(null);
+    });
+
+    it('SVC-SGT-04: Non-existent ticket emits null (Tier 2)', () => {
+      let snapshotCallback: (snap: any) => void = () => {};
+      mockFirestore.onSnapshot.mockImplementation((_ref: any, cb: any) => {
+        snapshotCallback = cb;
+        return jest.fn();
+      });
+
+      const onUpdate = jest.fn();
+      subscribeSingleRepairTicket('non-existent', 'tenant-alpha', onUpdate);
+
+      const mockSnap = {
+        exists: () => false,
+      };
+      snapshotCallback(mockSnap);
+
+      expect(onUpdate).toHaveBeenCalledWith(null);
+    });
+
+    it('SVC-SGT-05: Empty ticketId or tenantId emits null immediately (Tier 2)', () => {
+      const onUpdate = jest.fn();
+      subscribeSingleRepairTicket('', 'tenant-alpha', onUpdate);
+      expect(onUpdate).toHaveBeenCalledWith(null);
+      expect(mockFirestore.onSnapshot).not.toHaveBeenCalled();
+    });
+  });
+
+  // ==========================================================================
+  // 4. ONE-OFF FETCH OPERATIONS (SVC-FCH)
+  // ==========================================================================
+  describe('fetchTenantRepairTickets & getRepairTicket', () => {
+    it('SVC-FCH-01: fetchTenantRepairTickets fetches and maps active tickets (Tier 1)', () => {
+      mockFirestore.getDocs.mockResolvedValue([
+        {
+          id: 't-1',
+          data: () => ({
+            id: 't-1',
+            tenantId: 'tenant-alpha',
+            repairNumber: 1001,
+            equipment: { name: 'Item 1' },
+            createdAt: '2026-08-25T10:00:00Z',
+          }),
+        },
+      ]);
+
+      return fetchTenantRepairTickets('tenant-alpha').then((tickets) => {
+        expect(tickets).toHaveLength(1);
+        expect(tickets[0].id).toBe('t-1');
+      });
+    });
+
+    it('SVC-FCH-02: getRepairTicket fetches single ticket and respects tenantId (Tier 1)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        id: 't-1',
+        data: () => ({
+          id: 't-1',
+          tenantId: 'tenant-alpha',
+          equipment: { name: 'Console' },
+        }),
+      });
+
+      const ticket = await getRepairTicket('t-1', 'tenant-alpha');
+      expect(ticket).not.toBeNull();
+      expect(ticket?.id).toBe('t-1');
+
+      const unauthorized = await getRepairTicket('t-1', 'tenant-wrong');
+      expect(unauthorized).toBeNull();
+    });
+
+    it('SVC-FCH-03: getRepairTicket returns null for non-existent ticket or empty ID (Tier 2)', async () => {
+      expect(await getRepairTicket('')).toBeNull();
+
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => false,
+      });
+      expect(await getRepairTicket('non-existent')).toBeNull();
+    });
+  });
+
+  // ==========================================================================
+  // 5. TICKET CREATION & SEQUENTIAL NUMBERS (SVC-CRT)
+  // ==========================================================================
+  describe('createRepairTicket & generateRepairNumber', () => {
+    it('SVC-CRT-01: generateRepairNumber increments highest number or defaults to 1001 (Tier 1)', async () => {
+      // With existing tickets
+      mockFirestore.getDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [{ data: () => ({ repairNumber: 1042 }) }],
+      });
+      const num1 = await generateRepairNumber('tenant-alpha');
+      expect(num1).toBe(1043);
+
+      // Without existing tickets
+      mockFirestore.getDocs.mockResolvedValueOnce({
+        empty: true,
+        docs: [],
+      }).mockResolvedValueOnce({
+        forEach: jest.fn(),
+      });
+      const num2 = await generateRepairNumber('tenant-alpha');
+      expect(num2).toBe(1001);
+    });
+
+    it('SVC-CRT-02: createRepairTicket writes document, initial action log, and triggers sync (Tier 1)', async () => {
+      mockFirestore.doc.mockReturnValue({ id: 'generated-ticket-id' });
+      mockFirestore.getDocs.mockResolvedValue({
+        empty: false,
+        docs: [{ data: () => ({ repairNumber: 1050 }) }],
+      });
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({ tenantId: 'tenant-alpha', serialNumbers: [{ serial: 'SN-001', status: 'Available' }] }),
+      });
+
+      const ticketId = await createRepairTicket(
+        'tenant-alpha',
+        {
+          equipment: {
+            id: 'eq-100',
+            name: 'Robe BMFL',
+            serialNumber: 'SN-001',
+            quantity: 1,
+          },
+          status: 'Under Repair',
+          priority: 'High',
+          initialNote: 'Front lens cracked upon arrival',
+        },
+        { id: 'user-tech-1', name: 'Alex Technician', email: 'alex@kuro.app' }
+      );
+
+      expect(ticketId).toBe('generated-ticket-id');
+      expect(mockFirestore.setDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          id: 'generated-ticket-id',
+          tenantId: 'tenant-alpha',
+          repairNumber: 1051,
+          status: 'Under Repair',
+          condition: 'Out of Service',
+          notes: expect.arrayContaining([
+            expect.objectContaining({ content: 'Front lens cracked upon arrival' }),
+          ]),
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              action: expect.stringContaining('Created repair ticket #1051 for Robe BMFL'),
+            }),
+          ]),
+        })
+      );
+
+      // Verify RTDB availability sync
+      expect(mockRtdb.set).toHaveBeenCalledWith(
+        expect.anything(),
+        { i: { 'eq-100': { q: 1 } } }
+      );
+    });
+
+    it('SVC-CRT-03: createRepairTicket rejects missing tenantId or equipment name (Tier 2)', async () => {
+      await expect(
+        createRepairTicket('', { equipment: { name: 'Item' } })
+      ).rejects.toThrow('Tenant ID is required to create a repair ticket');
+
+      await expect(
+        createRepairTicket('tenant-1', { equipment: { name: '' } })
+      ).rejects.toThrow('Equipment name is required');
+    });
+  });
+
+  // ==========================================================================
+  // 6. STATUS UPDATES & ACTION LOGGING (SVC-UPD)
+  // ==========================================================================
+  describe('updateRepairTicketStatus', () => {
+    it('SVC-UPD-01: updateRepairTicketStatus updates status and appends action log (Tier 1)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          status: 'Under Repair',
+          equipment: { id: 'eq-1', serialNumber: 'SN-001', quantity: 1 },
+        }),
+      });
+
+      const res = await updateRepairTicketStatus(
+        'ticket-1',
+        'Awaiting Parts',
+        { id: 'u-1', name: 'Alex Tech' },
+        'tenant-alpha',
+        'Ordered stepper motor'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          status: 'Awaiting Parts',
+          condition: 'Out of Service',
+          actions: expect.anything(),
+        })
+      );
+    });
+
+    it('SVC-UPD-02: Resolving repair to Operational restores condition to Available to Use (Tier 1)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          status: 'Under Repair',
+          equipment: { id: 'eq-1', serialNumber: 'SN-001', quantity: 1 },
+        }),
+      });
+
+      const res = await updateRepairTicketStatus(
+        'ticket-1',
+        'Operational',
+        { id: 'u-1', name: 'Alex Tech' },
+        'tenant-alpha',
+        'Replaced motor and calibrated'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          status: 'Operational',
+          condition: 'Available to Use',
+        })
+      );
+
+      // Verify RTDB ledger release (set to null)
+      expect(mockRtdb.set).toHaveBeenCalledWith(expect.anything(), null);
+    });
+
+    it('SVC-UPD-03: Rejects invalid status transition (Tier 2)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          status: 'Decommissioned',
+        }),
+      });
+
+      const res = await updateRepairTicketStatus(
+        'ticket-1',
+        'Completed', // Illegal direct transition from Decommissioned
+        { name: 'Tech' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(false);
+      expect(res.error).toBe('Invalid status transition');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-UPD-04: Rejects unauthorized cross-tenant status update (Tier 2)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-beta', // Different tenant
+          status: 'Under Repair',
+        }),
+      });
+
+      const res = await updateRepairTicketStatus(
+        'ticket-1',
+        'Operational',
+        { name: 'Tech' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(false);
+      expect(res.error).toBe('Repair ticket not found or unauthorized');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+  });
+
+  // ==========================================================================
+  // 7. TECHNICIAN ACTIONS, NOTES & ATTACHMENTS (SVC-ACT)
+  // ==========================================================================
+  describe('appendRepairAction, appendRepairNote & attachments', () => {
+    it('SVC-ACT-01: appendRepairAction appends audit action log (Tier 1)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({ tenantId: 'tenant-alpha' }),
+      });
+
+      const entry = await appendRepairAction(
+        't-1',
+        'Cleaned optical sensor',
+        { id: 'u-1', name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(entry.action).toBe('Cleaned optical sensor');
+      expect(entry.user.name).toBe('Alex');
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          actions: expect.anything(),
+        })
+      );
+    });
+
+    it('SVC-ACT-02: appendRepairNote appends note and creates action log entry (Tier 1)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({ tenantId: 'tenant-alpha' }),
+      });
+
+      const note = await appendRepairNote(
+        't-1',
+        'Inspected power supply board capacitor',
+        { id: 'u-1', name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(note.content).toBe('Inspected power supply board capacitor');
+      expect(note.user?.name).toBe('Alex');
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          notes: expect.anything(),
+          actions: expect.anything(),
+        })
+      );
+    });
+
+    it('SVC-ACT-03: addRepairAttachment appends attachment and logs action (Tier 1)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({ tenantId: 'tenant-alpha' }),
+      });
+
+      const res = await addRepairAttachment(
+        't-1',
+        {
+          type: 'Photo',
+          url: 'https://storage.kuro.app/photo.jpg',
+          fileName: 'damage-front.jpg',
+        },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(res.attachmentId).toMatch(/^att_/);
+      expect(mockFirestore.updateDoc).toHaveBeenCalled();
+    });
+
+    it('SVC-ACT-04: Rejects empty action or note content (Tier 2)', async () => {
+      await expect(
+        appendRepairAction('t-1', '   ', { name: 'Tech' }, 'tenant-alpha')
+      ).rejects.toThrow('Action text cannot be empty');
+
+      await expect(
+        appendRepairNote('t-1', '', { name: 'Tech' }, 'tenant-alpha')
+      ).rejects.toThrow('Note content cannot be empty');
+    });
+  });
+
+  // ==========================================================================
+  // 8. STORAGE PHOTO UPLOAD (SVC-ATT)
+  // ==========================================================================
+  describe('uploadRepairDamagePhoto', () => {
+    it('SVC-ATT-01: uploadRepairDamagePhoto uploads blob and returns URL & attachment (Tier 1)', async () => {
+      mockStorage.ref.mockReturnValue({ type: 'storage_ref' });
+      mockStorage.uploadBytes.mockResolvedValue({ ref: { fullPath: 'path' } });
+      mockStorage.getDownloadURL.mockResolvedValue('https://firebasestorage.googleapis.com/download/damage.jpg');
+
+      const result = await uploadRepairDamagePhoto(
+        'tenant-alpha',
+        't-100',
+        'file:///local/path/evidence.jpg'
+      );
+
+      expect(result.url).toBe('https://firebasestorage.googleapis.com/download/damage.jpg');
+      expect(result.attachment.type).toBe('Photo');
+      expect(result.attachment.url).toBe('https://firebasestorage.googleapis.com/download/damage.jpg');
+      expect(mockStorage.ref).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.stringContaining('tenants/tenant-alpha/repairs/t-100/attachments/')
+      );
+    });
+
+    it('SVC-ATT-02: uploadRepairDamagePhoto rejects missing parameters (Tier 2)', async () => {
+      await expect(uploadRepairDamagePhoto('', 't-1', 'file:///path.jpg')).rejects.toThrow();
+      await expect(uploadRepairDamagePhoto('tenant-1', '', 'file:///path.jpg')).rejects.toThrow();
+      await expect(uploadRepairDamagePhoto('tenant-1', 't-1', '')).rejects.toThrow();
+    });
+  });
+
+  // ==========================================================================
+  // 9. RTDB & EQUIPMENT SYNC (SVC-SYN)
+  // ==========================================================================
+  describe('syncRepairToRtdbLedger & updateEquipmentRepairCondition', () => {
+    it('SVC-SYN-01: syncRepairToRtdbLedger sets reservation lock when Out of Service (Tier 1)', async () => {
+      await syncRepairToRtdbLedger('tenant-alpha', 't-1', 'eq-1', 'Out of Service', 2);
+      expect(mockRtdb.set).toHaveBeenCalledWith(
+        expect.anything(),
+        { i: { 'eq-1': { q: 2 } } }
+      );
+    });
+
+    it('SVC-SYN-02: syncRepairToRtdbLedger removes lock when Available to Use (Tier 1)', async () => {
+      await syncRepairToRtdbLedger('tenant-alpha', 't-1', 'eq-1', 'Available to Use', 1);
+      expect(mockRtdb.set).toHaveBeenCalledWith(expect.anything(), null);
+    });
+
+    it('SVC-SYN-03: updateEquipmentRepairCondition updates serial number status (Tier 1)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          serialNumbers: [
+            { serial: 'SN-001', status: 'Available' },
+            { serial: 'SN-002', status: 'Available' },
+          ],
+        }),
+      });
+
+      await updateEquipmentRepairCondition(
+        'eq-1',
+        'tenant-alpha',
+        'Out of Service',
+        'Under Repair',
+        'SN-001'
+      );
+
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          serialNumbers: [
+            { serial: 'SN-001', status: 'In Repair' },
+            { serial: 'SN-002', status: 'Available' },
+          ],
+        })
+      );
+    });
+  });
+});

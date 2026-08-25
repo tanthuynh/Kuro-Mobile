@@ -1,0 +1,326 @@
+/**
+ * app/pullsheet/[id].tsx
+ * Mobile Pull Sheet Screen in Kuro Mobile.
+ * Full warehouse equipment preparation view with real-time status machines,
+ * section grouping, category filters, progress indicators, bulk confirm,
+ * and quick entry to Continuous Camera Scanner.
+ */
+
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  FlatList,
+} from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import {
+  ArrowLeft,
+  Search,
+  X,
+  CheckCheck,
+  QrCode,
+  FileSpreadsheet,
+  Layers,
+  Sparkles,
+} from 'lucide-react-native';
+
+import { useTheme } from '@/context/theme-context';
+import { usePullSheet } from '@/hooks/use-pull-sheet';
+import { useSingleEvent } from '@/hooks/use-events';
+import { ScreenHeader } from '@/components/layout/screen-header';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { PullSheetProgressBar } from '@/components/pull-sheets/pull-sheet-progress-bar';
+import { PullSheetSectionHeader } from '@/components/pull-sheets/pull-sheet-section-header';
+import { PullSheetItemRow } from '@/components/pull-sheets/pull-sheet-item-row';
+import { PullSheetStatusSheet } from '@/components/pull-sheets/pull-sheet-status-sheet';
+import type { PullsheetItem } from '@/types/pull-sheet';
+
+const CATEGORIES = ['All', 'Audio', 'Lighting', 'Video', 'Rigging', 'Power', 'Cables', 'Misc'];
+
+export default function PullSheetScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const { colors, typography, spacing, layout } = useTheme();
+
+  const eventId = Array.isArray(id) ? id[0] : id || '';
+
+  const { event } = useSingleEvent(eventId);
+  const {
+    pullsheet,
+    filteredSections,
+    progress,
+    loading,
+    error,
+    searchQuery,
+    setSearchQuery,
+    selectedCategory,
+    setSelectedCategory,
+    updateStatus,
+    advanceStatus,
+    rollbackStatus,
+    bulkConfirm,
+  } = usePullSheet(eventId);
+
+  const [activeStatusItem, setActiveStatusItem] = useState<PullsheetItem | null>(null);
+  const [isBulkConfirming, setIsBulkConfirming] = useState(false);
+
+  const handleBulkConfirm = async () => {
+    setIsBulkConfirming(true);
+    await bulkConfirm();
+    setIsBulkConfirming(false);
+  };
+
+  const handleOpenScanner = () => {
+    router.push({
+      pathname: '/(tabs)/scanner',
+      params: { eventId },
+    });
+  };
+
+  if (loading && !pullsheet) {
+    return (
+      <View style={[styles.centerScreen, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.mutedForeground, marginTop: spacing.md }]}>
+          Loading Pull Sheet...
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      {/* Screen Header */}
+      <ScreenHeader
+        title={event ? event.eventName : 'Pull Sheet'}
+        subtitle={event?.eventNumber ? `Pull Sheet #${event.eventNumber}` : `Event ID: ${eventId}`}
+        leftAction={
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            testID="pullsheet-back-btn"
+          >
+            <ArrowLeft size={20} color={colors.foreground} />
+          </Pressable>
+        }
+        rightAction={
+          progress.pendingQuantity > 0 ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={isBulkConfirming}
+              icon={<CheckCheck size={14} color={colors.secondaryForeground} />}
+              onPress={handleBulkConfirm}
+              testID="bulk-confirm-header-btn"
+            >
+              Confirm All
+            </Button>
+          ) : undefined
+        }
+      />
+
+      <ScrollView contentContainerStyle={[styles.scrollContent, { padding: spacing.base }]}>
+        {/* Progress Overview Card */}
+        <Card style={styles.progressCard}>
+          <CardContent style={{ paddingTop: spacing.base }}>
+            <PullSheetProgressBar progress={progress} />
+          </CardContent>
+        </Card>
+
+        {/* Search Bar */}
+        <View style={styles.searchWrap}>
+          <Input
+            placeholder="Filter equipment, note, barcode..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            leftIcon={<Search size={16} color={colors.mutedForeground} />}
+            rightIcon={
+              searchQuery ? (
+                <Pressable onPress={() => setSearchQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <X size={16} color={colors.mutedForeground} />
+                </Pressable>
+              ) : undefined
+            }
+          />
+        </View>
+
+        {/* Category Chips Bar */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[styles.categoryChipsScroll, { gap: spacing.xs }]}
+        >
+          {CATEGORIES.map((cat) => {
+            const isSelected = selectedCategory === cat;
+            return (
+              <Pressable
+                key={cat}
+                onPress={() => setSelectedCategory(cat)}
+                style={[
+                  styles.categoryChip,
+                  {
+                    backgroundColor: isSelected ? colors.primary : colors.surface,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                  },
+                ]}
+                testID={`pullsheet-category-chip-${cat.toLowerCase()}`}
+              >
+                <Text
+                  style={[
+                    styles.categoryChipText,
+                    {
+                      color: isSelected ? colors.primaryForeground : colors.foreground,
+                      fontSize: typography.fontSize.xs,
+                      fontWeight: isSelected ? '700' : '500',
+                    },
+                  ]}
+                >
+                  {cat}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        {/* Grouped Sections List */}
+        {filteredSections.length === 0 ? (
+          <View style={[styles.emptyContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Layers size={40} color={colors.mutedForeground} style={{ marginBottom: 10 }} />
+            <Text style={[styles.emptyTitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
+              No Equipment Matches
+            </Text>
+            <Text style={[styles.emptySubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.xs, marginVertical: spacing.xs }]}>
+              {searchQuery || selectedCategory !== 'All'
+                ? 'No line items match your active search or category filters.'
+                : 'No equipment items listed on this pull sheet.'}
+            </Text>
+            {searchQuery || selectedCategory !== 'All' ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onPress={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('All');
+                }}
+                style={{ marginTop: spacing.sm }}
+              >
+                Reset Filters
+              </Button>
+            ) : null}
+          </View>
+        ) : (
+          filteredSections.map((section) => (
+            <View key={section.id} style={styles.sectionBlock}>
+              <PullSheetSectionHeader
+                title={section.title}
+                itemCount={section.items.length}
+              />
+
+              {section.items.map((item) => (
+                <PullSheetItemRow
+                  key={item.id}
+                  item={item}
+                  onAdvanceStatus={(itemId) => advanceStatus(itemId)}
+                  onLongPress={(it) => setActiveStatusItem(it)}
+                />
+              ))}
+            </View>
+          ))
+        )}
+      </ScrollView>
+
+      {/* Floating Action Button (FAB) for Continuous Scanner */}
+      <View style={styles.fabContainer}>
+        <Button
+          variant="primary"
+          size="lg"
+          icon={<QrCode size={20} color={colors.primaryForeground} />}
+          onPress={handleOpenScanner}
+          style={styles.fabButton}
+          testID="open-continuous-scanner-fab"
+        >
+          Open Continuous Scanner
+        </Button>
+      </View>
+
+      {/* Long-Press Status Modal Sheet */}
+      <PullSheetStatusSheet
+        item={activeStatusItem}
+        visible={Boolean(activeStatusItem)}
+        onClose={() => setActiveStatusItem(null)}
+        onSelectStatus={(itemId, newStatus) => updateStatus(itemId, newStatus)}
+        onRollback={(itemId) => rollbackStatus(itemId)}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  centerScreen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollContent: {
+    paddingBottom: 90, // Leave room for FAB
+  },
+  loadingText: {
+    fontWeight: '500',
+  },
+  progressCard: {
+    marginBottom: 12,
+  },
+  searchWrap: {
+    marginBottom: 10,
+  },
+  categoryChipsScroll: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  categoryChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  categoryChipText: {},
+  sectionBlock: {
+    marginBottom: 8,
+  },
+  emptyContainer: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 16,
+  },
+  emptyTitle: {
+    fontWeight: '700',
+  },
+  emptySubtitle: {
+    textAlign: 'center',
+  },
+  fabContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 16,
+    right: 16,
+  },
+  fabButton: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+});

@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.npmrc
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
