@@ -420,7 +420,7 @@ export default function LoginScreen() {
                 Forgot Password
               </Text>
               <Text style={[styles.modalSubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginBottom: spacing.md }]}>
-                Enter your email address and we'll send you your password if an account exists.
+                {"Enter your email address and we'll send you your password if an account exists."}
               </Text>
 
               {resetSentNotice ? (

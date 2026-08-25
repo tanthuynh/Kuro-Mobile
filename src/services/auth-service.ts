@@ -19,8 +19,9 @@ import {
   where,
   limit,
 } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth, db } from '../lib/firebase';
+import { auth, db, functions } from '../lib/firebase';
 import { stopPresence } from './presence-service';
 import type {
   User,
@@ -36,7 +37,7 @@ import { STORAGE_KEYS, API_CONFIG } from '../constants/config';
 export { STORAGE_KEYS };
 
 /**
- * Step 1: Resolve email address against backend API / Firestore to determine Identity Platform Tenant ID.
+ * Step 1: Resolve email address against Singapore Cloud Function / Firestore to determine Identity Platform Tenant ID.
  * Handles Super Admins (project-level authTenantId: null) and Tenant users.
  */
 export async function lookupAuthTenantId(email: string): Promise<TenantLookupResult> {
@@ -47,24 +48,18 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    // 1. Primary: Use secure backend API route in runtime (powered by Firebase Admin SDK on kuro-web)
+    // 1. Primary: Use Singapore Firebase Cloud Function (lookupAuthTenantId)
     if (process.env.NODE_ENV !== 'test') {
       try {
-        const apiBase = API_CONFIG.baseUrl || 'http://localhost:3000';
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const lookupAuthTenantFn = httpsCallable<
+          { email: string },
+          { success?: boolean; authTenantId: string | null; tenantId?: string; tenantName?: string; tenantSlug?: string; error?: string }
+        >(functions, 'lookupAuthTenantId');
 
-        const response = await fetch(`${apiBase}/api/auth/lookup-tenant`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: normalizedEmail }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
+        const lookupResult = await lookupAuthTenantFn({ email: normalizedEmail });
+        const data = lookupResult.data;
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
+        if (data && data.success !== false) {
           const isSuperAdmin = data.authTenantId === null;
           const result: TenantLookupResult = {
             success: true,
@@ -76,15 +71,21 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
           };
           await AsyncStorage.setItem(STORAGE_KEYS.TENANT_LOOKUP, JSON.stringify(result));
           return result;
-        } else if (response.status === 404 || response.status === 400) {
+        } else if (data?.error) {
           return {
             success: false,
             authTenantId: null,
-            error: data.error || 'User not found. Please check your email or contact your administrator.',
+            error: data.error,
           };
         }
-      } catch (apiError) {
-        console.warn('[authService] Backend API lookup unreachable, falling back to direct Firestore:', apiError);
+      } catch (fnError: any) {
+        console.warn('[authService] Cloud function lookup error:', fnError);
+        const formatted = formatAuthError(fnError);
+        return {
+          success: false,
+          authTenantId: null,
+          error: formatted.message,
+        };
       }
     }
 
@@ -618,3 +619,71 @@ export function createLogoutNotice(reason: LogoutReason): LogoutNotice {
       };
   }
 }
+
+/**
+ * Formats Firebase / Cloud Function / Auth errors into clean, user-friendly messages
+ */
+export function formatAuthError(error: any): Error {
+  const code = error?.code || '';
+  let message = 'An unexpected error occurred. Please try again.';
+  switch (code) {
+    case 'functions/invalid-argument':
+      message = 'Please enter a valid email address.';
+      break;
+    case 'functions/not-found':
+      message = 'No account found with this email address.';
+      break;
+    case 'functions/permission-denied':
+      message = 'Your account has been deactivated. Please contact your administrator.';
+      break;
+    case 'functions/failed-precondition':
+      message = 'Your organization is not configured for mobile login.';
+      break;
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+    case 'auth/invalid-email':
+      message = 'Invalid email or password.';
+      break;
+    case 'auth/user-disabled':
+      message = 'This user account has been disabled.';
+      break;
+    case 'auth/too-many-requests':
+      message = 'Too many failed attempts. Please try again later.';
+      break;
+    case 'auth/network-request-failed':
+    case 'functions/unavailable':
+      message = 'Network error. Please check your internet connection.';
+      break;
+    default:
+      if (error?.message) message = error.message;
+      break;
+  }
+  return new Error(message);
+}
+
+/**
+ * Helper: Complete multi-tenant login handler
+ * 1. Resolves tenant ID via Cloud Function
+ * 2. Sets auth.tenantId
+ * 3. Authenticates with email & password
+ */
+export async function loginWithTenant(email: string, password: string): Promise<UserProfile> {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail || !password) {
+    throw new Error('Please enter both email and password.');
+  }
+
+  const lookupResult = await lookupAuthTenantId(normalizedEmail);
+  if (!lookupResult.success) {
+    throw new Error(lookupResult.error || 'User not found.');
+  }
+
+  const result = await signInWithTenant(normalizedEmail, password, lookupResult.authTenantId);
+  if (!result.success || !result.user) {
+    throw new Error(result.error || 'Authentication failed.');
+  }
+
+  return result.user;
+}
+

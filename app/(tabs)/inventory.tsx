@@ -181,7 +181,7 @@ export default function InventoryScreen() {
                   { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginVertical: spacing.sm },
                 ]}
               >
-                No items match "{searchQuery || selectedCategory || availabilityFilter}".
+                {`No items match "${searchQuery || selectedCategory || availabilityFilter}".`}
               </Text>
               <Button
                 variant="outline"

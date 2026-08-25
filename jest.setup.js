@@ -12,12 +12,12 @@ jest.mock('expo-router', () => ({
   }),
   useSegments: () => ['(tabs)'],
   usePathname: () => '/',
-  Link: ({ children }: any) => children,
-  Slot: ({ children }: any) => children,
-  Stack: Object.assign(({ children }: any) => children, {
+  Link: ({ children }) => children,
+  Slot: ({ children }) => children,
+  Stack: Object.assign(({ children }) => children, {
     Screen: () => null,
   }),
-  Tabs: Object.assign(({ children }: any) => children, {
+  Tabs: Object.assign(({ children }) => children, {
     Screen: () => null,
   }),
 }));
@@ -32,8 +32,8 @@ jest.mock('expo-splash-screen', () => ({
 jest.mock('react-native-safe-area-context', () => {
   const inset = { top: 44, right: 0, bottom: 34, left: 0 };
   return {
-    SafeAreaProvider: ({ children }: any) => children,
-    SafeAreaConsumer: ({ children }: any) => children(inset),
+    SafeAreaProvider: ({ children }) => children,
+    SafeAreaConsumer: ({ children }) => children(inset),
     useSafeAreaInsets: () => inset,
     useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 }),
   };
@@ -113,11 +113,16 @@ jest.mock('firebase/storage', () => ({
   getDownloadURL: jest.fn().mockResolvedValue('https://firebasestorage.googleapis.com/download/mock.jpg'),
 }));
 
+jest.mock('firebase/functions', () => ({
+  getFunctions: jest.fn(() => ({})),
+  httpsCallable: jest.fn(() => jest.fn().mockResolvedValue({ data: { success: true, authTenantId: null } })),
+}));
+
 // Mock expo-camera
 jest.mock('expo-camera', () => {
   const React = require('react');
   return {
-    CameraView: ({ children, ...props }: any) => React.createElement('CameraView', props, children),
+    CameraView: ({ children, ...props }) => React.createElement('CameraView', props, children),
     useCameraPermissions: () => [{ granted: true, canAskAgain: true }, jest.fn().mockResolvedValue({ granted: true })],
   };
 });
