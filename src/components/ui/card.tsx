@@ -59,8 +59,8 @@ export const CardTitle: React.FC<CardTitleProps> = ({ children, style }) => {
         styles.title,
         {
           color: colors.cardForeground,
-          fontSize: typography.fontSize.lg,
-          lineHeight: typography.lineHeight.lg,
+          fontSize: typography.fontSize.md,
+          lineHeight: typography.lineHeight.md,
         },
         style,
       ]}
@@ -83,8 +83,8 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({ children, styl
         styles.description,
         {
           color: colors.mutedForeground,
-          fontSize: typography.fontSize.sm,
-          lineHeight: typography.lineHeight.sm,
+          fontSize: typography.fontSize.xs,
+          lineHeight: typography.lineHeight.xs,
         },
         style,
       ]}
@@ -144,9 +144,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   title: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   description: {
+    fontFamily: 'Calibri',
     fontWeight: '400',
   },
   content: {},

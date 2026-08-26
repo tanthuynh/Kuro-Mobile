@@ -333,40 +333,28 @@ describe('repair-engine', () => {
   // 3. STATE MACHINE & STATUS TRANSITIONS SUITE (ENG-TRN)
   // ==========================================================================
   describe('isValidStatusTransition & getNextRepairStatus', () => {
-    it('ENG-TRN-01: Under Repair forward transitions are valid (Tier 1)', () => {
-      expect(isValidStatusTransition('Under Repair', 'Awaiting Parts')).toBe(true);
+    it('ENG-TRN-01: Under Repair transitions are valid (Tier 1)', () => {
+      expect(isValidStatusTransition('Under Repair', 'Pending')).toBe(true);
       expect(isValidStatusTransition('Under Repair', 'Completed')).toBe(true);
-      expect(isValidStatusTransition('Under Repair', 'Operational')).toBe(true);
-      expect(isValidStatusTransition('Under Repair', 'Decommissioned')).toBe(true);
-      expect(isValidStatusTransition('Under Repair', 'Archived')).toBe(true);
+      expect(isValidStatusTransition('Under Repair', 'Reported')).toBe(true);
     });
 
-    it('ENG-TRN-02: Awaiting Parts transitions are valid (Tier 1)', () => {
-      expect(isValidStatusTransition('Awaiting Parts', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Awaiting Parts', 'Completed')).toBe(true);
-      expect(isValidStatusTransition('Awaiting Parts', 'Operational')).toBe(true);
-      expect(isValidStatusTransition('Awaiting Parts', 'Decommissioned')).toBe(true);
+    it('ENG-TRN-02: Pending transitions are valid (Tier 1)', () => {
+      expect(isValidStatusTransition('Pending', 'Under Repair')).toBe(true);
+      expect(isValidStatusTransition('Pending', 'Completed')).toBe(true);
+      expect(isValidStatusTransition('Pending', 'Reported')).toBe(true);
     });
 
     it('ENG-TRN-03: Completed transitions are valid (Tier 1)', () => {
-      expect(isValidStatusTransition('Completed', 'Operational')).toBe(true);
-      expect(isValidStatusTransition('Completed', 'Returned')).toBe(true);
       expect(isValidStatusTransition('Completed', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Completed', 'Archived')).toBe(true);
+      expect(isValidStatusTransition('Completed', 'Pending')).toBe(true);
+      expect(isValidStatusTransition('Completed', 'Reported')).toBe(true);
     });
 
-    it('ENG-TRN-04: Operational transitions are valid (Tier 1)', () => {
-      expect(isValidStatusTransition('Operational', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Operational', 'Completed')).toBe(true);
-      expect(isValidStatusTransition('Operational', 'Returned')).toBe(true);
-      expect(isValidStatusTransition('Operational', 'Archived')).toBe(true);
-    });
-
-    it('ENG-TRN-05: Decommissioned and Unarchiving transitions (Tier 1)', () => {
-      expect(isValidStatusTransition('Decommissioned', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Decommissioned', 'Archived')).toBe(true);
-      expect(isValidStatusTransition('Archived', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Archived', 'Operational')).toBe(true);
+    it('ENG-TRN-04: Reported transitions are valid (Tier 1)', () => {
+      expect(isValidStatusTransition('Reported', 'Pending')).toBe(true);
+      expect(isValidStatusTransition('Reported', 'Under Repair')).toBe(true);
+      expect(isValidStatusTransition('Reported', 'Completed')).toBe(true);
     });
 
     it('ENG-TRN-06: Identity self-transitions are valid and idempotent (Tier 1)', () => {
@@ -375,41 +363,35 @@ describe('repair-engine', () => {
       });
     });
 
-    it('ENG-TRN-07: Illegal transitions are rejected (Tier 2)', () => {
-      expect(isValidStatusTransition('Archived', 'Awaiting Parts')).toBe(false);
-      expect(isValidStatusTransition('Decommissioned', 'Completed')).toBe(false);
-      expect(isValidStatusTransition('Decommissioned', 'Operational')).toBe(false);
-      expect(isValidStatusTransition('Collected', 'Completed')).toBe(false);
+    it('ENG-TRN-07: Illegal transitions with unknown statuses are rejected (Tier 2)', () => {
+      expect(isValidStatusTransition('InvalidStatus', 'Pending')).toBe(false);
+      expect(isValidStatusTransition('Pending', 'UnknownStatus')).toBe(false);
     });
 
     it('ENG-TRN-08: Corrupted/invalid/null status inputs return false without throwing (Tier 2)', () => {
-      expect(isValidStatusTransition(null, 'Operational')).toBe(false);
-      expect(isValidStatusTransition('Operational', null)).toBe(false);
-      expect(isValidStatusTransition('INVALID_STATUS', 'Operational')).toBe(false);
-      expect(isValidStatusTransition('Operational', 'INVALID_STATUS')).toBe(false);
+      expect(isValidStatusTransition(null, 'Completed')).toBe(false);
+      expect(isValidStatusTransition('Completed', null)).toBe(false);
+      expect(isValidStatusTransition('INVALID_STATUS', 'Completed')).toBe(false);
+      expect(isValidStatusTransition('Completed', 'INVALID_STATUS')).toBe(false);
       expect(isValidStatusTransition('', '')).toBe(false);
     });
 
     it('ENG-TRN-09: getNextRepairStatus returns logical progressive lifecycle status (Tier 1)', () => {
+      expect(getNextRepairStatus('Reported')).toBe('Pending');
+      expect(getNextRepairStatus('Pending')).toBe('Under Repair');
       expect(getNextRepairStatus('Under Repair')).toBe('Completed');
-      expect(getNextRepairStatus('Awaiting Parts')).toBe('Under Repair');
-      expect(getNextRepairStatus('Completed')).toBe('Operational');
-      expect(getNextRepairStatus('Operational')).toBe('Returned');
-      expect(getNextRepairStatus('Collected')).toBe('Under Repair');
-      expect(getNextRepairStatus('Returned')).toBe('Archived');
-      expect(getNextRepairStatus('Decommissioned')).toBe('Archived');
-      expect(getNextRepairStatus('Archived')).toBe('Archived');
-      expect(getNextRepairStatus('UNKNOWN')).toBe('Under Repair');
+      expect(getNextRepairStatus('Completed')).toBe('Completed');
+      expect(getNextRepairStatus('UNKNOWN')).toBe('Reported');
     });
 
     it('ENG-TRN-10: getQuickStatusOptions returns actionable mobile options (Tier 1)', () => {
       const underRepairQuick = getQuickStatusOptions('Under Repair');
-      expect(underRepairQuick).toContain('Awaiting Parts');
+      expect(underRepairQuick).toContain('Pending');
       expect(underRepairQuick).toContain('Completed');
-      expect(underRepairQuick).toContain('Operational');
 
-      const completedQuick = getQuickStatusOptions('Completed');
-      expect(completedQuick).toContain('Operational');
+      const reportedQuick = getQuickStatusOptions('Reported');
+      expect(reportedQuick).toContain('Pending');
+      expect(reportedQuick).toContain('Under Repair');
     });
   });
 
@@ -434,7 +416,7 @@ describe('repair-engine', () => {
         id: 't-2',
         repairNumber: 1002,
         equipment: { name: 'Aputure 600d Light', serialNumber: 'SN-APU-202', barcode: 'BAR-002' },
-        status: 'Awaiting Parts',
+        status: 'Pending',
         priority: 'High',
         condition: 'Out of Service',
         billingStatus: 'Quoted',
@@ -458,7 +440,7 @@ describe('repair-engine', () => {
         id: 't-4',
         repairNumber: 1004,
         equipment: { name: 'L-Acoustics SB18 Sub', serialNumber: 'SN-LA-404', barcode: 'BAR-004' },
-        status: 'Operational',
+        status: 'Reported',
         priority: 'Low',
         condition: 'Available to Use',
         billingStatus: 'Internal',
@@ -470,7 +452,7 @@ describe('repair-engine', () => {
         id: 't-5',
         repairNumber: 1005,
         equipment: { name: 'Old Fog Machine [Scrapped]', serialNumber: 'SN-FOG-505' },
-        status: 'Archived',
+        status: 'Completed',
         priority: 'None',
         condition: 'Out of Service',
         archived: true,
@@ -486,15 +468,27 @@ describe('repair-engine', () => {
 
     it('ENG-FLT-02: Filter by array of statuses (Tier 1)', () => {
       const res = filterRepairTickets(sampleTickets, {
-        status: ['Under Repair', 'Awaiting Parts'],
+        status: ['Under Repair', 'Pending'],
       });
       expect(res).toHaveLength(2);
       expect(res.map((t) => t.id)).toEqual(['t-1', 't-2']);
     });
 
-    it('ENG-FLT-03: Filter by status "all" returns all active non-archived tickets (Tier 1)', () => {
-      const res = filterRepairTickets(sampleTickets, { status: 'all' });
-      expect(res).toHaveLength(4);
+    it('ENG-FLT-03: Filter by status "all" or "All" returns all active non-archived tickets (Tier 1)', () => {
+      const resLower = filterRepairTickets(sampleTickets, { status: 'all' });
+      expect(resLower).toHaveLength(4);
+
+      const resUpper = filterRepairTickets(sampleTickets, { status: 'All' });
+      expect(resUpper).toHaveLength(4);
+
+      const resAllPrio = filterRepairTickets(sampleTickets, { priority: 'All' });
+      expect(resAllPrio).toHaveLength(4);
+
+      const resAllCond = filterRepairTickets(sampleTickets, { condition: 'All' });
+      expect(resAllCond).toHaveLength(4);
+
+      const resAllBill = filterRepairTickets(sampleTickets, { billingStatus: 'All' });
+      expect(resAllBill).toHaveLength(4);
     });
 
     it('ENG-FLT-04: Filter by priority (Tier 1)', () => {
@@ -659,7 +653,9 @@ describe('repair-engine', () => {
 
     it('ENG-NRM-01: Normalizers handle canonical, alias, and fallback inputs (Tier 1)', () => {
       expect(normalizeRepairStatus('in_repair')).toBe('Under Repair');
-      expect(normalizeRepairStatus('ready')).toBe('Operational');
+      expect(normalizeRepairStatus('ready')).toBe('Completed');
+      expect(normalizeRepairStatus('reported')).toBe('Reported');
+      expect(normalizeRepairStatus('awaiting parts')).toBe('Pending');
       expect(normalizeRepairPriority('med')).toBe('Medium');
       expect(normalizeRepairBillingStatus('invoiced')).toBe('Invoiced');
       expect(normalizeEquipmentCondition('available')).toBe('Available to Use');
@@ -673,9 +669,10 @@ describe('repair-engine', () => {
     });
 
     it('ENG-NRM-03: Badge variants resolve properly (Tier 1)', () => {
-      expect(getStatusBadgeVariant('Under Repair')).toBe('warning');
-      expect(getStatusBadgeVariant('Operational')).toBe('success');
-      expect(getStatusBadgeVariant('Decommissioned')).toBe('destructive');
+      expect(getStatusBadgeVariant('Under Repair')).toBe('destructive');
+      expect(getStatusBadgeVariant('Completed')).toBe('success');
+      expect(getStatusBadgeVariant('Reported')).toBe('info');
+      expect(getStatusBadgeVariant('Pending')).toBe('warning');
       expect(getPriorityBadgeVariant('Critical')).toBe('destructive');
       expect(getPriorityBadgeVariant('High')).toBe('warning');
       expect(getPriorityBadgeVariant('Low')).toBe('info');

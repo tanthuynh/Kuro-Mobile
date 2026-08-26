@@ -12,27 +12,36 @@ import {
   updateRepairTicketStatus,
   appendRepairAction,
   appendRepairNote,
+  updateRepairNote,
+  deleteRepairNote,
+  addRepairAttachment,
+  deleteRepairAttachment,
   uploadRepairDamagePhoto,
 } from '@/services/repair-service';
 import {
   filterRepairTickets,
   calculateEquipmentCondition,
+  normalizeRepairStatus,
 } from '@/lib/repair-engine';
 import type {
   RepairTicket,
   RepairStatus,
   RepairPriority,
   EquipmentCondition,
+  RepairAttachment,
   CreateRepairTicketInput,
 } from '@/types/repair';
 
 export interface RepairMetrics {
   total: number;
+  all?: number;
+  reported: number;
+  pending: number;
   underRepair: number;
-  awaitingParts: number;
-  operational: number;
   completed: number;
-  outOfService: number;
+  operational?: number;
+  awaitingParts?: number;
+  outOfService?: number;
 }
 
 export function useTickets() {
@@ -90,21 +99,22 @@ export function useTickets() {
 
   // Metrics summary
   const metrics: RepairMetrics = useMemo(() => {
+    let reported = 0;
+    let pending = 0;
     let underRepair = 0;
-    let awaitingParts = 0;
-    let operational = 0;
     let completed = 0;
     let outOfService = 0;
 
     for (const t of tickets) {
-      if (t.status === 'Under Repair') underRepair++;
-      if (t.status === 'Awaiting Parts') awaitingParts++;
-      if (t.status === 'Operational') operational++;
-      if (t.status === 'Completed') completed++;
+      const normStatus = normalizeRepairStatus(t.status);
+      if (normStatus === 'Reported') reported++;
+      else if (normStatus === 'Pending') pending++;
+      else if (normStatus === 'Under Repair') underRepair++;
+      else if (normStatus === 'Completed') completed++;
+
       if (
         t.condition === 'Out of Service' ||
-        t.status === 'Under Repair' ||
-        t.status === 'Awaiting Parts'
+        normStatus !== 'Completed'
       ) {
         outOfService++;
       }
@@ -112,11 +122,14 @@ export function useTickets() {
 
     return {
       total: tickets.length,
+      all: tickets.length,
+      reported,
+      pending,
       underRepair,
-      awaitingParts,
-      operational,
       completed,
       outOfService,
+      operational: completed,
+      awaitingParts: pending,
     };
   }, [tickets]);
 
@@ -262,6 +275,59 @@ export function useSingleTicket(ticketId: string) {
     [ticketId, tenantId, user, fetchTicket]
   );
 
+  const handleUpdateNote = useCallback(
+    async (noteId: string, content: string) => {
+      if (!ticketId || !tenantId) return;
+      const author = {
+        id: user?.id || 'unknown',
+        name: user?.name || user?.email || 'Technician',
+      };
+      await updateRepairNote(ticketId, noteId, content, author, tenantId);
+      await fetchTicket();
+    },
+    [ticketId, tenantId, user, fetchTicket]
+  );
+
+  const handleDeleteNote = useCallback(
+    async (noteId: string) => {
+      if (!ticketId || !tenantId) return;
+      const author = {
+        id: user?.id || 'unknown',
+        name: user?.name || user?.email || 'Technician',
+      };
+      await deleteRepairNote(ticketId, noteId, author, tenantId);
+      await fetchTicket();
+    },
+    [ticketId, tenantId, user, fetchTicket]
+  );
+
+  const handleAddAttachment = useCallback(
+    async (attachment: Omit<RepairAttachment, 'id'>) => {
+      if (!ticketId || !tenantId) return { success: false, attachmentId: '', error: 'Missing ticket/tenant' };
+      const author = {
+        id: user?.id || 'unknown',
+        name: user?.name || user?.email || 'Technician',
+      };
+      const result = await addRepairAttachment(ticketId, attachment, author, tenantId);
+      await fetchTicket();
+      return result;
+    },
+    [ticketId, tenantId, user, fetchTicket]
+  );
+
+  const handleDeleteAttachment = useCallback(
+    async (attachmentId: string) => {
+      if (!ticketId || !tenantId) return;
+      const author = {
+        id: user?.id || 'unknown',
+        name: user?.name || user?.email || 'Technician',
+      };
+      await deleteRepairAttachment(ticketId, attachmentId, author, tenantId);
+      await fetchTicket();
+    },
+    [ticketId, tenantId, user, fetchTicket]
+  );
+
   return {
     ticket,
     loading,
@@ -270,5 +336,9 @@ export function useSingleTicket(ticketId: string) {
     updateStatus: handleUpdateStatus,
     appendAction: handleAppendAction,
     appendNote: handleAppendNote,
+    updateNote: handleUpdateNote,
+    deleteNote: handleDeleteNote,
+    addAttachment: handleAddAttachment,
+    deleteAttachment: handleDeleteAttachment,
   };
 }

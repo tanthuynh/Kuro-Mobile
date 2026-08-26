@@ -327,6 +327,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
   cardContent: {
@@ -363,8 +364,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 2,
   },
-  stageName: {},
+  stageName: {
+    fontFamily: 'Calibri',
+  },
   stageSubtitle: {
+    fontFamily: 'Calibri',
     marginBottom: 8,
   },
   timingBox: {
@@ -374,6 +378,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   timingText: {
-    fontFamily: 'monospace',
+    fontFamily: 'Calibri',
   },
 });

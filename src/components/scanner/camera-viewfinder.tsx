@@ -258,6 +258,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   simText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
     textAlign: 'center',
   },
@@ -321,6 +322,7 @@ const styles = StyleSheet.create({
     minHeight: 32,
   },
   modeText: {
+    fontFamily: 'Calibri',
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
@@ -338,6 +340,7 @@ const styles = StyleSheet.create({
     zIndex: 4,
   },
   promptText: {
+    fontFamily: 'Calibri',
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 12,
     textAlign: 'center',

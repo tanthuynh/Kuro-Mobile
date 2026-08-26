@@ -57,20 +57,20 @@ describe('Milestone 5: Kuro Mobile Repair & Fault Logging E2E Integration', () =
     expect(validation.errorMessages).toHaveLength(0);
 
     // 2. Condition Calculation
+    expect(repairEngine.calculateEquipmentCondition('Reported')).toBe('Out of Service');
+    expect(repairEngine.calculateEquipmentCondition('Pending')).toBe('Out of Service');
     expect(repairEngine.calculateEquipmentCondition('Under Repair')).toBe('Out of Service');
-    expect(repairEngine.calculateEquipmentCondition('Awaiting Parts')).toBe('Out of Service');
-    expect(repairEngine.calculateEquipmentCondition('Operational')).toBe('Available to Use');
     expect(repairEngine.calculateEquipmentCondition('Completed')).toBe('Available to Use');
 
     // 3. State Machine Progression
-    // Under Repair -> Awaiting Parts
-    expect(repairEngine.isValidStatusTransition('Under Repair', 'Awaiting Parts')).toBe(true);
-    // Awaiting Parts -> Under Repair
-    expect(repairEngine.isValidStatusTransition('Awaiting Parts', 'Under Repair')).toBe(true);
-    // Under Repair -> Operational
-    expect(repairEngine.isValidStatusTransition('Under Repair', 'Operational')).toBe(true);
-    // Operational -> Completed
-    expect(repairEngine.isValidStatusTransition('Operational', 'Completed')).toBe(true);
+    // Reported -> Pending
+    expect(repairEngine.isValidStatusTransition('Reported', 'Pending')).toBe(true);
+    // Pending -> Under Repair
+    expect(repairEngine.isValidStatusTransition('Pending', 'Under Repair')).toBe(true);
+    // Under Repair -> Completed
+    expect(repairEngine.isValidStatusTransition('Under Repair', 'Completed')).toBe(true);
+    // Completed -> Completed
+    expect(repairEngine.isValidStatusTransition('Completed', 'Completed')).toBe(true);
 
     // 4. Action Log Entry Creation
     const actionLog = repairEngine.createActionLogEntry(
@@ -102,7 +102,7 @@ describe('Milestone 5: Kuro Mobile Repair & Fault Logging E2E Integration', () =
         tenantId: tenantAlpha,
         equipment: { name: 'Alpha Console' },
         priority: 'Low',
-        status: 'Operational',
+        status: 'Completed',
         condition: 'Available to Use',
         requestedBy: 'Alpha User',
         createdAt: new Date().toISOString(),

@@ -247,25 +247,21 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite — Milestone 1', () =>
     });
 
     it('ADV-TRN-01: Permitted and forbidden state transitions match state machine specifications', () => {
-      // Forbidden direct transitions
+      // Forbidden transitions with invalid status
       expect(isValidStatusTransition('Decommissioned', 'Completed')).toBe(false);
-      expect(isValidStatusTransition('Decommissioned', 'Operational')).toBe(false);
-      expect(isValidStatusTransition('Decommissioned', 'Awaiting Parts')).toBe(false);
-      expect(isValidStatusTransition('Archived', 'Awaiting Parts')).toBe(false);
-      expect(isValidStatusTransition('Collected', 'Completed')).toBe(false);
-      expect(isValidStatusTransition('Collected', 'Returned')).toBe(false);
+      expect(isValidStatusTransition('UnknownStatus', 'Pending')).toBe(false);
+      expect(isValidStatusTransition('Reported', 'Invalid')).toBe(false);
 
-      // Permitted rehabilitation / lifecycle transitions
-      expect(isValidStatusTransition('Decommissioned', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Archived', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Archived', 'Operational')).toBe(true);
-      expect(isValidStatusTransition('Collected', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Collected', 'Operational')).toBe(true);
+      // Permitted transitions
+      expect(isValidStatusTransition('Reported', 'Pending')).toBe(true);
+      expect(isValidStatusTransition('Pending', 'Under Repair')).toBe(true);
+      expect(isValidStatusTransition('Under Repair', 'Completed')).toBe(true);
+      expect(isValidStatusTransition('Completed', 'Under Repair')).toBe(true);
     });
 
     it('ADV-TRN-02: Stress test rapid cyclical status transitions (100 cycles)', () => {
-      let currentStatus: any = 'Under Repair';
-      const sequence = ['Completed', 'Operational', 'Returned', 'Under Repair', 'Awaiting Parts', 'Under Repair'];
+      let currentStatus: any = 'Reported';
+      const sequence = ['Pending', 'Under Repair', 'Completed', 'Reported'];
 
       for (let i = 0; i < 100; i++) {
         const next = sequence[i % sequence.length];
@@ -275,19 +271,18 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite — Milestone 1', () =>
       }
     });
 
-    it('ADV-TRN-03: Terminal idempotency of getNextRepairStatus on Archived', () => {
-      expect(getNextRepairStatus('Archived')).toBe('Archived');
+    it('ADV-TRN-03: Terminal idempotency of getNextRepairStatus on Completed', () => {
+      expect(getNextRepairStatus('Completed')).toBe('Completed');
+      expect(getNextRepairStatus('Reported')).toBe('Pending');
+      expect(getNextRepairStatus('Pending')).toBe('Under Repair');
       expect(getNextRepairStatus('Under Repair')).toBe('Completed');
-      expect(getNextRepairStatus('Completed')).toBe('Operational');
-      expect(getNextRepairStatus('Operational')).toBe('Returned');
-      expect(getNextRepairStatus('Returned')).toBe('Archived');
     });
 
     it('ADV-TRN-04: getAvailableStatusTransitions and getQuickStatusOptions return valid subsets', () => {
       const availUnderRepair = getAvailableStatusTransitions('Under Repair');
       expect(availUnderRepair).toContain('Completed');
-      expect(availUnderRepair).toContain('Awaiting Parts');
-      expect(availUnderRepair).toContain('Operational');
+      expect(availUnderRepair).toContain('Pending');
+      expect(availUnderRepair).toContain('Reported');
 
       const quickOptions = getQuickStatusOptions('Under Repair');
       expect(quickOptions.length).toBeGreaterThanOrEqual(2);
@@ -354,7 +349,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite — Milestone 1', () =>
     it('ADV-FLT-02: Fast filtering across 1,000 tickets with multi-criteria conditions', () => {
       const start = performance.now();
       const filtered = filterRepairTickets(largeTicketList, {
-        status: ['Under Repair', 'Awaiting Parts'],
+        status: ['Under Repair', 'Pending'],
         priority: 'High',
         assigneeId: 'tech-2',
         search: 'Brand 2',
@@ -364,7 +359,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite — Milestone 1', () =>
       expect(duration).toBeLessThan(100);
       expect(Array.isArray(filtered)).toBe(true);
       filtered.forEach((t) => {
-        expect(['Under Repair', 'Awaiting Parts']).toContain(t.status);
+        expect(['Under Repair', 'Pending']).toContain(t.status);
         expect(t.priority).toBe('High');
         expect(t.assigneeId).toBe('tech-2');
         expect(t.archived).toBe(false);
@@ -387,9 +382,9 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite — Milestone 1', () =>
     it('ADV-SRT-01: Sorts large ticket arrays stably by all sort keys without throwing on nulls/missing fields', () => {
       const ticketsWithMissingFields: RepairTicket[] = [
         { id: '1', tenantId: 't', equipment: { name: '' }, priority: 'High', status: 'Under Repair', requestedBy: 'A' },
-        { id: '2', tenantId: 't', equipment: { name: 'A-Item' }, priority: 'Low', status: 'Operational', requestedBy: 'B', repairNumber: 200 },
+        { id: '2', tenantId: 't', equipment: { name: 'A-Item' }, priority: 'Low', status: 'Reported', requestedBy: 'B', repairNumber: 200 },
         { id: '3', tenantId: 't', equipment: { name: 'Z-Item' }, priority: 'Critical', status: 'Completed', requestedBy: 'C', repairNumber: 100 },
-        { id: '4', tenantId: 't', equipment: { name: 'M-Item' }, priority: 'Medium', status: 'Archived', requestedBy: 'D', createdAt: '2026-08-25T10:00:00Z' },
+        { id: '4', tenantId: 't', equipment: { name: 'M-Item' }, priority: 'Medium', status: 'Pending', requestedBy: 'D', createdAt: '2026-08-25T10:00:00Z' },
       ];
 
       const sortKeys = ['repairNumber', 'priority', 'status', 'equipmentName', 'createdAt', 'updatedAt'] as const;
@@ -417,8 +412,8 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite — Milestone 1', () =>
 
     it('ADV-NRM-01: Normalizers handle canonical, alias, and fallback inputs safely', () => {
       expect(normalizeRepairStatus('in_repair')).toBe('Under Repair');
-      expect(normalizeRepairStatus('ready')).toBe('Operational');
-      expect(normalizeRepairStatus('unknown_status_xyz')).toBe('Under Repair');
+      expect(normalizeRepairStatus('ready')).toBe('Completed');
+      expect(normalizeRepairStatus('unknown_status_xyz')).toBe('Reported');
 
       expect(normalizeRepairPriority('critical')).toBe('Critical');
       expect(normalizeRepairPriority('med')).toBe('Medium');
@@ -434,9 +429,10 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite — Milestone 1', () =>
       expect(formatRepairNumber(null)).toBe('—');
       expect(formatRepairNumber(undefined)).toBe('—');
 
-      expect(getStatusBadgeVariant('Under Repair')).toBe('warning');
-      expect(getStatusBadgeVariant('Operational')).toBe('success');
-      expect(getPriorityBadgeVariant('Critical')).toBe('destructive');
+      expect(getStatusBadgeVariant('Under Repair')).toBe('destructive');
+      expect(getStatusBadgeVariant('Completed')).toBe('success');
+      expect(getStatusBadgeVariant('Reported')).toBe('info');
+      expect(getStatusBadgeVariant('Pending')).toBe('warning');
 
       const iso = '2026-08-25T12:00:00.000Z';
       expect(normalizeDateToISO(iso)).toBe(iso);
@@ -535,7 +531,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite — Milestone 1', () =>
 
       const res = await updateRepairTicketStatus(
         'ticket-victim-1',
-        'Operational',
+        'Completed',
         { name: 'Attacker Tech' },
         'tenant-attacker',
         'Malicious status override'

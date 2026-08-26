@@ -268,6 +268,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerTitle: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
   closeBtn: {
@@ -294,6 +295,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   typeTabText: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   metaRow: {
@@ -307,11 +309,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  metaText: {},
+  metaText: {
+    fontFamily: 'Calibri',
+  },
   inputContainer: {
     marginBottom: 16,
   },
   multilineInput: {
+    fontFamily: 'Calibri',
     minHeight: 100,
     textAlignVertical: 'top',
   },

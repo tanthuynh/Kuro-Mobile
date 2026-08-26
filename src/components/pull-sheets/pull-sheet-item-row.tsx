@@ -105,8 +105,8 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
           style={[
             styles.qtyBadge,
             {
-              backgroundColor: isPrepped ? 'rgba(16, 185, 129, 0.15)' : colors.surface,
-              borderColor: isPrepped ? 'rgba(16, 185, 129, 0.4)' : colors.border,
+              backgroundColor: isPrepped ? colors.brandGreenScale.green2 : colors.surface,
+              borderColor: isPrepped ? colors.brandGreenScale.green4 : colors.border,
             },
           ]}
         >
@@ -130,7 +130,7 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
               styles.descriptionText,
               {
                 color: isPrepped ? colors.foreground : colors.cardForeground,
-                fontSize: typography.fontSize.sm,
+                fontSize: typography.fontSize.base,
                 fontWeight: isSubItem ? '500' : '600',
               },
             ]}
@@ -177,7 +177,8 @@ const styles = StyleSheet.create({
   },
   qtyBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 2,
+    minHeight: 24,
     borderRadius: 6,
     borderWidth: 1,
     minWidth: 38,
@@ -186,19 +187,23 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   qtyText: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
-    fontFamily: 'monospace',
+    lineHeight: 16,
   },
   contentCol: {
     flex: 1,
     marginRight: 8,
   },
   descriptionText: {
-    lineHeight: 18,
+    fontFamily: 'Calibri',
+    lineHeight: 20,
   },
   internalNoteText: {
+    fontFamily: 'Calibri',
     marginTop: 2,
     fontStyle: 'italic',
+    lineHeight: 16,
   },
   statusBadgeWrap: {
     justifyContent: 'center',
@@ -212,7 +217,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   noteBodyText: {
+    fontFamily: 'Calibri',
     flex: 1,
-    lineHeight: 18,
+    lineHeight: 20,
   },
 });

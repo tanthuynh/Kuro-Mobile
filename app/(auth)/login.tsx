@@ -515,6 +515,7 @@ const styles = StyleSheet.create({
     marginLeft: -10,
   },
   logoText: {
+    fontFamily: 'Calibri',
     fontSize: 28,
     lineHeight: 34,
     letterSpacing: 1.5,
@@ -532,6 +533,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   fieldLabel: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
     marginBottom: 6,
   },
@@ -554,6 +556,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   rememberMeText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
   actionButton: {
@@ -571,6 +574,7 @@ const styles = StyleSheet.create({
     height: 1,
   },
   dividerText: {
+    fontFamily: 'Calibri',
     fontSize: 11,
     textTransform: 'uppercase',
     fontWeight: '600',
@@ -589,11 +593,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   emailDisplayText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
     flex: 1,
     marginRight: 8,
   },
   changeText: {
+    fontFamily: 'Calibri',
     fontWeight: '400',
   },
   forgotPasswordRow: {
@@ -603,6 +609,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   forgotPasswordText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
   noticeBanner: {
@@ -622,9 +629,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   noticeTitle: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   noticeDescription: {
+    fontFamily: 'Calibri',
     marginTop: 2,
   },
   noticeDismiss: {
@@ -642,6 +651,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorBannerText: {
+    fontFamily: 'Calibri',
     flex: 1,
     fontWeight: '500',
   },
@@ -650,6 +660,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footerText: {
+    fontFamily: 'Calibri',
     textAlign: 'center',
   },
   modalOverlay: {
@@ -667,10 +678,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalTitle: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
     marginBottom: 4,
   },
   modalSubtitle: {
+    fontFamily: 'Calibri',
     lineHeight: 18,
   },
   successBanner: {
@@ -680,6 +693,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   successBannerText: {
+    fontFamily: 'Calibri',
     lineHeight: 18,
   },
   modalActionsRow: {

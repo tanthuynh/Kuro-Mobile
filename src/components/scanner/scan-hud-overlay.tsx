@@ -69,11 +69,11 @@ export const ScanHudOverlay: React.FC<ScanHudOverlayProps> = ({
     switch (result.type) {
       case 'SUCCESS':
         return {
-          bgColor: '#064E3B',
-          borderColor: '#10B981',
+          bgColor: '#1F471F',
+          borderColor: '#22C55E',
           textColor: '#FFFFFF',
           title: result.isFullyPrepped ? 'Prep Line Complete' : 'Asset Scanned',
-          icon: <CheckCircle2 size={20} color="#34D399" />,
+          icon: <CheckCircle2 size={20} color="#22C55E" />,
         };
       case 'ALREADY_COMPLETED':
         return {
@@ -125,7 +125,7 @@ export const ScanHudOverlay: React.FC<ScanHudOverlayProps> = ({
           <Text
             style={[
               styles.hudTitle,
-              { color: config.textColor, fontSize: typography.fontSize.sm },
+              { color: config.textColor, fontSize: typography.fontSize.base },
             ]}
           >
             {config.title}
@@ -184,10 +184,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   hudTitle: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
     letterSpacing: 0.2,
   },
   hudMessage: {
+    fontFamily: 'Calibri',
     marginTop: 2,
     lineHeight: 16,
   },

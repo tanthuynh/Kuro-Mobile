@@ -4,9 +4,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -14,7 +15,7 @@ import { ThemeProvider, useTheme } from '@/context/theme-context';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import { ScannerProvider } from '@/context/scanner-context';
 
-// Prevent splash screen from auto-hiding before auth state is determined
+// Prevent splash screen from auto-hiding before auth state and fonts are determined
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* Ignore error in development/web */
 });
@@ -23,16 +24,17 @@ SplashScreen.preventAutoHideAsync().catch(() => {
  * Route Guard Component
  * Monitors authentication state and enforces route access boundaries.
  */
-function RouteGuard() {
+function RouteGuard({ isFontsReady }: { isFontsReady: boolean }) {
   const { isAuthenticated, isLoading, isRestoringSession } = useAuth();
   const { isDark, colors } = useTheme();
   const segments = useSegments();
   const router = useRouter();
 
   const isAuthReady = !isLoading && !isRestoringSession;
+  const isReady = isAuthReady && isFontsReady;
 
   useEffect(() => {
-    if (!isAuthReady) return;
+    if (!isReady) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
@@ -44,11 +46,11 @@ function RouteGuard() {
       router.replace('/(tabs)');
     }
 
-    // Hide native splash screen once initial routing is resolved
+    // Hide native splash screen once initial routing and fonts are resolved
     SplashScreen.hideAsync().catch(() => {});
-  }, [isAuthenticated, isAuthReady, segments, router]);
+  }, [isAuthenticated, isReady, segments, router]);
 
-  if (!isAuthReady) {
+  if (!isReady) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -68,12 +70,39 @@ function RouteGuard() {
  * App Root Layout
  */
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Calibri: require('../assets/fonts/Calibri.ttf'),
+    'Calibri-Regular': require('../assets/fonts/Calibri-Regular.ttf'),
+    'Calibri-Bold': require('../assets/fonts/Calibri-Bold.ttf'),
+    'Calibri-Italic': require('../assets/fonts/Calibri-Italic.ttf'),
+    'Calibri-BoldItalic': require('../assets/fonts/Calibri-BoldItalic.ttf'),
+    'Calibri-Light': require('../assets/fonts/Calibri-Light.ttf'),
+  });
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const styleId = 'kuro-calibri-web-styles';
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+          * {
+            font-family: 'Calibri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+  }, []);
+
+  const isFontsReady = fontsLoaded || !!fontError;
+
   return (
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
           <ScannerProvider>
-            <RouteGuard />
+            <RouteGuard isFontsReady={isFontsReady} />
           </ScannerProvider>
         </AuthProvider>
       </ThemeProvider>

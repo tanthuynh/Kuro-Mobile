@@ -128,7 +128,7 @@ export function mapFirestoreRepairTicketDoc(docSnap: any): RepairTicket {
       }))
     : [];
 
-  const rawStatus = data.status || 'Under Repair';
+  const rawStatus = data.status || 'Reported';
   const status: RepairStatus = normalizeRepairStatus(rawStatus);
   const condition: EquipmentCondition =
     data.condition || calculateEquipmentCondition(status);
@@ -418,7 +418,7 @@ export async function createRepairTicket(
       ? ticketData.repairNumber
       : await generateRepairNumber(tenantId);
 
-  const status: RepairStatus = normalizeRepairStatus(ticketData.status || 'Under Repair');
+  const status: RepairStatus = normalizeRepairStatus(ticketData.status || 'Reported');
   const condition: EquipmentCondition =
     ticketData.condition || calculateEquipmentCondition(status);
 
@@ -546,7 +546,7 @@ export async function updateRepairTicketStatus(
     }
 
     const currentData = snap.data();
-    const oldStatus: RepairStatus = normalizeRepairStatus(currentData.status || 'Under Repair');
+    const oldStatus: RepairStatus = normalizeRepairStatus(currentData.status || 'Reported');
 
     if (!isValidStatusTransition(oldStatus, newStatus)) {
       return { success: false, error: 'Invalid status transition' };
@@ -734,6 +734,129 @@ export async function addRepairAttachment(
   } catch (err: any) {
     return { success: false, attachmentId: '', error: err.message };
   }
+}
+
+/**
+ * Updates an existing technician note in `notes` and logs an audit action.
+ */
+export async function updateRepairNote(
+  ticketId: string,
+  noteId: string,
+  newContent: string,
+  user: { id?: string; uid?: string; name?: string; email?: string; avatarUrl?: string },
+  tenantId: string
+): Promise<void> {
+  if (!ticketId || !tenantId) throw new Error('Ticket ID and Tenant ID are required');
+  if (!noteId) throw new Error('Note ID is required');
+  if (!newContent || !newContent.trim()) throw new Error('Note content cannot be empty');
+
+  const ticketRef = doc(db, 'tickets', ticketId);
+  const snap = await getDoc(ticketRef);
+
+  if (!snap.exists() || snap.data()?.tenantId !== tenantId) {
+    throw new Error('Repair ticket not found or unauthorized');
+  }
+
+  const currentData = snap.data();
+  const currentNotes: RepairNote[] = Array.isArray(currentData.notes) ? currentData.notes : [];
+  const updatedNotes = currentNotes.map((n) => {
+    if (n.id === noteId) {
+      return {
+        ...n,
+        content: newContent.trim(),
+        user: {
+          id: user.uid || user.id || n.user?.id || 'system',
+          name: user.name || n.user?.name || 'Technician',
+          email: user.email || n.user?.email,
+          avatarUrl: user.avatarUrl || n.user?.avatarUrl,
+        },
+        timestamp: new Date().toISOString(),
+      };
+    }
+    return n;
+  });
+
+  const actionSnippet =
+    newContent.trim().length > 60 ? `${newContent.trim().substring(0, 57)}...` : newContent.trim();
+  const actionEntry = createActionLogEntry(user, `Updated note: "${actionSnippet}"`, tenantId);
+
+  await updateDoc(ticketRef, {
+    notes: updatedNotes,
+    actions: arrayUnion(actionEntry),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Deletes an existing technician note from `notes` and logs an audit action.
+ */
+export async function deleteRepairNote(
+  ticketId: string,
+  noteId: string,
+  user: { id?: string; uid?: string; name?: string; email?: string; avatarUrl?: string },
+  tenantId: string
+): Promise<void> {
+  if (!ticketId || !tenantId) throw new Error('Ticket ID and Tenant ID are required');
+  if (!noteId) throw new Error('Note ID is required');
+
+  const ticketRef = doc(db, 'tickets', ticketId);
+  const snap = await getDoc(ticketRef);
+
+  if (!snap.exists() || snap.data()?.tenantId !== tenantId) {
+    throw new Error('Repair ticket not found or unauthorized');
+  }
+
+  const currentData = snap.data();
+  const currentNotes: RepairNote[] = Array.isArray(currentData.notes) ? currentData.notes : [];
+  const targetNote = currentNotes.find((n) => n.id === noteId);
+  const updatedNotes = currentNotes.filter((n) => n.id !== noteId);
+
+  const actionSnippet = targetNote?.content
+    ? (targetNote.content.length > 50 ? `${targetNote.content.substring(0, 47)}...` : targetNote.content)
+    : 'technician note';
+  const actionEntry = createActionLogEntry(user, `Deleted note: "${actionSnippet}"`, tenantId);
+
+  await updateDoc(ticketRef, {
+    notes: updatedNotes,
+    actions: arrayUnion(actionEntry),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Deletes an attachment (photo, PDF, document) from `attachments` and logs an audit action.
+ */
+export async function deleteRepairAttachment(
+  ticketId: string,
+  attachmentId: string,
+  user: { id?: string; uid?: string; name?: string; email?: string; avatarUrl?: string },
+  tenantId: string
+): Promise<void> {
+  if (!ticketId || !tenantId) throw new Error('Ticket ID and Tenant ID are required');
+  if (!attachmentId) throw new Error('Attachment ID is required');
+
+  const ticketRef = doc(db, 'tickets', ticketId);
+  const snap = await getDoc(ticketRef);
+
+  if (!snap.exists() || snap.data()?.tenantId !== tenantId) {
+    throw new Error('Repair ticket not found or unauthorized');
+  }
+
+  const currentData = snap.data();
+  const currentAttachments: RepairAttachment[] = Array.isArray(currentData.attachments)
+    ? currentData.attachments
+    : [];
+  const targetAtt = currentAttachments.find((a) => a.id === attachmentId);
+  const updatedAttachments = currentAttachments.filter((a) => a.id !== attachmentId);
+
+  const fileName = targetAtt?.fileName || targetAtt?.type || 'attachment';
+  const actionEntry = createActionLogEntry(user, `Deleted attachment: ${fileName}`, tenantId);
+
+  await updateDoc(ticketRef, {
+    attachments: updatedAttachments,
+    actions: arrayUnion(actionEntry),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 // ============================================================================

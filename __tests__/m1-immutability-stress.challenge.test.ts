@@ -21,7 +21,7 @@ describe('Tier 5 Immutability & Defensive Copying Stress Harness', () => {
       // Call 1: mutate with push
       const arr1 = getAvailableStatusTransitions(status);
       arr1.push('CORRUPTED_STATUS' as RepairStatus);
-      arr1.push('Decommissioned');
+      arr1.push('Pending');
 
       // Call 2: mutate with pop and splice
       const arr2 = getAvailableStatusTransitions(status);

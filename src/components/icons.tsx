@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   text: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
     fontVariant: ['small-caps'],
     letterSpacing: 1.5,

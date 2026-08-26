@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   messageText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
     flex: 1,
   },
@@ -128,6 +129,7 @@ const styles = StyleSheet.create({
     minHeight: 32,
   },
   retryText: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
 });

@@ -142,7 +142,7 @@ describe('repair-service', () => {
 
       expect(ticket.id).toBe('empty-1');
       expect(ticket.equipment.name).toBe('Unnamed Equipment');
-      expect(ticket.status).toBe('Under Repair');
+      expect(ticket.status).toBe('Reported');
       expect(ticket.condition).toBe('Out of Service');
       expect(ticket.actions).toEqual([]);
       expect(ticket.notes).toEqual([]);
@@ -550,7 +550,7 @@ describe('repair-service', () => {
 
       const res = await updateRepairTicketStatus(
         'ticket-1',
-        'Awaiting Parts',
+        'Pending',
         { id: 'u-1', name: 'Alex Tech' },
         'tenant-alpha',
         'Ordered stepper motor'
@@ -560,14 +560,14 @@ describe('repair-service', () => {
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          status: 'Awaiting Parts',
+          status: 'Pending',
           condition: 'Out of Service',
           actions: expect.anything(),
         })
       );
     });
 
-    it('SVC-UPD-02: Resolving repair to Operational restores condition to Available to Use (Tier 1)', async () => {
+    it('SVC-UPD-02: Resolving repair to Completed restores condition to Available to Use (Tier 1)', async () => {
       mockFirestore.getDoc.mockResolvedValue({
         exists: () => true,
         data: () => ({
@@ -579,7 +579,7 @@ describe('repair-service', () => {
 
       const res = await updateRepairTicketStatus(
         'ticket-1',
-        'Operational',
+        'Completed',
         { id: 'u-1', name: 'Alex Tech' },
         'tenant-alpha',
         'Replaced motor and calibrated'
@@ -589,7 +589,7 @@ describe('repair-service', () => {
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          status: 'Operational',
+          status: 'Completed',
           condition: 'Available to Use',
         })
       );
@@ -603,13 +603,13 @@ describe('repair-service', () => {
         exists: () => true,
         data: () => ({
           tenantId: 'tenant-alpha',
-          status: 'Decommissioned',
+          status: 'Under Repair',
         }),
       });
 
       const res = await updateRepairTicketStatus(
         'ticket-1',
-        'Completed', // Illegal direct transition from Decommissioned
+        'InvalidStatus' as any,
         { name: 'Tech' },
         'tenant-alpha'
       );
@@ -630,7 +630,7 @@ describe('repair-service', () => {
 
       const res = await updateRepairTicketStatus(
         'ticket-1',
-        'Operational',
+        'Completed',
         { name: 'Tech' },
         'tenant-alpha'
       );

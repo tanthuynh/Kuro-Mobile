@@ -1,10 +1,10 @@
 /**
  * app/(tabs)/repairs.tsx
  * Real-Time Active Repair Tickets Feed & Fault Management in Kuro Mobile.
- * Subscribes live to tenant tickets collection with multi-criteria status/priority filters and search.
+ * Subscribes live to tenant tickets collection with interactive status metric cards and search.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,6 @@ import {
   FlatList,
   ScrollView,
   Pressable,
-  RefreshControl,
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -21,12 +20,6 @@ import {
   Plus,
   Search,
   X,
-  Filter,
-  ShieldAlert,
-  Clock,
-  CheckCircle2,
-  Package,
-  AlertTriangle,
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -34,42 +27,22 @@ import { useTheme } from '@/context/theme-context';
 import { useTickets } from '@/hooks/use-tickets';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { RepairTicketCard } from '@/components/repair/repair-ticket-card';
-import type { RepairTicket, RepairStatus, RepairPriority } from '@/types/repair';
-
-const STATUS_TABS = [
-  'All',
-  'Under Repair',
-  'Awaiting Parts',
-  'Operational',
-  'Completed',
-];
-
-const PRIORITY_FILTERS = [
-  'All',
-  'Critical',
-  'High',
-  'Medium',
-  'Low',
-];
+import type { RepairTicket } from '@/types/repair';
 
 export default function RepairsScreen() {
   const insets = useSafeAreaInsets();
-  const { colors, typography, spacing, layout } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const router = useRouter();
 
   const {
     tickets,
     filteredTickets,
     loading,
-    error,
     metrics,
     statusFilter,
     setStatusFilter,
-    priorityFilter,
-    setPriorityFilter,
     searchQuery,
     setSearchQuery,
   } = useTickets();
@@ -82,6 +55,19 @@ export default function RepairsScreen() {
     router.push(`/repair/${ticket.id}`);
   };
 
+  const metricCards: Array<{
+    status: string;
+    label: string;
+    countKey: 'total' | 'reported' | 'pending' | 'underRepair' | 'completed';
+    color: string;
+  }> = [
+    { status: 'All', label: 'All', countKey: 'total', color: colors.foreground },
+    { status: 'Reported', label: 'Reported', countKey: 'reported', color: '#3B82F6' },
+    { status: 'Pending', label: 'Pending', countKey: 'pending', color: '#F59E0B' },
+    { status: 'Under Repair', label: 'Under Repair', countKey: 'underRepair', color: '#EF4444' },
+    { status: 'Completed', label: 'Completed', countKey: 'completed', color: '#10B981' },
+  ];
+
   return (
     <View
       style={[
@@ -92,44 +78,62 @@ export default function RepairsScreen() {
         },
       ]}
     >
-      {/* Metrics Summary Strip */}
+      {/* Interactive Status Metric Cards */}
       <View style={[styles.metricsContainer, { paddingHorizontal: spacing.base, paddingTop: spacing.xs }]}>
         <View style={styles.metricsGrid}>
-          <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.metricNumber, { color: colors.destructive, fontSize: typography.fontSize.lg }]}>
-              {metrics.underRepair}
-            </Text>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-              In Repair
-            </Text>
-          </View>
+          {metricCards.map((card) => {
+            const isSelected = statusFilter === card.status;
+            const count = metrics[card.countKey] ?? 0;
 
-          <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.metricNumber, { color: '#EA580C', fontSize: typography.fontSize.lg }]}>
-              {metrics.awaitingParts}
-            </Text>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-              Parts
-            </Text>
-          </View>
-
-          <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.metricNumber, { color: colors.status.online, fontSize: typography.fontSize.lg }]}>
-              {metrics.operational}
-            </Text>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-              Fixed
-            </Text>
-          </View>
-
-          <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.metricNumber, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-              {metrics.total}
-            </Text>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-              Total
-            </Text>
-          </View>
+            return (
+              <Pressable
+                key={card.status}
+                onPress={() => setStatusFilter(card.status)}
+                style={({ pressed }) => [
+                  styles.metricCard,
+                  {
+                    backgroundColor: isSelected
+                      ? isDark
+                        ? 'rgba(59, 130, 246, 0.18)'
+                        : 'rgba(59, 130, 246, 0.12)'
+                      : colors.card,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                    borderWidth: isSelected ? 2 : 1,
+                  },
+                  pressed && { opacity: 0.8 },
+                ]}
+                testID={`metric-card-${card.status.toLowerCase().replace(/\s+/g, '-')}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={`Filter by ${card.label}, ${count} tickets`}
+              >
+                <Text
+                  style={[
+                    styles.metricNumber,
+                    {
+                      color: card.color,
+                      fontSize: typography.fontSize.lg,
+                    },
+                  ]}
+                >
+                  {count}
+                </Text>
+                <Text
+                  style={[
+                    styles.metricLabel,
+                    {
+                      color: isSelected ? colors.foreground : colors.mutedForeground,
+                      fontSize: typography.fontSize.xs,
+                      fontWeight: isSelected ? '700' : '600',
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {card.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       </View>
 
@@ -149,98 +153,6 @@ export default function RepairsScreen() {
           }
           testID="repair-feed-search-input"
         />
-      </View>
-
-      {/* Status Filter Horizontal Tabs */}
-      <View style={styles.statusTabsContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[styles.statusTabsScroll, { paddingHorizontal: spacing.base }]}
-        >
-          {STATUS_TABS.map((status) => {
-            const isSelected = statusFilter === status;
-            return (
-              <Pressable
-                key={status}
-                onPress={() => setStatusFilter(status)}
-                style={[
-                  styles.statusTabPill,
-                  {
-                    backgroundColor: isSelected ? colors.primary : colors.card,
-                    borderColor: isSelected ? colors.primary : colors.border,
-                  },
-                ]}
-                testID={`status-filter-tab-${status.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                <Text
-                  style={[
-                    styles.statusTabText,
-                    {
-                      color: isSelected ? colors.primaryForeground : colors.foreground,
-                      fontSize: typography.fontSize.xs,
-                      fontWeight: isSelected ? '700' : '500',
-                    },
-                  ]}
-                >
-                  {status}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      {/* Priority Filter Chips */}
-      <View style={styles.priorityFilterContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[styles.priorityScroll, { paddingHorizontal: spacing.base }]}
-        >
-          {PRIORITY_FILTERS.map((p) => {
-            const isSelected = priorityFilter === p;
-            return (
-              <Pressable
-                key={p}
-                onPress={() => setPriorityFilter(p)}
-                style={[
-                  styles.priorityChip,
-                  {
-                    backgroundColor: isSelected
-                      ? p === 'Critical'
-                        ? 'rgba(239, 68, 68, 0.25)'
-                        : colors.muted
-                      : 'transparent',
-                    borderColor: isSelected
-                      ? p === 'Critical'
-                        ? colors.destructive
-                        : colors.primary
-                      : colors.border,
-                  },
-                ]}
-                testID={`priority-filter-chip-${p.toLowerCase()}`}
-              >
-                <Text
-                  style={[
-                    styles.priorityChipText,
-                    {
-                      color: isSelected
-                        ? p === 'Critical'
-                          ? colors.destructive
-                          : colors.foreground
-                        : colors.mutedForeground,
-                      fontSize: 11,
-                      fontWeight: isSelected ? '700' : '500',
-                    },
-                  ]}
-                >
-                  {p === 'All' ? 'All Priorities' : p}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
       </View>
 
       {/* Main Tickets List */}
@@ -264,44 +176,30 @@ export default function RepairsScreen() {
           )}
           contentContainerStyle={[styles.listContent, { padding: spacing.base }]}
           ListEmptyComponent={
-            <View style={[styles.emptyContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Wrench size={36} color={colors.mutedForeground} />
-              <Text style={[styles.emptyTitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-                No Repair Tickets Found
-              </Text>
-              <Text style={[styles.emptySubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                {searchQuery || statusFilter !== 'All' || priorityFilter !== 'All'
+            <EmptyState
+              icon={<Wrench size={40} color={colors.mutedForeground} />}
+              title="No Repair Tickets Found"
+              description={
+                searchQuery || statusFilter !== 'All'
                   ? 'Try changing your filters or search keywords.'
-                  : 'All fleet equipment is in operational condition.'}
-              </Text>
-
-              {searchQuery || statusFilter !== 'All' || priorityFilter !== 'All' ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onPress={() => {
-                    setSearchQuery('');
-                    setStatusFilter('All');
-                    setPriorityFilter('All');
-                  }}
-                  style={{ marginTop: 12 }}
-                  testID="reset-filters-btn"
-                >
-                  Reset Filters
-                </Button>
-              ) : (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<Plus size={14} color={colors.primaryForeground} />}
-                  onPress={handleCreateNew}
-                  style={{ marginTop: 12 }}
-                  testID="empty-report-fault-btn"
-                >
-                  Report Fault
-                </Button>
-              )}
-            </View>
+                  : 'All fleet equipment is in operational condition.'
+              }
+              actionLabel={
+                searchQuery || statusFilter !== 'All' ? 'Reset Filters' : 'Report Fault'
+              }
+              actionVariant={searchQuery || statusFilter !== 'All' ? 'outline' : 'primary'}
+              actionIcon={searchQuery || statusFilter !== 'All' ? undefined : <Plus size={14} color={colors.primaryForeground} />}
+              onAction={
+                searchQuery || statusFilter !== 'All'
+                  ? () => {
+                      setSearchQuery('');
+                      setStatusFilter('All');
+                    }
+                  : handleCreateNew
+              }
+              testID="empty-repairs-state"
+              actionTestID={searchQuery || statusFilter !== 'All' ? 'reset-filters-btn' : 'feed-new-repair-empty-btn'}
+            />
           }
         />
       )}
@@ -341,11 +239,13 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   metricsContainer: {
-    marginBottom: 4,
+    marginBottom: 6,
   },
   metricsGrid: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 4,
   },
   metricCard: {
     flex: 1,
@@ -353,46 +253,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    borderWidth: 1,
   },
   metricNumber: {
-    fontWeight: '800',
+    fontFamily: 'Calibri',
+    fontSize: 20,
+    fontWeight: '700',
   },
   metricLabel: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
-    marginTop: 1,
+    lineHeight: 16,
+    marginTop: 2,
   },
   searchContainer: {
     marginBottom: 6,
   },
-  statusTabsContainer: {
-    marginVertical: 4,
-  },
-  statusTabsScroll: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  statusTabPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  statusTabText: {},
-  priorityFilterContainer: {
-    marginBottom: 8,
-  },
-  priorityScroll: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  priorityChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  priorityChipText: {},
   listContent: {
     paddingBottom: 40,
   },
@@ -402,6 +278,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
   emptyContainer: {
@@ -414,10 +291,16 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   emptyTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
     marginTop: 8,
   },
   emptySubtitle: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     textAlign: 'center',
   },
 });

@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
   },
   dot: {},
   label: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
 });

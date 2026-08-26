@@ -510,13 +510,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   avatarText: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
   userInfoBlock: {
     flex: 1,
   },
   userName: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   presenceRightSlot: {
     alignItems: 'center',
@@ -525,12 +529,21 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   onlineStatusText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
+    lineHeight: 16,
   },
   userEmail: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     marginTop: 2,
   },
   userTenant: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     marginTop: 2,
     fontWeight: '500',
   },
@@ -541,7 +554,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontWeight: '600',
+    fontFamily: 'Calibri',
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 22,
   },
   themeButtonsGroupWide: {
     flexDirection: 'row',
@@ -561,6 +577,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   themeBtnTextWide: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   bottomActionPane: {
@@ -571,6 +588,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   versionText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     textAlign: 'center',
   },
 });

@@ -77,9 +77,11 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 24,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 2,
+    borderRadius: 9999,
     borderWidth: 1,
     alignSelf: 'flex-start',
   },
@@ -90,7 +92,9 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   badgeText: {
-    fontWeight: '700',
+    fontFamily: 'Calibri',
+    fontWeight: '600',
     letterSpacing: 0.2,
+    lineHeight: 16,
   },
 });

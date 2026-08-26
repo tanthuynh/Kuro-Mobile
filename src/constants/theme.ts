@@ -143,6 +143,7 @@ export const layout = {
   minTouchTarget: 48,
   headerHeight: 56,
   tabBarHeight: 64,
+  badgeHeight: 24,
   borderRadius: {
     sm: 4,
     md: 6,
@@ -154,6 +155,15 @@ export const layout = {
 } as const;
 
 export const typography = {
+  fontFamily: {
+    regular: 'Calibri',
+    bold: 'Calibri-Bold',
+    italic: 'Calibri-Italic',
+    boldItalic: 'Calibri-BoldItalic',
+    light: 'Calibri-Light',
+    body: 'Calibri',
+    heading: 'Calibri-Bold',
+  },
   fontSize: {
     xs: 12,
     sm: 13,
@@ -181,3 +191,13 @@ export const typography = {
     bold: '700' as const,
   },
 } as const;
+
+export const iconSize = {
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  hero: 40,
+} as const;
+

@@ -39,6 +39,8 @@ import { useSingleEvent } from '@/hooks/use-events';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ModalSheet } from '@/components/ui/modal-sheet';
 import { CameraViewfinder } from '@/components/scanner/camera-viewfinder';
 import { ScanHudOverlay } from '@/components/scanner/scan-hud-overlay';
 import { ManualCodeInput } from '@/components/scanner/manual-code-input';
@@ -275,111 +277,95 @@ export default function ScannerScreen() {
         )}
       </ScrollView>
 
-      {/* Item Detail Inspection Modal */}
-      <Modal
+      {/* Item Detail Inspection Modal Sheet */}
+      <ModalSheet
         visible={Boolean(inspectedItem)}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setInspectedItem(null)}
+        onClose={() => setInspectedItem(null)}
+        title="Asset Inspection"
+        testID="scanner-detail-modal"
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={styles.modalHeaderRow}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-                Asset Inspection
-              </Text>
-              <Pressable
-                onPress={() => setInspectedItem(null)}
-                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              >
-                <X size={20} color={colors.mutedForeground} />
-              </Pressable>
+        {inspectedItem ? (
+          <View style={styles.modalBody}>
+            <Text style={[styles.detailItemName, { color: colors.foreground, fontSize: typography.fontSize.xl }]}>
+              {inspectedItem.name}
+            </Text>
+
+            <View style={styles.detailChipsRow}>
+              <Badge variant="brand">{inspectedItem.category || 'Equipment'}</Badge>
+              <Badge variant={inspectedItem.resultType === 'SUCCESS' ? 'success' : 'warning'}>
+                {inspectedItem.status}
+              </Badge>
             </View>
 
-            {inspectedItem ? (
-              <View style={styles.modalBody}>
-                <Text style={[styles.detailItemName, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-                  {inspectedItem.name}
+            <View style={[styles.specGrid, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={styles.specRow}>
+                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                  Scanned Code
                 </Text>
-
-                <View style={styles.detailChipsRow}>
-                  <Badge variant="brand">{inspectedItem.category || 'Equipment'}</Badge>
-                  <Badge variant={inspectedItem.resultType === 'SUCCESS' ? 'success' : 'warning'}>
-                    {inspectedItem.status}
-                  </Badge>
-                </View>
-
-                <View style={[styles.specGrid, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                  <View style={styles.specRow}>
-                    <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                      Scanned Code
-                    </Text>
-                    <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                      {inspectedItem.code}
-                    </Text>
-                  </View>
-
-                  {inspectedItem.location ? (
-                    <View style={styles.specRow}>
-                      <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                        Warehouse Location
-                      </Text>
-                      <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                        {inspectedItem.location}
-                      </Text>
-                    </View>
-                  ) : null}
-
-                  <View style={styles.specRow}>
-                    <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                      Scan Timestamp
-                    </Text>
-                    <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                      {inspectedItem.timestamp.toLocaleString()}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.modalActionRow}>
-                  <Button
-                    variant="destructive"
-                    size="default"
-                    icon={<Wrench size={16} color="#FFFFFF" />}
-                    style={{ flex: 1 }}
-                    onPress={() => {
-                      const item = inspectedItem;
-                      setInspectedItem(null);
-                      router.push({
-                        pathname: '/repair/new',
-                        params: {
-                          name: item.name,
-                          barcode: item.code,
-                          serialNumber: item.code,
-                          category: item.category || 'Equipment',
-                          location: item.location || '',
-                        },
-                      });
-                    }}
-                    testID="scanner-report-fault-btn"
-                  >
-                    Report Fault
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    size="default"
-                    style={{ flex: 1 }}
-                    onPress={() => setInspectedItem(null)}
-                    testID="scanner-close-inspection-btn"
-                  >
-                    Close
-                  </Button>
-                </View>
+                <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
+                  {inspectedItem.code}
+                </Text>
               </View>
-            ) : null}
+
+              {inspectedItem.location ? (
+                <View style={styles.specRow}>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                    Warehouse Location
+                  </Text>
+                  <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
+                    {inspectedItem.location}
+                  </Text>
+                </View>
+              ) : null}
+
+              <View style={styles.specRow}>
+                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                  Scan Timestamp
+                </Text>
+                <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
+                  {inspectedItem.timestamp.toLocaleString()}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.modalActionRow}>
+              <Button
+                variant="destructive"
+                size="default"
+                icon={<Wrench size={16} color="#FFFFFF" />}
+                style={{ flex: 1 }}
+                onPress={() => {
+                  const item = inspectedItem;
+                  setInspectedItem(null);
+                  router.push({
+                    pathname: '/repair/new',
+                    params: {
+                      name: item.name,
+                      barcode: item.code,
+                      serialNumber: item.code,
+                      category: item.category || 'Equipment',
+                      location: item.location || '',
+                    },
+                  });
+                }}
+                testID="scanner-report-fault-btn"
+              >
+                Report Fault
+              </Button>
+
+              <Button
+                variant="outline"
+                size="default"
+                style={{ flex: 1 }}
+                onPress={() => setInspectedItem(null)}
+                testID="scanner-close-inspection-btn"
+              >
+                Close
+              </Button>
+            </View>
           </View>
-        </View>
-      </Modal>
+        ) : null}
+      </ModalSheet>
     </View>
   );
 }
@@ -405,9 +391,15 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   jobBannerTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
     fontWeight: '700',
+    lineHeight: 20,
   },
   jobBannerSub: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     marginTop: 2,
   },
   jobBannerActions: {
@@ -423,7 +415,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   manualTitle: {
-    fontWeight: '600',
+    fontFamily: 'Calibri',
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 22,
   },
   recentHeaderRow: {
     flexDirection: 'row',
@@ -432,10 +427,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   clearBtnText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
+    lineHeight: 16,
   },
   emptyScans: {
     borderRadius: 8,
@@ -445,6 +446,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyScansText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     textAlign: 'center',
   },
   scanItemCard: {
@@ -457,7 +461,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   scanItemName: {
-    fontWeight: '600',
+    fontFamily: 'Calibri',
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
     flex: 1,
     marginRight: 8,
   },
@@ -466,13 +473,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   codeBadge: {
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
+    lineHeight: 16,
   },
   metaDot: {
     marginHorizontal: 6,
   },
-  metaText: {},
+  metaText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.65)',
@@ -491,11 +504,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   modalBody: {},
   detailItemName: {
+    fontFamily: 'Calibri',
+    fontSize: 20,
     fontWeight: '700',
+    lineHeight: 26,
     marginBottom: 8,
   },
   detailChipsRow: {
@@ -515,10 +534,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   specLabel: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '500',
+    lineHeight: 16,
   },
   specValue: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
     fontWeight: '600',
+    lineHeight: 20,
   },
   modalActionRow: {
     flexDirection: 'row',

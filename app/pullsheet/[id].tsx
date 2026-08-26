@@ -34,6 +34,7 @@ import { useSingleEvent } from '@/hooks/use-events';
 import { ScreenHeader } from '@/components/layout/screen-header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Card, CardContent } from '@/components/ui/card';
 import { PullSheetProgressBar } from '@/components/pull-sheets/pull-sheet-progress-bar';
 import { PullSheetSectionHeader } from '@/components/pull-sheets/pull-sheet-section-header';
@@ -190,30 +191,25 @@ export default function PullSheetScreen() {
 
         {/* Grouped Sections List */}
         {filteredSections.length === 0 ? (
-          <View style={[styles.emptyContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Layers size={40} color={colors.mutedForeground} style={{ marginBottom: 10 }} />
-            <Text style={[styles.emptyTitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-              No Equipment Matches
-            </Text>
-            <Text style={[styles.emptySubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.xs, marginVertical: spacing.xs }]}>
-              {searchQuery || selectedCategory !== 'All'
+          <EmptyState
+            icon={<Layers size={40} color={colors.mutedForeground} />}
+            title="No Equipment Matches"
+            description={
+              searchQuery || selectedCategory !== 'All'
                 ? 'No line items match your active search or category filters.'
-                : 'No equipment items listed on this pull sheet.'}
-            </Text>
-            {searchQuery || selectedCategory !== 'All' ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('All');
-                }}
-                style={{ marginTop: spacing.sm }}
-              >
-                Reset Filters
-              </Button>
-            ) : null}
-          </View>
+                : 'No equipment items listed on this pull sheet.'
+            }
+            actionLabel={searchQuery || selectedCategory !== 'All' ? 'Reset Filters' : undefined}
+            onAction={
+              searchQuery || selectedCategory !== 'All'
+                ? () => {
+                    setSearchQuery('');
+                    setSelectedCategory('All');
+                  }
+                : undefined
+            }
+            testID="pullsheet-empty-state"
+          />
         ) : (
           filteredSections.map((section) => (
             <View key={section.id} style={styles.sectionBlock}>
@@ -274,6 +270,7 @@ const styles = StyleSheet.create({
     paddingBottom: 90, // Leave room for FAB
   },
   loadingText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
   progressCard: {
@@ -287,12 +284,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    minHeight: 24,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 9999,
     borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  categoryChipText: {},
+  categoryChipText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
+  },
   sectionBlock: {
     marginBottom: 8,
   },
@@ -305,9 +309,15 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   emptyTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   emptySubtitle: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     textAlign: 'center',
   },
   fabContainer: {

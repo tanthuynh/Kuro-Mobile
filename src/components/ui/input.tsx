@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
   inputContainer: {
@@ -192,6 +193,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     minHeight: 48,
+    fontFamily: 'Calibri',
     paddingVertical: 10,
     ...Platform.select({
       web: {
@@ -219,9 +221,11 @@ const styles = StyleSheet.create({
     paddingRight: 4,
   },
   errorText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
   helperText: {
+    fontFamily: 'Calibri',
     fontWeight: '400',
   },
 });

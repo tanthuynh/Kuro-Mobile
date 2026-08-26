@@ -36,6 +36,8 @@ import { useEquipment } from '@/hooks/use-equipment';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ModalSheet } from '@/components/ui/modal-sheet';
 import { CategoryFilterBar } from '@/components/inventory/category-filter-bar';
 import { EquipmentCard } from '@/components/inventory/equipment-card';
 import type { Equipment } from '@/types/equipment';
@@ -161,31 +163,18 @@ export default function InventoryScreen() {
             />
           }
           ListEmptyComponent={
-            <View style={[styles.emptyContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Package size={48} color={colors.mutedForeground} style={{ marginBottom: 12 }} />
-              <Text style={[styles.emptyTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-                No Equipment Found
-              </Text>
-              <Text
-                style={[
-                  styles.emptySubtitle,
-                  { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginVertical: spacing.sm },
-                ]}
-              >
-                {`No items match "${searchQuery || selectedCategory || availabilityFilter}".`}
-              </Text>
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('All');
-                  setAvailabilityFilter('All');
-                }}
-              >
-                Reset Filters
-              </Button>
-            </View>
+            <EmptyState
+              icon={<Package size={40} color={colors.mutedForeground} />}
+              title="No Equipment Found"
+              description={`No items match "${searchQuery || selectedCategory || availabilityFilter}".`}
+              actionLabel="Reset Filters"
+              onAction={() => {
+                setSearchQuery('');
+                setSelectedCategory('All');
+                setAvailabilityFilter('All');
+              }}
+              testID="inventory-empty-state"
+            />
           }
           renderItem={({ item }) => (
             <EquipmentCard
@@ -196,163 +185,147 @@ export default function InventoryScreen() {
         />
       )}
 
-      {/* Item Detail Inspection Modal */}
-      <Modal
+      {/* Item Detail Inspection Modal Sheet */}
+      <ModalSheet
         visible={Boolean(activeItem)}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setActiveItem(null)}
+        onClose={() => setActiveItem(null)}
+        title="Equipment Specifications"
+        testID="inventory-spec-modal"
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={styles.modalHeaderRow}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-                Equipment Specifications
+        {activeItem ? (
+          <View>
+            {activeItem.manufacturer ? (
+              <Text style={[styles.detailItemManufacturer, { color: colors.primary, fontSize: typography.fontSize.xs }]}>
+                {activeItem.manufacturer}
               </Text>
-              <Pressable
-                onPress={() => setActiveItem(null)}
-                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              >
-                <X size={20} color={colors.mutedForeground} />
-              </Pressable>
+            ) : null}
+            <Text style={[styles.detailItemName, { color: colors.foreground, fontSize: typography.fontSize.xl }]}>
+              {activeItem.name}
+            </Text>
+
+            <View style={styles.detailChipsRow}>
+              {activeItem.category ? <Badge variant="brand">{activeItem.category}</Badge> : null}
+              {activeItem.caseType ? <Badge variant="outline">{activeItem.caseType}</Badge> : null}
             </View>
 
-            {activeItem ? (
-              <ScrollView style={styles.modalBody} contentContainerStyle={{ paddingBottom: 20 }}>
-                {activeItem.manufacturer ? (
-                  <Text style={[styles.detailItemManufacturer, { color: colors.primary, fontSize: typography.fontSize.sm }]}>
-                    {activeItem.manufacturer}
-                  </Text>
-                ) : null}
-                <Text style={[styles.detailItemName, { color: colors.foreground, fontSize: typography.fontSize.xl }]}>
-                  {activeItem.name}
+            {/* Specification Grid */}
+            <View style={[styles.specGrid, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              {activeItem.model ? (
+                <View style={styles.specRow}>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Model</Text>
+                  <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.model}</Text>
+                </View>
+              ) : null}
+
+              {activeItem.barcode ? (
+                <View style={styles.specRow}>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Barcode</Text>
+                  <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.barcode}</Text>
+                </View>
+              ) : null}
+
+              {activeItem.serialNumber ? (
+                <View style={styles.specRow}>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Primary Serial</Text>
+                  <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.serialNumber}</Text>
+                </View>
+              ) : null}
+
+              {activeItem.knownLocation ? (
+                <View style={styles.specRow}>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Warehouse Location</Text>
+                  <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.knownLocation}</Text>
+                </View>
+              ) : null}
+
+              <View style={styles.specRow}>
+                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Fleet Quantity</Text>
+                <Text style={[styles.specValue, { color: colors.status.online, fontSize: typography.fontSize.base }]}>
+                  {Math.max(0, (activeItem.quantity || 1) - (activeItem.consumedQuantity || 0))} available / {activeItem.quantity || 1} total
                 </Text>
+              </View>
 
-                <View style={styles.detailChipsRow}>
-                  {activeItem.category ? <Badge variant="brand">{activeItem.category}</Badge> : null}
-                  {activeItem.caseType ? <Badge variant="outline">{activeItem.caseType}</Badge> : null}
+              {activeItem.weight ? (
+                <View style={styles.specRow}>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Weight</Text>
+                  <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.weight} kg</Text>
                 </View>
+              ) : null}
 
-                {/* Specification Grid */}
-                <View style={[styles.specGrid, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                  {activeItem.model ? (
-                    <View style={styles.specRow}>
-                      <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Model</Text>
-                      <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>{activeItem.model}</Text>
-                    </View>
-                  ) : null}
+              {activeItem.powerW ? (
+                <View style={styles.specRow}>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Power Draw</Text>
+                  <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.powerW} W</Text>
+                </View>
+              ) : null}
+            </View>
 
-                  {activeItem.barcode ? (
-                    <View style={styles.specRow}>
-                      <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Barcode</Text>
-                      <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>{activeItem.barcode}</Text>
-                    </View>
-                  ) : null}
-
-                  {activeItem.serialNumber ? (
-                    <View style={styles.specRow}>
-                      <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Primary Serial</Text>
-                      <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>{activeItem.serialNumber}</Text>
-                    </View>
-                  ) : null}
-
-                  {activeItem.knownLocation ? (
-                    <View style={styles.specRow}>
-                      <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Warehouse Location</Text>
-                      <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>{activeItem.knownLocation}</Text>
-                    </View>
-                  ) : null}
-
-                  <View style={styles.specRow}>
-                    <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Fleet Quantity</Text>
-                    <Text style={[styles.specValue, { color: colors.status.online, fontSize: typography.fontSize.sm }]}>
-                      {Math.max(0, (activeItem.quantity || 1) - (activeItem.consumedQuantity || 0))} available / {activeItem.quantity || 1} total
+            {/* Serial Numbers List */}
+            {activeItem.serialNumbers && activeItem.serialNumbers.length > 0 ? (
+              <View style={[styles.serialsSection, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Text style={[styles.serialsTitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
+                  Individual Serialized Units ({activeItem.serialNumbers.length}):
+                </Text>
+                {activeItem.serialNumbers.map((sn, i) => (
+                  <View key={sn.id || i} style={[styles.serialUnitRow, { borderTopColor: colors.border }]}>
+                    <Text style={[styles.serialUnitText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+                      #{i + 1}: {sn.serial}
                     </Text>
+                    <Badge
+                      variant={
+                        sn.status === 'Available'
+                          ? 'success'
+                          : sn.status === 'In Use'
+                          ? 'warning'
+                          : 'destructive'
+                      }
+                    >
+                      {sn.status}
+                    </Badge>
                   </View>
-
-                  {activeItem.weight ? (
-                    <View style={styles.specRow}>
-                      <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Weight</Text>
-                      <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>{activeItem.weight} kg</Text>
-                    </View>
-                  ) : null}
-
-                  {activeItem.powerW ? (
-                    <View style={styles.specRow}>
-                      <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Power Draw</Text>
-                      <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>{activeItem.powerW} W</Text>
-                    </View>
-                  ) : null}
-                </View>
-
-                {/* Serial Numbers List */}
-                {activeItem.serialNumbers && activeItem.serialNumbers.length > 0 ? (
-                  <View style={[styles.serialsSection, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <Text style={[styles.serialsTitle, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
-                      Individual Serialized Units ({activeItem.serialNumbers.length}):
-                    </Text>
-                    {activeItem.serialNumbers.map((sn, i) => (
-                      <View key={sn.id || i} style={[styles.serialUnitRow, { borderTopColor: colors.border }]}>
-                        <Text style={[styles.serialUnitText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
-                          #{i + 1}: {sn.serial}
-                        </Text>
-                        <Badge
-                          variant={
-                            sn.status === 'Available'
-                              ? 'success'
-                              : sn.status === 'In Use'
-                              ? 'warning'
-                              : 'destructive'
-                          }
-                        >
-                          {sn.status}
-                        </Badge>
-                      </View>
-                    ))}
-                  </View>
-                ) : null}
-
-                <View style={styles.modalActionRow}>
-                  <Button
-                    variant="destructive"
-                    size="default"
-                    icon={<Wrench size={15} color="#FFFFFF" />}
-                    style={{ flex: 1 }}
-                    onPress={() => {
-                      const item = activeItem;
-                      setActiveItem(null);
-                      router.push({
-                        pathname: '/repair/new',
-                        params: {
-                          equipmentId: item.id || '',
-                          name: item.name,
-                          serialNumber: item.serialNumber || '',
-                          barcode: item.barcode || '',
-                          category: item.category || '',
-                          location: item.knownLocation || '',
-                        },
-                      });
-                    }}
-                    testID="inventory-report-fault-btn"
-                  >
-                    Report Fault
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    size="default"
-                    style={{ flex: 1 }}
-                    onPress={() => setActiveItem(null)}
-                    testID="inventory-close-inspection-btn"
-                  >
-                    Close
-                  </Button>
-                </View>
-              </ScrollView>
+                ))}
+              </View>
             ) : null}
+
+            <View style={styles.modalActionRow}>
+              <Button
+                variant="destructive"
+                size="default"
+                icon={<Wrench size={15} color="#FFFFFF" />}
+                style={{ flex: 1 }}
+                onPress={() => {
+                  const item = activeItem;
+                  setActiveItem(null);
+                  router.push({
+                    pathname: '/repair/new',
+                    params: {
+                      equipmentId: item.id || '',
+                      name: item.name,
+                      serialNumber: item.serialNumber || '',
+                      barcode: item.barcode || '',
+                      category: item.category || '',
+                      location: item.knownLocation || '',
+                    },
+                  });
+                }}
+                testID="inventory-report-fault-btn"
+              >
+                Report Fault
+              </Button>
+
+              <Button
+                variant="outline"
+                size="default"
+                style={{ flex: 1 }}
+                onPress={() => setActiveItem(null)}
+                testID="inventory-close-inspection-btn"
+              >
+                Close
+              </Button>
+            </View>
           </View>
-        </View>
-      </Modal>
+        ) : null}
+      </ModalSheet>
     </View>
   );
 }
@@ -367,6 +340,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
   searchContainer: {
@@ -378,12 +352,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   availPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    minHeight: 24,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 9999,
     borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  availPillText: {},
+  availPillText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
+  },
   listContent: {
     paddingBottom: 32,
   },
@@ -396,9 +377,15 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   emptyTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   emptySubtitle: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     textAlign: 'center',
   },
   modalOverlay: {
@@ -420,15 +407,24 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   modalBody: {},
   detailItemManufacturer: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
+    lineHeight: 16,
   },
   detailItemName: {
+    fontFamily: 'Calibri',
+    fontSize: 20,
     fontWeight: '700',
+    lineHeight: 26,
     marginBottom: 8,
   },
   detailChipsRow: {
@@ -448,10 +444,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   specLabel: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '500',
+    lineHeight: 16,
   },
   specValue: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
     fontWeight: '600',
+    lineHeight: 20,
   },
   serialsSection: {
     borderRadius: 8,
@@ -460,9 +462,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   serialsTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
     fontWeight: '700',
     marginBottom: 8,
     letterSpacing: 0.3,
+    lineHeight: 20,
   },
   serialUnitRow: {
     flexDirection: 'row',
@@ -472,7 +477,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   serialUnitText: {
-    fontFamily: 'monospace',
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
   },
   modalActionRow: {
     flexDirection: 'row',

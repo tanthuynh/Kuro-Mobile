@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   title: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
   countBadge: {
@@ -195,6 +196,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   countText: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   emptyContainer: {
@@ -207,6 +209,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   emptyText: {
+    fontFamily: 'Calibri',
     textAlign: 'center',
   },
   thumbnailsScroll: {
@@ -272,6 +275,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   lightboxTitle: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   lightboxCloseBtn: {

@@ -115,15 +115,11 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
       }
     });
 
-    it('ADV-SM-03: Proves Decommissioned cannot transition directly to Completed or Operational', () => {
+    it('ADV-SM-03: Proves illegal or unknown statuses cannot transition', () => {
       expect(isValidStatusTransition('Decommissioned', 'Completed')).toBe(false);
-      expect(isValidStatusTransition('Decommissioned', 'Operational')).toBe(false);
-      expect(isValidStatusTransition('Decommissioned', 'Awaiting Parts')).toBe(false);
-      expect(isValidStatusTransition('Decommissioned', 'Returned')).toBe(false);
-      // Allowed: Under Repair, Archived, self
-      expect(isValidStatusTransition('Decommissioned', 'Under Repair')).toBe(true);
-      expect(isValidStatusTransition('Decommissioned', 'Archived')).toBe(true);
-      expect(isValidStatusTransition('Decommissioned', 'Decommissioned')).toBe(true);
+      expect(isValidStatusTransition('Decommissioned', 'Under Repair')).toBe(false);
+      expect(isValidStatusTransition('Unknown', 'Reported')).toBe(false);
+      expect(isValidStatusTransition('Reported', 'Unknown')).toBe(false);
     });
 
     it('ADV-SM-04: Proves updateRepairTicketStatus rejects illegal transitions and prevents database write', async () => {
@@ -136,7 +132,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
         data: () => ({
           id: ticketId,
           tenantId,
-          status: 'Decommissioned',
+          status: 'Under Repair',
           condition: 'Out of Service',
         }),
       });
@@ -144,7 +140,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
       const user = { id: 'tech-1', name: 'Tester' };
       const res = await updateRepairTicketStatus(
         ticketId,
-        'Operational', // Illegal transition from Decommissioned
+        'InvalidStatus' as any,
         user,
         tenantId
       );
@@ -156,11 +152,11 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
     });
 
     it('ADV-SM-05: Tests getNextRepairStatus robustness with unknown/null/corrupt status inputs', () => {
-      expect(getNextRepairStatus(null)).toBe('Under Repair');
-      expect(getNextRepairStatus(undefined)).toBe('Under Repair');
-      expect(getNextRepairStatus('')).toBe('Under Repair');
-      expect(getNextRepairStatus('INVALID_STATUS')).toBe('Under Repair');
-      expect(getNextRepairStatus('Archived')).toBe('Archived'); // terminal idempotent
+      expect(getNextRepairStatus(null)).toBe('Reported');
+      expect(getNextRepairStatus(undefined)).toBe('Reported');
+      expect(getNextRepairStatus('')).toBe('Reported');
+      expect(getNextRepairStatus('INVALID_STATUS')).toBe('Reported');
+      expect(getNextRepairStatus('Completed')).toBe('Completed');
       expect(getNextRepairStatus('Under Repair')).toBe('Completed');
     });
 
@@ -175,11 +171,9 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
         expect(quick.length).toBeGreaterThan(0);
 
         // Mutating return value must not affect subsequent calls
-        available.push('Decommissioned');
+        available.push('Pending');
         const availableAgain = getAvailableStatusTransitions(status);
-        expect(availableAgain.filter((s) => s === 'Decommissioned').length).toBeLessThanOrEqual(
-          STATUS_TRANSITIONS_GRAPH[status]?.includes('Decommissioned') ? 1 : 0
-        );
+        expect(availableAgain.length).toBe(STATUS_TRANSITIONS_GRAPH[status]?.length);
       }
     });
   });
@@ -229,7 +223,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
           assetNumber: 'AST-202',
         },
         priority: 'High',
-        status: 'Awaiting Parts',
+        status: 'Pending',
         condition: 'Out of Service',
         billingStatus: 'Quoted',
         assigneeId: 'tech-beta',
@@ -255,7 +249,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
           assetNumber: 'AST-303',
         },
         priority: 'Low',
-        status: 'Operational',
+        status: 'Completed',
         condition: 'Available to Use',
         billingStatus: 'Invoiced',
         assigneeId: 'tech-alpha',
@@ -278,7 +272,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
           category: 'Moving Heads',
         },
         priority: 'Medium',
-        status: 'Archived',
+        status: 'Completed',
         condition: 'Out of Service',
         billingStatus: 'None',
         assigneeId: null,
@@ -291,7 +285,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
 
     it('ADV-FLT-01: Multi-status array filtering matches correctly and excludes unselected statuses', () => {
       const filtered = filterRepairTickets(sampleTickets, {
-        status: ['Under Repair', 'Awaiting Parts'],
+        status: ['Under Repair', 'Pending'],
       });
 
       expect(filtered.map((t) => t.id)).toEqual(['t-1', 't-2']);

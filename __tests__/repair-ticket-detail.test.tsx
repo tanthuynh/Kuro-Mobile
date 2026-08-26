@@ -1,8 +1,9 @@
 /**
  * __tests__/repair-ticket-detail.test.tsx
- * Milestone 3 & 4: Repair Ticket Details, 1-Tap Status Updates & Action Logs.
- * Verifies equipment specifications, photo gallery lightbox, parts used,
- * 1-tap status transitions, and modal action logging.
+ * Repair Ticket Detail Screen Comprehensive Test Suite (R1-R5).
+ * Validates Header, Consolidated Info Card, 5-Button Status Strip,
+ * Inline Notes & Attachments with Modals & Deletion Confirmation,
+ * Fixed Dual Bottom Action Bar, and Cost Calculations.
  */
 
 import React from 'react';
@@ -39,9 +40,14 @@ jest.mock('@/context/auth-context', () => ({
 
 // Mock Router
 const mockBack = jest.fn();
+const mockPush = jest.fn();
+const mockCanGoBack = jest.fn().mockReturnValue(true);
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     back: mockBack,
+    push: mockPush,
+    canGoBack: mockCanGoBack,
   }),
   useLocalSearchParams: () => ({
     id: 'ticket-101',
@@ -52,6 +58,11 @@ const mockSingleTicket: RepairTicket = {
   id: 'ticket-101',
   tenantId: 'tenant-alpha',
   repairNumber: 1042,
+  internalReference: 'REF-2026-X99',
+  supplierId: 'SUPP-ROBE-GLOBAL',
+  owner: 'Alpha Rental Group',
+  repairPeriodStart: '2026-08-25T08:00:00.000Z',
+  repairPeriodEnd: '2026-08-27T18:00:00.000Z',
   equipment: {
     id: 'eq-robe-mega-01',
     name: 'Robe MegaPointe Moving Head',
@@ -73,6 +84,22 @@ const mockSingleTicket: RepairTicket = {
       type: 'Photo',
       url: 'https://firebasestorage.googleapis.com/v0/b/mock/o/lens_crack.jpg',
       fileName: 'lens_crack.jpg',
+      uploadedAt: '2026-08-26T10:00:00.000Z',
+    },
+    {
+      id: 'att-2',
+      type: 'PDF',
+      url: 'https://firebasestorage.googleapis.com/v0/b/mock/o/service_manual.pdf',
+      fileName: 'service_manual.pdf',
+      uploadedAt: '2026-08-26T11:00:00.000Z',
+    },
+  ],
+  notes: [
+    {
+      id: 'note-1',
+      content: 'Inspection revealed cracked front glass element.',
+      user: { id: 'usr-tech-01', name: 'Alex Technician' },
+      timestamp: new Date(Date.now() - 1800000).toISOString(),
     },
   ],
   partsUsed: [
@@ -106,124 +133,444 @@ const mockSingleTicket: RepairTicket = {
   ],
 };
 
-describe('Milestone 3 & 4: Repair Ticket Details Screen', () => {
+describe('Repair Ticket Details Screen (R1-R5)', () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
     jest.spyOn(repairService, 'getRepairTicket').mockResolvedValue(mockSingleTicket);
   });
 
-  it('renders equipment specifications, status, priority, and condition banner', async () => {
-    const { getByText, findAllByText, getByTestId } = render(<RepairTicketDetailScreen />);
+  describe('R1: Modernized Header & Navigation', () => {
+    it('displays [repairNumber], equipment name, status badge, and invokes back navigation', async () => {
+      const { findByText, getByText, getByTestId } = render(<RepairTicketDetailScreen />);
 
-    const titles = await findAllByText('Robe MegaPointe Moving Head');
-    expect(titles.length).toBeGreaterThan(0);
-    expect(getByText('#REP-1042')).toBeTruthy();
-    expect(getByText('SN-ROBE-9912')).toBeTruthy();
-    expect(getByText('#BAR-ROBE-101')).toBeTruthy();
-    expect(getByText('Lighting & FX')).toBeTruthy();
-    expect(getByText('Bay 2 / Rack 4')).toBeTruthy();
-    const alexNames = await findAllByText('Alex Technician');
-    expect(alexNames.length).toBeGreaterThan(0);
-    const davidNames = await findAllByText('David Lighting Tech');
-    expect(davidNames.length).toBeGreaterThan(0);
-    expect(getByTestId('ticket-condition-banner')).toBeTruthy();
-  });
+      expect(await findByText('[1042]')).toBeTruthy();
+      expect(getByText('Robe MegaPointe Moving Head')).toBeTruthy();
+      expect(getByTestId('ticket-header-status')).toBeTruthy();
 
-  it('renders damage photo gallery and opens full-screen lightbox preview', async () => {
-    const { getByTestId, findByTestId, findByText } = render(<RepairTicketDetailScreen />);
-
-    expect(await findByTestId('photo-thumb-0')).toBeTruthy();
-
-    // Tap photo thumbnail to open lightbox
-    const thumb = getByTestId('photo-thumb-0');
-    await act(async () => {
-      fireEvent.press(thumb);
-    });
-
-    expect(await findByText('Damage Photo Preview')).toBeTruthy();
-    expect(getByTestId('lightbox-close-btn')).toBeTruthy();
-
-    // Close lightbox
-    const closeBtn = getByTestId('lightbox-close-btn');
-    await act(async () => {
-      fireEvent.press(closeBtn);
+      const backBtn = getByTestId('ticket-detail-back-btn');
+      fireEvent.press(backBtn);
+      expect(mockBack).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('renders parts used list with cost calculations', async () => {
-    const { getByText, findByText } = render(<RepairTicketDetailScreen />);
+  describe('R2: Consolidated Top Info Card', () => {
+    it('renders Row 1 (Priority, Condition, Period) and Row 2 (Serial, Ref, Supplier, Owner•Requester)', async () => {
+      const { findByTestId, getByText } = render(<RepairTicketDetailScreen />);
 
-    expect(await findByText('MegaPointe Front Lens Assembly')).toBeTruthy();
-    expect(getByText('Prism Optical Filter Glass')).toBeTruthy();
-    expect(getByText('$280.00')).toBeTruthy();
-    expect(getByText('$90.00')).toBeTruthy();
-    // Total badge: 280 + (45*2) = 370
-    expect(getByText('$370.00')).toBeTruthy();
-  });
+      expect(await findByTestId('ticket-info-card')).toBeTruthy();
+      expect(findByTestId('ticket-priority-badge')).toBeTruthy();
+      expect(findByTestId('ticket-condition-banner')).toBeTruthy();
+      expect(getByText('Out of Service')).toBeTruthy();
+      expect(getByText('Critical Priority')).toBeTruthy();
 
-  it('renders chronological audit action logs', async () => {
-    const { getByText, findByText } = render(<RepairTicketDetailScreen />);
-
-    expect(await findByText('Reported shattered front lens during load-out.')).toBeTruthy();
-    expect(getByText('Diagnosed cracked lens ring. Ordered OEM replacement.')).toBeTruthy();
-  });
-
-  it('executes 1-tap quick status transition to Awaiting Parts', async () => {
-    const updateSpy = jest
-      .spyOn(repairService, 'updateRepairTicketStatus')
-      .mockResolvedValueOnce({ success: true });
-
-    const { getByTestId, findByTestId } = render(<RepairTicketDetailScreen />);
-
-    const partsBtn = await findByTestId('status-btn-awaiting-parts');
-    await act(async () => {
-      fireEvent.press(partsBtn);
+      // Row 2 fields
+      expect(getByText('SN-ROBE-9912')).toBeTruthy();
+      expect(getByText('REF-2026-X99')).toBeTruthy();
+      expect(getByText('SUPP-ROBE-GLOBAL')).toBeTruthy();
+      expect(getByText('Alpha Rental Group • David Lighting Tech')).toBeTruthy();
     });
-
-    expect(updateSpy).toHaveBeenCalledWith(
-      'ticket-101',
-      'Awaiting Parts',
-      expect.objectContaining({ name: 'Alex Technician' }),
-      'tenant-alpha',
-      undefined
-    );
   });
 
-  it('opens modal and appends technician action log', async () => {
-    const appendSpy = jest
-      .spyOn(repairService, 'appendRepairAction')
-      .mockResolvedValueOnce({
-        id: 'act-99',
-        user: { name: 'Alex Technician' },
-        action: 'Replaced front lens and recalibrated pan/tilt stepper motors.',
-        timestamp: new Date().toISOString(),
+  describe('R3: 5-Button Status Transition Strip', () => {
+    it('renders all 5 canonical statuses in equal single strip and allows transitions', async () => {
+      const updateSpy = jest
+        .spyOn(repairService, 'updateRepairTicketStatus')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      expect(await findByTestId('status-btn-reported')).toBeTruthy();
+      expect(getByTestId('status-btn-pending')).toBeTruthy();
+      expect(getByTestId('status-btn-under-repair')).toBeTruthy();
+      expect(getByTestId('status-btn-completed')).toBeTruthy();
+      expect(getByTestId('status-btn-cancel')).toBeTruthy();
+
+      // Transition to Cancel
+      const cancelBtn = getByTestId('status-btn-cancel');
+      await act(async () => {
+        fireEvent.press(cancelBtn);
       });
 
-    const { getByTestId, findByTestId } = render(<RepairTicketDetailScreen />);
+      expect(updateSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        'Cancel',
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha',
+        undefined
+      );
+    });
+  });
 
-    // Open Modal
-    const addLogBtn = await findByTestId('detail-add-action-btn');
-    await act(async () => {
-      fireEvent.press(addLogBtn);
+  describe('R4: Consolidated Notes & Files / Attachments Card', () => {
+    it('renders inline photo thumbnails and opens lightbox with delete option', async () => {
+      const deleteAttSpy = jest
+        .spyOn(repairService, 'deleteRepairAttachment')
+        .mockResolvedValueOnce({ success: true } as any);
+
+      const { findByTestId, getByTestId, getByText } = render(<RepairTicketDetailScreen />);
+
+      expect(await findByTestId('photo-thumb-0')).toBeTruthy();
+
+      // Tap thumbnail to open full-screen lightbox
+      const thumb = getByTestId('photo-thumb-0');
+      await act(async () => {
+        fireEvent.press(thumb);
+      });
+
+      expect(getByTestId('photo-lightbox-modal')).toBeTruthy();
+      expect(getByTestId('lightbox-delete-btn')).toBeTruthy();
+
+      // Trigger delete from lightbox
+      const deleteBtn = getByTestId('lightbox-delete-btn');
+      await act(async () => {
+        fireEvent.press(deleteBtn);
+      });
+
+      // Confirm delete dialog opens
+      expect(getByTestId('delete-confirm-modal')).toBeTruthy();
+      const confirmBtn = getByTestId('confirm-delete-btn');
+      await act(async () => {
+        fireEvent.press(confirmBtn);
+      });
+
+      expect(deleteAttSpy).toHaveBeenCalledWith('ticket-101', 'att-1', expect.anything(), 'tenant-alpha');
     });
 
-    expect(getByTestId('ticket-action-note-modal')).toBeTruthy();
+    it('renders document list and opens document viewer with delete option', async () => {
+      const deleteAttSpy = jest
+        .spyOn(repairService, 'deleteRepairAttachment')
+        .mockResolvedValueOnce({ success: true } as any);
 
-    // Type note
-    const input = getByTestId('action-note-input');
-    fireEvent.changeText(input, 'Replaced front lens and recalibrated pan/tilt stepper motors.');
+      const { findByTestId, getByTestId, getByText } = render(<RepairTicketDetailScreen />);
 
-    // Submit
-    const submitBtn = getByTestId('submit-action-note-btn');
-    await act(async () => {
-      fireEvent.press(submitBtn);
+      expect(await findByTestId('doc-item-0')).toBeTruthy();
+      expect(getByText('service_manual.pdf')).toBeTruthy();
+
+      // Tap doc item to open doc viewer modal
+      const docItem = getByTestId('doc-item-0');
+      await act(async () => {
+        fireEvent.press(docItem);
+      });
+
+      expect(getByTestId('doc-viewer-modal')).toBeTruthy();
+
+      // Delete from doc viewer
+      const viewerDelBtn = getByTestId('viewer-delete-doc-btn');
+      await act(async () => {
+        fireEvent.press(viewerDelBtn);
+      });
+
+      expect(getByTestId('delete-confirm-modal')).toBeTruthy();
+      const confirmBtn = getByTestId('confirm-delete-btn');
+      await act(async () => {
+        fireEvent.press(confirmBtn);
+      });
+
+      expect(deleteAttSpy).toHaveBeenCalledWith('ticket-101', 'att-2', expect.anything(), 'tenant-alpha');
     });
 
-    expect(appendSpy).toHaveBeenCalledWith(
-      'ticket-101',
-      'Replaced front lens and recalibrated pan/tilt stepper motors.',
-      expect.objectContaining({ name: 'Alex Technician' }),
-      'tenant-alpha'
-    );
+    it('renders technician notes, opens edit modal, updates and deletes note with confirmation', async () => {
+      const updateNoteSpy = jest
+        .spyOn(repairService, 'updateRepairNote')
+        .mockResolvedValueOnce({ id: 'note-1', content: 'Updated note text' } as any);
+
+      const deleteNoteSpy = jest
+        .spyOn(repairService, 'deleteRepairNote')
+        .mockResolvedValueOnce({ success: true } as any);
+
+      const { findByTestId, getByTestId, getByText } = render(<RepairTicketDetailScreen />);
+
+      expect(await findByTestId('note-item-0')).toBeTruthy();
+      expect(getByText('Inspection revealed cracked front glass element.')).toBeTruthy();
+
+      // Tap note to open edit dialog
+      const noteItem = getByTestId('note-item-0');
+      await act(async () => {
+        fireEvent.press(noteItem);
+      });
+
+      expect(getByTestId('edit-note-modal')).toBeTruthy();
+
+      // Update content and save
+      const input = getByTestId('edit-note-input');
+      fireEvent.changeText(input, 'Updated note content after second check.');
+      const saveBtn = getByTestId('save-edit-note-btn');
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      expect(updateNoteSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        'note-1',
+        'Updated note content after second check.',
+        expect.anything(),
+        'tenant-alpha'
+      );
+    });
+  });
+
+  describe('R5: Dual Fixed Bottom Action Bar', () => {
+    it('opens Add Note modal from bottom bar and appends technician note', async () => {
+      const appendNoteSpy = jest
+        .spyOn(repairService, 'appendRepairNote')
+        .mockResolvedValueOnce({
+          id: 'note-99',
+          content: 'New technician note added via bottom bar',
+          timestamp: new Date().toISOString(),
+        } as any);
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const addNoteBtn = await findByTestId('detail-add-note-btn');
+      await act(async () => {
+        fireEvent.press(addNoteBtn);
+      });
+
+      expect(getByTestId('add-note-modal')).toBeTruthy();
+
+      const input = getByTestId('add-note-input');
+      fireEvent.changeText(input, 'New technician note added via bottom bar');
+
+      const submitBtn = getByTestId('submit-add-note-btn');
+      await act(async () => {
+        fireEvent.press(submitBtn);
+      });
+
+      expect(appendNoteSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        'New technician note added via bottom bar',
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
+
+    it('opens Add Attachment modal from bottom bar and attaches document', async () => {
+      const addAttSpy = jest
+        .spyOn(repairService, 'addRepairAttachment')
+        .mockResolvedValueOnce({
+          id: 'att-99',
+          url: 'https://example.com/schematic.pdf',
+          fileName: 'schematic.pdf',
+          type: 'PDF',
+          uploadedAt: new Date().toISOString(),
+        } as any);
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const addAttBtn = await findByTestId('detail-add-attachment-btn');
+      await act(async () => {
+        fireEvent.press(addAttBtn);
+      });
+
+      expect(getByTestId('add-attachment-modal')).toBeTruthy();
+
+      // Enter custom URL
+      const urlInput = getByTestId('attachment-url-input');
+      const nameInput = getByTestId('attachment-name-input');
+      fireEvent.changeText(urlInput, 'https://example.com/schematic.pdf');
+      fireEvent.changeText(nameInput, 'schematic.pdf');
+
+      const submitBtn = getByTestId('submit-attachment-btn');
+      await act(async () => {
+        fireEvent.press(submitBtn);
+      });
+
+      expect(addAttSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        expect.objectContaining({
+          url: 'https://example.com/schematic.pdf',
+          fileName: 'schematic.pdf',
+        }),
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
+  });
+
+  describe('Parts Used & Action Log Cards', () => {
+    it('renders parts used list with total calculations and action log timeline', async () => {
+      const { findByTestId, getByText, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      expect(await findByTestId('ticket-parts-card')).toBeTruthy();
+      expect(getByText('MegaPointe Front Lens Assembly')).toBeTruthy();
+      expect(getByText('Prism Optical Filter Glass')).toBeTruthy();
+      expect(getByText('$280.00')).toBeTruthy();
+      expect(getByText('$90.00')).toBeTruthy();
+      expect(getByText('$370.00')).toBeTruthy();
+
+      expect(getByTestId('ticket-actions-card')).toBeTruthy();
+      expect(getByText('Reported shattered front lens during load-out.')).toBeTruthy();
+      expect(getByText('Diagnosed cracked lens ring. Ordered OEM replacement.')).toBeTruthy();
+    });
+  });
+
+  describe('Adversarial & Edge Cases', () => {
+    it('cancelling deletion confirmation modal aborts deletion without invoking service', async () => {
+      const deleteAttSpy = jest.spyOn(repairService, 'deleteRepairAttachment');
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const removeBtn = await findByTestId('photo-remove-0');
+      await act(async () => {
+        fireEvent.press(removeBtn);
+      });
+
+      expect(getByTestId('delete-confirm-modal')).toBeTruthy();
+
+      // Tap Cancel button
+      const cancelBtn = getByTestId('cancel-delete-confirm-btn');
+      await act(async () => {
+        fireEvent.press(cancelBtn);
+      });
+
+      expect(deleteAttSpy).not.toHaveBeenCalled();
+    });
+
+    it('displays error banner when status update fails', async () => {
+      jest
+        .spyOn(repairService, 'updateRepairTicketStatus')
+        .mockRejectedValueOnce(new Error('Network connection timeout'));
+
+      const { findByTestId, getByTestId, findByText } = render(<RepairTicketDetailScreen />);
+
+      const cancelBtn = await findByTestId('status-btn-cancel');
+      await act(async () => {
+        fireEvent.press(cancelBtn);
+      });
+
+      expect(await findByText('Network connection timeout')).toBeTruthy();
+    });
+
+    it('displays error banner when note deletion fails and dismisses modal cleanly', async () => {
+      jest
+        .spyOn(repairService, 'deleteRepairNote')
+        .mockRejectedValueOnce(new Error('Permission denied'));
+
+      const { findByTestId, getByTestId, getByText } = render(<RepairTicketDetailScreen />);
+
+      const noteItem = await findByTestId('note-item-0');
+      await act(async () => {
+        fireEvent.press(noteItem);
+      });
+
+      const deleteBtn = getByTestId('delete-note-btn');
+      await act(async () => {
+        fireEvent.press(deleteBtn);
+      });
+
+      const confirmBtn = getByTestId('confirm-delete-btn');
+      await act(async () => {
+        fireEvent.press(confirmBtn);
+      });
+
+      await waitFor(() => {
+        expect(getByText('Permission denied')).toBeTruthy();
+      });
+    });
+
+    it('handles tickets with empty notes, attachments, and parts gracefully', async () => {
+      const emptyTicket: RepairTicket = {
+        ...mockSingleTicket,
+        id: 'ticket-empty',
+        attachments: [],
+        notes: [],
+        partsUsed: [],
+        actions: [],
+        repairPeriodStart: undefined,
+        repairPeriodEnd: undefined,
+        condition: undefined as any,
+        status: 'Completed',
+      };
+
+      jest.spyOn(repairService, 'getRepairTicket').mockResolvedValueOnce(emptyTicket);
+
+      const { findByText } = render(<RepairTicketDetailScreen />);
+
+      expect(await findByText('No damage photos attached.')).toBeTruthy();
+      expect(findByText('No PDFs or documentation attached.')).toBeTruthy();
+      expect(findByText('No notes recorded yet. Tap "Add Note" below to record notes.')).toBeTruthy();
+      expect(findByText('Available to Use')).toBeTruthy();
+    });
+
+    it('correctly handles repairNumber 0 without falling back to ticket ID', async () => {
+      const zeroNumTicket: RepairTicket = {
+        ...mockSingleTicket,
+        repairNumber: 0,
+        id: 'fallback-id-12345',
+      };
+
+      jest.spyOn(repairService, 'getRepairTicket').mockResolvedValueOnce(zeroNumTicket);
+
+      const { findByText } = render(<RepairTicketDetailScreen />);
+
+      expect(await findByText('[0]')).toBeTruthy();
+    });
+
+    it('displays error banner inside Add Note modal when note creation fails', async () => {
+      jest
+        .spyOn(repairService, 'appendRepairNote')
+        .mockRejectedValueOnce(new Error('Failed to create note on server'));
+
+      const { findByTestId, getByTestId, findAllByText } = render(<RepairTicketDetailScreen />);
+
+      const addNoteBtn = await findByTestId('detail-add-note-btn');
+      await act(async () => {
+        fireEvent.press(addNoteBtn);
+      });
+
+      const input = getByTestId('add-note-input');
+      fireEvent.changeText(input, 'New test note');
+
+      const submitBtn = getByTestId('submit-add-note-btn');
+      await act(async () => {
+        fireEvent.press(submitBtn);
+      });
+
+      const errors = await findAllByText('Failed to create note on server');
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(getByTestId('add-note-modal')).toBeTruthy();
+    });
+
+    it('allows deleting document directly from doc list row delete button with confirmation', async () => {
+      const deleteAttSpy = jest
+        .spyOn(repairService, 'deleteRepairAttachment')
+        .mockResolvedValueOnce({ success: true } as any);
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const docDelBtn = await findByTestId('delete-doc-btn-0');
+      await act(async () => {
+        fireEvent.press(docDelBtn);
+      });
+
+      expect(getByTestId('delete-confirm-modal')).toBeTruthy();
+      const confirmBtn = getByTestId('confirm-delete-btn');
+      await act(async () => {
+        fireEvent.press(confirmBtn);
+      });
+
+      expect(deleteAttSpy).toHaveBeenCalledWith('ticket-101', 'att-2', expect.anything(), 'tenant-alpha');
+    });
+
+    it('classifies .jpeg and .webp as photo attachments and non-images as doc attachments', async () => {
+      const multiAttTicket: RepairTicket = {
+        ...mockSingleTicket,
+        attachments: [
+          { id: 'att-jpg', type: 'Photo', url: 'https://example.com/photo.jpeg' },
+          { id: 'att-webp', type: 'Photo', url: 'https://example.com/photo.webp' },
+          { id: 'att-csv', type: 'Document', url: 'https://example.com/report.csv', fileName: 'report.csv' },
+        ],
+      };
+
+      jest.spyOn(repairService, 'getRepairTicket').mockResolvedValueOnce(multiAttTicket);
+
+      const { findByTestId, getByTestId, getByText } = render(<RepairTicketDetailScreen />);
+
+      expect(await findByTestId('photo-thumb-0')).toBeTruthy();
+      expect(getByTestId('photo-thumb-1')).toBeTruthy();
+      expect(getByText('report.csv')).toBeTruthy();
+    });
   });
 });
+

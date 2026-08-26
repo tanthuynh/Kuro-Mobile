@@ -34,6 +34,13 @@ jest.mock('expo-splash-screen', () => ({
   hideAsync: jest.fn().mockResolvedValue(true),
 }));
 
+// Mock expo-font
+jest.mock('expo-font', () => ({
+  useFonts: jest.fn(() => [true, null]),
+  loadAsync: jest.fn().mockResolvedValue(true),
+  isLoaded: jest.fn().mockReturnValue(true),
+}));
+
 // Mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => {
   const inset = { top: 44, right: 0, bottom: 34, left: 0 };
@@ -158,5 +165,143 @@ jest.mock('expo-av', () => ({
     },
   },
 }));
+
+// Mock expo-location
+jest.mock('expo-location', () => ({
+  requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({
+    status: 'granted',
+    granted: true,
+    canAskAgain: true,
+    expires: 'never',
+  }),
+  requestBackgroundPermissionsAsync: jest.fn().mockResolvedValue({
+    status: 'granted',
+    granted: true,
+    canAskAgain: true,
+    expires: 'never',
+  }),
+  getForegroundPermissionsAsync: jest.fn().mockResolvedValue({
+    status: 'granted',
+    granted: true,
+    canAskAgain: true,
+    expires: 'never',
+  }),
+  getBackgroundPermissionsAsync: jest.fn().mockResolvedValue({
+    status: 'granted',
+    granted: true,
+    canAskAgain: true,
+    expires: 'never',
+  }),
+  getCurrentPositionAsync: jest.fn().mockResolvedValue({
+    coords: {
+      latitude: -33.8688,
+      longitude: 151.2093,
+      altitude: 10,
+      accuracy: 5,
+      heading: 0,
+      speed: 0,
+    },
+    timestamp: 1718000000000,
+  }),
+  getLastKnownPositionAsync: jest.fn().mockResolvedValue({
+    coords: {
+      latitude: -33.8688,
+      longitude: 151.2093,
+      altitude: 10,
+      accuracy: 5,
+      heading: 0,
+      speed: 0,
+    },
+    timestamp: 1718000000000,
+  }),
+  startLocationUpdatesAsync: jest.fn().mockResolvedValue(undefined),
+  stopLocationUpdatesAsync: jest.fn().mockResolvedValue(undefined),
+  hasStartedLocationUpdatesAsync: jest.fn().mockResolvedValue(false),
+  watchPositionAsync: jest.fn().mockResolvedValue({
+    remove: jest.fn(),
+  }),
+  Accuracy: {
+    Lowest: 1,
+    Low: 2,
+    Balanced: 3,
+    High: 4,
+    Highest: 5,
+    BestForNavigation: 6,
+  },
+  ActivityType: {
+    Other: 1,
+    AutomotiveNavigation: 2,
+    Fitness: 3,
+    OtherNavigation: 4,
+    Airborne: 5,
+  },
+  GeofencingEventType: {
+    Enter: 1,
+    Exit: 2,
+  },
+  PermissionStatus: {
+    GRANTED: 'granted',
+    DENIED: 'denied',
+    UNDETERMINED: 'undetermined',
+  },
+}), { virtual: true });
+
+// Mock expo-task-manager
+jest.mock('expo-task-manager', () => {
+  const tasks = new Map();
+  return {
+    defineTask: jest.fn((taskName, executor) => {
+      tasks.set(taskName, executor);
+    }),
+    isTaskRegisteredAsync: jest.fn().mockImplementation((taskName) => {
+      return Promise.resolve(tasks.has(taskName));
+    }),
+    unregisterTaskAsync: jest.fn().mockImplementation((taskName) => {
+      tasks.delete(taskName);
+      return Promise.resolve();
+    }),
+    unregisterAllTasksAsync: jest.fn().mockImplementation(() => {
+      tasks.clear();
+      return Promise.resolve();
+    }),
+    isTaskDefined: jest.fn().mockImplementation((taskName) => {
+      return tasks.has(taskName);
+    }),
+    getRegisteredTasksAsync: jest.fn().mockImplementation(() => {
+      return Promise.resolve(
+        Array.from(tasks.keys()).map((taskName) => ({ taskName, taskType: 'location' }))
+      );
+    }),
+    _getTaskExecutor: (taskName) => tasks.get(taskName),
+    _clearTasks: () => tasks.clear(),
+  };
+}, { virtual: true });
+
+
+// Mock expo-linking
+jest.mock('expo-linking', () => {
+  const listeners = new Set();
+  return {
+    openURL: jest.fn().mockResolvedValue(true),
+    canOpenURL: jest.fn().mockResolvedValue(true),
+    getInitialURL: jest.fn().mockResolvedValue(null),
+    addEventListener: jest.fn((type, handler) => {
+      listeners.add(handler);
+      return {
+        remove: jest.fn(() => listeners.delete(handler)),
+      };
+    }),
+    removeEventListener: jest.fn(),
+    createURL: jest.fn((path) => `kuro://${path || ''}`),
+    parse: jest.fn((url) => ({
+      path: url,
+      queryParams: {},
+      scheme: url ? url.split(':')[0] : null,
+    })),
+    sendIntent: jest.fn().mockResolvedValue(undefined),
+    openSettings: jest.fn().mockResolvedValue(undefined),
+  };
+});
+
 
 

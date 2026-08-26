@@ -7,7 +7,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CalendarDays, QrCode, Package, User, Wrench } from 'lucide-react-native';
+import { CalendarDays, QrCode, Package, User, Wrench, Truck } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
 
@@ -37,6 +37,7 @@ export default function TabsLayout() {
           shadowRadius: 4,
         },
         tabBarLabelStyle: {
+          fontFamily: 'Calibri',
           fontSize: typography.fontSize.xs,
           fontWeight: '600',
           marginTop: 2,
@@ -83,6 +84,20 @@ export default function TabsLayout() {
           tabBarLabel: 'Equipment',
           tabBarIcon: ({ color, focused, size }) => (
             <Package
+              size={size || 22}
+              color={color}
+              strokeWidth={focused ? 2.5 : 2}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="logistics"
+        options={{
+          title: 'Logistics',
+          tabBarLabel: 'Logistics',
+          tabBarIcon: ({ color, focused, size }) => (
+            <Truck
               size={size || 22}
               color={color}
               strokeWidth={focused ? 2.5 : 2}

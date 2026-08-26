@@ -112,9 +112,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   progressTitle: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   progressPct: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
   track: {
@@ -137,8 +139,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  metricLabel: {},
+  metricLabel: {
+    fontFamily: 'Calibri',
+  },
   metricValue: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
 });

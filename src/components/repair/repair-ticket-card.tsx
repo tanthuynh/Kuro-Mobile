@@ -13,12 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
-  Wrench,
-  AlertTriangle,
-  Clock,
-  User,
   Image as ImageIcon,
-  ChevronRight,
   ShieldAlert,
   CheckCircle2,
 } from 'lucide-react-native';
@@ -26,9 +21,8 @@ import {
 import { useTheme } from '@/context/theme-context';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
-import { formatTimeAgo } from '@/lib/date-utils';
 import { REPAIR_STATUS_CONFIG } from '@/lib/repair-engine';
-import type { RepairTicket, RepairStatus, RepairPriority } from '@/types/repair';
+import type { RepairTicket, RepairStatus, RepairPriority, EquipmentCondition } from '@/types/repair';
 
 export interface RepairTicketCardProps {
   ticket: RepairTicket;
@@ -74,19 +68,20 @@ export function RepairTicketCard({
     }
   };
 
-  const isOutOfService = ticket.condition === 'Out of Service' ||
-    ticket.status === 'Under Repair' ||
-    ticket.status === 'Awaiting Parts';
+  const condition: EquipmentCondition = ticket.condition === 'Available to Use'
+    ? 'Available to Use'
+    : 'Out of Service';
 
-  const repairNumDisplay = ticket.repairNumber
-    ? `#REP-${ticket.repairNumber}`
-    : ticket.id
-    ? `#${ticket.id.substring(0, 7).toUpperCase()}`
-    : '#REP';
+  const isOutOfService = condition === 'Out of Service';
 
-  const timeAgo = formatTimeAgo(ticket.createdAt || ticket.updatedAt || new Date());
+  const repairNumDisplay =
+    ticket.repairNumber !== undefined && ticket.repairNumber !== null
+      ? `[${ticket.repairNumber}]`
+      : ticket.id
+      ? `[${ticket.id.substring(0, 7).toUpperCase()}]`
+      : '[REP]';
+
   const photoCount = Array.isArray(ticket.attachments) ? ticket.attachments.length : 0;
-  const actionsCount = Array.isArray(ticket.actions) ? ticket.actions.length : 0;
 
   return (
     <Card style={styles.card}>
@@ -101,15 +96,29 @@ export function RepairTicketCard({
         accessibilityLabel={`Repair ticket ${repairNumDisplay} for ${ticket.equipment?.name || 'Equipment'}`}
       >
         <CardContent style={styles.content}>
-          {/* Top Row: Ticket Number & Status / Priority */}
+          {/* Top Row: [Ticket Number] Inventory Name & Status on right */}
           <View style={styles.topRow}>
-            <View style={styles.ticketIdBadge}>
-              <Wrench size={13} color={colors.primary} />
-              <Text style={[styles.ticketIdText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+            <View style={styles.ticketTitleContainer}>
+              <Text style={[styles.ticketIdText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                 {repairNumDisplay}
+              </Text>
+              <Text 
+                style={[styles.equipmentName, { color: colors.foreground, fontSize: typography.fontSize.sm, flexShrink: 1, marginLeft: 6 }]} 
+                numberOfLines={1}
+              >
+                {ticket.equipment?.name || 'Unknown Asset'}
               </Text>
             </View>
 
+            <View style={styles.statusContainer}>
+              <Badge variant={statusConfig.badgeVariant as BadgeVariant}>
+                {ticket.status}
+              </Badge>
+            </View>
+          </View>
+
+          {/* 2nd Row: Priority, Condition, Photos | Owner, Requester */}
+          <View style={styles.secondRow}>
             <View style={styles.badgesGroup}>
               {ticket.priority && ticket.priority !== 'None' ? (
                 <Badge variant={getPriorityVariant(ticket.priority)}>
@@ -117,64 +126,6 @@ export function RepairTicketCard({
                 </Badge>
               ) : null}
 
-              <Badge variant={statusConfig.badgeVariant as BadgeVariant}>
-                {ticket.status}
-              </Badge>
-            </View>
-          </View>
-
-          {/* Equipment Name & Serial */}
-          <View style={styles.equipmentSection}>
-            <Text
-              style={[styles.equipmentName, { color: colors.foreground, fontSize: typography.fontSize.base }]}
-              numberOfLines={1}
-            >
-              {ticket.equipment?.name || 'Unknown Asset'}
-            </Text>
-
-            <View style={styles.equipmentMetaRow}>
-              {ticket.equipment?.category ? (
-                <Text style={[styles.categoryText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                  {ticket.equipment.category}
-                </Text>
-              ) : null}
-
-              {ticket.equipment?.serialNumber ? (
-                <Text style={[styles.serialText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                  • SN: {ticket.equipment.serialNumber}
-                </Text>
-              ) : ticket.equipment?.barcode ? (
-                <Text style={[styles.serialText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                  • #{ticket.equipment.barcode}
-                </Text>
-              ) : null}
-
-              {ticket.equipment?.knownLocation ? (
-                <Text style={[styles.serialText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                  • Loc: {ticket.equipment.knownLocation}
-                </Text>
-              ) : null}
-            </View>
-          </View>
-
-          {/* Fault / Problem Description Preview */}
-          {ticket.repairType || (ticket.notes && ticket.notes.length > 0) ? (
-            <View style={[styles.faultPreviewBox, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-              <Text
-                style={[styles.faultText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}
-                numberOfLines={2}
-              >
-                {ticket.repairType ? `[${ticket.repairType}] ` : ''}
-                {ticket.notes && ticket.notes.length > 0
-                  ? ticket.notes[ticket.notes.length - 1].content
-                  : 'Fault logged'}
-              </Text>
-            </View>
-          ) : null}
-
-          {/* Bottom Row: Condition, Photos, Assignee & Time */}
-          <View style={styles.bottomRow}>
-            <View style={styles.bottomLeft}>
               {/* Operational Condition Pill */}
               <View
                 style={[
@@ -203,14 +154,14 @@ export function RepairTicketCard({
                     },
                   ]}
                 >
-                  {isOutOfService ? 'Out of Service' : 'Available'}
+                  {condition}
                 </Text>
               </View>
 
               {/* Photo indicator */}
               {photoCount > 0 ? (
                 <View style={styles.metaPill}>
-                  <ImageIcon size={12} color={colors.mutedForeground} />
+                  <ImageIcon size={11} color={colors.mutedForeground} />
                   <Text style={[styles.metaPillText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
                     {photoCount}
                   </Text>
@@ -218,25 +169,13 @@ export function RepairTicketCard({
               ) : null}
             </View>
 
-            <View style={styles.bottomRight}>
-              <View style={styles.assigneeRow}>
-                <User size={12} color={colors.mutedForeground} />
-                <Text
-                  style={[styles.assigneeText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}
-                  numberOfLines={1}
-                >
-                  {ticket.assignee?.name || ticket.requestedBy || 'Unassigned'}
-                </Text>
-              </View>
-
-              <View style={styles.timeRow}>
-                <Clock size={11} color={colors.mutedForeground} />
-                <Text style={[styles.timeText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                  {timeAgo}
-                </Text>
-              </View>
-
-              <ChevronRight size={14} color={colors.mutedForeground} />
+            <View style={styles.peopleGroup}>
+              <Text
+                style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}
+                numberOfLines={1}
+              >
+                {ticket.owner ? `${ticket.owner} • ` : ''}{ticket.requestedBy || 'Unknown'}
+              </Text>
             </View>
           </View>
         </CardContent>
@@ -263,101 +202,80 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  ticketIdBadge: {
+  ticketTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    flex: 1,
+    paddingRight: 8,
   },
   ticketIdText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '700',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    lineHeight: 16,
+  },
+  equipmentName: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
+  },
+  statusContainer: {
+    flexShrink: 0,
+  },
+  secondRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   badgesGroup: {
     flexDirection: 'row',
     gap: 6,
     alignItems: 'center',
   },
-  equipmentSection: {
-    marginTop: 2,
-  },
-  equipmentName: {
-    fontWeight: '700',
-  },
-  equipmentMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-    flexWrap: 'wrap',
-    gap: 4,
-  },
-  categoryText: {
-    fontWeight: '500',
-  },
-  serialText: {
-    fontWeight: '400',
-  },
-  faultPreviewBox: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 1,
-    marginTop: 2,
-  },
-  faultText: {
-    fontStyle: 'italic',
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-    paddingTop: 6,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  bottomLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
   conditionPill: {
+    minHeight: 24,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 4,
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   conditionText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
+    lineHeight: 16,
   },
   metaPill: {
+    minHeight: 24,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
   metaPillText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '500',
+    lineHeight: 16,
   },
-  bottomRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  peopleGroup: {
+    flex: 1,
+    alignItems: 'flex-end',
+    paddingLeft: 12,
   },
-  assigneeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    maxWidth: 90,
-  },
-  assigneeText: {
+  personText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '500',
+    lineHeight: 16,
   },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  timeText: {},
 });

@@ -201,13 +201,19 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   manufacturerText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 2,
+    lineHeight: 16,
   },
   nameText: {
-    fontWeight: '600',
+    fontFamily: 'Calibri',
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
   },
   chipsRow: {
     flexDirection: 'row',
@@ -217,7 +223,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   barcodeText: {
-    fontFamily: 'monospace',
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     marginLeft: 4,
   },
   specsRow: {
@@ -230,7 +238,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  specText: {},
+  specText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
+  },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -243,11 +255,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  stockLabel: {},
+  stockLabel: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
+  },
   stockValue: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '700',
+    lineHeight: 16,
   },
   serialsCount: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
+    lineHeight: 16,
   },
 });

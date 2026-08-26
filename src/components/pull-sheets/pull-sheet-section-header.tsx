@@ -87,16 +87,25 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   titleText: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.3,
+    lineHeight: 22,
   },
   countBadge: {
+    minHeight: 24,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: 9999,
     borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   countText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
+    lineHeight: 16,
   },
 });

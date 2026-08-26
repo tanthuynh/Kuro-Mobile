@@ -305,21 +305,28 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   eventNumberBadge: {
-    paddingHorizontal: 6,
+    minHeight: 24,
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 6,
     borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   eventNumberText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '700',
-    fontFamily: 'monospace',
+    lineHeight: 16,
   },
   typePill: {
+    minHeight: 24,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
+    paddingVertical: 2,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   typeDot: {
@@ -329,13 +336,17 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   typeLabel: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
+    lineHeight: 16,
   },
   eventName: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
-    marginBottom: 10,
-    lineHeight: 22,
+    marginBottom: 8,
+    lineHeight: 20,
   },
   metaGrid: {
     flexDirection: 'row',
@@ -354,7 +365,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   metaText: {
+    fontFamily: 'Calibri',
     fontWeight: '400',
+    lineHeight: 16,
   },
   equipmentSummary: {
     paddingTop: 6,
@@ -362,7 +375,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   equipmentCountText: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
+    lineHeight: 16,
   },
   actionsRow: {
     flexDirection: 'row',

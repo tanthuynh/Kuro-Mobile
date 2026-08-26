@@ -1,7 +1,7 @@
 /**
  * __tests__/repair-tickets-feed.test.tsx
  * Milestone 3: Real-Time Repair Tickets Feed & Filter Tests.
- * Verifies live subscription, metrics aggregation, status/priority filtering,
+ * Verifies live subscription, 5 interactive status metric cards filtering ("All", "Reported", "Pending", "Under Repair", "Completed"),
  * search, and navigation routing.
  */
 
@@ -85,7 +85,7 @@ const mockTickets: RepairTicket[] = [
     },
     repairType: 'Electrical / Power',
     priority: 'High',
-    status: 'Awaiting Parts',
+    status: 'Pending',
     condition: 'Out of Service',
     requestedBy: 'Sarah Audio',
     createdAt: new Date(Date.now() - 7200000).toISOString(),
@@ -105,10 +105,30 @@ const mockTickets: RepairTicket[] = [
     },
     repairType: 'Firmware / Software',
     priority: 'Low',
-    status: 'Operational',
+    status: 'Completed',
     condition: 'Available to Use',
     requestedBy: 'Dave Video',
     createdAt: new Date(Date.now() - 86400000).toISOString(),
+    actions: [],
+  },
+  {
+    id: 'ticket-004',
+    tenantId: 'tenant-alpha',
+    repairNumber: 104,
+    equipment: {
+      id: 'eq-4',
+      name: 'Yamaha CL5 Digital Console',
+      category: 'Audio',
+      serialNumber: 'SN-CL5-009',
+      barcode: 'BAR-104',
+      knownLocation: 'FOH Rack',
+    },
+    repairType: 'Fader Issue',
+    priority: 'Medium',
+    status: 'Reported',
+    condition: 'Out of Service',
+    requestedBy: 'Sam Audio',
+    createdAt: new Date(Date.now() - 10000000).toISOString(),
     actions: [],
   },
 ];
@@ -126,52 +146,79 @@ describe('Milestone 3: Repair Tickets Feed Screen', () => {
       });
   });
 
-  it('subscribes to live tenant tickets and renders metric counters', async () => {
-    const { getByText, findByText } = render(<RepairsScreen />);
+  it('subscribes to live tenant tickets and renders 5 interactive status metric cards', async () => {
+    const { getByText, findByText, getByTestId } = render(<RepairsScreen />);
 
     expect(subscribeMock).toHaveBeenCalledWith('tenant-alpha', expect.any(Function), expect.any(Function));
 
-    // Metric numbers
+    // Verify all 5 metric cards exist
+    expect(getByTestId('metric-card-all')).toBeTruthy();
+    expect(getByTestId('metric-card-reported')).toBeTruthy();
+    expect(getByTestId('metric-card-pending')).toBeTruthy();
+    expect(getByTestId('metric-card-under-repair')).toBeTruthy();
+    expect(getByTestId('metric-card-completed')).toBeTruthy();
+
+    // Verify ticket names are displayed
     expect(await findByText('Robe MegaPointe Moving Head')).toBeTruthy();
     expect(getByText('Shure Axient Dual Receiver')).toBeTruthy();
     expect(getByText('Barco E2 Gen2 Video Processor')).toBeTruthy();
+    expect(getByText('Yamaha CL5 Digital Console')).toBeTruthy();
   });
 
-  it('filters tickets by status tab', async () => {
+  it('filters tickets by tapping interactive status metric cards', async () => {
     const { getByTestId, queryByText, findByText } = render(<RepairsScreen />);
 
-    // Click 'Under Repair' tab
-    const underRepairTab = getByTestId('status-filter-tab-under-repair');
+    // Click 'Under Repair' metric card
+    const underRepairCard = getByTestId('metric-card-under-repair');
     await act(async () => {
-      fireEvent.press(underRepairTab);
+      fireEvent.press(underRepairCard);
     });
 
     expect(await findByText('Robe MegaPointe Moving Head')).toBeTruthy();
     expect(queryByText('Shure Axient Dual Receiver')).toBeNull();
     expect(queryByText('Barco E2 Gen2 Video Processor')).toBeNull();
+    expect(queryByText('Yamaha CL5 Digital Console')).toBeNull();
 
-    // Click 'Operational' tab
-    const opTab = getByTestId('status-filter-tab-operational');
+    // Click 'Completed' metric card
+    const completedCard = getByTestId('metric-card-completed');
     await act(async () => {
-      fireEvent.press(opTab);
+      fireEvent.press(completedCard);
     });
 
     expect(await findByText('Barco E2 Gen2 Video Processor')).toBeTruthy();
     expect(queryByText('Robe MegaPointe Moving Head')).toBeNull();
-  });
+    expect(queryByText('Shure Axient Dual Receiver')).toBeNull();
+    expect(queryByText('Yamaha CL5 Digital Console')).toBeNull();
 
-  it('filters tickets by priority chip', async () => {
-    const { getByTestId, queryByText, findByText } = render(<RepairsScreen />);
-
-    // Click 'Critical' priority chip
-    const criticalChip = getByTestId('priority-filter-chip-critical');
+    // Click 'Pending' metric card
+    const pendingCard = getByTestId('metric-card-pending');
     await act(async () => {
-      fireEvent.press(criticalChip);
+      fireEvent.press(pendingCard);
+    });
+
+    expect(await findByText('Shure Axient Dual Receiver')).toBeTruthy();
+    expect(queryByText('Robe MegaPointe Moving Head')).toBeNull();
+    expect(queryByText('Barco E2 Gen2 Video Processor')).toBeNull();
+
+    // Click 'Reported' metric card
+    const reportedCard = getByTestId('metric-card-reported');
+    await act(async () => {
+      fireEvent.press(reportedCard);
+    });
+
+    expect(await findByText('Yamaha CL5 Digital Console')).toBeTruthy();
+    expect(queryByText('Robe MegaPointe Moving Head')).toBeNull();
+
+    // Click 'All' metric card
+    const allCard = getByTestId('metric-card-all');
+    await act(async () => {
+      fireEvent.press(allCard);
     });
 
     expect(await findByText('Robe MegaPointe Moving Head')).toBeTruthy();
-    expect(queryByText('Shure Axient Dual Receiver')).toBeNull();
-    expect(queryByText('Barco E2 Gen2 Video Processor')).toBeNull();
+    expect(queryByText('Shure Axient Dual Receiver')).toBeTruthy();
+    expect(queryByText('Barco E2 Gen2 Video Processor')).toBeTruthy();
+    expect(queryByText('Yamaha CL5 Digital Console')).toBeTruthy();
   });
 
   it('filters tickets via search input keyword', async () => {
@@ -208,4 +255,40 @@ describe('Milestone 3: Repair Tickets Feed Screen', () => {
 
     expect(mockPush).toHaveBeenCalledWith('/repair/new');
   });
+
+  it('renders metric card counts correctly and handles empty search with filter reset', async () => {
+    const { getByTestId, findByText, queryByText } = render(<RepairsScreen />);
+
+    // Verify metric cards contain the correct numbers
+    const allCard = getByTestId('metric-card-all');
+    const reportedCard = getByTestId('metric-card-reported');
+    const pendingCard = getByTestId('metric-card-pending');
+    const underRepairCard = getByTestId('metric-card-under-repair');
+    const completedCard = getByTestId('metric-card-completed');
+
+    expect(allCard.props.accessibilityLabel).toContain('4 tickets');
+    expect(reportedCard.props.accessibilityLabel).toContain('1 tickets');
+    expect(pendingCard.props.accessibilityLabel).toContain('1 tickets');
+    expect(underRepairCard.props.accessibilityLabel).toContain('1 tickets');
+    expect(completedCard.props.accessibilityLabel).toContain('1 tickets');
+
+    // Search for non-existent ticket to trigger empty state
+    const searchInput = getByTestId('repair-feed-search-input');
+    await act(async () => {
+      fireEvent.changeText(searchInput, 'NonExistentDevice123');
+    });
+
+    expect(await findByText('No Repair Tickets Found')).toBeTruthy();
+    const resetBtn = getByTestId('reset-filters-btn');
+    expect(resetBtn).toBeTruthy();
+
+    // Click Reset Filters
+    await act(async () => {
+      fireEvent.press(resetBtn);
+    });
+
+    expect(await findByText('Robe MegaPointe Moving Head')).toBeTruthy();
+    expect(queryByText('No Repair Tickets Found')).toBeNull();
+  });
 });
+

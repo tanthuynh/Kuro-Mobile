@@ -92,5 +92,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  chipText: {},
+  chipText: {
+    fontFamily: 'Calibri',
+  },
 });

@@ -119,16 +119,23 @@ const styles = StyleSheet.create({
     minHeight: 38,
   },
   tabLabel: {
+    fontFamily: 'Calibri',
     marginRight: 6,
   },
   countBadge: {
-    paddingHorizontal: 6,
+    minHeight: 24,
+    minWidth: 24,
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 10,
+    borderRadius: 9999,
     borderWidth: 1,
-    minWidth: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  countText: {},
+  countText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    fontWeight: '700',
+    lineHeight: 16,
+  },
 });

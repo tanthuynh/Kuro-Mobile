@@ -140,9 +140,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
   subtitle: {
+    fontFamily: 'Calibri',
     fontWeight: '400',
   },
   tenantBadge: {

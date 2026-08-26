@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kuro Mobile",
     "slug": "kuro-mobile",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "kuromobile",
@@ -15,14 +15,29 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amiastudios.kuromobile"
+      "bundleIdentifier": "com.amiastudios.kuromobile",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ],
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Kuro Mobile tracks your location during active logistics jobs to provide dispatchers with real-time ETA and status updates.",
+        "NSLocationWhenInUseUsageDescription": "Kuro Mobile uses your location to show nearby stops and provide accurate route navigation."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#141414"
       },
-      "package": "com.amiastudios.kuromobile"
+      "package": "com.amiastudios.kuromobile",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -31,7 +46,25 @@
     "plugins": [
       "expo-router",
       "expo-asset",
-      "expo-font"
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Calibri.ttf",
+            "./assets/fonts/Calibri-Regular.ttf",
+            "./assets/fonts/Calibri-Bold.ttf",
+            "./assets/fonts/Calibri-Italic.ttf",
+            "./assets/fonts/Calibri-BoldItalic.ttf",
+            "./assets/fonts/Calibri-Light.ttf"
+          ]
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Kuro Mobile tracks your location during active logistics jobs to provide dispatchers with real-time ETA and status updates."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

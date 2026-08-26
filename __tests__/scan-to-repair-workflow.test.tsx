@@ -168,7 +168,7 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
           category: 'Cameras & Optics',
         }),
         priority: 'High',
-        status: 'Under Repair',
+        status: 'Reported',
         condition: 'Out of Service',
         initialNote: 'HDMI output port is loose and dropping signal intermittently.',
         requestedBy: 'Alex Technician',

@@ -307,12 +307,20 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   loadingText: {
+    fontFamily: 'Calibri',
     fontWeight: '500',
   },
   errorTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
-  errorSubtitle: {},
+  errorSubtitle: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
+  },
   ctaCard: {
     marginBottom: 16,
     borderWidth: 1,
@@ -322,9 +330,15 @@ const styles = StyleSheet.create({
   },
   ctaTextCol: {},
   ctaTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
     fontWeight: '700',
+    lineHeight: 20,
   },
   ctaSubtitle: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     marginTop: 2,
   },
   ctaButtonsRow: {
@@ -345,16 +359,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   cardContentNoTop: {
     paddingTop: 4,
   },
   infoMainText: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
     fontWeight: '600',
+    lineHeight: 20,
     marginBottom: 4,
   },
-  addressText: {},
+  addressText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
+  },
   actionRow: {
     flexDirection: 'row',
     gap: 8,
@@ -364,6 +388,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notesText: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
     lineHeight: 20,
   },
 });

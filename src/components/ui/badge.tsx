@@ -140,9 +140,10 @@ export const Badge: React.FC<BadgeProps> = ({
       style={[
         styles.badge,
         {
+          minHeight: layout.badgeHeight || 24,
           borderRadius: layout.borderRadius.full,
-          paddingHorizontal: spacing.sm + 2,
-          paddingVertical: spacing.xs - 1,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: 2,
         },
         variantStyle.container,
         style,
@@ -155,7 +156,7 @@ export const Badge: React.FC<BadgeProps> = ({
             styles.badgeText,
             {
               fontSize: typography.fontSize.xs,
-              lineHeight: typography.lineHeight.xs,
+              lineHeight: 16,
             },
             variantStyle.text,
             textStyle,
@@ -181,6 +182,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   badgeText: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
 });

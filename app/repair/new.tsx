@@ -93,7 +93,7 @@ export default function NewRepairScreen() {
   const [repairType, setRepairType] = useState(REPAIR_TYPES[0]);
   const [priority, setPriority] = useState<RepairPriority>('High');
   const [condition, setCondition] = useState<EquipmentCondition>('Out of Service');
-  const [initialStatus, setInitialStatus] = useState<RepairStatus>('Under Repair');
+  const [initialStatus, setInitialStatus] = useState<RepairStatus>('Reported');
 
   // Photo attachments state
   const [photos, setPhotos] = useState<Array<{ id: string; url: string; uri?: string; fileName?: string }>>([]);
@@ -567,7 +567,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   cardContent: {
     padding: 14,
@@ -584,7 +587,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
+    lineHeight: 16,
   },
   chipsScroll: {
     flexDirection: 'row',
@@ -592,13 +598,19 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    minHeight: 24,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 9999,
     borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chipText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '600',
+    lineHeight: 16,
   },
   priorityRow: {
     flexDirection: 'row',
@@ -606,14 +618,19 @@ const styles = StyleSheet.create({
   },
   priorityPill: {
     flex: 1,
-    paddingVertical: 8,
+    minHeight: 24,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   priorityText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '700',
+    lineHeight: 16,
   },
   conditionRow: {
     flexDirection: 'row',
@@ -629,12 +646,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   conditionTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     fontWeight: '700',
+    lineHeight: 16,
   },
   conditionSub: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     marginTop: 1,
   },
   textArea: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
     minHeight: 90,
     textAlignVertical: 'top',
   },
@@ -647,8 +672,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   errorText: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
     flex: 1,
     fontWeight: '600',
+    lineHeight: 16,
   },
   submitButton: {
     marginTop: 4,

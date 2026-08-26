@@ -24,6 +24,7 @@ import {
 
 import { useTheme } from '@/context/theme-context';
 import { Button } from '@/components/ui/button';
+import { ModalSheet } from '@/components/ui/modal-sheet';
 import {
   PULLSHEET_LIFECYCLE_ORDER,
   STATUS_DISPLAY_CONFIG,
@@ -49,7 +50,7 @@ export const PullSheetStatusSheet: React.FC<PullSheetStatusSheetProps> = ({
   onRollback,
   testID,
 }) => {
-  const { colors, typography, spacing, layout } = useTheme();
+  const { colors, typography, layout } = useTheme();
 
   if (!item) return null;
 
@@ -71,190 +72,152 @@ export const PullSheetStatusSheet: React.FC<PullSheetStatusSheetProps> = ({
   };
 
   return (
-    <Modal
+    <ModalSheet
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      onClose={onClose}
+      title="Item Status & Progression"
+      icon={<Tag size={18} color={colors.primary} />}
       testID={testID || 'pullsheet-status-sheet-modal'}
     >
-      <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-
-        <View
+      {/* Item Details */}
+      <View
+        style={[
+          styles.itemSummaryBox,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <Text
           style={[
-            styles.sheetContent,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-            },
+            styles.itemDescription,
+            { color: colors.cardForeground, fontSize: typography.fontSize.base },
           ]}
         >
-          {/* Header */}
-          <View style={styles.headerRow}>
-            <View style={styles.headerTitleGroup}>
-              <Tag size={18} color={colors.primary} style={{ marginRight: 8 }} />
-              <Text
-                style={[
-                  styles.title,
-                  { color: colors.foreground, fontSize: typography.fontSize.md },
-                ]}
-              >
-                Item Status & Progression
-              </Text>
-            </View>
-            <Pressable
-              onPress={onClose}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              testID="close-status-sheet-btn"
-            >
-              <X size={20} color={colors.mutedForeground} />
-            </Pressable>
-          </View>
+          {item.description}
+        </Text>
 
-          <ScrollView style={styles.scrollBody} contentContainerStyle={{ paddingBottom: 24 }}>
-            {/* Item Details */}
-            <View
-              style={[
-                styles.itemSummaryBox,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.itemDescription,
-                  { color: colors.cardForeground, fontSize: typography.fontSize.base },
-                ]}
-              >
-                {item.description}
-              </Text>
+        <View style={styles.metaRow}>
+          <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+            Required Quantity: <Text style={{ color: colors.foreground, fontWeight: '700' }}>{item.quantity}</Text>
+          </Text>
+          {item.scannedQuantity !== undefined ? (
+            <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+              Scanned: <Text style={{ color: colors.status.online, fontWeight: '700' }}>{item.scannedQuantity}</Text>
+            </Text>
+          ) : null}
+        </View>
 
-              <View style={styles.metaRow}>
-                <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                  Required Quantity: <Text style={{ color: colors.foreground, fontWeight: '700' }}>{item.quantity}</Text>
-                </Text>
-                {item.scannedQuantity !== undefined ? (
-                  <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                    Scanned: <Text style={{ color: colors.status.online, fontWeight: '700' }}>{item.scannedQuantity}</Text>
-                  </Text>
-                ) : null}
-              </View>
-
-              {item.internalNote ? (
-                <View style={styles.noteBox}>
-                  <Info size={14} color={colors.status.degraded} style={{ marginRight: 6 }} />
-                  <Text
-                    style={[
-                      styles.noteText,
-                      { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
-                    ]}
-                  >
-                    {item.internalNote}
-                  </Text>
-                </View>
-              ) : null}
-
-              {item.scannedBarcodes && item.scannedBarcodes.length > 0 ? (
-                <View style={styles.barcodesContainer}>
-                  <View style={styles.barcodeHeaderRow}>
-                    <Barcode size={14} color={colors.primary} style={{ marginRight: 6 }} />
-                    <Text style={[styles.barcodeTitle, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
-                      Scanned Asset Serials ({item.scannedBarcodes.length}):
-                    </Text>
-                  </View>
-                  <View style={styles.barcodeChipsRow}>
-                    {item.scannedBarcodes.map((barcode, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          styles.barcodeChip,
-                          {
-                            backgroundColor: colors.card,
-                            borderColor: colors.border,
-                          },
-                        ]}
-                      >
-                        <Text style={[styles.barcodeChipText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
-                          {barcode}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              ) : null}
-            </View>
-
-            {/* Quick Rollback Action */}
-            {currentStatus !== 'pending' && currentStatus !== 'none' ? (
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<RotateCcw size={14} color={colors.foreground} />}
-                onPress={handleRollback}
-                style={styles.rollbackButton}
-                testID="rollback-status-btn"
-              >
-                Revert to {STATUS_DISPLAY_CONFIG[prevStatus]?.label || 'Previous'}
-              </Button>
-            ) : null}
-
-            {/* Status Option Buttons */}
+        {item.internalNote ? (
+          <View style={styles.noteBox}>
+            <Info size={14} color={colors.status.degraded} style={{ marginRight: 6 }} />
             <Text
               style={[
-                styles.optionsHeader,
+                styles.noteText,
                 { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
               ]}
             >
-              SELECT OPERATIONAL STATUS
+              {item.internalNote}
             </Text>
+          </View>
+        ) : null}
 
-            {PULLSHEET_LIFECYCLE_ORDER.map((statusKey) => {
-              const config = STATUS_DISPLAY_CONFIG[statusKey];
-              const isSelected = currentStatus === statusKey;
-
-              return (
-                <Pressable
-                  key={statusKey}
-                  onPress={() => handleStatusSelect(statusKey)}
+        {item.scannedBarcodes && item.scannedBarcodes.length > 0 ? (
+          <View style={styles.barcodesContainer}>
+            <View style={styles.barcodeHeaderRow}>
+              <Barcode size={14} color={colors.primary} style={{ marginRight: 6 }} />
+              <Text style={[styles.barcodeTitle, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+                Scanned Asset Serials ({item.scannedBarcodes.length}):
+              </Text>
+            </View>
+            <View style={styles.barcodeChipsRow}>
+              {item.scannedBarcodes.map((barcode, i) => (
+                <View
+                  key={i}
                   style={[
-                    styles.statusOptionRow,
+                    styles.barcodeChip,
                     {
-                      backgroundColor: isSelected ? config.bgColor : colors.surface,
-                      borderColor: isSelected ? config.borderColor : colors.border,
-                      borderRadius: layout.borderRadius.md,
+                      backgroundColor: colors.card,
+                      borderColor: colors.border,
                     },
                   ]}
-                  testID={`select-status-option-${statusKey}`}
                 >
-                  <View style={styles.optionLeft}>
-                    <View style={[styles.statusDot, { backgroundColor: config.color }]} />
-                    <Text
-                      style={[
-                        styles.optionLabel,
-                        {
-                          color: isSelected ? config.color : colors.foreground,
-                          fontSize: typography.fontSize.sm,
-                          fontWeight: isSelected ? '700' : '500',
-                        },
-                      ]}
-                    >
-                      {config.label}
-                    </Text>
-                  </View>
-
-                  {isSelected ? (
-                    <CheckCircle2 size={18} color={config.color} />
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
+                  <Text style={[styles.barcodeChipText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+                    {barcode}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : null}
       </View>
-    </Modal>
+
+      {/* Quick Rollback Action */}
+      {currentStatus !== 'pending' && currentStatus !== 'none' ? (
+        <Button
+          variant="outline"
+          size="sm"
+          icon={<RotateCcw size={14} color={colors.foreground} />}
+          onPress={handleRollback}
+          style={styles.rollbackButton}
+          testID="rollback-status-btn"
+        >
+          Revert to {STATUS_DISPLAY_CONFIG[prevStatus]?.label || 'Previous'}
+        </Button>
+      ) : null}
+
+      {/* Status Option Buttons */}
+      <Text
+        style={[
+          styles.optionsHeader,
+          { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+        ]}
+      >
+        SELECT OPERATIONAL STATUS
+      </Text>
+
+      {PULLSHEET_LIFECYCLE_ORDER.map((statusKey) => {
+        const config = STATUS_DISPLAY_CONFIG[statusKey];
+        const isSelected = currentStatus === statusKey;
+
+        return (
+          <Pressable
+            key={statusKey}
+            onPress={() => handleStatusSelect(statusKey)}
+            style={[
+              styles.statusOptionRow,
+              {
+                backgroundColor: isSelected ? config.bgColor : colors.surface,
+                borderColor: isSelected ? config.borderColor : colors.border,
+                borderRadius: layout.borderRadius.md,
+              },
+            ]}
+            testID={`select-status-option-${statusKey}`}
+          >
+            <View style={styles.optionLeft}>
+              <View style={[styles.statusDot, { backgroundColor: config.color }]} />
+              <Text
+                style={[
+                  styles.optionLabel,
+                  {
+                    color: isSelected ? config.color : colors.foreground,
+                    fontSize: typography.fontSize.sm,
+                    fontWeight: isSelected ? '700' : '500',
+                  },
+                ]}
+              >
+                {config.label}
+              </Text>
+            </View>
+
+            {isSelected ? (
+              <CheckCircle2 size={18} color={config.color} />
+            ) : null}
+          </Pressable>
+        );
+      })}
+    </ModalSheet>
   );
 };
 
@@ -285,6 +248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
   scrollBody: {},
@@ -295,6 +259,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   itemDescription: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -303,7 +268,9 @@ const styles = StyleSheet.create({
     gap: 16,
     marginBottom: 6,
   },
-  metaText: {},
+  metaText: {
+    fontFamily: 'Calibri',
+  },
   noteBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -313,6 +280,7 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255, 255, 255, 0.08)',
   },
   noteText: {
+    fontFamily: 'Calibri',
     flex: 1,
   },
   barcodesContainer: {
@@ -327,6 +295,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   barcodeTitle: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   barcodeChipsRow: {
@@ -341,12 +310,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   barcodeChipText: {
-    fontFamily: 'monospace',
+    fontFamily: 'Calibri',
   },
   rollbackButton: {
     marginBottom: 16,
   },
   optionsHeader: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -370,5 +340,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginRight: 10,
   },
-  optionLabel: {},
+  optionLabel: {
+    fontFamily: 'Calibri',
+  },
 });

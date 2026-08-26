@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   baseText: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
     textAlign: 'center',
   },

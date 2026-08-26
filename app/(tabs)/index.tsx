@@ -38,6 +38,7 @@ import { EventFilterTabs } from '@/components/events/event-filter-tabs';
 import { EventCard } from '@/components/events/event-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -273,22 +274,18 @@ export default function HomeScreen() {
 
         {/* Live Events Feed List */}
         {displayedEvents.length === 0 ? (
-          <View style={[styles.emptyContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Layers size={40} color={colors.mutedForeground} style={{ marginBottom: 10 }} />
-            <Text style={[styles.emptyTitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-              No Events Scheduled
-            </Text>
-            <Text style={[styles.emptySubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.xs, marginVertical: spacing.xs }]}>
-              {selectedTab === 'today'
+          <EmptyState
+            icon={<Layers size={40} color={colors.mutedForeground} />}
+            title="No Events Scheduled"
+            description={
+              selectedTab === 'today'
                 ? `No jobs match the date window for ${getFormattedDate(targetDateOffset)}.`
-                : 'No active production events found in this category.'}
-            </Text>
-            {targetDateOffset !== 0 ? (
-              <Button variant="outline" size="sm" onPress={resetDateOffset} style={{ marginTop: spacing.sm }}>
-                Back to Today
-              </Button>
-            ) : null}
-          </View>
+                : 'No active production events found in this category.'
+            }
+            actionLabel={targetDateOffset !== 0 ? 'Back to Today' : undefined}
+            onAction={targetDateOffset !== 0 ? resetDateOffset : undefined}
+            testID="dashboard-empty-state"
+          />
         ) : (
           displayedEvents.map((event) => (
             <EventCard key={event.id} event={event} testID={`event-card-item-${event.id}`} />
@@ -326,6 +323,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dateText: {
+    fontFamily: 'Calibri',
     fontWeight: '600',
   },
   todayBadge: {
@@ -347,9 +345,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   metricCount: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
   },
   metricLabel: {
+    fontFamily: 'Calibri',
     marginTop: 2,
     fontWeight: '500',
   },
@@ -368,7 +368,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   emptyContainer: {
     borderRadius: 12,
@@ -379,9 +382,15 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   emptyTitle: {
+    fontFamily: 'Calibri',
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
   },
   emptySubtitle: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    lineHeight: 16,
     textAlign: 'center',
   },
 });

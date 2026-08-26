@@ -52,10 +52,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
+    fontFamily: 'Calibri',
     fontWeight: '700',
     textAlign: 'center',
   },
   message: {
+    fontFamily: 'Calibri',
     textAlign: 'center',
     lineHeight: 22,
   },

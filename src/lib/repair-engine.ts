@@ -27,14 +27,11 @@ import { parseFirestoreDate } from '@/lib/date-utils';
 // ============================================================================
 
 export const CANONICAL_REPAIR_STATUSES: RepairStatus[] = [
+  'Reported',
+  'Pending',
   'Under Repair',
-  'Awaiting Parts',
-  'Operational',
   'Completed',
-  'Collected',
-  'Returned',
-  'Decommissioned',
-  'Archived',
+  'Cancel',
 ];
 
 export const CANONICAL_REPAIR_PRIORITIES: RepairPriority[] = [
@@ -56,69 +53,45 @@ export const PRIORITY_WEIGHTS: Record<RepairPriority, number> = {
 };
 
 export const REPAIR_STATUS_CONFIG: Record<RepairStatus, RepairStatusConfig> = {
-  'Under Repair': {
-    label: 'Under Repair',
+  'Reported': {
+    label: 'Reported',
+    color: '#3B82F6', // Blue
+    bgColor: 'rgba(59, 130, 246, 0.15)',
+    borderColor: 'rgba(59, 130, 246, 0.35)',
+    badgeVariant: 'info',
+    icon: 'alert-circle',
+  },
+  'Pending': {
+    label: 'Pending',
     color: '#F59E0B', // Amber
     bgColor: 'rgba(245, 158, 11, 0.15)',
     borderColor: 'rgba(245, 158, 11, 0.35)',
     badgeVariant: 'warning',
+    icon: 'clock',
+  },
+  'Under Repair': {
+    label: 'Under Repair',
+    color: '#EF4444', // Red
+    bgColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: 'rgba(239, 68, 68, 0.35)',
+    badgeVariant: 'destructive',
     icon: 'wrench',
   },
-  'Awaiting Parts': {
-    label: 'Awaiting Parts',
-    color: '#F97316', // Orange
-    bgColor: 'rgba(249, 115, 22, 0.15)',
-    borderColor: 'rgba(249, 115, 22, 0.35)',
-    badgeVariant: 'warning',
-    icon: 'package',
-  },
-  'Operational': {
-    label: 'Operational',
+  'Completed': {
+    label: 'Completed',
     color: '#10B981', // Emerald Green
     bgColor: 'rgba(16, 185, 129, 0.15)',
     borderColor: 'rgba(16, 185, 129, 0.35)',
     badgeVariant: 'success',
     icon: 'check-circle-2',
   },
-  'Completed': {
-    label: 'Completed',
-    color: '#3B82F6', // Blue
-    bgColor: 'rgba(59, 130, 246, 0.15)',
-    borderColor: 'rgba(59, 130, 246, 0.35)',
-    badgeVariant: 'info',
-    icon: 'check',
-  },
-  'Collected': {
-    label: 'Collected',
-    color: '#8B5CF6', // Purple
-    bgColor: 'rgba(139, 92, 246, 0.15)',
-    borderColor: 'rgba(139, 92, 246, 0.35)',
-    badgeVariant: 'secondary',
-    icon: 'truck',
-  },
-  'Returned': {
-    label: 'Returned',
-    color: '#06B6D4', // Cyan
-    bgColor: 'rgba(6, 182, 212, 0.15)',
-    borderColor: 'rgba(6, 182, 212, 0.35)',
-    badgeVariant: 'info',
-    icon: 'corner-down-left',
-  },
-  'Decommissioned': {
-    label: 'Decommissioned',
-    color: '#EF4444', // Red
-    bgColor: 'rgba(239, 68, 68, 0.15)',
-    borderColor: 'rgba(239, 68, 68, 0.35)',
-    badgeVariant: 'destructive',
-    icon: 'alert-octagon',
-  },
-  'Archived': {
-    label: 'Archived',
-    color: '#64748B', // Slate
+  'Cancel': {
+    label: 'Cancel',
+    color: '#64748B', // Slate Grey
     bgColor: 'rgba(100, 116, 139, 0.15)',
     borderColor: 'rgba(100, 116, 139, 0.35)',
-    badgeVariant: 'outline',
-    icon: 'archive',
+    badgeVariant: 'secondary',
+    icon: 'x-circle',
   },
 };
 
@@ -175,71 +148,50 @@ export const REPAIR_PRIORITY_CONFIG: Record<RepairPriority, RepairPriorityConfig
 
 // State Machine Permitted Transitions Graph
 export const STATUS_TRANSITIONS_GRAPH: Record<RepairStatus, RepairStatus[]> = {
+  'Reported': [
+    'Reported',
+    'Pending',
+    'Under Repair',
+    'Completed',
+    'Cancel',
+  ],
+  'Pending': [
+    'Pending',
+    'Under Repair',
+    'Completed',
+    'Reported',
+    'Cancel',
+  ],
   'Under Repair': [
     'Under Repair',
-    'Awaiting Parts',
+    'Pending',
     'Completed',
-    'Operational',
-    'Decommissioned',
-    'Archived',
-  ],
-  'Awaiting Parts': [
-    'Awaiting Parts',
-    'Under Repair',
-    'Completed',
-    'Operational',
-    'Decommissioned',
-    'Archived',
+    'Reported',
+    'Cancel',
   ],
   'Completed': [
     'Completed',
-    'Operational',
-    'Returned',
     'Under Repair',
-    'Archived',
+    'Pending',
+    'Reported',
+    'Cancel',
   ],
-  'Operational': [
-    'Operational',
+  'Cancel': [
+    'Cancel',
+    'Reported',
+    'Pending',
     'Under Repair',
     'Completed',
-    'Returned',
-    'Archived',
-  ],
-  'Collected': [
-    'Collected',
-    'Under Repair',
-    'Awaiting Parts',
-    'Operational',
-    'Archived',
-  ],
-  'Returned': [
-    'Returned',
-    'Operational',
-    'Under Repair',
-    'Archived',
-  ],
-  'Decommissioned': [
-    'Decommissioned',
-    'Under Repair',
-    'Archived',
-  ],
-  'Archived': [
-    'Archived',
-    'Under Repair',
-    'Operational',
   ],
 };
 
 // 1-Tap Quick Action Suggestions for Mobile UI
 export const QUICK_STATUS_OPTIONS: Record<RepairStatus, RepairStatus[]> = {
-  'Under Repair': ['Awaiting Parts', 'Completed', 'Operational'],
-  'Awaiting Parts': ['Under Repair', 'Completed', 'Operational'],
-  'Completed': ['Operational', 'Returned', 'Under Repair'],
-  'Operational': ['Under Repair', 'Completed'],
-  'Collected': ['Under Repair', 'Operational'],
-  'Returned': ['Operational', 'Under Repair'],
-  'Decommissioned': ['Under Repair', 'Archived'],
-  'Archived': ['Under Repair', 'Operational'],
+  'Reported': ['Pending', 'Under Repair', 'Completed', 'Cancel'],
+  'Pending': ['Under Repair', 'Completed', 'Reported', 'Cancel'],
+  'Under Repair': ['Completed', 'Pending', 'Reported', 'Cancel'],
+  'Completed': ['Under Repair', 'Reported', 'Cancel'],
+  'Cancel': ['Reported', 'Pending', 'Under Repair', 'Completed'],
 };
 
 // ============================================================================
@@ -250,39 +202,43 @@ export const QUICK_STATUS_OPTIONS: Record<RepairStatus, RepairStatus[]> = {
  * Normalizes any string or legacy input into a canonical RepairStatus.
  */
 export function normalizeRepairStatus(status?: string | null): RepairStatus {
-  if (!status || typeof status !== 'string') return 'Under Repair';
+  if (!status || typeof status !== 'string') return 'Reported';
   const clean = status.trim().toLowerCase();
 
   switch (clean) {
+    case 'reported':
+    case 'new':
+    case 'open':
+      return 'Reported';
+    case 'pending':
+    case 'awaiting parts':
+    case 'awaiting_parts':
+    case 'waiting parts':
+    case 'collected':
+      return 'Pending';
     case 'under repair':
     case 'under_repair':
     case 'in repair':
     case 'in_repair':
       return 'Under Repair';
-    case 'awaiting parts':
-    case 'awaiting_parts':
-    case 'waiting parts':
-      return 'Awaiting Parts';
-    case 'operational':
-    case 'ready':
-      return 'Operational';
     case 'completed':
-    case 'repaired':
-      return 'Completed';
-    case 'collected':
-      return 'Collected';
+    case 'operational':
     case 'returned':
-      return 'Returned';
+    case 'ready':
+    case 'fixed':
+    case 'repaired':
     case 'decommissioned':
-    case 'scrapped':
-      return 'Decommissioned';
     case 'archived':
-      return 'Archived';
+      return 'Completed';
+    case 'cancel':
+    case 'cancelled':
+    case 'canceled':
+      return 'Cancel';
     default: {
       const match = CANONICAL_REPAIR_STATUSES.find(
         (s) => s.toLowerCase() === clean
       );
-      return match || 'Under Repair';
+      return match || 'Reported';
     }
   }
 }
@@ -399,7 +355,10 @@ export function calculateEquipmentCondition(status?: string | null): EquipmentCo
     clean === 'completed' ||
     clean === 'returned' ||
     clean === 'ready' ||
-    clean === 'repaired'
+    clean === 'repaired' ||
+    clean === 'cancel' ||
+    clean === 'cancelled' ||
+    clean === 'canceled'
   ) {
     return 'Available to Use';
   }
@@ -449,29 +408,21 @@ export function isValidStatusTransition(
  */
 export function getNextRepairStatus(current: string | null | undefined, _action?: string): RepairStatus {
   if (!current || typeof current !== 'string' || !CANONICAL_REPAIR_STATUSES.some((s) => s.toLowerCase() === current.trim().toLowerCase())) {
-    return 'Under Repair';
+    return 'Reported';
   }
   const currNorm = normalizeRepairStatus(current);
 
   switch (currNorm) {
+    case 'Reported':
+      return 'Pending';
+    case 'Pending':
+      return 'Under Repair';
     case 'Under Repair':
       return 'Completed';
-    case 'Awaiting Parts':
-      return 'Under Repair';
     case 'Completed':
-      return 'Operational';
-    case 'Operational':
-      return 'Returned';
-    case 'Collected':
-      return 'Under Repair';
-    case 'Returned':
-      return 'Archived';
-    case 'Decommissioned':
-      return 'Archived';
-    case 'Archived':
-      return 'Archived'; // Idempotent terminal
+      return 'Completed';
     default:
-      return 'Under Repair';
+      return 'Reported';
   }
 }
 
@@ -577,8 +528,8 @@ export function validateRepairTicketInput(
       if (!att || !att.url || typeof att.url !== 'string' || !att.url.trim()) {
         addError(`attachments[${idx}].url`, 'Attachment URL is required.');
       }
-      if (att && !['Photo', 'PDF', 'URL'].includes(att.type)) {
-        addError(`attachments[${idx}].type`, 'Attachment type must be Photo, PDF, or URL.');
+      if (att && !['Photo', 'PDF', 'URL', 'Document'].includes(att.type)) {
+        addError(`attachments[${idx}].type`, 'Attachment type must be Photo, PDF, URL, or Document.');
       }
     });
   }
@@ -686,13 +637,13 @@ export function filterRepairTickets(
 
   return tickets.filter((ticket) => {
     // 1. Archived check
-    const isArchived = ticket.archived === true || ticket.status === 'Archived';
+    const isArchived = ticket.archived === true || (ticket.status as string) === 'Archived';
     if (!allowArchived && isArchived) {
       return false;
     }
 
     // 2. Status filter
-    if (status && status !== 'all') {
+    if (status && (typeof status === 'string' ? status.toLowerCase() !== 'all' : true)) {
       const allowedStatuses = Array.isArray(status) ? status : [status];
       const matchStatus = allowedStatuses.some(
         (s) => s.toLowerCase() === (ticket.status || '').toLowerCase()
@@ -701,7 +652,7 @@ export function filterRepairTickets(
     }
 
     // 3. Priority filter
-    if (priority && priority !== 'all') {
+    if (priority && (typeof priority === 'string' ? priority.toLowerCase() !== 'all' : true)) {
       const allowedPriorities = Array.isArray(priority) ? priority : [priority];
       const matchPriority = allowedPriorities.some(
         (p) => p.toLowerCase() === (ticket.priority || '').toLowerCase()
@@ -710,7 +661,7 @@ export function filterRepairTickets(
     }
 
     // 4. Condition filter
-    if (condition && condition !== 'all') {
+    if (condition && (typeof condition === 'string' ? condition.toLowerCase() !== 'all' : true)) {
       const ticketCond = ticket.condition || calculateEquipmentCondition(ticket.status);
       if (ticketCond.toLowerCase() !== condition.toLowerCase()) {
         return false;
@@ -718,7 +669,7 @@ export function filterRepairTickets(
     }
 
     // 5. Billing Status filter
-    if (billingStatus && billingStatus !== 'all') {
+    if (billingStatus && (typeof billingStatus === 'string' ? billingStatus.toLowerCase() !== 'all' : true)) {
       const ticketBill = ticket.billingStatus || 'None';
       if (ticketBill.toLowerCase() !== billingStatus.toLowerCase()) {
         return false;
@@ -863,9 +814,9 @@ export function calculateRepairCostTotal(
  */
 export function getPriorityBadgeVariant(
   priority: RepairPriority | string
-): 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info' | 'brand' | 'error' {
+): 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info' | 'brand' {
   const norm = normalizeRepairPriority(priority);
-  return REPAIR_PRIORITY_CONFIG[norm]?.badgeVariant || 'default';
+  return (REPAIR_PRIORITY_CONFIG[norm]?.badgeVariant as any) || 'default';
 }
 
 /**
@@ -873,7 +824,7 @@ export function getPriorityBadgeVariant(
  */
 export function getStatusBadgeVariant(
   status: RepairStatus | string
-): 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info' | 'brand' | 'error' {
+): 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info' | 'brand' {
   const norm = normalizeRepairStatus(status);
-  return REPAIR_STATUS_CONFIG[norm]?.badgeVariant || 'default';
+  return (REPAIR_STATUS_CONFIG[norm]?.badgeVariant as any) || 'default';
 }

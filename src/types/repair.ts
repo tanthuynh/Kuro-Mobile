@@ -12,14 +12,11 @@ import type { Equipment } from './equipment';
  * Mirrors kuro-web/src/app/repair/definitions.ts Status type.
  */
 export type RepairStatus =
-  | 'Operational'
-  | 'Collected'
+  | 'Reported'
+  | 'Pending'
   | 'Under Repair'
-  | 'Awaiting Parts'
   | 'Completed'
-  | 'Returned'
-  | 'Decommissioned'
-  | 'Archived';
+  | 'Cancel';
 
 /**
  * Canonical ticket priority levels.
@@ -69,15 +66,16 @@ export interface RepairUser {
 }
 
 /**
- * Media attachment on a repair ticket (damage evidence photos, spec PDFs, URLs).
+ * Media attachment on a repair ticket (damage evidence photos, spec PDFs, URLs, documents).
  * Mirrors kuro-web attachmentSchema.
  */
 export interface RepairAttachment {
   id: string;
-  type: 'Photo' | 'PDF' | 'URL';
+  type: 'Photo' | 'PDF' | 'URL' | 'Document' | string;
   url: string;
   fileName?: string;
   notes?: string;
+  fileSize?: number;
   uploadedAt?: string; // ISO 8601 string
 }
 
