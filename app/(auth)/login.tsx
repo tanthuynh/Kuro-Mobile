@@ -244,6 +244,8 @@ export default function LoginScreen() {
                         setEmail(text);
                         if (errorMessage) setErrorMessage(null);
                       }}
+                      onSubmitEditing={handleEmailSubmit}
+                      returnKeyType="next"
                       containerStyle={styles.inputWrapper}
                     />
                   </View>
@@ -361,6 +363,8 @@ export default function LoginScreen() {
                         setPassword(text);
                         if (errorMessage) setErrorMessage(null);
                       }}
+                      onSubmitEditing={handlePasswordLogin}
+                      returnKeyType="go"
                       containerStyle={styles.inputWrapper}
                     />
                   </View>
@@ -440,6 +444,8 @@ export default function LoginScreen() {
                     autoCapitalize="none"
                     value={forgotPasswordEmail}
                     onChangeText={setForgotPasswordEmail}
+                    onSubmitEditing={handleForgotPassword}
+                    returnKeyType="done"
                     containerStyle={styles.inputWrapper}
                   />
                 </View>

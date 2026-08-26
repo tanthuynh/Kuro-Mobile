@@ -3,7 +3,7 @@
  * User Profile, Tenant Information, Presence & Sign-Out Screen
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,42 +12,219 @@ import {
   Switch,
   Alert,
   Pressable,
+  Image,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Building2,
-  Shield,
   LogOut,
   Moon,
   Sun,
   Smartphone,
-  Activity,
 } from 'lucide-react-native';
+import { SvgXml } from 'react-native-svg';
+import { ref, onValue, set } from 'firebase/database';
+import { doc, getDoc } from 'firebase/firestore';
 
 import { useTheme } from '@/context/theme-context';
 import { useAuth } from '@/context/auth-context';
-import { ScreenHeader } from '@/components/layout/screen-header';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { OnlineIndicator } from '@/components/ui/online-indicator';
+import { db, rtdb, auth } from '@/lib/firebase';
 
-export default function ProfileScreen() {
-  const { colors, typography, spacing, themeMode, setThemeMode } = useTheme();
-  const { user, tenant, signOut } = useAuth();
+/**
+ * Crew / User Avatar renderer supporting:
+ * 1. In-app SVG Data URIs (data:image/svg+xml;...)
+ * 2. Custom photo URLs (Firebase Storage / HTTP / HTTPS)
+ * 3. Base64 raster data URIs (data:image/png;base64,...)
+ * 4. Fallback Initials with brand/extracted accent color
+ */
+function CrewAvatar({
+  avatarUrl,
+  name,
+  size = 68,
+}: {
+  avatarUrl?: string | null;
+  name?: string;
+  size?: number;
+}) {
+  const { colors, typography } = useTheme();
 
-  const [isAvailable, setIsAvailable] = useState(true);
-  const [isSigningOut, setIsSigningOut] = useState(false);
-
-  const getInitials = (name?: string): string => {
-    if (!name) return 'OP';
-    const parts = name.trim().split(' ');
+  const getInitials = (n?: string): string => {
+    if (!n) return 'OP';
+    const parts = n.trim().split(/\s+/);
     if (parts.length >= 2) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
-    return name.slice(0, 2).toUpperCase();
+    return n.slice(0, 2).toUpperCase();
+  };
+
+  const parsedSvgXml = useMemo(() => {
+    if (!avatarUrl || typeof avatarUrl !== 'string') return null;
+    const trimmed = avatarUrl.trim();
+    if (!trimmed.toLowerCase().startsWith('data:image/svg+xml')) return null;
+
+    try {
+      let content = trimmed;
+      if (content.toLowerCase().includes(';base64,')) {
+        const base64Content = content.split(/;base64,/i)[1];
+        if (typeof atob !== 'undefined') {
+          content = atob(base64Content);
+        } else if (typeof Buffer !== 'undefined') {
+          content = Buffer.from(base64Content, 'base64').toString('utf8');
+        }
+      } else {
+        // Strip data URI prefix and decode URL entities
+        const rawPart = content.replace(/^data:image\/svg\+xml;?(utf8)?,?/i, '');
+        content = decodeURIComponent(rawPart);
+      }
+
+      if (content.includes('<svg')) {
+        return content;
+      }
+    } catch (e) {
+      console.warn('[CrewAvatar] SVG decode error:', e);
+    }
+    return null;
+  }, [avatarUrl]);
+
+  // Case 1: In-App SVG Avatar
+  if (parsedSvgXml) {
+    return (
+      <View style={[styles.avatarCircle, { width: size, height: size, borderRadius: size / 2 }]}>
+        <SvgXml xml={parsedSvgXml} width={size} height={size} />
+      </View>
+    );
+  }
+
+  // Case 2: Custom Photo URL / Base64 Raster Image
+  if (
+    avatarUrl &&
+    typeof avatarUrl === 'string' &&
+    (avatarUrl.startsWith('http://') ||
+      avatarUrl.startsWith('https://') ||
+      avatarUrl.startsWith('data:image/png') ||
+      avatarUrl.startsWith('data:image/jpeg'))
+  ) {
+    return (
+      <View style={[styles.avatarCircle, { width: size, height: size, borderRadius: size / 2 }]}>
+        <Image
+          source={{ uri: avatarUrl }}
+          style={{ width: size, height: size, borderRadius: size / 2 }}
+          resizeMode="cover"
+          accessibilityRole="image"
+          accessibilityLabel={name || 'Operator avatar'}
+        />
+      </View>
+    );
+  }
+
+  // Case 3: Fallback Initials
+  return (
+    <View
+      style={[
+        styles.avatarCircle,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: colors.brandGreenScale.green2,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.avatarText,
+          {
+            color: colors.primary,
+            fontSize: typography.fontSize.xl,
+          },
+        ]}
+      >
+        {getInitials(name)}
+      </Text>
+    </View>
+  );
+}
+
+export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
+  const { colors, typography, spacing, themeMode, setThemeMode } = useTheme();
+  const { user, tenant, signOut } = useAuth();
+
+  const [isManualOffline, setIsManualOffline] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [liveTenant, setLiveTenant] = useState<any>(null);
+
+  // Sync manual online status with Firebase RTDB (matching Kuro Web user-nav)
+  useEffect(() => {
+    const uid = auth.currentUser?.uid || user?.uid || user?.id;
+    if (!uid || !auth.currentUser) return;
+    const manualStatusRef = ref(rtdb, `/presence/${uid}/manualStatus`);
+    const unsubscribe = onValue(
+      manualStatusRef,
+      (snapshot) => {
+        setIsManualOffline(snapshot.val() === 'offline');
+      },
+      (error) => {
+        const msg = error?.message?.toLowerCase() || '';
+        if (!msg.includes('permission_denied') && !msg.includes('permission denied')) {
+          console.warn('Manual status listener error:', error);
+        }
+      }
+    );
+    return () => unsubscribe();
+  }, [user?.uid, user?.id]);
+
+  // Fetch full live tenant metadata from Firestore `tenants/{tenantId}`
+  useEffect(() => {
+    if (user?.tenantId && user.tenantId !== 'root') {
+      getDoc(doc(db, 'tenants', user.tenantId))
+        .then((snap) => {
+          if (snap.exists()) {
+            setLiveTenant(snap.data());
+          }
+        })
+        .catch((err) => {
+          console.warn('[ProfileScreen] Failed to fetch tenant metadata:', err);
+        });
+    }
+  }, [user?.tenantId]);
+
+  const displayTenantName =
+    liveTenant?.company ||
+    liveTenant?.name ||
+    tenant?.tenantName ||
+    user?.tenantName ||
+    'Amia Studios';
+
+  const toggleOnlineStatus = async (checked: boolean) => {
+    const uid = auth.currentUser?.uid || user?.uid || user?.id;
+    setIsManualOffline(!checked);
+    if (!uid || !auth.currentUser) return;
+    const status = checked ? 'online' : 'offline';
+    set(ref(rtdb, `/presence/${uid}/manualStatus`), status).catch((err) => {
+      const msg = err?.message?.toLowerCase() || '';
+      if (!msg.includes('permission_denied') && !msg.includes('permission denied')) {
+        console.warn('Failed to update manual online status:', err);
+      }
+    });
   };
 
   const handleSignOutPrompt = () => {
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to sign out of your Kuro workspace?');
+      if (confirmed) {
+        setIsSigningOut(true);
+        signOut('manual').catch((err: any) => {
+          alert(err.message || 'Failed to sign out.');
+          setIsSigningOut(false);
+        });
+      }
+      return;
+    }
+
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out of your Kuro workspace?',
@@ -70,202 +247,230 @@ export default function ProfileScreen() {
     );
   };
 
-  const enabledModules = user?.enabledModules || ['dashboard', 'events', 'logistics', 'dispatch', 'repair', 'inventory'];
-  const accessRights = user?.accessRights || ['Events', 'Logistics', 'Dispatch', 'Inventory'];
-
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <ScreenHeader title="Account Profile" subtitle="Operator Profile & Tenant Workspace" />
-
-      <ScrollView contentContainerStyle={[styles.scrollContent, { padding: spacing.base }]}>
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top + spacing.sm,
+        },
+      ]}
+    >
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingHorizontal: spacing.base, paddingBottom: 32 },
+        ]}
+      >
         {/* User Identity Card */}
         <Card style={styles.userCard}>
-          <CardContent style={{ paddingTop: spacing.base }}>
+          <CardContent style={{ paddingTop: spacing.base, paddingBottom: spacing.base }}>
             <View style={styles.userHeaderRow}>
-              <View style={[styles.avatarCircle, { backgroundColor: colors.brandGreenScale.green2, borderColor: colors.brandGreenScale.green4 }]}>
-                <Text style={[styles.avatarText, { color: colors.primary, fontSize: typography.fontSize.xl }]}>
-                  {getInitials(user?.name)}
-                </Text>
-              </View>
+              {/* Left: Avatar without green outline */}
+              <CrewAvatar
+                avatarUrl={user?.avatarUrl}
+                name={user?.name}
+                size={68}
+              />
 
+              {/* Center: User Info */}
               <View style={styles.userInfoBlock}>
-                <Text style={[styles.userName, { color: colors.cardForeground, fontSize: typography.fontSize.lg }]}>
+                <Text
+                  style={[
+                    styles.userName,
+                    { color: colors.cardForeground, fontSize: typography.fontSize.lg },
+                  ]}
+                >
                   {user?.name || 'Kuro Operator'}
                 </Text>
-                <Text style={[styles.userEmail, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+
+                <Text
+                  style={[
+                    styles.userEmail,
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
+                  ]}
+                >
                   {user?.email || 'operator@amiastudios.com'}
                 </Text>
+
+                {/* Full Tenant Name under User's Email */}
+                <Text
+                  style={[
+                    styles.userTenant,
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                  ]}
+                >
+                  {displayTenantName}
+                </Text>
+
                 <View style={styles.badgeRow}>
                   <Badge variant="brand">{user?.role || 'Administrator'}</Badge>
                 </View>
               </View>
-            </View>
-          </CardContent>
-        </Card>
 
-        {/* Tenant Organization Information */}
-        <Card style={styles.sectionCard}>
-          <CardHeader>
-            <View style={styles.sectionHeaderRow}>
-              <Building2 size={18} color={colors.primary} style={{ marginRight: 8 }} />
-              <Text style={[styles.sectionTitle, { color: colors.cardForeground, fontSize: typography.fontSize.md }]}>
-                Organization Workspace
-              </Text>
-            </View>
-          </CardHeader>
-          <CardContent>
-            <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                Company Name
-              </Text>
-              <Text style={[styles.infoValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                {tenant?.tenantName || user?.tenantName || 'Amia Studios'}
-              </Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                Tenant ID
-              </Text>
-              <Text style={[styles.infoCode, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                {user?.tenantId || 'tenant-amia-prod'}
-              </Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                Workspace Status
-              </Text>
-              <Badge variant="success">Active</Badge>
-            </View>
-
-            <View style={[styles.modulesBlock, { borderTopColor: colors.border }]}>
-              <Text style={[styles.modulesTitle, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                Active Feature Modules
-              </Text>
-              <View style={styles.chipsWrap}>
-                {enabledModules.map((mod) => (
-                  <Badge key={mod} variant="secondary" style={styles.moduleChip}>
-                    {mod}
-                  </Badge>
-                ))}
-              </View>
-            </View>
-          </CardContent>
-        </Card>
-
-        {/* Role & Permissions */}
-        <Card style={styles.sectionCard}>
-          <CardHeader>
-            <View style={styles.sectionHeaderRow}>
-              <Shield size={18} color={colors.primary} style={{ marginRight: 8 }} />
-              <Text style={[styles.sectionTitle, { color: colors.cardForeground, fontSize: typography.fontSize.md }]}>
-                Role & Operational Access Rights
-              </Text>
-            </View>
-          </CardHeader>
-          <CardContent>
-            <View style={styles.chipsWrap}>
-              {accessRights.map((right) => (
-                <Badge key={right} variant="brand" style={styles.moduleChip}>
-                  {right}
-                </Badge>
-              ))}
-            </View>
-          </CardContent>
-        </Card>
-
-        {/* Presence & System Controls */}
-        <Card style={styles.sectionCard}>
-          <CardHeader>
-            <View style={styles.sectionHeaderRow}>
-              <Activity size={18} color={colors.primary} style={{ marginRight: 8 }} />
-              <Text style={[styles.sectionTitle, { color: colors.cardForeground, fontSize: typography.fontSize.md }]}>
-                Presence & Application Settings
-              </Text>
-            </View>
-          </CardHeader>
-          <CardContent>
-            {/* Online Presence Toggle */}
-            <View style={styles.presenceToggleRow}>
-              <View style={styles.presenceTextGroup}>
-                <View style={styles.presenceStatusHeader}>
-                  <OnlineIndicator status={isAvailable ? 'online' : 'offline'} pulse={isAvailable} size={8} />
-                  <Text style={[styles.presenceTitle, { color: colors.foreground, fontSize: typography.fontSize.sm, marginLeft: 6 }]}>
-                    {isAvailable ? 'Available (Online)' : 'Away (Offline)'}
-                  </Text>
-                </View>
-                <Text style={[styles.presenceDesc, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                  Broadcast live operational availability to warehouse dispatch.
+              {/* Right: Available / Away Toggle */}
+              <View style={styles.presenceRightSlot}>
+                <Text
+                  style={[
+                    styles.onlineStatusText,
+                    {
+                      color: !isManualOffline ? colors.status.online : colors.mutedForeground,
+                      fontSize: typography.fontSize.xs,
+                    },
+                  ]}
+                >
+                  {!isManualOffline ? 'Available' : 'Away'}
                 </Text>
-              </View>
-              <Switch
-                value={isAvailable}
-                onValueChange={setIsAvailable}
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            {/* Theme Selector */}
-            <View style={[styles.themeSelectRow, { borderTopColor: colors.border }]}>
-              <Text style={[styles.themeLabel, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                App Appearance
-              </Text>
-              <View style={styles.themeButtonsGroup}>
-                <Pressable
-                  onPress={() => setThemeMode('dark')}
-                  style={[
-                    styles.themeButton,
-                    {
-                      backgroundColor: themeMode === 'dark' ? colors.primary : colors.surface,
-                      borderColor: themeMode === 'dark' ? colors.primary : colors.border,
-                    },
-                  ]}
-                >
-                  <Moon size={14} color={themeMode === 'dark' ? colors.primaryForeground : colors.foreground} />
-                  <Text style={[styles.themeBtnText, { color: themeMode === 'dark' ? colors.primaryForeground : colors.foreground, fontSize: typography.fontSize.xs }]}>
-                    Dark
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setThemeMode('light')}
-                  style={[
-                    styles.themeButton,
-                    {
-                      backgroundColor: themeMode === 'light' ? colors.primary : colors.surface,
-                      borderColor: themeMode === 'light' ? colors.primary : colors.border,
-                    },
-                  ]}
-                >
-                  <Sun size={14} color={themeMode === 'light' ? colors.primaryForeground : colors.foreground} />
-                  <Text style={[styles.themeBtnText, { color: themeMode === 'light' ? colors.primaryForeground : colors.foreground, fontSize: typography.fontSize.xs }]}>
-                    Light
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setThemeMode('system')}
-                  style={[
-                    styles.themeButton,
-                    {
-                      backgroundColor: themeMode === 'system' ? colors.primary : colors.surface,
-                      borderColor: themeMode === 'system' ? colors.primary : colors.border,
-                    },
-                  ]}
-                >
-                  <Smartphone size={14} color={themeMode === 'system' ? colors.primaryForeground : colors.foreground} />
-                  <Text style={[styles.themeBtnText, { color: themeMode === 'system' ? colors.primaryForeground : colors.foreground, fontSize: typography.fontSize.xs }]}>
-                    Auto
-                  </Text>
-                </Pressable>
+                <Switch
+                  value={!isManualOffline}
+                  onValueChange={toggleOnlineStatus}
+                  trackColor={{ false: colors.border, true: colors.primary }}
+                  thumbColor="#FFFFFF"
+                  style={
+                    Platform.OS === 'ios'
+                      ? { transform: [{ scaleX: 0.75 }, { scaleY: 0.75 }] }
+                      : { transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }
+                  }
+                  testID="profile-online-status-toggle"
+                />
               </View>
             </View>
           </CardContent>
         </Card>
 
-        {/* Sign Out Action Button */}
+        {/* App Appearance Settings Card (Wide & Double Size Buttons, No Leading Icon) */}
+        <Card style={styles.sectionCard}>
+          <CardHeader>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: colors.cardForeground, fontSize: typography.fontSize.md },
+              ]}
+            >
+              App Appearance
+            </Text>
+          </CardHeader>
+          <CardContent>
+            <View style={styles.themeButtonsGroupWide}>
+              <Pressable
+                onPress={() => setThemeMode('dark')}
+                style={[
+                  styles.themeButtonWide,
+                  {
+                    backgroundColor: themeMode === 'dark' ? colors.primary : colors.surface,
+                    borderColor: themeMode === 'dark' ? colors.primary : colors.border,
+                  },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Dark Theme"
+                testID="theme-dark-btn"
+              >
+                <Moon
+                  size={20}
+                  color={themeMode === 'dark' ? colors.primaryForeground : colors.foreground}
+                />
+                <Text
+                  style={[
+                    styles.themeBtnTextWide,
+                    {
+                      color: themeMode === 'dark' ? colors.primaryForeground : colors.foreground,
+                      fontSize: typography.fontSize.sm,
+                    },
+                  ]}
+                >
+                  Dark
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => setThemeMode('light')}
+                style={[
+                  styles.themeButtonWide,
+                  {
+                    backgroundColor: themeMode === 'light' ? colors.primary : colors.surface,
+                    borderColor: themeMode === 'light' ? colors.primary : colors.border,
+                  },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Light Theme"
+                testID="theme-light-btn"
+              >
+                <Sun
+                  size={20}
+                  color={themeMode === 'light' ? colors.primaryForeground : colors.foreground}
+                />
+                <Text
+                  style={[
+                    styles.themeBtnTextWide,
+                    {
+                      color: themeMode === 'light' ? colors.primaryForeground : colors.foreground,
+                      fontSize: typography.fontSize.sm,
+                    },
+                  ]}
+                >
+                  Light
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => setThemeMode('system')}
+                style={[
+                  styles.themeButtonWide,
+                  {
+                    backgroundColor: themeMode === 'system' ? colors.primary : colors.surface,
+                    borderColor: themeMode === 'system' ? colors.primary : colors.border,
+                  },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="System Auto Theme"
+                testID="theme-auto-btn"
+              >
+                <Smartphone
+                  size={20}
+                  color={themeMode === 'system' ? colors.primaryForeground : colors.foreground}
+                />
+                <Text
+                  style={[
+                    styles.themeBtnTextWide,
+                    {
+                      color: themeMode === 'system' ? colors.primaryForeground : colors.foreground,
+                      fontSize: typography.fontSize.sm,
+                    },
+                  ]}
+                >
+                  Auto
+                </Text>
+              </Pressable>
+            </View>
+          </CardContent>
+        </Card>
+      </ScrollView>
+
+      {/* Fixed Bottom Action Pane above Bottom Tab Bar */}
+      <View
+        style={[
+          styles.bottomActionPane,
+          {
+            paddingHorizontal: spacing.base,
+            paddingTop: spacing.xs,
+            paddingBottom: spacing.sm,
+            backgroundColor: colors.background,
+          },
+        ]}
+      >
+        {/* Version Header above Sign Out */}
+        <View style={styles.versionFooter}>
+          <Text
+            style={[
+              styles.versionText,
+              { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+            ]}
+          >
+            Kuro RMS Mobile • Build 1.0.0 (Release)
+          </Text>
+        </View>
+
         <Button
           variant="destructive"
           size="lg"
@@ -274,18 +479,11 @@ export default function ProfileScreen() {
           loadingText="Signing out..."
           icon={<LogOut size={18} color={colors.destructiveForeground} />}
           onPress={handleSignOutPrompt}
-          style={{ marginTop: spacing.md }}
+          testID="profile-sign-out-btn"
         >
           Sign Out of Account
         </Button>
-
-        {/* Version Footer */}
-        <View style={styles.versionFooter}>
-          <Text style={[styles.versionText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-            Kuro Mobile ERP • Build 1.0.0 (Release)
-          </Text>
-        </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -303,15 +501,13 @@ const styles = StyleSheet.create({
   userHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   avatarCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 12,
+    overflow: 'hidden',
   },
   avatarText: {
     fontWeight: '700',
@@ -322,8 +518,21 @@ const styles = StyleSheet.create({
   userName: {
     fontWeight: '700',
   },
+  presenceRightSlot: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 8,
+    gap: 4,
+  },
+  onlineStatusText: {
+    fontWeight: '600',
+  },
   userEmail: {
     marginTop: 2,
+  },
+  userTenant: {
+    marginTop: 2,
+    fontWeight: '500',
   },
   badgeRow: {
     marginTop: 6,
@@ -331,98 +540,39 @@ const styles = StyleSheet.create({
   sectionCard: {
     marginBottom: 12,
   },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   sectionTitle: {
     fontWeight: '600',
   },
-  infoRow: {
+  themeButtonsGroupWide: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    gap: 10,
+    width: '100%',
   },
-  infoLabel: {
-    fontWeight: '500',
-  },
-  infoValue: {
-    fontWeight: '600',
-  },
-  infoCode: {
-    fontFamily: 'monospace',
-  },
-  modulesBlock: {
-    paddingTop: 10,
-    borderTopWidth: 1,
-    marginTop: 4,
-  },
-  modulesTitle: {
-    fontWeight: '600',
-    marginBottom: 6,
-    textTransform: 'uppercase',
-  },
-  chipsWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  moduleChip: {
-    marginBottom: 2,
-  },
-  presenceToggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  presenceTextGroup: {
+  themeButtonWide: {
     flex: 1,
-    marginRight: 12,
-  },
-  presenceStatusHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 52,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    gap: 8,
   },
-  presenceTitle: {
+  themeBtnTextWide: {
     fontWeight: '600',
   },
-  presenceDesc: {
-    marginTop: 2,
-  },
-  themeSelectRow: {
-    paddingTop: 12,
-    borderTopWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  themeLabel: {
-    fontWeight: '600',
-  },
-  themeButtonsGroup: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  themeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 4,
-    minHeight: 36,
-  },
-  themeBtnText: {
-    fontWeight: '600',
+  bottomActionPane: {
+    paddingTop: 8,
   },
   versionFooter: {
-    marginTop: 20,
+    marginBottom: 10,
     alignItems: 'center',
   },
   versionText: {
     textAlign: 'center',
   },
 });
+
+

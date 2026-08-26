@@ -29,10 +29,10 @@ import {
   Clock,
   ExternalLink,
 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
 import { useEquipment } from '@/hooks/use-equipment';
-import { ScreenHeader } from '@/components/layout/screen-header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +43,7 @@ import type { Equipment } from '@/types/equipment';
 const AVAILABILITY_FILTERS = ['All', 'Available', 'In Use', 'In Repair'];
 
 export default function InventoryScreen() {
+  const insets = useSafeAreaInsets();
   const { colors, typography, spacing, layout } = useTheme();
   const router = useRouter();
 
@@ -68,27 +69,17 @@ export default function InventoryScreen() {
   }, [refresh]);
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      {/* Top Header */}
-      <ScreenHeader
-        title="Equipment Inventory"
-        subtitle="Live Warehouse & Fleet Catalog"
-        showTenantBadge
-        rightAction={
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<QrCode size={14} color={colors.primaryForeground} />}
-            onPress={() => router.push('/(tabs)/scanner')}
-            testID="inventory-scan-shortcut-btn"
-          >
-            Scan
-          </Button>
-        }
-      />
-
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top + spacing.sm,
+        },
+      ]}
+    >
       {/* Search Input Bar */}
-      <View style={[styles.searchContainer, { paddingHorizontal: spacing.base, paddingTop: spacing.sm }]}>
+      <View style={[styles.searchContainer, { paddingHorizontal: spacing.base, paddingTop: spacing.xs }]}>
         <Input
           placeholder="Search by equipment, make, model, barcode..."
           value={searchQuery}

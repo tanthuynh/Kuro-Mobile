@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   Pressable,
+  Platform,
   StyleSheet,
   type TextInputProps,
   type StyleProp,
@@ -98,6 +99,7 @@ export const Input = forwardRef<TextInput, InputProps>(
             editable={editable}
             placeholderTextColor={colors.mutedForeground}
             secureTextEntry={isPassword && !showPassword}
+            underlineColorAndroid="transparent"
             style={[
               styles.textInput,
               {
@@ -191,6 +193,13 @@ const styles = StyleSheet.create({
     height: '100%',
     minHeight: 48,
     paddingVertical: 10,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+        outlineWidth: 0,
+        boxShadow: 'none',
+      } as any,
+    }),
   },
   leftIconContainer: {
     paddingLeft: 12,

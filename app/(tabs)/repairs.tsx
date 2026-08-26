@@ -28,10 +28,10 @@ import {
   Package,
   AlertTriangle,
 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
 import { useTickets } from '@/hooks/use-tickets';
-import { ScreenHeader } from '@/components/layout/screen-header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,6 +56,7 @@ const PRIORITY_FILTERS = [
 ];
 
 export default function RepairsScreen() {
+  const insets = useSafeAreaInsets();
   const { colors, typography, spacing, layout } = useTheme();
   const router = useRouter();
 
@@ -82,25 +83,15 @@ export default function RepairsScreen() {
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      {/* Top Header */}
-      <ScreenHeader
-        title="Repair & Faults"
-        subtitle={`${metrics.outOfService} out of service • ${metrics.total} total tickets`}
-        showTenantBadge
-        rightAction={
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Plus size={14} color={colors.primaryForeground} />}
-            onPress={handleCreateNew}
-            testID="feed-new-repair-btn"
-          >
-            Report Fault
-          </Button>
-        }
-      />
-
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top + spacing.sm,
+        },
+      ]}
+    >
       {/* Metrics Summary Strip */}
       <View style={[styles.metricsContainer, { paddingHorizontal: spacing.base, paddingTop: spacing.xs }]}>
         <View style={styles.metricsGrid}>
@@ -314,6 +305,30 @@ export default function RepairsScreen() {
           }
         />
       )}
+
+      {/* Fixed Bottom Action Pane above Bottom Tab Bar */}
+      <View
+        style={[
+          styles.bottomActionPane,
+          {
+            paddingHorizontal: spacing.base,
+            paddingTop: spacing.xs,
+            paddingBottom: spacing.sm,
+            backgroundColor: colors.background,
+          },
+        ]}
+      >
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          icon={<Plus size={18} color={colors.primaryForeground} />}
+          onPress={handleCreateNew}
+          testID="feed-new-repair-btn"
+        >
+          Report Equipment Fault
+        </Button>
+      </View>
     </View>
   );
 }
@@ -321,6 +336,9 @@ export default function RepairsScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+  },
+  bottomActionPane: {
+    paddingTop: 8,
   },
   metricsContainer: {
     marginBottom: 4,

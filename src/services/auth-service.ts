@@ -65,7 +65,7 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
             success: true,
             authTenantId: data.authTenantId ?? null,
             tenantId: data.tenantId || (isSuperAdmin ? 'root' : ''),
-            tenantName: data.tenantName || (isSuperAdmin ? 'System Administration' : 'Tenant Workspace'),
+            tenantName: data.tenantName || (isSuperAdmin ? 'System Administration' : data.tenantSlug || 'Amia Studios'),
             tenantSlug: data.tenantSlug || (isSuperAdmin ? 'admin' : ''),
             isSuperAdmin,
           };
@@ -194,7 +194,7 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
       success: true,
       authTenantId: tenantData.authTenantId,
       tenantId: userData.tenantId,
-      tenantName: tenantData.company || tenantData.slug || 'Tenant Workspace',
+      tenantName: tenantData.company || (tenantData as any).name || tenantData.slug || userData.tenantName || 'Amia Studios',
       tenantSlug: tenantData.slug || '',
       isSuperAdmin: false,
     };
@@ -406,7 +406,7 @@ export async function getUserProfile(
         const tenantSnap = await getDoc(doc(db, 'tenants', rawUser.tenantId));
         if (tenantSnap.exists()) {
           const tenantData = tenantSnap.data() as Partial<Tenant>;
-          tenantName = tenantData.company || tenantData.slug || tenantName;
+          tenantName = tenantData.company || (tenantData as any).name || tenantData.slug || rawUser.tenantName || 'Amia Studios';
           tenantSlug = tenantData.slug || '';
           tenantModules = tenantData.enabledModules || tenantModules;
         }

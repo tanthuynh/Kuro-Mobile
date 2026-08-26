@@ -29,17 +29,18 @@ import {
   FileSpreadsheet,
   Layers,
 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
 import { useAuth } from '@/context/auth-context';
 import { useEvents } from '@/hooks/use-events';
-import { ScreenHeader } from '@/components/layout/screen-header';
 import { EventFilterTabs } from '@/components/events/event-filter-tabs';
 import { EventCard } from '@/components/events/event-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const { colors, typography, spacing, layout } = useTheme();
   const { user, tenant } = useAuth();
   const router = useRouter();
@@ -81,17 +82,15 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      {/* Top Header with Live Presence Indicator */}
-      <ScreenHeader
-        title={`${getGreeting()}, ${user?.firstName || 'Operator'}`}
-        subtitle="Today's Operational Command"
-        showTenantBadge
-        tenantName={tenant?.tenantName || user?.tenantName || 'Kuro Workspace'}
-        showConnectionStatus
-        connectionStatus="online"
-        latencyMs={38}
-      />
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top + spacing.sm,
+        },
+      ]}
+    >
 
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { padding: spacing.base }]}

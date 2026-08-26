@@ -15,6 +15,8 @@ import {
   type Unsubscribe,
 } from 'firebase/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 import { rtdb, auth } from '../lib/firebase';
 import type { UserProfile } from '../types/auth';
 
@@ -29,18 +31,20 @@ export interface PresenceCallbacks {
  * Generate a unique session identifier for this mobile client.
  */
 async function getOrCreateMobileSessionId(): Promise<string> {
-  const STORAGE_KEY = '@kuro_session_id';
+  const STORAGE_KEY = 'mobileSessionId';
   try {
     let sessionId = await AsyncStorage.getItem(STORAGE_KEY);
     if (!sessionId) {
-      sessionId = `mob_${Date.now()}_${Math.random().toString(36).substring(2, 12)}`;
+      sessionId = uuidv4();
       await AsyncStorage.setItem(STORAGE_KEY, sessionId);
     }
     return sessionId;
   } catch {
-    return `mob_${Date.now()}_${Math.random().toString(36).substring(2, 12)}`;
+    return uuidv4();
   }
 }
+
+let globalMobileConRef: any = null;
 
 /**
  * Start tracking presence for an authenticated user in Realtime Database.
@@ -55,14 +59,15 @@ export function startPresence(
     return () => {};
   }
 
-  let currentConRef: any = null;
   let hasClaimedSession = false;
   let mobileSessionId = '';
 
   const myConnectionsRef = ref(rtdb, `/presence/${uid}/connections`);
   const lastOnlineRef = ref(rtdb, `/presence/${uid}/lastChanged`);
+  const lastOnlineMobileRef = ref(rtdb, `/presence/${uid}/lastChanged_mobile`);
   const profileRef = ref(rtdb, `/presence/${uid}/profile`);
-  const activeSessionRef = ref(rtdb, `/presence/${uid}/activeSessionId`);
+  const activeSessionRef = ref(rtdb, `/presence/${uid}/activeSessions/mobile`);
+  const legacyActiveSessionRef = ref(rtdb, `/presence/${uid}/activeSessionId`);
   const forceLogoutRef = ref(rtdb, `/presence/${uid}/forceLogout`);
   const forceRefreshRef = ref(rtdb, `/presence/${uid}/forceRefresh`);
   const connectedRef = ref(rtdb, '.info/connected');
@@ -148,10 +153,10 @@ export function startPresence(
       }
 
       // Cleanup prior connection node on reconnect
-      if (currentConRef) {
+      if (globalMobileConRef) {
         try {
-          await onDisconnect(currentConRef).cancel();
-          await remove(currentConRef);
+          await onDisconnect(globalMobileConRef).cancel();
+          await remove(globalMobileConRef);
         } catch {
           // Ignore if already deleted
         }
@@ -159,17 +164,18 @@ export function startPresence(
 
       // Push new connection record
       const conRef = push(myConnectionsRef);
-      currentConRef = conRef;
+      globalMobileConRef = conRef;
 
       try {
         // Configure onDisconnect handlers
         await onDisconnect(conRef).remove();
         await onDisconnect(lastOnlineRef).set(serverTimestamp());
+        await onDisconnect(lastOnlineMobileRef).set(serverTimestamp());
 
         // Write connection node
         await set(conRef, {
           sessionId: mobileSessionId,
-          device: 'mobile',
+          deviceType: 'mobile',
           connectedAt: serverTimestamp(),
         });
 
@@ -177,8 +183,11 @@ export function startPresence(
         if (mobileSessionId) {
           await set(activeSessionRef, mobileSessionId);
           hasClaimedSession = true;
+          // Clean up legacy single-session field if it exists
+          await remove(legacyActiveSessionRef).catch(() => {});
         }
         await set(lastOnlineRef, serverTimestamp());
+        await set(lastOnlineMobileRef, serverTimestamp());
 
         // Update public user profile card in RTDB for roster view
         await set(profileRef, {
@@ -209,12 +218,12 @@ export function startPresence(
     unsubForceRefresh();
     unsubConnected();
 
-    if (currentConRef) {
-      onDisconnect(currentConRef).cancel().catch(() => {});
+    if (globalMobileConRef) {
+      onDisconnect(globalMobileConRef).cancel().catch(() => {});
       if (auth.currentUser) {
-        remove(currentConRef).catch(() => {});
+        remove(globalMobileConRef).catch(() => {});
       }
-      currentConRef = null;
+      globalMobileConRef = null;
     }
   };
 }
@@ -227,11 +236,22 @@ export async function stopPresence(uid?: string): Promise<void> {
   if (!targetUid) return;
 
   try {
-    const connectionsRef = ref(rtdb, `/presence/${targetUid}/connections`);
     const lastOnlineRef = ref(rtdb, `/presence/${targetUid}/lastChanged`);
+    const lastOnlineMobileRef = ref(rtdb, `/presence/${targetUid}/lastChanged_mobile`);
+    const mobileSessionRef = ref(rtdb, `/presence/${targetUid}/activeSessions/mobile`);
 
     await set(lastOnlineRef, serverTimestamp()).catch(() => {});
-    await remove(connectionsRef).catch(() => {});
+    await set(lastOnlineMobileRef, serverTimestamp()).catch(() => {});
+    
+    // ONLY clear the mobile session slot! Do not touch web.
+    await remove(mobileSessionRef).catch(() => {});
+
+    // Instantly remove the specific mobile connection node
+    if (globalMobileConRef) {
+      await onDisconnect(globalMobileConRef).cancel().catch(() => {});
+      await remove(globalMobileConRef).catch(() => {});
+      globalMobileConRef = null;
+    }
   } catch (error) {
     console.warn('[presenceService] stopPresence error:', error);
   }

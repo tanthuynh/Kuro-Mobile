@@ -445,8 +445,7 @@ describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () =>
         </ScannerProvider>
       );
 
-      // Header and Active Job Banner
-      expect(getByText('Job Prep Scanner')).toBeTruthy();
+      // Active Job Banner
       expect(getByText('Active Job: Sydney Vivid Lights Mainstage')).toBeTruthy();
       expect(getByTestId('scanner-view-pullsheet-btn')).toBeTruthy();
 
@@ -483,13 +482,11 @@ describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () =>
     it('submits manual barcode entry in Standalone Fleet Scanner Mode', async () => {
       mockSearchParams = {};
 
-      const { getByPlaceholderText, getByTestId, getByText } = render(
+      const { getByPlaceholderText, getByTestId } = render(
         <ScannerProvider>
           <ScannerScreen />
         </ScannerProvider>
       );
-
-      expect(getByText('Fleet Scanner')).toBeTruthy();
 
       const input = getByPlaceholderText('Type barcode or serial number...');
       fireEvent.changeText(input, 'BAR-BARCO-4K-001');

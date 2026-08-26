@@ -31,11 +31,11 @@ import {
   Package,
   Wrench,
 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
 import { useScanner, type RecentScanRecord } from '@/context/scanner-context';
 import { useSingleEvent } from '@/hooks/use-events';
-import { ScreenHeader } from '@/components/layout/screen-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +44,7 @@ import { ScanHudOverlay } from '@/components/scanner/scan-hud-overlay';
 import { ManualCodeInput } from '@/components/scanner/manual-code-input';
 
 export default function ScannerScreen() {
+  const insets = useSafeAreaInsets();
   const { colors, typography, spacing, layout } = useTheme();
   const router = useRouter();
   const { eventId: routeEventId } = useLocalSearchParams<{ eventId?: string }>();
@@ -84,31 +85,15 @@ export default function ScannerScreen() {
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      {/* Top Header */}
-      <ScreenHeader
-        title={activeEventId ? 'Job Prep Scanner' : 'Fleet Scanner'}
-        subtitle={
-          activeEvent
-            ? `Reconciling ${activeEvent.eventName}`
-            : 'Continuous Barcode & QR Inspection'
-        }
-        showTenantBadge
-        rightAction={
-          activeEventId ? (
-            <Button
-              variant="outline"
-              size="sm"
-              icon={<FileSpreadsheet size={14} color={colors.foreground} />}
-              onPress={() => router.push(`/pullsheet/${activeEventId}`)}
-              testID="scanner-view-pullsheet-btn"
-            >
-              Pull Sheet
-            </Button>
-          ) : undefined
-        }
-      />
-
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top + spacing.sm,
+        },
+      ]}
+    >
       {/* Floating HUD Feedback Toast */}
       <ScanHudOverlay
         result={lastResult}
@@ -147,16 +132,28 @@ export default function ScannerScreen() {
               </Text>
             </View>
 
-            <Pressable
-              onPress={handleExitJobMode}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              style={styles.exitJobBtn}
-              testID="exit-job-scanner-mode-btn"
-            >
-              <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.xs }}>
-                Exit Job
-              </Text>
-            </Pressable>
+            <View style={styles.jobBannerActions}>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<FileSpreadsheet size={13} color={colors.secondaryForeground} />}
+                onPress={() => router.push(`/pullsheet/${activeEventId}`)}
+                testID="scanner-view-pullsheet-btn"
+                style={{ marginRight: 6 }}
+              >
+                Pull Sheet
+              </Button>
+              <Pressable
+                onPress={handleExitJobMode}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.exitJobBtn}
+                testID="exit-job-scanner-mode-btn"
+              >
+                <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.xs }}>
+                  Exit
+                </Text>
+              </Pressable>
+            </View>
           </View>
         ) : null}
 
@@ -412,6 +409,10 @@ const styles = StyleSheet.create({
   },
   jobBannerSub: {
     marginTop: 2,
+  },
+  jobBannerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   exitJobBtn: {
     paddingHorizontal: 8,

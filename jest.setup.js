@@ -3,6 +3,12 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+// Mock uuid
+jest.mock('uuid', () => ({
+  v4: () => 'mock-uuid-1234',
+}));
+
+
 // Mock expo-router
 jest.mock('expo-router', () => ({
   useRouter: () => ({
