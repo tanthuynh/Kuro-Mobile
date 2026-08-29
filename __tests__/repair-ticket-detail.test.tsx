@@ -41,12 +41,14 @@ jest.mock('@/context/auth-context', () => ({
 // Mock Router
 const mockBack = jest.fn();
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
 const mockCanGoBack = jest.fn().mockReturnValue(true);
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     back: mockBack,
     push: mockPush,
+    replace: mockReplace,
     canGoBack: mockCanGoBack,
   }),
   useLocalSearchParams: () => ({
@@ -140,21 +142,51 @@ describe('Repair Ticket Details Screen (R1-R5)', () => {
     jest.spyOn(repairService, 'getRepairTicket').mockResolvedValue(mockSingleTicket);
   });
 
-  describe('R1: Modernized Header & Navigation', () => {
-    it('displays [repairNumber], equipment name, status badge, and invokes back navigation', async () => {
-      const { findByText, getByText, getByTestId } = render(<RepairTicketDetailScreen />);
+  describe('R1: Title-Sized Header & Top-Right Cleanup', () => {
+    it('displays [repairNumber], equipment name, removes top-right status badge, and invokes back navigation', async () => {
+      const { findByText, getByText, queryByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
 
       expect(await findByText('[1042]')).toBeTruthy();
       expect(getByText('Robe MegaPointe Moving Head')).toBeTruthy();
-      expect(getByTestId('ticket-header-status')).toBeTruthy();
+      // Status badge should be removed from top right header
+      expect(queryByTestId('ticket-header-status')).toBeNull();
 
       const backBtn = getByTestId('ticket-detail-back-btn');
       fireEvent.press(backBtn);
-      expect(mockBack).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)/repairs');
+    });
+
+    it('opens quick text edit dialog on tapping equipment name and updates name instantly', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const equipNameBtn = await findByTestId('header-equipment-name-btn');
+      await act(async () => {
+        fireEvent.press(equipNameBtn);
+      });
+
+      expect(getByTestId('edit-equipment-modal')).toBeTruthy();
+      const input = getByTestId('edit-equipment-name-input');
+      fireEvent.changeText(input, 'Robe MegaPointe Moving Head (Gen 2)');
+
+      const saveBtn = getByTestId('save-edit-equipment-btn');
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { equipmentName: 'Robe MegaPointe Moving Head (Gen 2)' },
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
     });
   });
 
-  describe('R2: Consolidated Top Info Card', () => {
+  describe('R2: 1-Click Selectors for Priority & Condition', () => {
     it('renders Row 1 (Priority, Condition, Period) and Row 2 (Serial, Ref, Supplier, Owner•Requester)', async () => {
       const { findByTestId, getByText } = render(<RepairTicketDetailScreen />);
 
@@ -170,9 +202,163 @@ describe('Repair Ticket Details Screen (R1-R5)', () => {
       expect(getByText('SUPP-ROBE-GLOBAL')).toBeTruthy();
       expect(getByText('Alpha Rental Group • David Lighting Tech')).toBeTruthy();
     });
+
+    it('opens 1-tap priority picker and updates priority instantly on option tap', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const priorityBadge = await findByTestId('ticket-priority-badge');
+      await act(async () => {
+        fireEvent.press(priorityBadge);
+      });
+
+      expect(getByTestId('priority-picker-modal')).toBeTruthy();
+
+      // Tap High Priority option
+      const highOption = getByTestId('priority-option-high');
+      await act(async () => {
+        fireEvent.press(highOption);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { priority: 'High' },
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
+
+    it('opens 1-tap condition picker and updates condition instantly on option tap', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const conditionBanner = await findByTestId('ticket-condition-banner');
+      await act(async () => {
+        fireEvent.press(conditionBanner);
+      });
+
+      expect(getByTestId('condition-picker-modal')).toBeTruthy();
+
+      // Tap Available to Use option
+      const availOption = getByTestId('condition-option-available');
+      await act(async () => {
+        fireEvent.press(availOption);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { condition: 'Available to Use' },
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
   });
 
-  describe('R3: 5-Button Status Transition Strip', () => {
+  describe('R3: 1-Tap Text Field Editors (Serial & Internal Reference)', () => {
+    it('opens quick text edit dialog on tapping Serial Number and updates serial', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const serialItem = await findByTestId('ticket-serial-number');
+      await act(async () => {
+        fireEvent.press(serialItem);
+      });
+
+      expect(getByTestId('edit-serial-modal')).toBeTruthy();
+
+      const input = getByTestId('edit-serial-input');
+      fireEvent.changeText(input, 'SN-ROBE-9999-PRO');
+
+      const saveBtn = getByTestId('save-edit-serial-btn');
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { serialNumber: 'SN-ROBE-9999-PRO' },
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
+
+    it('opens quick text edit dialog on tapping Internal Reference and updates reference', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const internalRefItem = await findByTestId('ticket-internal-ref');
+      await act(async () => {
+        fireEvent.press(internalRefItem);
+      });
+
+      expect(getByTestId('edit-internal-ref-modal')).toBeTruthy();
+
+      const input = getByTestId('edit-internal-ref-input');
+      fireEvent.changeText(input, 'REF-NEW-2026-B');
+
+      const saveBtn = getByTestId('save-edit-internal-ref-btn');
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { internalReference: 'REF-NEW-2026-B' },
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
+  });
+
+  describe('R4: Quick Date Range Editor', () => {
+    it('opens date range picker dialog on tapping Repair Period and updates dates with presets', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const periodItem = await findByTestId('ticket-repair-period');
+      await act(async () => {
+        fireEvent.press(periodItem);
+      });
+
+      expect(getByTestId('edit-period-modal')).toBeTruthy();
+
+      // Tap 1 Week Preset
+      const presetWeekBtn = getByTestId('period-preset-1week');
+      fireEvent.press(presetWeekBtn);
+
+      const saveBtn = getByTestId('save-period-btn');
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        expect.objectContaining({
+          repairPeriodStart: expect.any(String),
+          repairPeriodEnd: expect.any(String),
+        }),
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
+  });
+
+  describe('5-Button Status Transition Strip', () => {
     it('renders all 5 canonical statuses in equal single strip and allows transitions', async () => {
       const updateSpy = jest
         .spyOn(repairService, 'updateRepairTicketStatus')
@@ -571,6 +757,413 @@ describe('Repair Ticket Details Screen (R1-R5)', () => {
       expect(getByTestId('photo-thumb-1')).toBeTruthy();
       expect(getByText('report.csv')).toBeTruthy();
     });
+
+    it('disables save button on empty equipment name and displays error banner when update fails', async () => {
+      jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockRejectedValueOnce(new Error('Server rejected equipment name'));
+
+      const { findByTestId, getByTestId, findAllByText } = render(<RepairTicketDetailScreen />);
+
+      const equipNameBtn = await findByTestId('header-equipment-name-btn');
+      await act(async () => {
+        fireEvent.press(equipNameBtn);
+      });
+
+      expect(getByTestId('edit-equipment-modal')).toBeTruthy();
+      const input = getByTestId('edit-equipment-name-input');
+      const saveBtn = getByTestId('save-edit-equipment-btn');
+
+      // Whitespace input disables save button
+      fireEvent.changeText(input, '   ');
+      expect(saveBtn.props.accessibilityState.disabled).toBe(true);
+
+      // Valid text enables save button, but server error shows error banner
+      fireEvent.changeText(input, 'New Valid Name');
+      expect(saveBtn.props.accessibilityState.disabled).toBe(false);
+
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      const errors = await findAllByText('Server rejected equipment name');
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('displays error banner inside period edit modal when invalid date range is submitted', async () => {
+      const { findByTestId, getByTestId, findAllByText } = render(<RepairTicketDetailScreen />);
+
+      const periodItem = await findByTestId('ticket-repair-period');
+      await act(async () => {
+        fireEvent.press(periodItem);
+      });
+
+      expect(getByTestId('edit-period-modal')).toBeTruthy();
+
+      const startInput = getByTestId('input-period-start');
+      const endInput = getByTestId('input-period-end');
+      fireEvent.changeText(startInput, '2026-08-30');
+      fireEvent.changeText(endInput, '2026-08-20');
+
+      const saveBtn = getByTestId('save-period-btn');
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      const errors = await findAllByText('End date must be on or after start date');
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('allows clearing serial number and internal reference to null', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValue({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      // Clear serial number
+      const serialItem = await findByTestId('ticket-serial-number');
+      await act(async () => {
+        fireEvent.press(serialItem);
+      });
+
+      const serialInput = getByTestId('edit-serial-input');
+      fireEvent.changeText(serialInput, '');
+      const saveSerialBtn = getByTestId('save-edit-serial-btn');
+      await act(async () => {
+        fireEvent.press(saveSerialBtn);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { serialNumber: null },
+        expect.anything(),
+        'tenant-alpha'
+      );
+
+      // Clear internal reference
+      const internalRefItem = await findByTestId('ticket-internal-ref');
+      await act(async () => {
+        fireEvent.press(internalRefItem);
+      });
+
+      const refInput = getByTestId('edit-internal-ref-input');
+      fireEvent.changeText(refInput, '');
+      const saveRefBtn = getByTestId('save-edit-internal-ref-btn');
+      await act(async () => {
+        fireEvent.press(saveRefBtn);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { internalReference: null },
+        expect.anything(),
+        'tenant-alpha'
+      );
+    });
+
+    it('exercises all period presets: Today, 3 Days, 2 Weeks, Clear', async () => {
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const periodItem = await findByTestId('ticket-repair-period');
+      await act(async () => {
+        fireEvent.press(periodItem);
+      });
+
+      expect(getByTestId('edit-period-modal')).toBeTruthy();
+
+      const startInput = getByTestId('input-period-start');
+      const endInput = getByTestId('input-period-end');
+
+      // Test Today preset
+      fireEvent.press(getByTestId('period-preset-today'));
+      expect(startInput.props.value).toBeTruthy();
+      expect(endInput.props.value).toBe(startInput.props.value);
+
+      // Test 3 Days preset
+      fireEvent.press(getByTestId('period-preset-3days'));
+      expect(endInput.props.value).not.toBe(startInput.props.value);
+
+      // Test 2 Weeks preset
+      fireEvent.press(getByTestId('period-preset-2weeks'));
+      expect(endInput.props.value).toBeTruthy();
+
+      // Test Clear preset
+      fireEvent.press(getByTestId('period-preset-clear'));
+      expect(startInput.props.value).toBe('');
+      expect(endInput.props.value).toBe('');
+    });
+
+    it('allows selecting None priority from priority picker', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const priorityBadge = await findByTestId('ticket-priority-badge');
+      await act(async () => {
+        fireEvent.press(priorityBadge);
+      });
+
+      expect(getByTestId('priority-picker-modal')).toBeTruthy();
+      const noneOption = getByTestId('priority-option-none');
+      await act(async () => {
+        fireEvent.press(noneOption);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { priority: 'None' },
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
+
+    it('displays error banner inside period edit modal when invalid date format is entered', async () => {
+      const { findByTestId, getByTestId, findAllByText } = render(<RepairTicketDetailScreen />);
+
+      const periodItem = await findByTestId('ticket-repair-period');
+      await act(async () => {
+        fireEvent.press(periodItem);
+      });
+
+      expect(getByTestId('edit-period-modal')).toBeTruthy();
+
+      const startInput = getByTestId('input-period-start');
+      fireEvent.changeText(startInput, 'invalid-date-string');
+
+      const saveBtn = getByTestId('save-period-btn');
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      const errors = await findAllByText('Start date format is invalid (YYYY-MM-DD)');
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('displays error banner inside priority picker modal when priority update fails', async () => {
+      jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockRejectedValueOnce(new Error('Failed to update priority on server'));
+
+      const { findByTestId, getByTestId, findAllByText } = render(<RepairTicketDetailScreen />);
+
+      const priorityBadge = await findByTestId('ticket-priority-badge');
+      await act(async () => {
+        fireEvent.press(priorityBadge);
+      });
+
+      expect(getByTestId('priority-picker-modal')).toBeTruthy();
+      const lowOption = getByTestId('priority-option-low');
+      await act(async () => {
+        fireEvent.press(lowOption);
+      });
+
+      const errors = await findAllByText('Failed to update priority on server');
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('displays error banner inside condition picker modal when condition update fails', async () => {
+      jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockRejectedValueOnce(new Error('Failed to update condition on server'));
+
+      const { findByTestId, getByTestId, findAllByText } = render(<RepairTicketDetailScreen />);
+
+      const conditionBanner = await findByTestId('ticket-condition-banner');
+      await act(async () => {
+        fireEvent.press(conditionBanner);
+      });
+
+      expect(getByTestId('condition-picker-modal')).toBeTruthy();
+      const outOption = getByTestId('condition-option-out-of-service');
+      await act(async () => {
+        fireEvent.press(outOption);
+      });
+
+      const errors = await findAllByText('Failed to update condition on server');
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('cancelling serial and internal ref modals does not trigger update', async () => {
+      const updateFieldsSpy = jest.spyOn(repairService, 'updateRepairTicketFields');
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      // Open serial modal then cancel
+      const serialItem = await findByTestId('ticket-serial-number');
+      await act(async () => {
+        fireEvent.press(serialItem);
+      });
+      expect(getByTestId('edit-serial-modal')).toBeTruthy();
+      fireEvent.press(getByTestId('cancel-edit-serial-btn'));
+
+      // Open internal ref modal then cancel
+      const refItem = await findByTestId('ticket-internal-ref');
+      await act(async () => {
+        fireEvent.press(refItem);
+      });
+      expect(getByTestId('edit-internal-ref-modal')).toBeTruthy();
+      fireEvent.press(getByTestId('cancel-edit-internal-ref-btn'));
+
+      expect(updateFieldsSpy).not.toHaveBeenCalled();
+    });
+
+    it('opens equipment name edit dialog from top-right header edit pencil button', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const headerEditBtn = await findByTestId('header-edit-equipment-btn');
+      expect(headerEditBtn).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.press(headerEditBtn);
+      });
+
+      expect(getByTestId('edit-equipment-modal')).toBeTruthy();
+      const input = getByTestId('edit-equipment-name-input');
+      fireEvent.changeText(input, 'Clay Paky Sharpy Plus');
+
+      await act(async () => {
+        fireEvent.press(getByTestId('save-edit-equipment-btn'));
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        expect.objectContaining({
+          equipmentName: 'Clay Paky Sharpy Plus',
+        }),
+        expect.anything(),
+        'tenant-alpha'
+      );
+    });
+
+    it('opens supplier edit dialog from supplier button card and saves', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const supplierTile = await findByTestId('ticket-supplier');
+      expect(supplierTile).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.press(supplierTile);
+      });
+
+      expect(getByTestId('edit-supplier-modal')).toBeTruthy();
+      const input = getByTestId('edit-supplier-input');
+      fireEvent.changeText(input, 'Stage Electrics UK');
+
+      await act(async () => {
+        fireEvent.press(getByTestId('save-edit-supplier-btn'));
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        expect.objectContaining({
+          supplierId: 'Stage Electrics UK',
+        }),
+        expect.anything(),
+        'tenant-alpha'
+      );
+    });
+
+    it('opens requester and owner edit dialog from owner-requester button card and saves', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const ownerReqTile = await findByTestId('ticket-owner-requester');
+      expect(ownerReqTile).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.press(ownerReqTile);
+      });
+
+      expect(getByTestId('edit-owner-requester-modal')).toBeTruthy();
+      const reqInput = getByTestId('edit-requested-by-input');
+      const ownerInput = getByTestId('edit-owner-input');
+
+      fireEvent.changeText(reqInput, 'Alex Warehouse');
+      fireEvent.changeText(ownerInput, 'Lighting Fleet Division');
+
+      await act(async () => {
+        fireEvent.press(getByTestId('save-edit-owner-requester-btn'));
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        expect.objectContaining({
+          owner: 'Lighting Fleet Division',
+          requestedBy: 'Alex Warehouse',
+        }),
+        expect.anything(),
+        'tenant-alpha'
+      );
+    });
+
+    it('allows all 5 status buttons to be clicked freely without transition graph blocking', async () => {
+      const updateStatusSpy = jest
+        .spyOn(repairService, 'updateRepairTicketStatus')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId } = render(<RepairTicketDetailScreen />);
+
+      // Ticket is initially 'Reported'
+      // Under old restrictions, Reported could not go directly to Completed or Cancel without going through Pending/Under Repair.
+      // Now all non-current status buttons should be enabled and freely clickable.
+      const completedBtn = await findByTestId('status-btn-completed');
+      expect(completedBtn.props.accessibilityState.disabled).toBe(false);
+
+      await act(async () => {
+        fireEvent.press(completedBtn);
+      });
+
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        'Completed',
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha',
+        undefined
+      );
+    });
+
+    it('allows Deferred priority option to be selected from priority picker modal', async () => {
+      const updateFieldsSpy = jest
+        .spyOn(repairService, 'updateRepairTicketFields')
+        .mockResolvedValueOnce({ success: true });
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const priorityBadge = await findByTestId('ticket-priority-badge');
+      await act(async () => {
+        fireEvent.press(priorityBadge);
+      });
+
+      expect(getByTestId('priority-picker-modal')).toBeTruthy();
+      const deferredOption = getByTestId('priority-option-deferred');
+      expect(deferredOption).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.press(deferredOption);
+      });
+
+      expect(updateFieldsSpy).toHaveBeenCalledWith(
+        'ticket-101',
+        { priority: 'Deferred' },
+        expect.objectContaining({ name: 'Alex Technician' }),
+        'tenant-alpha'
+      );
+    });
   });
 });
+
 

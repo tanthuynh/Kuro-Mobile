@@ -105,7 +105,7 @@ export function AddActionNoteModal({
 
             <Pressable
               onPress={handleClose}
-              style={[styles.closeBtn, { backgroundColor: colors.muted }]}
+              style={[styles.closeBtn, { backgroundColor: colors.surface }]}
               testID="close-action-note-modal"
               hitSlop={8}
             >
@@ -115,7 +115,7 @@ export function AddActionNoteModal({
 
           <ScrollView style={styles.bodyScroll} contentContainerStyle={{ padding: spacing.base }}>
             {/* Entry Type Toggle Tabs */}
-            <View style={[styles.typeToggleContainer, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+            <View style={[styles.typeToggleContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <Pressable
                 onPress={() => setEntryType('action')}
                 style={[

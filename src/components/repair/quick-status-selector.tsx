@@ -23,7 +23,6 @@ import {
 import { useTheme } from '@/context/theme-context';
 import {
   REPAIR_STATUS_CONFIG,
-  isValidStatusTransition,
 } from '@/lib/repair-engine';
 import type { RepairStatus } from '@/types/repair';
 
@@ -99,29 +98,28 @@ export function QuickStatusSelector({
           };
 
           const isCurrent = status === currentStatus;
-          const isValid = isValidStatusTransition(currentStatus, status);
 
           return (
             <Pressable
               key={status}
               onPress={() => {
-                if (!disabled && !isUpdating && !isCurrent && isValid) {
+                if (!disabled && !isUpdating && !isCurrent) {
                   onSelectStatus(status);
                 }
               }}
-              disabled={disabled || isUpdating || isCurrent || !isValid}
+              disabled={disabled || isUpdating || isCurrent}
               style={({ pressed }) => [
                 styles.statusButton,
                 {
                   backgroundColor: isCurrent ? config.color : config.bgColor,
                   borderColor: isCurrent ? config.color : config.borderColor,
                 },
-                pressed && !isCurrent && isValid && { opacity: 0.8, transform: [{ scale: 0.98 }] },
-                (!isValid || disabled) && !isCurrent && { opacity: 0.4 },
+                pressed && !isCurrent && { opacity: 0.8, transform: [{ scale: 0.98 }] },
+                disabled && !isCurrent && { opacity: 0.4 },
               ]}
               testID={`status-btn-${status.toLowerCase().replace(/\s+/g, '-')}`}
               accessibilityRole="button"
-              accessibilityState={{ selected: isCurrent, disabled: disabled || !isValid }}
+              accessibilityState={{ selected: isCurrent, disabled: disabled || isCurrent }}
               accessibilityLabel={`Set status to ${status}`}
             >
               {getStatusIcon(status, isCurrent ? '#FFFFFF' : config.color)}

@@ -30,6 +30,7 @@ import {
 import { db, rtdb, storage } from '@/lib/firebase';
 import { parseFirestoreDate } from '@/lib/date-utils';
 import {
+  CANONICAL_REPAIR_STATUSES,
   calculateEquipmentCondition,
   createActionLogEntry,
   isValidStatusTransition,
@@ -39,6 +40,7 @@ import type {
   RepairTicket,
   RepairStatus,
   EquipmentCondition,
+  RepairPriority,
   RepairActionLog,
   RepairNote,
   RepairAttachment,
@@ -541,29 +543,31 @@ export async function updateRepairTicketStatus(
     const ticketRef = doc(db, 'tickets', ticketId);
     const snap = await getDoc(ticketRef);
 
-    if (!snap.exists() || snap.data()?.tenantId !== tenantId) {
+    if (!snap || typeof snap.exists !== 'function' || !snap.exists() || snap.data()?.tenantId !== tenantId) {
       return { success: false, error: 'Repair ticket not found or unauthorized' };
     }
 
-    const currentData = snap.data();
+    const currentData = snap.data() || {};
     const oldStatus: RepairStatus = normalizeRepairStatus(currentData.status || 'Reported');
 
     if (!isValidStatusTransition(oldStatus, newStatus)) {
       return { success: false, error: 'Invalid status transition' };
     }
 
+    const normNewStatus: RepairStatus = normalizeRepairStatus(newStatus);
+
     const newCondition: EquipmentCondition =
-      updatedCondition || calculateEquipmentCondition(newStatus);
+      updatedCondition || calculateEquipmentCondition(normNewStatus);
 
     const actionText = reason && reason.trim()
-      ? `Changed status from "${oldStatus}" to "${newStatus}" (${reason.trim()})`
-      : `Changed status from "${oldStatus}" to "${newStatus}"`;
+      ? `Changed status from "${oldStatus}" to "${normNewStatus}" (${reason.trim()})`
+      : `Changed status from "${oldStatus}" to "${normNewStatus}"`;
 
     const actionEntry = createActionLogEntry(user, actionText, tenantId);
 
     // Atomic Firestore update
     await updateDoc(ticketRef, {
-      status: newStatus,
+      status: normNewStatus,
       condition: newCondition,
       actions: arrayUnion(actionEntry),
       updatedAt: serverTimestamp(),
@@ -576,7 +580,7 @@ export async function updateRepairTicketStatus(
           currentData.equipment.id,
           tenantId,
           newCondition,
-          newStatus,
+          normNewStatus,
           currentData.equipment.serialNumber
         );
       } catch (err) {
@@ -601,6 +605,288 @@ export async function updateRepairTicketStatus(
   } catch (err: any) {
     console.error('[repairService] updateRepairTicketStatus error:', err);
     return { success: false, error: err.message || 'Failed to update status' };
+  }
+}
+
+/**
+ * Input parameters for updating individual repair ticket fields.
+ */
+export interface UpdateRepairTicketFieldsInput {
+  equipment?: Partial<RepairEquipmentRef>;
+  equipmentName?: string;
+  serialNumber?: string | null;
+  internalReference?: string | null;
+  supplierId?: string | null;
+  owner?: string | null;
+  requestedBy?: string | null;
+  priority?: RepairPriority;
+  condition?: EquipmentCondition;
+  repairPeriodStart?: string | null;
+  repairPeriodEnd?: string | null;
+  status?: RepairStatus;
+  [key: string]: any;
+}
+
+/**
+ * Updates individual repair ticket fields (equipment name, serial, internal reference,
+ * priority, condition, repair period, supplier, owner, requester) directly in Firestore,
+ * logging action audits and synchronizing equipment/RTDB availability where needed.
+ */
+export async function updateRepairTicketFields(
+  ticketId: string,
+  fields: UpdateRepairTicketFieldsInput,
+  user: { id?: string; uid?: string; name?: string; email?: string; avatarUrl?: string },
+  tenantId: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!ticketId || !tenantId) {
+    return { success: false, error: 'Ticket ID and Tenant ID are required' };
+  }
+
+  try {
+    const ticketRef = doc(db, 'tickets', ticketId);
+    const snap = await getDoc(ticketRef);
+
+    if (!snap || typeof snap.exists !== 'function' || !snap.exists() || snap.data()?.tenantId !== tenantId) {
+      return { success: false, error: 'Repair ticket not found or unauthorized' };
+    }
+
+    const currentData = snap.data() || {};
+    const updates: Record<string, any> = {
+      updatedAt: serverTimestamp(),
+    };
+    const changes: string[] = [];
+
+    // 1. Equipment changes
+    const updatedEquipment = { ...(currentData.equipment || {}) };
+    let equipmentChanged = false;
+
+    const targetEquipName = fields.equipmentName !== undefined ? fields.equipmentName : fields.equipment?.name;
+    if (targetEquipName !== undefined) {
+      if (typeof targetEquipName !== 'string' || !targetEquipName.trim()) {
+        return { success: false, error: 'Equipment name cannot be empty' };
+      }
+      const trimmedEquip = targetEquipName.trim();
+      if (trimmedEquip !== currentData.equipment?.name) {
+        updatedEquipment.name = trimmedEquip;
+        equipmentChanged = true;
+        changes.push(`equipment name to "${updatedEquipment.name}"`);
+      }
+    }
+
+    const targetSerial = fields.serialNumber !== undefined ? fields.serialNumber : fields.equipment?.serialNumber;
+    if (targetSerial !== undefined) {
+      const normalizedSerial = targetSerial !== null && targetSerial !== undefined ? String(targetSerial).trim() || null : null;
+      const currentSerial = currentData.equipment?.serialNumber ? String(currentData.equipment.serialNumber).trim() : null;
+      if (normalizedSerial !== currentSerial) {
+        updatedEquipment.serialNumber = normalizedSerial;
+        equipmentChanged = true;
+        changes.push(`serial number to "${updatedEquipment.serialNumber || '—'}"`);
+      }
+    }
+
+    if (fields.equipment) {
+      for (const [k, v] of Object.entries(fields.equipment)) {
+        if (k !== 'name' && k !== 'serialNumber' && v !== undefined && v !== currentData.equipment?.[k]) {
+          updatedEquipment[k] = v;
+          equipmentChanged = true;
+        }
+      }
+    }
+
+    if (equipmentChanged) {
+      updates.equipment = updatedEquipment;
+    }
+
+    // 2. Internal Reference
+    if (fields.internalReference !== undefined) {
+      const normalizedRef = fields.internalReference !== null && fields.internalReference !== undefined ? String(fields.internalReference).trim() || null : null;
+      const currentRef = currentData.internalReference ? String(currentData.internalReference).trim() : null;
+      if (normalizedRef !== currentRef) {
+        updates.internalReference = normalizedRef;
+        changes.push(`internal reference to "${updates.internalReference || '—'}"`);
+      }
+    }
+
+    // 2b. Supplier
+    if (fields.supplierId !== undefined) {
+      const normalizedSupplier = fields.supplierId !== null && fields.supplierId !== undefined ? String(fields.supplierId).trim() || null : null;
+      const currentSupplier = currentData.supplierId ? String(currentData.supplierId).trim() : null;
+      if (normalizedSupplier !== currentSupplier) {
+        updates.supplierId = normalizedSupplier;
+        changes.push(`supplier to "${updates.supplierId || '—'}"`);
+      }
+    }
+
+    // 2c. Owner
+    if (fields.owner !== undefined) {
+      const normalizedOwner = fields.owner !== null && fields.owner !== undefined ? String(fields.owner).trim() || null : null;
+      const currentOwner = currentData.owner ? String(currentData.owner).trim() : null;
+      if (normalizedOwner !== currentOwner) {
+        updates.owner = normalizedOwner;
+        changes.push(`owner to "${updates.owner || '—'}"`);
+      }
+    }
+
+    // 2d. Requested By
+    if (fields.requestedBy !== undefined) {
+      const normalizedReq = fields.requestedBy !== null && fields.requestedBy !== undefined ? String(fields.requestedBy).trim() || null : null;
+      const currentReq = currentData.requestedBy ? String(currentData.requestedBy).trim() : null;
+      if (normalizedReq !== currentReq) {
+        updates.requestedBy = normalizedReq || 'Warehouse Tech';
+        changes.push(`requested by to "${updates.requestedBy}"`);
+      }
+    }
+
+    // 3. Priority
+    const VALID_PRIORITIES: RepairPriority[] = ['None', 'Low', 'Medium', 'High', 'Deferred', 'Critical'];
+    if (fields.priority !== undefined) {
+      if (!VALID_PRIORITIES.includes(fields.priority as any)) {
+        return { success: false, error: `Invalid priority level "${fields.priority}"` };
+      }
+      if (fields.priority !== currentData.priority) {
+        updates.priority = fields.priority;
+        changes.push(`priority to "${fields.priority}"`);
+      }
+    }
+
+    // 4. Condition
+    const VALID_CONDITIONS: EquipmentCondition[] = ['Available to Use', 'Out of Service'];
+    if (fields.condition !== undefined) {
+      if (!VALID_CONDITIONS.includes(fields.condition as any)) {
+        return { success: false, error: `Invalid condition "${fields.condition}"` };
+      }
+      if (fields.condition !== currentData.condition) {
+        updates.condition = fields.condition;
+        changes.push(`condition to "${fields.condition}"`);
+      }
+    }
+
+    // 5. Repair Period
+    let normalizedStart: string | null | undefined = undefined;
+    if (fields.repairPeriodStart !== undefined) {
+      if (fields.repairPeriodStart !== null && String(fields.repairPeriodStart).trim() !== '') {
+        const parsedStart = parseFirestoreDate(fields.repairPeriodStart);
+        if (!parsedStart) {
+          return { success: false, error: 'Invalid repair period start date' };
+        }
+        normalizedStart = parsedStart.toISOString();
+      } else {
+        normalizedStart = null;
+      }
+      const currentStart = currentData.repairPeriodStart ? parseFirestoreDate(currentData.repairPeriodStart)?.toISOString() || null : null;
+      if (normalizedStart !== currentStart) {
+        updates.repairPeriodStart = normalizedStart;
+        changes.push('repair period start');
+      }
+    }
+
+    let normalizedEnd: string | null | undefined = undefined;
+    if (fields.repairPeriodEnd !== undefined) {
+      if (fields.repairPeriodEnd !== null && String(fields.repairPeriodEnd).trim() !== '') {
+        const parsedEnd = parseFirestoreDate(fields.repairPeriodEnd);
+        if (!parsedEnd) {
+          return { success: false, error: 'Invalid repair period end date' };
+        }
+        normalizedEnd = parsedEnd.toISOString();
+      } else {
+        normalizedEnd = null;
+      }
+      const currentEnd = currentData.repairPeriodEnd ? parseFirestoreDate(currentData.repairPeriodEnd)?.toISOString() || null : null;
+      if (normalizedEnd !== currentEnd) {
+        updates.repairPeriodEnd = normalizedEnd;
+        changes.push('repair period end');
+      }
+    }
+
+    // Validate that repairPeriodEnd >= repairPeriodStart if both exist
+    const effectiveStartIso = updates.repairPeriodStart !== undefined ? updates.repairPeriodStart : currentData.repairPeriodStart;
+    const effectiveEndIso = updates.repairPeriodEnd !== undefined ? updates.repairPeriodEnd : currentData.repairPeriodEnd;
+    const effectiveStartDate = parseFirestoreDate(effectiveStartIso);
+    const effectiveEndDate = parseFirestoreDate(effectiveEndIso);
+    if (effectiveStartDate && effectiveEndDate && effectiveEndDate.getTime() < effectiveStartDate.getTime()) {
+      return { success: false, error: 'Repair period end date must be on or after start date' };
+    }
+
+    // 6. Status
+    if (fields.status !== undefined) {
+      if (!CANONICAL_REPAIR_STATUSES.includes(fields.status as any)) {
+        return { success: false, error: 'Invalid status transition' };
+      }
+      const normStatus = normalizeRepairStatus(fields.status);
+      const oldStatus: RepairStatus = normalizeRepairStatus(currentData.status || 'Reported');
+      if (!isValidStatusTransition(oldStatus, normStatus)) {
+        return { success: false, error: 'Invalid status transition' };
+      }
+      if (normStatus !== currentData.status) {
+        updates.status = normStatus;
+        changes.push(`status to "${normStatus}"`);
+        // If condition not explicitly specified, auto-sync condition to match new status
+        if (fields.condition === undefined) {
+          const autoCondition = calculateEquipmentCondition(normStatus);
+          if (autoCondition !== currentData.condition) {
+            updates.condition = autoCondition;
+          }
+        }
+      }
+    }
+
+    // Audit log if any changes detected
+    if (changes.length > 0) {
+      const actionText = `Updated ${changes.join(', ')}`;
+      const actionEntry = createActionLogEntry(user, actionText, tenantId);
+      updates.actions = arrayUnion(actionEntry);
+    }
+
+    await updateDoc(ticketRef, updates);
+
+    // Sync /equipment condition & RTDB availability ledger if condition, status, or serial changed
+    if (
+      updates.condition ||
+      updates.status ||
+      (equipmentChanged && updatedEquipment.serialNumber !== currentData.equipment?.serialNumber)
+    ) {
+      const finalCondition: EquipmentCondition =
+        updates.condition ||
+        (updates.status ? calculateEquipmentCondition(updates.status) : currentData.condition) ||
+        calculateEquipmentCondition(updates.status || currentData.status);
+      const finalStatus: RepairStatus = updates.status || currentData.status;
+      const equipId = updatedEquipment.id || currentData.equipment?.id;
+      const serialNo =
+        updatedEquipment.serialNumber !== undefined
+          ? updatedEquipment.serialNumber
+          : currentData.equipment?.serialNumber;
+
+      if (equipId) {
+        try {
+          await updateEquipmentRepairCondition(
+            equipId,
+            tenantId,
+            finalCondition,
+            finalStatus,
+            serialNo
+          );
+        } catch (err) {
+          console.warn('[repairService] Equipment condition sync warning in updateRepairTicketFields:', err);
+        }
+      }
+
+      try {
+        await syncRepairToRtdbLedger(
+          tenantId,
+          ticketId,
+          equipId,
+          finalCondition,
+          updatedEquipment.quantity || currentData.equipment?.quantity || 1
+        );
+      } catch (err) {
+        console.warn('[repairService] RTDB ledger sync warning in updateRepairTicketFields:', err);
+      }
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('[repairService] updateRepairTicketFields error:', err);
+    return { success: false, error: err.message || 'Failed to update ticket fields' };
   }
 }
 

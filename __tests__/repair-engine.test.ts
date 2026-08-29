@@ -349,12 +349,21 @@ describe('repair-engine', () => {
       expect(isValidStatusTransition('Completed', 'Under Repair')).toBe(true);
       expect(isValidStatusTransition('Completed', 'Pending')).toBe(true);
       expect(isValidStatusTransition('Completed', 'Reported')).toBe(true);
+      expect(isValidStatusTransition('Completed', 'Cancel')).toBe(true);
     });
 
     it('ENG-TRN-04: Reported transitions are valid (Tier 1)', () => {
       expect(isValidStatusTransition('Reported', 'Pending')).toBe(true);
       expect(isValidStatusTransition('Reported', 'Under Repair')).toBe(true);
       expect(isValidStatusTransition('Reported', 'Completed')).toBe(true);
+      expect(isValidStatusTransition('Reported', 'Cancel')).toBe(true);
+    });
+
+    it('ENG-TRN-05: Cancel transitions are valid to all canonical statuses (Tier 1)', () => {
+      expect(isValidStatusTransition('Cancel', 'Reported')).toBe(true);
+      expect(isValidStatusTransition('Cancel', 'Pending')).toBe(true);
+      expect(isValidStatusTransition('Cancel', 'Under Repair')).toBe(true);
+      expect(isValidStatusTransition('Cancel', 'Completed')).toBe(true);
     });
 
     it('ENG-TRN-06: Identity self-transitions are valid and idempotent (Tier 1)', () => {
@@ -392,6 +401,12 @@ describe('repair-engine', () => {
       const reportedQuick = getQuickStatusOptions('Reported');
       expect(reportedQuick).toContain('Pending');
       expect(reportedQuick).toContain('Under Repair');
+
+      const completedQuick = getQuickStatusOptions('Completed');
+      expect(completedQuick).toContain('Pending');
+      expect(completedQuick).toContain('Under Repair');
+      expect(completedQuick).toContain('Reported');
+      expect(completedQuick).toContain('Cancel');
     });
   });
 

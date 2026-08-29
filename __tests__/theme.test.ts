@@ -15,14 +15,14 @@ describe('Kuro Mobile Theme System & Accessibility Tokens', () => {
     });
 
     it('operational status colors match Kuro Web specifications', () => {
-      expect(darkColors.status.events).toBe('#60A5FA');
+      expect(darkColors.status.events).toBe('#30ABE8');
       expect(darkColors.status.logistics).toBe('#16A34A');
-      expect(darkColors.status.dispatch).toBe('#EAB308');
-      expect(darkColors.status.repairs).toBe('#EF4444');
+      expect(darkColors.status.dispatch).toBe('#FACC15');
+      expect(darkColors.status.repairs).toBe('#D92929');
 
-      expect(lightColors.status.events).toBe('#60A5FA');
+      expect(lightColors.status.events).toBe('#3B82F6');
       expect(lightColors.status.logistics).toBe('#16A34A');
-      expect(lightColors.status.dispatch).toBe('#EAB308');
+      expect(lightColors.status.dispatch).toBe('#FACC15');
       expect(lightColors.status.repairs).toBe('#EF4444');
     });
 

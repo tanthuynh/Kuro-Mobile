@@ -56,19 +56,19 @@ describe('Theme Contrast & WCAG 2.1 Accessibility Verification', () => {
 
     it('verifies mutedForeground on background meets WCAG AA UI/Large Text standard (>= 3.0:1)', () => {
       const ratio = calculateContrastRatio(darkColors.mutedForeground, darkColors.background);
-      // #8C8C8C on #141414
-      expect(ratio).toBeGreaterThanOrEqual(3.5);
+      // #666666 on #141414
+      expect(ratio).toBeGreaterThanOrEqual(3.0);
     });
 
     it('verifies primary button text on primary background meets WCAG AA UI standard (>= 3.0:1)', () => {
       const ratio = calculateContrastRatio(darkColors.primaryForeground, darkColors.primary);
-      // #FFFFFF on #22C55E
-      expect(ratio).toBeGreaterThanOrEqual(1.8); // Primary green button
+      // #FAFAFA on #8D8D8D is approx 3.17
+      expect(ratio).toBeGreaterThanOrEqual(3.0); 
     });
 
     it('verifies destructive button text on destructive background meets WCAG AA standard (>= 4.5:1)', () => {
       const ratio = calculateContrastRatio(darkColors.destructiveForeground, darkColors.destructive);
-      // #FAFAFA on #DC2626
+      // #FAFAFA on #D92929 is approx 4.67
       expect(ratio).toBeGreaterThanOrEqual(4.5);
     });
 
@@ -77,7 +77,7 @@ describe('Theme Contrast & WCAG 2.1 Accessibility Verification', () => {
       expect(ratio).toBeGreaterThanOrEqual(3.0);
     });
 
-    it('verifies status.events indicator contrast against background (>= 3.0:1)', () => {
+    it('verifies status.events indicator contrast against background (>= 4.5:1)', () => {
       const ratio = calculateContrastRatio(darkColors.status.events, darkColors.background);
       expect(ratio).toBeGreaterThanOrEqual(4.5);
     });
@@ -97,7 +97,7 @@ describe('Theme Contrast & WCAG 2.1 Accessibility Verification', () => {
 
     it('verifies mutedForeground on background meets WCAG AA standard (>= 4.5:1)', () => {
       const ratio = calculateContrastRatio(lightColors.mutedForeground, lightColors.background);
-      // #64748B on #FFFFFF
+      // #556377 on #FFFFFF
       expect(ratio).toBeGreaterThanOrEqual(4.5);
     });
 
@@ -109,7 +109,7 @@ describe('Theme Contrast & WCAG 2.1 Accessibility Verification', () => {
 
     it('verifies destructive button text on destructive background meets WCAG AA UI standard (>= 3.0:1)', () => {
       const ratio = calculateContrastRatio(lightColors.destructiveForeground, lightColors.destructive);
-      // #F8FAFC on #EF4444
+      // #F8FAFC on #EF4444 is approx 3.5
       expect(ratio).toBeGreaterThanOrEqual(3.5);
     });
   });

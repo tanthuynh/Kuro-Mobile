@@ -50,22 +50,22 @@ export const darkColors: ThemeColors = {
   background: '#141414',
   surface: '#1A1A1A',
   card: '#1F1F1F',
-  cardForeground: '#E5E5E5',
-  foreground: '#E5E5E5',
+  cardForeground: '#E6E6E6',
+  foreground: '#E6E6E6',
   popover: '#1A1A1A',
-  popoverForeground: '#E5E5E5',
+  popoverForeground: '#E6E6E6',
   muted: '#1F471F',
-  mutedForeground: '#8C8C8C',
+  mutedForeground: '#666666',
   border: '#303030',
   input: '#303030',
   ring: '#CBD5E1',
-  primary: '#22C55E',
-  primaryForeground: '#FFFFFF',
+  primary: '#8D8D8D',
+  primaryForeground: '#FAFAFA',
   secondary: '#1F471F',
   secondaryForeground: '#FAFAFA',
-  accent: 'rgba(32, 96, 32, 0.90)',
+  accent: '#206020',
   accentForeground: '#FAFAFA',
-  destructive: '#DC2626',
+  destructive: '#D92929',
   destructiveForeground: '#FAFAFA',
   brandGreen: '#206020',
   brandGreenMuted: 'rgba(32, 96, 32, 0.35)',
@@ -78,12 +78,12 @@ export const darkColors: ThemeColors = {
   },
   status: {
     online: '#16A34A',
-    offline: '#EF4444',
-    degraded: '#EAB308',
-    events: '#60A5FA',
-    logistics: '#16A34A',
-    dispatch: '#EAB308',
-    repairs: '#EF4444',
+    offline: '#D92929',
+    degraded: '#FACC15',
+    events: '#30ABE8', // mapped from info
+    logistics: '#16A34A', // mapped from success
+    dispatch: '#FACC15', // mapped from warning
+    repairs: '#D92929', // mapped from destructive
   },
 };
 
@@ -96,7 +96,7 @@ export const lightColors: ThemeColors = {
   popover: '#FFFFFF',
   popoverForeground: '#020817',
   muted: '#F1F5F9',
-  mutedForeground: '#64748B',
+  mutedForeground: '#556377',
   border: '#E2E8F0',
   input: '#E2E8F0',
   ring: '#020817',
@@ -118,13 +118,13 @@ export const lightColors: ThemeColors = {
     green5: 'rgba(32, 96, 32, 0.90)',
   },
   status: {
-    online: '#16A34A',
-    offline: '#EF4444',
-    degraded: '#EAB308',
-    events: '#60A5FA',
-    logistics: '#16A34A',
-    dispatch: '#EAB308',
-    repairs: '#EF4444',
+    online: '#16A34A', // success
+    offline: '#EF4444', // destructive
+    degraded: '#FACC15', // warning
+    events: '#3B82F6', // mapped from info
+    logistics: '#16A34A', // mapped from success
+    dispatch: '#FACC15', // mapped from warning
+    repairs: '#EF4444', // mapped from destructive
   },
 };
 

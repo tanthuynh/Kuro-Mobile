@@ -10,6 +10,8 @@ import {
   getRepairTicket,
   createRepairTicket,
   updateRepairTicketStatus,
+  updateRepairTicketFields,
+  type UpdateRepairTicketFieldsInput,
   appendRepairAction,
   appendRepairNote,
   updateRepairNote,
@@ -23,6 +25,7 @@ import {
   calculateEquipmentCondition,
   normalizeRepairStatus,
 } from '@/lib/repair-engine';
+import { parseFirestoreDate } from '@/lib/date-utils';
 import type {
   RepairTicket,
   RepairStatus,
@@ -182,6 +185,24 @@ export function useTickets() {
     [tenantId, user]
   );
 
+  const handleUpdateTicketFields = useCallback(
+    async (ticketId: string, fields: UpdateRepairTicketFieldsInput) => {
+      if (!tenantId) throw new Error('Cannot update ticket fields: tenantId missing');
+      const author = {
+        id: user?.id || 'unknown',
+        name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
+      };
+      const result = await updateRepairTicketFields(ticketId, fields, author, tenantId);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update ticket fields');
+      }
+      return result;
+    },
+    [tenantId, user]
+  );
+
   return {
     tickets,
     filteredTickets,
@@ -200,6 +221,8 @@ export function useTickets() {
     // Actions
     createTicket: handleCreateTicket,
     updateStatus: handleUpdateStatus,
+    updateRepairTicketFields: handleUpdateTicketFields,
+    updateTicketFields: handleUpdateTicketFields,
     appendAction: handleAppendAction,
     appendNote: handleAppendNote,
   };
@@ -242,9 +265,105 @@ export function useSingleTicket(ticketId: string) {
       const author = {
         id: user?.id || 'unknown',
         name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
       };
       await updateRepairTicketStatus(ticketId, newStatus, author, tenantId, reason);
       await fetchTicket();
+    },
+    [ticketId, tenantId, user, fetchTicket]
+  );
+
+  const handleUpdateFields = useCallback(
+    async (fields: UpdateRepairTicketFieldsInput) => {
+      if (!ticketId || !tenantId) throw new Error('Missing ticket ID or tenant ID');
+      const author = {
+        id: user?.id || 'unknown',
+        name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
+      };
+
+      // Optimistic local state update
+      setTicket((prev) => {
+        if (!prev) return prev;
+        const updatedEquipment = { ...prev.equipment };
+        if (fields.equipment) {
+          Object.assign(updatedEquipment, fields.equipment);
+        }
+        if (fields.equipmentName !== undefined && typeof fields.equipmentName === 'string') {
+          updatedEquipment.name = fields.equipmentName.trim();
+        }
+        if (fields.serialNumber !== undefined) {
+          updatedEquipment.serialNumber = fields.serialNumber ? String(fields.serialNumber).trim() : null;
+        }
+
+        const nextStatus = fields.status !== undefined ? normalizeRepairStatus(fields.status) : prev.status;
+        const nextCondition = fields.condition !== undefined
+          ? fields.condition
+          : fields.status !== undefined
+          ? calculateEquipmentCondition(nextStatus)
+          : prev.condition;
+
+        const nextTicket: RepairTicket = {
+          ...prev,
+          equipment: updatedEquipment as any,
+          internalReference:
+            fields.internalReference !== undefined
+              ? fields.internalReference
+                ? String(fields.internalReference).trim()
+                : null
+              : prev.internalReference,
+          supplierId:
+            fields.supplierId !== undefined
+              ? fields.supplierId
+                ? String(fields.supplierId).trim()
+                : null
+              : prev.supplierId,
+          owner:
+            fields.owner !== undefined
+              ? fields.owner
+                ? String(fields.owner).trim()
+                : null
+              : prev.owner,
+          requestedBy:
+            fields.requestedBy !== undefined
+              ? fields.requestedBy
+                ? String(fields.requestedBy).trim()
+                : 'Warehouse Tech'
+              : prev.requestedBy,
+          priority: fields.priority !== undefined ? fields.priority : prev.priority,
+          condition: nextCondition,
+          repairPeriodStart:
+            fields.repairPeriodStart !== undefined
+              ? fields.repairPeriodStart
+                ? parseFirestoreDate(fields.repairPeriodStart)?.toISOString() || null
+                : null
+              : prev.repairPeriodStart,
+          repairPeriodEnd:
+            fields.repairPeriodEnd !== undefined
+              ? fields.repairPeriodEnd
+                ? parseFirestoreDate(fields.repairPeriodEnd)?.toISOString() || null
+                : null
+              : prev.repairPeriodEnd,
+          status: nextStatus,
+        };
+        return nextTicket;
+      });
+
+      try {
+        const result = await updateRepairTicketFields(ticketId, fields, author, tenantId);
+        if (!result.success) {
+          await fetchTicket();
+          throw new Error(result.error || 'Failed to update ticket fields');
+        }
+        await fetchTicket();
+        return result;
+      } catch (err: any) {
+        console.error('[useSingleTicket] updateRepairTicketFields error:', err);
+        await fetchTicket();
+        throw err;
+      }
     },
     [ticketId, tenantId, user, fetchTicket]
   );
@@ -255,6 +374,8 @@ export function useSingleTicket(ticketId: string) {
       const author = {
         id: user?.id || 'unknown',
         name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
       };
       await appendRepairAction(ticketId, actionText, author, tenantId);
       await fetchTicket();
@@ -268,6 +389,8 @@ export function useSingleTicket(ticketId: string) {
       const author = {
         id: user?.id || 'unknown',
         name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
       };
       await appendRepairNote(ticketId, noteText, author, tenantId);
       await fetchTicket();
@@ -281,6 +404,8 @@ export function useSingleTicket(ticketId: string) {
       const author = {
         id: user?.id || 'unknown',
         name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
       };
       await updateRepairNote(ticketId, noteId, content, author, tenantId);
       await fetchTicket();
@@ -294,6 +419,8 @@ export function useSingleTicket(ticketId: string) {
       const author = {
         id: user?.id || 'unknown',
         name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
       };
       await deleteRepairNote(ticketId, noteId, author, tenantId);
       await fetchTicket();
@@ -307,6 +434,8 @@ export function useSingleTicket(ticketId: string) {
       const author = {
         id: user?.id || 'unknown',
         name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
       };
       const result = await addRepairAttachment(ticketId, attachment, author, tenantId);
       await fetchTicket();
@@ -321,6 +450,8 @@ export function useSingleTicket(ticketId: string) {
       const author = {
         id: user?.id || 'unknown',
         name: user?.name || user?.email || 'Technician',
+        email: user?.email,
+        avatarUrl: user?.avatarUrl,
       };
       await deleteRepairAttachment(ticketId, attachmentId, author, tenantId);
       await fetchTicket();
@@ -334,6 +465,8 @@ export function useSingleTicket(ticketId: string) {
     error,
     refresh: fetchTicket,
     updateStatus: handleUpdateStatus,
+    updateRepairTicketFields: handleUpdateFields,
+    updateTicketFields: handleUpdateFields,
     appendAction: handleAppendAction,
     appendNote: handleAppendNote,
     updateNote: handleUpdateNote,

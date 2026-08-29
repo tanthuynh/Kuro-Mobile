@@ -14,6 +14,7 @@ import {
   generateRepairNumber,
   createRepairTicket,
   updateRepairTicketStatus,
+  updateRepairTicketFields,
   appendRepairAction,
   appendRepairNote,
   appendRepairAttachment,
@@ -639,6 +640,74 @@ describe('repair-service', () => {
       expect(res.error).toBe('Repair ticket not found or unauthorized');
       expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
     });
+
+    it('SVC-UPD-05: Safely handles null or undefined snapshot without throwing TypeError', async () => {
+      mockFirestore.getDoc.mockResolvedValue(undefined);
+
+      const res = await updateRepairTicketStatus(
+        'ticket-nonexistent',
+        'Completed',
+        { name: 'Tech' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(false);
+      expect(res.error).toBe('Repair ticket not found or unauthorized');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-UPD-06: Allows free direct transition from Reported directly to Cancel or Completed', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          status: 'Reported',
+          equipment: { id: 'eq-1', quantity: 1 },
+        }),
+      });
+
+      const resCancel = await updateRepairTicketStatus(
+        'ticket-1',
+        'Cancel',
+        { name: 'Tech' },
+        'tenant-alpha'
+      );
+      expect(resCancel.success).toBe(true);
+
+      const resCompleted = await updateRepairTicketStatus(
+        'ticket-1',
+        'Completed',
+        { name: 'Tech' },
+        'tenant-alpha'
+      );
+      expect(resCompleted.success).toBe(true);
+    });
+
+    it('SVC-UPD-07: Normalizes lowercase status input to canonical casing', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          status: 'Reported',
+          equipment: { id: 'eq-1', quantity: 1 },
+        }),
+      });
+
+      const res = await updateRepairTicketStatus(
+        'ticket-1',
+        'under repair' as any,
+        { name: 'Tech' },
+        'tenant-alpha'
+      );
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          status: 'Under Repair',
+          condition: 'Out of Service',
+        })
+      );
+    });
   });
 
   // ==========================================================================
@@ -804,4 +873,500 @@ describe('repair-service', () => {
       );
     });
   });
+
+  // ==========================================================================
+  // 10. DIRECT FIELD UPDATES (SVC-FLD)
+  // ==========================================================================
+  describe('updateRepairTicketFields', () => {
+    it('SVC-FLD-01: updates equipment name and serial number with audit action log', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          equipment: { id: 'eq-1', name: 'Old Moving Light', serialNumber: 'SN-OLD-01' },
+          status: 'Under Repair',
+          condition: 'Out of Service',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        {
+          equipmentName: 'New Robe BMFL Profile',
+          serialNumber: 'SN-NEW-99',
+        },
+        { id: 'u-1', name: 'Alex Tech' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          equipment: expect.objectContaining({
+            id: 'eq-1',
+            name: 'New Robe BMFL Profile',
+            serialNumber: 'SN-NEW-99',
+          }),
+          actions: expect.anything(),
+        })
+      );
+    });
+
+    it('SVC-FLD-02: updates priority, condition, internal reference, and dates', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          equipment: { id: 'eq-1', name: 'Console', quantity: 1 },
+          priority: 'Low',
+          condition: 'Out of Service',
+          internalReference: 'REF-OLD',
+          status: 'Under Repair',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        {
+          priority: 'Critical',
+          condition: 'Available to Use',
+          internalReference: 'REF-NEW-2026',
+          repairPeriodStart: '2026-08-25T00:00:00.000Z',
+          repairPeriodEnd: '2026-08-28T00:00:00.000Z',
+        },
+        { id: 'u-1', name: 'Alex Tech' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          priority: 'Critical',
+          condition: 'Available to Use',
+          internalReference: 'REF-NEW-2026',
+          repairPeriodStart: '2026-08-25T00:00:00.000Z',
+          repairPeriodEnd: '2026-08-28T00:00:00.000Z',
+        })
+      );
+
+      // Verify RTDB ledger release on condition Available to Use
+      expect(mockRtdb.set).toHaveBeenCalledWith(expect.anything(), null);
+    });
+
+    it('SVC-FLD-03: rejects unauthorized or non-existent ticket field updates', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => false,
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-missing',
+        { priority: 'High' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(false);
+      expect(res.error).toBe('Repair ticket not found or unauthorized');
+
+      const resNoTenant = await updateRepairTicketFields(
+        '',
+        { priority: 'High' },
+        { name: 'Alex' },
+        ''
+      );
+      expect(resNoTenant.success).toBe(false);
+    });
+
+    it('SVC-FLD-04: rejects empty or whitespace-only equipment names', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          equipment: { id: 'eq-1', name: 'Robe BMFL' },
+        }),
+      });
+
+      const resEmpty = await updateRepairTicketFields(
+        'ticket-101',
+        { equipmentName: '   ' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(resEmpty.success).toBe(false);
+      expect(resEmpty.error).toBe('Equipment name cannot be empty');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-FLD-05: rejects invalid repair period where end date is before start date', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          equipment: { id: 'eq-1', name: 'Robe BMFL' },
+          repairPeriodStart: '2026-08-25T00:00:00.000Z',
+          repairPeriodEnd: '2026-08-28T00:00:00.000Z',
+        }),
+      });
+
+      const resInvalid = await updateRepairTicketFields(
+        'ticket-101',
+        {
+          repairPeriodStart: '2026-08-30T00:00:00.000Z',
+          repairPeriodEnd: '2026-08-20T00:00:00.000Z',
+        },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(resInvalid.success).toBe(false);
+      expect(resInvalid.error).toBe('Repair period end date must be on or after start date');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-FLD-06: rejects ticket belonging to another tenant', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-other',
+          equipment: { id: 'eq-1', name: 'Robe BMFL' },
+        }),
+      });
+
+      const resCrossTenant = await updateRepairTicketFields(
+        'ticket-cross',
+        { priority: 'Critical' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(resCrossTenant.success).toBe(false);
+      expect(resCrossTenant.error).toBe('Repair ticket not found or unauthorized');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-FLD-07: avoids false audit actions when fields are identical or normalized nulls', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          equipment: { id: 'eq-1', name: 'Robe BMFL', serialNumber: null },
+          internalReference: null,
+          priority: 'High',
+          repairPeriodStart: '2026-08-25T00:00:00.000Z',
+          repairPeriodEnd: '2026-08-28T00:00:00.000Z',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        {
+          equipmentName: 'Robe BMFL',
+          serialNumber: null,
+          internalReference: '',
+          priority: 'High',
+          repairPeriodStart: '2026-08-25T00:00:00.000Z',
+          repairPeriodEnd: '2026-08-28T00:00:00.000Z',
+        },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.not.objectContaining({
+          actions: expect.anything(),
+        })
+      );
+    });
+
+    it('SVC-FLD-08: clears serial number to null and passes null to equipment condition sync (no resurrection)', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          equipment: { id: 'eq-1', name: 'Robe BMFL', serialNumber: 'SN-ROBE-OLD' },
+          status: 'Under Repair',
+          condition: 'Out of Service',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        { serialNumber: null },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          equipment: expect.objectContaining({ serialNumber: null }),
+        })
+      );
+    });
+
+    it('SVC-FLD-09: successfully updates priority to None', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          priority: 'High',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        { priority: 'None' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          priority: 'None',
+        })
+      );
+    });
+
+    it('SVC-FLD-10: preserves existing equipment properties when updating partial equipment object', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          equipment: {
+            id: 'eq-1',
+            name: 'Robe BMFL',
+            serialNumber: 'SN-001',
+            knownLocation: 'Rack A',
+            barcode: 'BAR-001',
+          },
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        {
+          equipment: {
+            knownLocation: 'Rack B / Floor 2',
+          },
+        },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          equipment: {
+            id: 'eq-1',
+            name: 'Robe BMFL',
+            serialNumber: 'SN-001',
+            knownLocation: 'Rack B / Floor 2',
+            barcode: 'BAR-001',
+          },
+        })
+      );
+    });
+
+    it('SVC-FLD-11: rejects invalid priority level values', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          priority: 'Medium',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        { priority: 'UltraUrgent' as any },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('Invalid priority level');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-FLD-12: rejects invalid condition values', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          condition: 'Out of Service',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        { condition: 'Destroyed' as any },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('Invalid condition');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-FLD-13: rejects invalid date formats for repairPeriodStart and repairPeriodEnd', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+        }),
+      });
+
+      const resInvalidStart = await updateRepairTicketFields(
+        'ticket-101',
+        { repairPeriodStart: 'invalid-start-date' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+      expect(resInvalidStart.success).toBe(false);
+      expect(resInvalidStart.error).toBe('Invalid repair period start date');
+
+      const resInvalidEnd = await updateRepairTicketFields(
+        'ticket-101',
+        { repairPeriodEnd: 'invalid-end-date' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+      expect(resInvalidEnd.success).toBe(false);
+      expect(resInvalidEnd.error).toBe('Invalid repair period end date');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-FLD-14: auto-derives condition to Available to Use and releases RTDB lock when status updates to Completed without explicit condition', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          status: 'Under Repair',
+          condition: 'Out of Service',
+          equipment: { id: 'eq-1', quantity: 1 },
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        { status: 'Completed' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          status: 'Completed',
+          condition: 'Available to Use',
+        })
+      );
+      expect(mockRtdb.set).toHaveBeenCalledWith(expect.anything(), null);
+    });
+
+    it('SVC-FLD-15: rejects illegal status transitions in updateRepairTicketFields', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          status: 'Completed',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        { status: 'InvalidStatus' as any },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(false);
+      expect(res.error).toBe('Invalid status transition');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-FLD-16: safely coerces numeric serial number and internal reference without throwing', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          equipment: { id: 'eq-1', serialNumber: '100' },
+          internalReference: '200',
+        }),
+      });
+
+      const res = await updateRepairTicketFields(
+        'ticket-101',
+        {
+          serialNumber: 9999 as any,
+          internalReference: 8888 as any,
+        },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          equipment: expect.objectContaining({ serialNumber: '9999' }),
+          internalReference: '8888',
+        })
+      );
+    });
+
+    it('SVC-FLD-17: safely handles null or undefined snapshot without throwing TypeError', async () => {
+      mockFirestore.getDoc.mockResolvedValue(null);
+
+      const res = await updateRepairTicketFields(
+        'ticket-nonexistent',
+        { equipmentName: 'New Name' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+
+      expect(res.success).toBe(false);
+      expect(res.error).toBe('Repair ticket not found or unauthorized');
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('SVC-FLD-18: allows direct status transition from Reported to Cancel or Completed in updateRepairTicketFields', async () => {
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          status: 'Reported',
+          equipment: { id: 'eq-1', quantity: 1 },
+        }),
+      });
+
+      const resCancel = await updateRepairTicketFields(
+        'ticket-101',
+        { status: 'Cancel' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+      expect(resCancel.success).toBe(true);
+
+      const resCompleted = await updateRepairTicketFields(
+        'ticket-101',
+        { status: 'Completed' },
+        { name: 'Alex' },
+        'tenant-alpha'
+      );
+      expect(resCompleted.success).toBe(true);
+    });
+  });
 });
+

@@ -190,7 +190,7 @@ export const QUICK_STATUS_OPTIONS: Record<RepairStatus, RepairStatus[]> = {
   'Reported': ['Pending', 'Under Repair', 'Completed', 'Cancel'],
   'Pending': ['Under Repair', 'Completed', 'Reported', 'Cancel'],
   'Under Repair': ['Completed', 'Pending', 'Reported', 'Cancel'],
-  'Completed': ['Under Repair', 'Reported', 'Cancel'],
+  'Completed': ['Under Repair', 'Pending', 'Reported', 'Cancel'],
   'Cancel': ['Reported', 'Pending', 'Under Repair', 'Completed'],
 };
 

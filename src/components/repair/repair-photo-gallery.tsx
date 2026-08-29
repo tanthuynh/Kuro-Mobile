@@ -60,7 +60,7 @@ export function RepairPhotoGallery({
           <Text style={[styles.title, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
             {title}
           </Text>
-          <View style={[styles.countBadge, { backgroundColor: colors.muted }]}>
+          <View style={[styles.countBadge, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
             <Text style={[styles.countText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
               {photos.length}
             </Text>
