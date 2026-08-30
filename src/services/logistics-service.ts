@@ -449,6 +449,18 @@ export async function updateJobLocation(
     trackingJobId: entryId,
     updatedAt: serverTimestamp(),
   });
+
+  // Breadcrumb tracking: Add location to history subcollection
+  try {
+    const historyRef = collection(docRef, 'location_history');
+    const historyDocRef = doc(historyRef, String(payloadLocation.timestamp));
+    await setDoc(historyDocRef, {
+      ...payloadLocation,
+      savedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    console.error('Failed to log location history breadcrumb', err);
+  }
 }
 
 /**

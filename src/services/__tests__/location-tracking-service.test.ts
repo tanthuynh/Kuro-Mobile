@@ -150,13 +150,14 @@ describe('Location Tracking Service (Milestone 3)', () => {
         LOCATION_TASK_NAME,
         expect.objectContaining({
           accuracy: Location.Accuracy.High,
-          timeInterval: 10000,
-          distanceInterval: 10,
+          timeInterval: 120000,
+          distanceInterval: 100,
           showsBackgroundLocationIndicator: true,
           foregroundService: {
             notificationTitle: 'Kuro Logistics Tracking',
             notificationBody: 'Live route tracking active',
           },
+          pausesUpdatesAutomatically: true,
         })
       );
 
@@ -170,6 +171,27 @@ describe('Location Tracking Service (Milestone 3)', () => {
           driverId: 'driver-99',
           driverName: 'John Doe',
           jobId,
+        })
+      );
+    });
+
+    it('respects custom tracking options when provided', async () => {
+      const jobId = 'job-custom-opts';
+      const tenantId = 'tenant-custom';
+
+      const success = await startTrackingJob(jobId, tenantId, {
+        timeInterval: 60000,
+        distanceInterval: 50,
+        pausesUpdatesAutomatically: false,
+      });
+
+      expect(success).toBe(true);
+      expect(Location.startLocationUpdatesAsync).toHaveBeenCalledWith(
+        LOCATION_TASK_NAME,
+        expect.objectContaining({
+          timeInterval: 60000,
+          distanceInterval: 50,
+          pausesUpdatesAutomatically: false,
         })
       );
     });
@@ -244,6 +266,45 @@ describe('Location Tracking Service (Milestone 3)', () => {
         expect.objectContaining({
           latitude: -33.8688,
           longitude: 151.2093,
+        })
+      );
+    });
+
+    it('falls back to last known position if initial position fix exceeds 50m accuracy threshold', async () => {
+      (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValueOnce({
+        coords: {
+          latitude: -33.9999,
+          longitude: 151.9999,
+          altitude: 0,
+          accuracy: 150, // Inaccurate initial fix
+          heading: 0,
+          speed: 0,
+        },
+        timestamp: 1718000000000,
+      });
+
+      (Location.getLastKnownPositionAsync as jest.Mock).mockResolvedValueOnce({
+        coords: {
+          latitude: -33.8688,
+          longitude: 151.2093,
+          altitude: 10,
+          accuracy: 15, // Good cached fix
+          heading: 0,
+          speed: 0,
+        },
+        timestamp: 1718000000000,
+      });
+
+      const success = await startTrackingJob('job-fallback-accuracy', 'tenant-alpha');
+      expect(success).toBe(true);
+      expect(Location.getCurrentPositionAsync).toHaveBeenCalledTimes(1);
+      expect(Location.getLastKnownPositionAsync).toHaveBeenCalledTimes(1);
+      expect(LogisticsService.updateJobLocation).toHaveBeenCalledWith(
+        'job-fallback-accuracy',
+        expect.objectContaining({
+          latitude: -33.8688,
+          longitude: 151.2093,
+          accuracy: 15,
         })
       );
     });
@@ -435,6 +496,406 @@ describe('Location Tracking Service (Milestone 3)', () => {
     it('returns null if handleLocationUpdate is passed invalid location object', async () => {
       const res = await handleLocationUpdate(null as any);
       expect(res).toBeNull();
+    });
+
+    it('discards location pings with accuracy > 50 meters and avoids Firestore writes and listener calls', async () => {
+      const jobId = 'job-accuracy-test';
+      await startTrackingJob(jobId, 'tenant-alpha');
+
+      // Clear mock calls from initial position fetch in startTrackingJob
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+      const listenerSpy = jest.fn();
+      addLocationListener(listenerSpy);
+
+      const inaccurateLocation: Location.LocationObject = {
+        coords: {
+          latitude: -33.8600,
+          longitude: 151.2100,
+          altitude: 10,
+          accuracy: 50.1, // > 50 meters
+          heading: 0,
+          speed: 0,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718000800000,
+      };
+
+      const result = await handleLocationUpdate(inaccurateLocation);
+
+      expect(result).toBeNull();
+      expect(listenerSpy).not.toHaveBeenCalled();
+      expect(LogisticsService.updateJobLocation).not.toHaveBeenCalled();
+    });
+
+    it('accepts location pings with accuracy <= 50 meters (including exact boundary 50m)', async () => {
+      const jobId = 'job-accuracy-boundary';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      const boundaryLocation: Location.LocationObject = {
+        coords: {
+          latitude: -33.8650,
+          longitude: 151.2150,
+          altitude: 10,
+          accuracy: 50, // exactly 50 meters
+          heading: 0,
+          speed: 0,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718000850000,
+      };
+
+      const result = await handleLocationUpdate(boundaryLocation);
+
+      expect(result).not.toBeNull();
+      expect(result?.accuracy).toBe(50);
+      expect(LogisticsService.updateJobLocation).toHaveBeenCalledWith(jobId, result);
+    });
+
+    it('accepts location pings when accuracy is null or undefined without throwing', async () => {
+      const jobId = 'job-accuracy-null';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      const noAccuracyLocation: Location.LocationObject = {
+        coords: {
+          latitude: -33.8660,
+          longitude: 151.2160,
+          altitude: 10,
+          accuracy: null as any,
+          heading: 0,
+          speed: 0,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718000860000,
+      };
+
+      const result = await handleLocationUpdate(noAccuracyLocation);
+
+      expect(result).not.toBeNull();
+      expect(result?.accuracy).toBeNull();
+      expect(LogisticsService.updateJobLocation).toHaveBeenCalledWith(jobId, result);
+    });
+
+    it('discards inaccurate locations passed via TaskManager background executor', async () => {
+      const executor = (TaskManager as any)._getTaskExecutor(LOCATION_TASK_NAME);
+      expect(executor).toBeDefined();
+
+      const jobId = 'job-bg-inaccurate';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      const inaccurateLocations = [
+        {
+          coords: {
+            latitude: -33.9000,
+            longitude: 151.3000,
+            altitude: 10,
+            accuracy: 120, // inaccurate jump
+            heading: 0,
+            speed: 0,
+          },
+          timestamp: 1718000900000,
+        },
+      ];
+
+      await executor({ data: { locations: inaccurateLocations } });
+
+      expect(LogisticsService.updateJobLocation).not.toHaveBeenCalled();
+    });
+
+    it('processes latest valid location in a TaskManager batch when trailing location is inaccurate', async () => {
+      const executor = (TaskManager as any)._getTaskExecutor(LOCATION_TASK_NAME);
+      expect(executor).toBeDefined();
+
+      const jobId = 'job-bg-batch';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      const batchedLocations = [
+        {
+          coords: {
+            latitude: -33.8710,
+            longitude: 151.2110,
+            altitude: 10,
+            accuracy: 25, // Valid ping
+            heading: 0,
+            speed: 0,
+          },
+          timestamp: 1718000910000,
+        },
+        {
+          coords: {
+            latitude: -33.8720,
+            longitude: 151.2120,
+            altitude: 10,
+            accuracy: 95, // Inaccurate jump
+            heading: 0,
+            speed: 0,
+          },
+          timestamp: 1718000920000,
+        },
+      ];
+
+      await executor({ data: { locations: batchedLocations } });
+
+      // Should have skipped the 95m jump and successfully written the 25m valid ping once
+      expect(LogisticsService.updateJobLocation).toHaveBeenCalledTimes(1);
+      expect(LogisticsService.updateJobLocation).toHaveBeenCalledWith(
+        jobId,
+        expect.objectContaining({
+          latitude: -33.8710,
+          longitude: 151.2110,
+          accuracy: 25,
+        })
+      );
+    });
+
+    it('discards location pings with negative, NaN, Infinity, or non-numeric accuracy values', async () => {
+      const jobId = 'job-accuracy-edge';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      const baseCoords = {
+        latitude: -33.8600,
+        longitude: 151.2100,
+        altitude: 10,
+        heading: 0,
+        speed: 0,
+        altitudeAccuracy: null,
+      };
+
+      // 1. Negative accuracy (iOS CoreLocation invalid fix)
+      const resNeg = await handleLocationUpdate({
+        coords: { ...baseCoords, accuracy: -1 },
+        timestamp: 1718000930000,
+      });
+      expect(resNeg).toBeNull();
+
+      // 2. NaN accuracy
+      const resNaN = await handleLocationUpdate({
+        coords: { ...baseCoords, accuracy: NaN },
+        timestamp: 1718000940000,
+      });
+      expect(resNaN).toBeNull();
+
+      // 3. Infinity accuracy
+      const resInf = await handleLocationUpdate({
+        coords: { ...baseCoords, accuracy: Infinity },
+        timestamp: 1718000950000,
+      });
+      expect(resInf).toBeNull();
+
+      // 4. Non-number string accuracy
+      const resStr = await handleLocationUpdate({
+        coords: { ...baseCoords, accuracy: 'invalid' as any },
+        timestamp: 1718000960000,
+      });
+      expect(resStr).toBeNull();
+
+      expect(LogisticsService.updateJobLocation).not.toHaveBeenCalled();
+    });
+
+    it('discards location pings with invalid or non-finite latitude/longitude', async () => {
+      const jobId = 'job-coords-edge';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      // NaN latitude
+      const resNaNLat = await handleLocationUpdate({
+        coords: {
+          latitude: NaN,
+          longitude: 151.2100,
+          accuracy: 10,
+          altitude: null,
+          heading: null,
+          speed: null,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718000970000,
+      });
+      expect(resNaNLat).toBeNull();
+
+      // Non-finite longitude
+      const resInfLng = await handleLocationUpdate({
+        coords: {
+          latitude: -33.8600,
+          longitude: Infinity,
+          accuracy: 10,
+          altitude: null,
+          heading: null,
+          speed: null,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718000980000,
+      });
+      expect(resInfLng).toBeNull();
+
+      // Out of bounds latitude (> 90)
+      const resOutOfBoundsLat = await handleLocationUpdate({
+        coords: {
+          latitude: 95.0,
+          longitude: 151.2100,
+          accuracy: 10,
+          altitude: null,
+          heading: null,
+          speed: null,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718000990000,
+      });
+      expect(resOutOfBoundsLat).toBeNull();
+
+      // Out of bounds longitude (< -180)
+      const resOutOfBoundsLng = await handleLocationUpdate({
+        coords: {
+          latitude: -33.8600,
+          longitude: -185.0,
+          accuracy: 10,
+          altitude: null,
+          heading: null,
+          speed: null,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718001000000,
+      });
+      expect(resOutOfBoundsLng).toBeNull();
+
+      expect(LogisticsService.updateJobLocation).not.toHaveBeenCalled();
+    });
+
+    it('accepts exact geographic boundary coordinates (-90, 90, -180, 180)', async () => {
+      const jobId = 'job-coords-boundaries';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      // Exact North Pole & Date Line
+      const northPole = await handleLocationUpdate({
+        coords: {
+          latitude: 90.0,
+          longitude: 180.0,
+          accuracy: 10,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718001010000,
+      });
+      expect(northPole).not.toBeNull();
+      expect(northPole?.latitude).toBe(90.0);
+      expect(northPole?.longitude).toBe(180.0);
+
+      // Exact South Pole & Antimeridian
+      const southPole = await handleLocationUpdate({
+        coords: {
+          latitude: -90.0,
+          longitude: -180.0,
+          accuracy: 10,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718001020000,
+      });
+      expect(southPole).not.toBeNull();
+      expect(southPole?.latitude).toBe(-90.0);
+      expect(southPole?.longitude).toBe(-180.0);
+    });
+
+    it('preserves lastKnownLocation in memory when a subsequent inaccurate location is discarded', async () => {
+      const jobId = 'job-retain-lastknown';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      // 1. Valid initial update
+      const validPing: Location.LocationObject = {
+        coords: {
+          latitude: -33.8500,
+          longitude: 151.2000,
+          altitude: 10,
+          accuracy: 15,
+          heading: 90,
+          speed: 10,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718001030000,
+      };
+      const validResult = await handleLocationUpdate(validPing);
+      expect(validResult).not.toBeNull();
+      expect(getLastKnownLocation()?.latitude).toBe(-33.8500);
+
+      // 2. Inaccurate jump arrives (> 50m)
+      const inaccuratePing: Location.LocationObject = {
+        coords: {
+          latitude: -33.9000,
+          longitude: 151.3000,
+          altitude: 10,
+          accuracy: 150,
+          heading: 90,
+          speed: 10,
+          altitudeAccuracy: null,
+        },
+        timestamp: 1718001040000,
+      };
+      const discardedResult = await handleLocationUpdate(inaccuratePing);
+      expect(discardedResult).toBeNull();
+
+      // Verify lastKnownLocation is preserved as the previous valid location
+      expect(getLastKnownLocation()?.latitude).toBe(-33.8500);
+      expect(getLastKnownLocation()?.longitude).toBe(151.2000);
+    });
+
+    it('handles stationary pause and resumes movement tracking with fresh batch delivery', async () => {
+      const executor = (TaskManager as any)._getTaskExecutor(LOCATION_TASK_NAME);
+      expect(executor).toBeDefined();
+
+      const jobId = 'job-stationary-resume';
+      await startTrackingJob(jobId, 'tenant-alpha');
+      (LogisticsService.updateJobLocation as jest.Mock).mockClear();
+
+      // Device pauses during stationary period (no updates fired).
+      // Device resumes movement: TaskManager dispatches batch with fresh movement coordinates.
+      const resumedBatch = [
+        {
+          coords: {
+            latitude: -33.8600,
+            longitude: 151.2100,
+            altitude: 15,
+            accuracy: 8,
+            heading: 180,
+            speed: 20,
+          },
+          timestamp: 1718002000000,
+        },
+        {
+          coords: {
+            latitude: -33.8650,
+            longitude: 151.2150,
+            altitude: 15,
+            accuracy: 5,
+            heading: 180,
+            speed: 25,
+          },
+          timestamp: 1718002120000,
+        },
+      ];
+
+      await executor({ data: { locations: resumedBatch } });
+
+      // Should have synced newest movement coordinate (-33.8650, 151.2150)
+      expect(LogisticsService.updateJobLocation).toHaveBeenCalledTimes(1);
+      expect(LogisticsService.updateJobLocation).toHaveBeenCalledWith(
+        jobId,
+        expect.objectContaining({
+          latitude: -33.8650,
+          longitude: 151.2150,
+          speed: 25,
+          timestamp: 1718002120000,
+        })
+      );
+      expect(getLastKnownLocation()?.latitude).toBe(-33.8650);
     });
   });
 

@@ -26,6 +26,7 @@ export interface TrackingOptions {
   notificationBody?: string;
   driverId?: string;
   driverName?: string;
+  pausesUpdatesAutomatically?: boolean;
 }
 
 export interface LocationPermissionResult {
@@ -72,6 +73,34 @@ export async function handleLocationUpdate(
   }
 
   const { coords, timestamp } = locationObj;
+
+  // Validate coordinates: latitude and longitude must be valid finite numbers within geographic bounds
+  if (
+    typeof coords.latitude !== 'number' ||
+    typeof coords.longitude !== 'number' ||
+    !Number.isFinite(coords.latitude) ||
+    !Number.isFinite(coords.longitude) ||
+    coords.latitude < -90 ||
+    coords.latitude > 90 ||
+    coords.longitude < -180 ||
+    coords.longitude > 180
+  ) {
+    return null;
+  }
+
+  // Accuracy Filter: Discard any location ping where accuracy > 50 meters or invalid (< 0, non-finite, non-number)
+  // to prevent GPS jumps and save DB writes
+  if (
+    coords.accuracy !== null &&
+    coords.accuracy !== undefined &&
+    (typeof coords.accuracy !== 'number' ||
+      !Number.isFinite(coords.accuracy) ||
+      coords.accuracy < 0 ||
+      coords.accuracy > 50)
+  ) {
+    return null;
+  }
+
   const formattedLocation: DriverLocation = {
     latitude: coords.latitude,
     longitude: coords.longitude,
@@ -119,8 +148,15 @@ try {
     if (data) {
       const { locations } = data as { locations?: Location.LocationObject[] };
       if (Array.isArray(locations) && locations.length > 0) {
-        const latestLocation = locations[locations.length - 1];
-        await handleLocationUpdate(latestLocation);
+        // Iterate backwards from newest location to find and process the latest valid ping in the batch
+        for (let i = locations.length - 1; i >= 0; i--) {
+          const location = locations[i];
+          const result = await handleLocationUpdate(location);
+          if (result) {
+            // Latest valid location updated; break to avoid redundant batch writes to Firestore
+            break;
+          }
+        }
       }
     }
   });
@@ -225,15 +261,15 @@ export async function startTrackingJob(
     if (!hasStarted) {
       await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
         accuracy: options?.accuracy ?? Location.Accuracy.High,
-        timeInterval: options?.timeInterval ?? 10000, // 10 seconds
-        distanceInterval: options?.distanceInterval ?? 10, // 10 meters
+        timeInterval: options?.timeInterval ?? 120000, // 2 minutes (120000 ms)
+        distanceInterval: options?.distanceInterval ?? 100, // 100 meters
         showsBackgroundLocationIndicator: true,
         foregroundService: {
           notificationTitle: options?.notificationTitle ?? 'Kuro Logistics Tracking',
           notificationBody: options?.notificationBody ?? 'Live route tracking active',
         },
         activityType: Location.ActivityType.AutomotiveNavigation,
-        pausesUpdatesAutomatically: false,
+        pausesUpdatesAutomatically: options?.pausesUpdatesAutomatically ?? true,
       });
     }
 
@@ -243,16 +279,20 @@ export async function startTrackingJob(
     trackingState.activeTenantId = tenantId;
 
     // Immediately fetch initial position to sync to Firestore without waiting for first interval
+    let initialUpdated: DriverLocation | null = null;
     try {
       const initialPos = await Location.getCurrentPositionAsync({
         accuracy: options?.accuracy ?? Location.Accuracy.High,
       });
       if (initialPos) {
-        await handleLocationUpdate(initialPos);
+        initialUpdated = await handleLocationUpdate(initialPos);
       }
     } catch (posErr) {
       console.warn('[LocationTrackingService] Failed to retrieve initial GPS fix:', posErr);
-      // Fallback: try last known position
+    }
+
+    // Fallback: try last known position if initial fix was unavailable or discarded due to low accuracy
+    if (!initialUpdated) {
       try {
         const lastPos = await Location.getLastKnownPositionAsync();
         if (lastPos) {
