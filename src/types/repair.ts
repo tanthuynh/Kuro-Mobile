@@ -313,3 +313,31 @@ export interface RepairPriorityConfig {
   weight: number;
   badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info' | 'brand' | 'error';
 }
+
+/**
+ * Tenant supplier contact representation from Firestore `contacts` collection.
+ */
+export interface TenantSupplier {
+  id: string;
+  name: string;
+  type?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  fullAddress?: string;
+}
+
+/**
+ * Tenant crew member representation from Firestore `users` collection.
+ */
+export interface TenantCrewMember {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: string;
+  position?: string;
+  avatarUrl?: string;
+}
+

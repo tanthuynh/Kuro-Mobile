@@ -37,6 +37,8 @@ jest.mock('@/context/auth-context', () => ({
   }),
 }));
 
+import * as equipmentService from '@/services/equipment-service';
+
 // Mock Router
 const mockPush = jest.fn();
 const mockBack = jest.fn();
@@ -62,12 +64,15 @@ jest.mock('expo-router', () => ({
 describe('Milestone 2: Scan-to-Repair Workflow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(repairService, 'fetchTenantSuppliers').mockResolvedValue([]);
+    jest.spyOn(repairService, 'fetchTenantCrewMembers').mockResolvedValue([]);
+    jest.spyOn(equipmentService, 'fetchEquipment').mockResolvedValue([]);
   });
 
-  it('pre-fills equipment metadata from navigation search params', () => {
-    const { getByTestId, getByDisplayValue } = render(<NewRepairScreen />);
+  it('pre-fills equipment metadata from navigation search params', async () => {
+    const { findByDisplayValue, getByDisplayValue } = render(<NewRepairScreen />);
 
-    expect(getByDisplayValue('Sony FX6 Cinema Camera')).toBeTruthy();
+    expect(await findByDisplayValue('Sony FX6 Cinema Camera')).toBeTruthy();
     expect(getByDisplayValue('SN-FX6-9921')).toBeTruthy();
     expect(getByDisplayValue('BAR-FX6-01')).toBeTruthy();
     expect(getByDisplayValue('Cameras & Optics')).toBeTruthy();
@@ -76,7 +81,8 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
 
   it('validates mandatory fault description before submission', async () => {
     const createSpy = jest.spyOn(repairService, 'createRepairTicket');
-    const { getByTestId, findByText } = render(<NewRepairScreen />);
+    const { getByTestId, findByText, findByDisplayValue } = render(<NewRepairScreen />);
+    await findByDisplayValue('Sony FX6 Cinema Camera');
 
     const submitBtn = getByTestId('submit-repair-btn');
     await act(async () => {
@@ -88,7 +94,8 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
   });
 
   it('allows selecting priority, repair type, and operational condition toggle', async () => {
-    const { getByTestId } = render(<NewRepairScreen />);
+    const { getByTestId, findByDisplayValue } = render(<NewRepairScreen />);
+    await findByDisplayValue('Sony FX6 Cinema Camera');
 
     // Select Critical Priority
     const criticalPill = getByTestId('priority-pill-critical');
@@ -106,7 +113,8 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
   });
 
   it('supports adding and removing photo attachments', async () => {
-    const { getByTestId, queryByTestId, findByTestId } = render(<NewRepairScreen />);
+    const { getByTestId, queryByTestId, findByTestId, findByDisplayValue } = render(<NewRepairScreen />);
+    await findByDisplayValue('Sony FX6 Cinema Camera');
 
     const addPhotoBtn = getByTestId('gallery-add-photo-btn');
 
@@ -140,7 +148,8 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
       .spyOn(repairService, 'createRepairTicket')
       .mockResolvedValueOnce('ticket-new-999');
 
-    const { getByTestId } = render(<NewRepairScreen />);
+    const { getByTestId, findByDisplayValue } = render(<NewRepairScreen />);
+    await findByDisplayValue('Sony FX6 Cinema Camera');
 
     // Enter fault description
     const descInput = getByTestId('input-fault-description');
@@ -177,7 +186,8 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
             type: 'Photo',
           }),
         ]),
-      })
+      }),
+      expect.anything()
     );
 
     expect(mockBack).toHaveBeenCalled();

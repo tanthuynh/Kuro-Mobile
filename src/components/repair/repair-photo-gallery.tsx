@@ -1,6 +1,7 @@
 /**
  * src/components/repair/repair-photo-gallery.tsx
- * Repair Damage Evidence Photo Gallery & Full-Screen Lightbox Modal.
+ * Repair Evidence Image Gallery & Full-Screen Lightbox Modal.
+ * Terminology simplified to "Images".
  */
 
 import React, { useState } from 'react';
@@ -19,7 +20,6 @@ import {
   Image as ImageIcon,
   X,
   Trash2,
-  Maximize2,
   ZoomIn,
 } from 'lucide-react-native';
 
@@ -32,6 +32,7 @@ export interface RepairPhotoGalleryProps {
   editable?: boolean;
   onAddPhoto?: () => void;
   onRemovePhoto?: (id: string) => void;
+  onPressPhoto?: (photo: any) => void;
   title?: string;
   testID?: string;
 }
@@ -41,10 +42,11 @@ export function RepairPhotoGallery({
   editable = false,
   onAddPhoto,
   onRemovePhoto,
-  title = 'Damage Photos & Evidence',
+  onPressPhoto,
+  title = 'Images',
   testID = 'repair-photo-gallery',
 }: RepairPhotoGalleryProps) {
-  const { colors, typography, spacing, layout } = useTheme();
+  const { colors, typography } = useTheme();
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   const getPhotoUri = (photo: any): string => {
@@ -66,26 +68,14 @@ export function RepairPhotoGallery({
             </Text>
           </View>
         </View>
-
-        {editable && onAddPhoto ? (
-          <Button
-            variant="outline"
-            size="sm"
-            icon={<Camera size={14} color={colors.primary} />}
-            onPress={onAddPhoto}
-            testID="gallery-add-photo-btn"
-          >
-            Add Photo
-          </Button>
-        ) : null}
       </View>
 
       {/* Thumbnails List */}
       {photos.length === 0 ? (
         <View style={[styles.emptyContainer, { borderColor: colors.border, backgroundColor: colors.card }]}>
-          <Camera size={28} color={colors.mutedForeground} />
+          <Camera size={26} color={colors.mutedForeground} />
           <Text style={[styles.emptyText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-            {editable ? 'No damage photos attached. Tap "Add Photo" to capture evidence.' : 'No photos attached to this ticket.'}
+            No photos attached.
           </Text>
         </View>
       ) : (
@@ -99,7 +89,13 @@ export function RepairPhotoGallery({
             return (
               <View key={item.id || `photo-${index}`} style={styles.thumbnailWrapper}>
                 <Pressable
-                  onPress={() => setSelectedPhoto(uri)}
+                  onPress={() => {
+                    if (onPressPhoto) {
+                      onPressPhoto(item);
+                    } else {
+                      setSelectedPhoto(uri);
+                    }
+                  }}
                   style={[styles.thumbnailPressable, { borderColor: colors.border }]}
                   testID={`photo-thumb-${index}`}
                 >
@@ -129,13 +125,30 @@ export function RepairPhotoGallery({
         </ScrollView>
       )}
 
-      {/* Full-Screen Lightbox Modal */}
-      <Modal
-        visible={!!selectedPhoto}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedPhoto(null)}
-      >
+      {/* Bottom Action: Add Photo (Opens Camera) */}
+      {editable && onAddPhoto ? (
+        <Button
+          variant="outline"
+          size="default"
+          fullWidth
+          icon={<Camera size={15} color={colors.primary} />}
+          onPress={onAddPhoto}
+          style={styles.bottomAddPhotoBtn}
+          testID="gallery-add-photo-btn"
+        >
+          Add Photo
+        </Button>
+      ) : null}
+
+      {/* Full-Screen Lightbox Modal (Internal fallback when onPressPhoto not provided) */}
+      {!onPressPhoto && (
+        <Modal
+          visible={!!selectedPhoto}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedPhoto(null)}
+          testID="photo-lightbox-modal"
+        >
         <View style={styles.lightboxOverlay}>
           <Pressable
             style={styles.lightboxBackdrop}
@@ -144,16 +157,31 @@ export function RepairPhotoGallery({
 
           <View style={styles.lightboxHeader}>
             <Text style={[styles.lightboxTitle, { color: '#FFFFFF', fontSize: typography.fontSize.sm }]}>
-              Damage Photo Preview
+              Image Preview
             </Text>
-            <Pressable
-              style={styles.lightboxCloseBtn}
-              onPress={() => setSelectedPhoto(null)}
-              testID="lightbox-close-btn"
-              hitSlop={12}
-            >
-              <X size={22} color="#FFFFFF" />
-            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              {editable && onRemovePhoto ? (
+                <Pressable
+                  onPress={() => {
+                    const found = photos.find((p) => getPhotoUri(p) === selectedPhoto);
+                    if (found) onRemovePhoto(found.id);
+                    setSelectedPhoto(null);
+                  }}
+                  testID="lightbox-delete-btn"
+                  hitSlop={12}
+                >
+                  <Trash2 size={20} color="#EF4444" />
+                </Pressable>
+              ) : null}
+              <Pressable
+                style={styles.lightboxCloseBtn}
+                onPress={() => setSelectedPhoto(null)}
+                testID="lightbox-close-btn"
+                hitSlop={12}
+              >
+                <X size={22} color="#FFFFFF" />
+              </Pressable>
+            </View>
           </View>
 
           {selectedPhoto ? (
@@ -167,6 +195,7 @@ export function RepairPhotoGallery({
           ) : null}
         </View>
       </Modal>
+      )}
     </View>
   );
 }
@@ -217,7 +246,11 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 4,
   },
+  bottomAddPhotoBtn: {
+    marginTop: 10,
+  },
   thumbnailWrapper: {
+    marginRight: 10,
     position: 'relative',
   },
   thumbnailPressable: {

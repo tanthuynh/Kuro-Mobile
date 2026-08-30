@@ -1,6 +1,6 @@
-# Original User Request
+# Dispatch Log
 
-## Initial Request — 2026-08-30T11:19:12Z
+## 2026-08-30T11:19:12Z
 
 Comprehensive UI, service, and workflow refactor for the Repair module in Kuro Mobile:
 1. Single Text Input with Autocomplete for Equipment, Requester, and Supplier:

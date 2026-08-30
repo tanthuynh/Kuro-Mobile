@@ -47,7 +47,52 @@ import type {
   RepairPart,
   RepairEquipmentRef,
   CreateRepairTicketInput,
+  TenantSupplier,
+  TenantCrewMember,
 } from '@/types/repair';
+
+// ============================================================================
+// 0. FIRESTORE DATA SANITIZATION
+// ============================================================================
+
+/**
+ * Recursively strips all `undefined` properties from an object or array.
+ * Required because Firestore `updateDoc` and `arrayUnion` throw if any field is `undefined`.
+ */
+export function removeUndefinedFields<T>(obj: T): T {
+  if (obj === null || obj === undefined) return null as any;
+
+  // Preserve Firestore FieldValues (arrayUnion, serverTimestamp, deleteField, etc.)
+  if (
+    typeof obj === 'object' &&
+    (
+      (obj as any)._methodName ||
+      (obj as any).constructor?.name === 'FieldValue' ||
+      (obj as any).constructor?.name === 'FieldValueImpl' ||
+      (obj as any).isEqual ||
+      obj instanceof Date ||
+      typeof (obj as any).toMillis === 'function'
+    )
+  ) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(removeUndefinedFields) as any;
+  }
+
+  if (typeof obj === 'object') {
+    const cleaned: Record<string, any> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (v !== undefined) {
+        cleaned[k] = removeUndefinedFields(v);
+      }
+    }
+    return cleaned as any;
+  }
+
+  return obj;
+}
 
 // ============================================================================
 // 1. DEFENSIVE DOCUMENT MAPPER
@@ -548,30 +593,33 @@ export async function updateRepairTicketStatus(
     }
 
     const currentData = snap.data() || {};
-    const oldStatus: RepairStatus = normalizeRepairStatus(currentData.status || 'Reported');
-
-    if (!isValidStatusTransition(oldStatus, newStatus)) {
+    if (!newStatus || !CANONICAL_REPAIR_STATUSES.some((s) => s.toLowerCase() === String(newStatus).trim().toLowerCase())) {
       return { success: false, error: 'Invalid status transition' };
     }
-
+    const oldStatus: RepairStatus = normalizeRepairStatus(currentData.status || 'Reported');
     const normNewStatus: RepairStatus = normalizeRepairStatus(newStatus);
-
-    const newCondition: EquipmentCondition =
-      updatedCondition || calculateEquipmentCondition(normNewStatus);
 
     const actionText = reason && reason.trim()
       ? `Changed status from "${oldStatus}" to "${normNewStatus}" (${reason.trim()})`
       : `Changed status from "${oldStatus}" to "${normNewStatus}"`;
 
-    const actionEntry = createActionLogEntry(user, actionText, tenantId);
+    const actionEntry = JSON.parse(JSON.stringify(createActionLogEntry(user, actionText, tenantId)));
 
-    // Atomic Firestore update
-    await updateDoc(ticketRef, {
+    const updates: Record<string, any> = {
       status: normNewStatus,
-      condition: newCondition,
       actions: arrayUnion(actionEntry),
       updatedAt: serverTimestamp(),
-    });
+    };
+
+    if (updatedCondition !== undefined) {
+      updates.condition = updatedCondition;
+    }
+
+    // Atomic Firestore update
+    await updateDoc(ticketRef, updates);
+
+    const effectiveCondition: EquipmentCondition =
+      updatedCondition !== undefined ? updatedCondition : (currentData.condition || 'Out of Service');
 
     // Sync /equipment condition
     if (currentData.equipment?.id) {
@@ -579,7 +627,7 @@ export async function updateRepairTicketStatus(
         await updateEquipmentRepairCondition(
           currentData.equipment.id,
           tenantId,
-          newCondition,
+          effectiveCondition,
           normNewStatus,
           currentData.equipment.serialNumber
         );
@@ -594,11 +642,11 @@ export async function updateRepairTicketStatus(
         tenantId,
         ticketId,
         currentData.equipment?.id,
-        newCondition,
+        effectiveCondition,
         currentData.equipment?.quantity || 1
       );
     } catch (err) {
-      console.warn('[repairService] RTDB ledger sync warning:', err);
+      console.warn('[repairService] Non-fatal RTDB sync warning:', err);
     }
 
     return { success: true };
@@ -813,31 +861,21 @@ export async function updateRepairTicketFields(
         return { success: false, error: 'Invalid status transition' };
       }
       const normStatus = normalizeRepairStatus(fields.status);
-      const oldStatus: RepairStatus = normalizeRepairStatus(currentData.status || 'Reported');
-      if (!isValidStatusTransition(oldStatus, normStatus)) {
-        return { success: false, error: 'Invalid status transition' };
-      }
       if (normStatus !== currentData.status) {
         updates.status = normStatus;
         changes.push(`status to "${normStatus}"`);
-        // If condition not explicitly specified, auto-sync condition to match new status
-        if (fields.condition === undefined) {
-          const autoCondition = calculateEquipmentCondition(normStatus);
-          if (autoCondition !== currentData.condition) {
-            updates.condition = autoCondition;
-          }
-        }
       }
     }
 
     // Audit log if any changes detected
     if (changes.length > 0) {
       const actionText = `Updated ${changes.join(', ')}`;
-      const actionEntry = createActionLogEntry(user, actionText, tenantId);
+      const actionEntry = JSON.parse(JSON.stringify(createActionLogEntry(user, actionText, tenantId)));
       updates.actions = arrayUnion(actionEntry);
     }
 
-    await updateDoc(ticketRef, updates);
+    const sanitizedUpdates = removeUndefinedFields(updates);
+    await updateDoc(ticketRef, sanitizedUpdates);
 
     // Sync /equipment condition & RTDB availability ledger if condition, status, or serial changed
     if (
@@ -846,9 +884,7 @@ export async function updateRepairTicketFields(
       (equipmentChanged && updatedEquipment.serialNumber !== currentData.equipment?.serialNumber)
     ) {
       const finalCondition: EquipmentCondition =
-        updates.condition ||
-        (updates.status ? calculateEquipmentCondition(updates.status) : currentData.condition) ||
-        calculateEquipmentCondition(updates.status || currentData.status);
+        updates.condition || currentData.condition || 'Out of Service';
       const finalStatus: RepairStatus = updates.status || currentData.status;
       const equipId = updatedEquipment.id || currentData.equipment?.id;
       const serialNo =
@@ -909,7 +945,7 @@ export async function appendRepairAction(
     throw new Error('Repair ticket not found or unauthorized');
   }
 
-  const actionEntry = createActionLogEntry(user, actionText.trim(), tenantId);
+  const actionEntry = JSON.parse(JSON.stringify(createActionLogEntry(user, actionText.trim(), tenantId)));
 
   await updateDoc(ticketRef, {
     actions: arrayUnion(actionEntry),
@@ -941,7 +977,7 @@ export async function appendRepairNote(
   const userId = user.uid || user.id || 'system';
   const userName = user.name || 'Technician';
 
-  const noteEntry: RepairNote = {
+  const noteEntry: RepairNote = removeUndefinedFields({
     id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     content: content.trim(),
     user: {
@@ -951,12 +987,12 @@ export async function appendRepairNote(
       avatarUrl: user.avatarUrl,
     },
     timestamp: new Date().toISOString(),
-  };
+  });
 
   const actionSnippet =
     content.trim().length > 60 ? `${content.trim().substring(0, 57)}...` : content.trim();
 
-  const actionEntry = createActionLogEntry(user, `Added note: "${actionSnippet}"`, tenantId);
+  const actionEntry = removeUndefinedFields(createActionLogEntry(user, `Added note: "${actionSnippet}"`, tenantId));
 
   await updateDoc(ticketRef, {
     notes: arrayUnion(noteEntry),
@@ -985,14 +1021,17 @@ export async function appendRepairAttachment(
     throw new Error('Repair ticket not found or unauthorized');
   }
 
-  const actionEntry = createActionLogEntry(
-    user,
-    `Attached ${attachment.type.toLowerCase()}: ${attachment.fileName || 'Damage photo'}`,
-    tenantId
+  const sanitizedAttachment = removeUndefinedFields(attachment);
+  const actionEntry = removeUndefinedFields(
+    createActionLogEntry(
+      user,
+      `Attached ${attachment.type.toLowerCase()}: ${attachment.fileName || 'Damage photo'}`,
+      tenantId
+    )
   );
 
   await updateDoc(ticketRef, {
-    attachments: arrayUnion(attachment),
+    attachments: arrayUnion(sanitizedAttachment),
     actions: arrayUnion(actionEntry),
     updatedAt: serverTimestamp(),
   });
@@ -1009,11 +1048,11 @@ export async function addRepairAttachment(
 ): Promise<{ success: boolean; attachmentId: string; error?: string }> {
   try {
     const attachmentId = `att_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const fullAttachment: RepairAttachment = {
+    const fullAttachment: RepairAttachment = removeUndefinedFields({
       id: attachmentId,
       ...attachment,
       uploadedAt: attachment.uploadedAt || new Date().toISOString(),
-    };
+    });
 
     await appendRepairAttachment(ticketId, fullAttachment, user, tenantId);
     return { success: true, attachmentId };
@@ -1047,7 +1086,7 @@ export async function updateRepairNote(
   const currentNotes: RepairNote[] = Array.isArray(currentData.notes) ? currentData.notes : [];
   const updatedNotes = currentNotes.map((n) => {
     if (n.id === noteId) {
-      return {
+      return removeUndefinedFields({
         ...n,
         content: newContent.trim(),
         user: {
@@ -1057,14 +1096,14 @@ export async function updateRepairNote(
           avatarUrl: user.avatarUrl || n.user?.avatarUrl,
         },
         timestamp: new Date().toISOString(),
-      };
+      });
     }
-    return n;
+    return removeUndefinedFields(n);
   });
 
   const actionSnippet =
     newContent.trim().length > 60 ? `${newContent.trim().substring(0, 57)}...` : newContent.trim();
-  const actionEntry = createActionLogEntry(user, `Updated note: "${actionSnippet}"`, tenantId);
+  const actionEntry = removeUndefinedFields(createActionLogEntry(user, `Updated note: "${actionSnippet}"`, tenantId));
 
   await updateDoc(ticketRef, {
     notes: updatedNotes,
@@ -1095,12 +1134,12 @@ export async function deleteRepairNote(
   const currentData = snap.data();
   const currentNotes: RepairNote[] = Array.isArray(currentData.notes) ? currentData.notes : [];
   const targetNote = currentNotes.find((n) => n.id === noteId);
-  const updatedNotes = currentNotes.filter((n) => n.id !== noteId);
+  const updatedNotes = currentNotes.filter((n) => n.id !== noteId).map(removeUndefinedFields);
 
   const actionSnippet = targetNote?.content
     ? (targetNote.content.length > 50 ? `${targetNote.content.substring(0, 47)}...` : targetNote.content)
     : 'technician note';
-  const actionEntry = createActionLogEntry(user, `Deleted note: "${actionSnippet}"`, tenantId);
+  const actionEntry = removeUndefinedFields(createActionLogEntry(user, `Deleted note: "${actionSnippet}"`, tenantId));
 
   await updateDoc(ticketRef, {
     notes: updatedNotes,
@@ -1133,10 +1172,10 @@ export async function deleteRepairAttachment(
     ? currentData.attachments
     : [];
   const targetAtt = currentAttachments.find((a) => a.id === attachmentId);
-  const updatedAttachments = currentAttachments.filter((a) => a.id !== attachmentId);
+  const updatedAttachments = currentAttachments.filter((a) => a.id !== attachmentId).map(removeUndefinedFields);
 
   const fileName = targetAtt?.fileName || targetAtt?.type || 'attachment';
-  const actionEntry = createActionLogEntry(user, `Deleted attachment: ${fileName}`, tenantId);
+  const actionEntry = removeUndefinedFields(createActionLogEntry(user, `Deleted attachment: ${fileName}`, tenantId));
 
   await updateDoc(ticketRef, {
     attachments: updatedAttachments,
@@ -1285,3 +1324,132 @@ export async function updateEquipmentRepairCondition(
     console.error('[repairService] Failed to update equipment repair condition:', error);
   }
 }
+
+// ============================================================================
+// 8. TENANT SUPPLIERS & CREW MEMBERS FETCHERS
+// ============================================================================
+
+/**
+ * Fetches all supplier contacts belonging to the tenant from Firestore `contacts`.
+ */
+export async function fetchTenantSuppliers(tenantId: string): Promise<TenantSupplier[]> {
+  if (!tenantId || !tenantId.trim()) return [];
+
+  try {
+    const q = query(
+      collection(db, 'contacts'),
+      where('tenantId', '==', tenantId)
+    );
+
+    const snapshot = await getDocs(q);
+    const suppliers: TenantSupplier[] = [];
+
+    if (snapshot) {
+      const docs = typeof (snapshot as any).forEach === 'function'
+        ? snapshot
+        : Array.isArray(snapshot)
+        ? snapshot
+        : Array.isArray((snapshot as any).docs)
+        ? (snapshot as any).docs
+        : [];
+
+      docs.forEach((docSnap: any) => {
+        const data = docSnap && typeof docSnap.data === 'function'
+          ? docSnap.data()
+          : (docSnap as any)?.data || (docSnap as any) || {};
+        if (data.tenantId && data.tenantId !== tenantId) return;
+
+        const types: string[] = Array.isArray(data.types)
+          ? data.types.map((t: any) => String(t).toLowerCase())
+          : data.type
+          ? [String(data.type).toLowerCase()]
+          : [];
+
+        // Include if explicitly marked as supplier, or if type is supplier/vendor/manufacturer, or if no specific types are set (general contact)
+        const isSupplier =
+          data.isSupplier === true ||
+          types.includes('supplier') ||
+          types.includes('vendor') ||
+          types.includes('manufacturer') ||
+          types.length === 0;
+
+        const name = (data.name || data.company || data.companyName || '').trim();
+        if (name && isSupplier) {
+          suppliers.push({
+            id: docSnap.id || data.id,
+            name,
+            type: data.type || (types.includes('supplier') ? 'Supplier' : types.includes('vendor') ? 'Vendor' : types.includes('manufacturer') ? 'Manufacturer' : 'Contact'),
+            email: data.email || undefined,
+            phone: data.phone || undefined,
+            website: data.website || undefined,
+            fullAddress: data.fullAddress || undefined,
+          });
+        }
+      });
+    }
+
+    suppliers.sort((a, b) => a.name.localeCompare(b.name));
+    return suppliers;
+  } catch (err) {
+    console.error('[repairService] fetchTenantSuppliers error:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetches all active crew members / users belonging to the tenant from Firestore `users`.
+ */
+export async function fetchTenantCrewMembers(tenantId: string): Promise<TenantCrewMember[]> {
+  if (!tenantId || !tenantId.trim()) return [];
+
+  try {
+    const q = query(
+      collection(db, 'users'),
+      where('tenantId', '==', tenantId)
+    );
+
+    const snapshot = await getDocs(q);
+    const crew: TenantCrewMember[] = [];
+
+    if (snapshot) {
+      const docs = typeof (snapshot as any).forEach === 'function'
+        ? snapshot
+        : Array.isArray(snapshot)
+        ? snapshot
+        : Array.isArray((snapshot as any).docs)
+        ? (snapshot as any).docs
+        : [];
+
+      docs.forEach((docSnap: any) => {
+        const data = docSnap && typeof docSnap.data === 'function'
+          ? docSnap.data()
+          : (docSnap as any)?.data || (docSnap as any) || {};
+        if (data.tenantId && data.tenantId !== tenantId) return;
+        if (data.disabled === true || data.archived === true || data.isDeleted === true || data.active === false) return;
+
+        const name =
+          (data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.displayName || data.email || '').trim();
+
+        if (name) {
+          crew.push({
+            id: docSnap.id || data.id,
+            name,
+            firstName: data.firstName || undefined,
+            lastName: data.lastName || undefined,
+            email: data.email || undefined,
+            position: data.position || undefined,
+            role: data.role || data.roleName || undefined,
+            avatarUrl: data.avatarUrl || undefined,
+          });
+        }
+      });
+    }
+
+    crew.sort((a, b) => a.name.localeCompare(b.name));
+    return crew;
+  } catch (err) {
+    console.error('[repairService] fetchTenantCrewMembers error:', err);
+    return [];
+  }
+}
+

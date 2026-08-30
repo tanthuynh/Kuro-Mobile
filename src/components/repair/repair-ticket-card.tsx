@@ -1,6 +1,7 @@
 /**
  * src/components/repair/repair-ticket-card.tsx
  * High-Contrast Repair Ticket Feed Item Card in Kuro Mobile.
+ * Displays Priority and Condition as clean normal text instead of badge pills.
  */
 
 import React from 'react';
@@ -9,20 +10,20 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   Image as ImageIcon,
-  ShieldAlert,
-  CheckCircle2,
+  Users,
+  UserCheck,
+  LayoutGrid,
+  Activity,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { REPAIR_STATUS_CONFIG } from '@/lib/repair-engine';
-import type { RepairTicket, RepairStatus, RepairPriority, EquipmentCondition } from '@/types/repair';
+import type { RepairTicket, RepairPriority, EquipmentCondition } from '@/types/repair';
 
 export interface RepairTicketCardProps {
   ticket: RepairTicket;
@@ -35,7 +36,7 @@ export function RepairTicketCard({
   onPress,
   testID = `repair-card-${ticket.id}`,
 }: RepairTicketCardProps) {
-  const { colors, typography, spacing, layout } = useTheme();
+  const { colors, typography, isDark } = useTheme();
   const router = useRouter();
 
   const handlePress = () => {
@@ -48,25 +49,14 @@ export function RepairTicketCard({
 
   const statusConfig = REPAIR_STATUS_CONFIG[ticket.status] || {
     label: ticket.status,
-    badgeVariant: 'secondary',
+    color: colors.foreground,
+    bgColor: colors.surface,
+    borderColor: colors.border,
   };
 
-  const getPriorityVariant = (priority: RepairPriority): BadgeVariant => {
-    switch (priority) {
-      case 'Critical':
-        return 'destructive';
-      case 'High':
-        return 'destructive';
-      case 'Medium':
-        return 'warning';
-      case 'Low':
-        return 'info';
-      case 'Deferred':
-        return 'secondary';
-      default:
-        return 'default';
-    }
-  };
+  const statusBg = isDark
+    ? `${statusConfig.color}22`
+    : `${statusConfig.color}15`;
 
   const condition: EquipmentCondition = ticket.condition === 'Available to Use'
     ? 'Available to Use'
@@ -96,7 +86,7 @@ export function RepairTicketCard({
         accessibilityLabel={`Repair ticket ${repairNumDisplay} for ${ticket.equipment?.name || 'Equipment'}`}
       >
         <CardContent style={styles.content}>
-          {/* Top Row: [Ticket Number] Inventory Name & Status on right */}
+          {/* Top Row: [Ticket Number] Equipment Name & Status Badge on right */}
           <View style={styles.topRow}>
             <View style={styles.ticketTitleContainer}>
               <Text style={[styles.ticketIdText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
@@ -111,45 +101,63 @@ export function RepairTicketCard({
             </View>
 
             <View style={styles.statusContainer}>
-              <Badge variant={statusConfig.badgeVariant as BadgeVariant}>
-                {ticket.status}
-              </Badge>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {
+                    backgroundColor: statusBg,
+                    borderColor: statusConfig.color,
+                  },
+                ]}
+                testID={`card-status-badge-${ticket.status.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                <Text
+                  style={[
+                    styles.statusBadgeText,
+                    {
+                      color: statusConfig.color,
+                    },
+                  ]}
+                >
+                  {ticket.status}
+                </Text>
+              </View>
             </View>
           </View>
 
-          {/* 2nd Row: Priority, Condition, Photos | Owner, Requester */}
+          {/* 2nd Row: Priority (grey text with icon), Condition (grey text with icon), Images Count | Owner & Requested By with icons */}
           <View style={styles.secondRow}>
-            <View style={styles.badgesGroup}>
+            <View style={styles.cleanTextMetaGroup}>
               {ticket.priority && ticket.priority !== 'None' ? (
-                <Badge variant={getPriorityVariant(ticket.priority)}>
-                  {ticket.priority}
-                </Badge>
+                <View style={styles.metaItem}>
+                  <LayoutGrid size={12} color={colors.mutedForeground} />
+                  <Text
+                    style={[
+                      styles.priorityText,
+                      { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                    ]}
+                    testID={`card-priority-${ticket.priority.toLowerCase()}`}
+                  >
+                    {ticket.priority}
+                  </Text>
+                </View>
               ) : null}
 
-              {/* Operational Condition Pill */}
+              {ticket.priority && ticket.priority !== 'None' ? (
+                <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+              ) : null}
+
+              {/* Operational Condition Clean Grey Text with Icon */}
               <View
-                style={[
-                  styles.conditionPill,
-                  {
-                    backgroundColor: isOutOfService
-                      ? 'rgba(239, 68, 68, 0.15)'
-                      : 'rgba(16, 185, 129, 0.15)',
-                    borderColor: isOutOfService
-                      ? 'rgba(239, 68, 68, 0.35)'
-                      : 'rgba(16, 185, 129, 0.35)',
-                  },
-                ]}
+                style={styles.conditionTextGroup}
+                testID={`card-condition-${isOutOfService ? 'out-of-service' : 'available'}`}
               >
-                {isOutOfService ? (
-                  <ShieldAlert size={11} color={colors.destructive} />
-                ) : (
-                  <CheckCircle2 size={11} color={colors.status.online} />
-                )}
+                <Activity size={12} color={colors.mutedForeground} />
                 <Text
                   style={[
                     styles.conditionText,
                     {
-                      color: isOutOfService ? colors.destructive : colors.status.online,
+                      color: colors.mutedForeground,
                       fontSize: typography.fontSize.xs,
                     },
                   ]}
@@ -158,24 +166,47 @@ export function RepairTicketCard({
                 </Text>
               </View>
 
-              {/* Photo indicator */}
+              {/* Photo / Images indicator */}
               {photoCount > 0 ? (
-                <View style={styles.metaPill}>
-                  <ImageIcon size={11} color={colors.mutedForeground} />
-                  <Text style={[styles.metaPillText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                    {photoCount}
-                  </Text>
-                </View>
+                <>
+                  <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+                  <View style={styles.imagesCountGroup}>
+                    <ImageIcon size={11} color={colors.mutedForeground} />
+                    <Text style={[styles.imagesCountText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                      {photoCount}
+                    </Text>
+                  </View>
+                </>
               ) : null}
             </View>
 
+            {/* Owner & Requested By with Web-App Matched Icons */}
             <View style={styles.peopleGroup}>
-              <Text
-                style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}
-                numberOfLines={1}
-              >
-                {ticket.owner ? `${ticket.owner} • ` : ''}{ticket.requestedBy || 'Unknown'}
-              </Text>
+              {ticket.owner ? (
+                <View style={styles.personItem}>
+                  <Users size={12} color={colors.mutedForeground} />
+                  <Text
+                    style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}
+                    numberOfLines={1}
+                  >
+                    {ticket.owner}
+                  </Text>
+                </View>
+              ) : null}
+
+              {ticket.owner && ticket.requestedBy ? (
+                <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+              ) : null}
+
+              <View style={styles.personItem}>
+                <UserCheck size={12} color={colors.mutedForeground} />
+                <Text
+                  style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}
+                  numberOfLines={1}
+                >
+                  {ticket.requestedBy || 'Unknown'}
+                </Text>
+              </View>
             </View>
           </View>
         </CardContent>
@@ -223,54 +254,77 @@ const styles = StyleSheet.create({
   statusContainer: {
     flexShrink: 0,
   },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusBadgeText: {
+    fontFamily: 'Calibri',
+    fontSize: 11,
+    fontWeight: '500',
+    lineHeight: 14,
+  },
   secondRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  badgesGroup: {
+  cleanTextMetaGroup: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
-    alignItems: 'center',
+    flexShrink: 1,
   },
-  conditionPill: {
-    minHeight: 24,
+  metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 3,
+  },
+  priorityText: {
+    fontFamily: 'Calibri',
+    fontWeight: '500',
+    lineHeight: 16,
+  },
+  separatorDot: {
+    fontSize: 11,
+  },
+  conditionTextGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 9999,
-    borderWidth: 1,
   },
   conditionText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '500',
     lineHeight: 16,
   },
-  metaPill: {
-    minHeight: 24,
+  imagesCountGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
-  metaPillText: {
+  imagesCountText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
     fontWeight: '500',
     lineHeight: 16,
   },
   peopleGroup: {
-    flex: 1,
-    alignItems: 'flex-end',
-    paddingLeft: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 6,
+    flexShrink: 1,
+    paddingLeft: 8,
+  },
+  personItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    flexShrink: 1,
   },
   personText: {
     fontFamily: 'Calibri',

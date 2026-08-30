@@ -13,10 +13,12 @@ export type TextVariant =
   | 'h2'
   | 'h3'
   | 'h4'
+  | 'subheading'
   | 'body'
   | 'body-sm'
   | 'caption'
   | 'label'
+  | 'overline'
   | 'muted';
 
 export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold' | 'light';
@@ -46,58 +48,81 @@ export const Text = forwardRef<RNText, TextProps>(
       switch (variant) {
         case 'h1':
           return {
-            fontSize: typography.fontSize.xl,
-            lineHeight: typography.lineHeight.xl,
+            fontSize: typography.fontSize['2xl'],
+            lineHeight: typography.lineHeight['2xl'],
             fontWeight: typography.fontWeight.bold,
             color: colors.foreground,
           };
-        case 'h2':
+        case 'h2': // standard headings (e.g. sectionTitle)
           return {
-            fontSize: typography.fontSize.md,
+            fontSize: typography.fontSize.md, // 16
             lineHeight: typography.lineHeight.md,
             fontWeight: typography.fontWeight.bold,
             color: colors.foreground,
           };
-        case 'h3':
+        case 'h3': // e.g. modalTitle
           return {
-            fontSize: typography.fontSize.base,
+            fontSize: typography.fontSize.base, // 14
             lineHeight: typography.lineHeight.base,
             fontWeight: typography.fontWeight.bold,
             color: colors.foreground,
           };
         case 'h4':
           return {
-            fontSize: typography.fontSize.base,
+            fontSize: typography.fontSize.base, // 14
             lineHeight: typography.lineHeight.base,
             fontWeight: typography.fontWeight.semibold,
             color: colors.foreground,
           };
+        case 'subheading': // e.g. sectionSubtitle
+          return {
+            fontSize: typography.fontSize.xs, // 12
+            lineHeight: typography.lineHeight.xs,
+            fontWeight: typography.fontWeight.semibold,
+            color: colors.foreground,
+          };
+        case 'body': // standard normal text (e.g. fieldValue)
+          return {
+            fontSize: typography.fontSize.base, // 14
+            lineHeight: typography.lineHeight.base,
+            color: colors.foreground,
+          };
         case 'body-sm':
           return {
-            fontSize: typography.fontSize.sm,
+            fontSize: typography.fontSize.sm, // 13
             lineHeight: typography.lineHeight.sm,
             color: colors.foreground,
           };
         case 'caption':
           return {
-            fontSize: typography.fontSize.xs,
+            fontSize: typography.fontSize.xs, // 12
             lineHeight: typography.lineHeight.xs,
             color: colors.mutedForeground,
           };
-        case 'label':
+        case 'label': // standard field labels (e.g. fieldLabel)
           return {
-            fontSize: typography.fontSize.xs,
+            fontSize: typography.fontSize.xs, // 12
             lineHeight: typography.lineHeight.xs,
             fontWeight: typography.fontWeight.semibold,
-            color: colors.foreground,
+            letterSpacing: 0.2,
+            textTransform: 'uppercase',
+            color: colors.mutedForeground,
+          };
+        case 'overline': // e.g. sectionHeaderLabel
+          return {
+            fontSize: 10,
+            lineHeight: 12,
+            fontWeight: typography.fontWeight.bold,
+            letterSpacing: 0.6,
+            textTransform: 'uppercase',
+            color: colors.mutedForeground,
           };
         case 'muted':
           return {
-            fontSize: typography.fontSize.xs,
+            fontSize: typography.fontSize.xs, // 12
             lineHeight: typography.lineHeight.xs,
             color: colors.mutedForeground,
           };
-        case 'body':
         default:
           return {
             fontSize: typography.fontSize.base,

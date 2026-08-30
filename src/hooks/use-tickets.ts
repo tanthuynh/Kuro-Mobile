@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import {
   subscribeTenantRepairTickets,
+  subscribeSingleRepairTicket,
   getRepairTicket,
   createRepairTicket,
   updateRepairTicketStatus,
@@ -19,6 +20,8 @@ import {
   addRepairAttachment,
   deleteRepairAttachment,
   uploadRepairDamagePhoto,
+  fetchTenantSuppliers,
+  fetchTenantCrewMembers,
 } from '@/services/repair-service';
 import {
   filterRepairTickets,
@@ -156,7 +159,20 @@ export function useTickets() {
         id: user?.id || 'unknown',
         name: user?.name || user?.email || 'Technician',
       };
-      await updateRepairTicketStatus(ticketId, newStatus, author, tenantId, reason);
+      const normStatus = normalizeRepairStatus(newStatus);
+      // Optimistic update in local tickets list
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === ticketId
+            ? { ...t, status: normStatus }
+            : t
+        )
+      );
+
+      const result = await updateRepairTicketStatus(ticketId, normStatus, author, tenantId, reason);
+      if (result && !result.success) {
+        throw new Error(result.error || 'Failed to update status');
+      }
     },
     [tenantId, user]
   );
@@ -236,6 +252,37 @@ export function useSingleTicket(ticketId: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Live real-time Firestore listener for all fields on the ticket document
+  useEffect(() => {
+    if (!ticketId || !tenantId) {
+      setTicket(null);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const unsubscribe = subscribeSingleRepairTicket(
+      ticketId,
+      tenantId,
+      (liveTicket) => {
+        setTicket(liveTicket);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        console.error('[useSingleTicket] Realtime subscription error:', err);
+        setError(err);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [ticketId, tenantId]);
+
   const fetchTicket = useCallback(async () => {
     if (!ticketId) {
       setTicket(null);
@@ -255,10 +302,6 @@ export function useSingleTicket(ticketId: string) {
     }
   }, [ticketId]);
 
-  useEffect(() => {
-    fetchTicket();
-  }, [fetchTicket]);
-
   const handleUpdateStatus = useCallback(
     async (newStatus: RepairStatus, reason?: string) => {
       if (!ticketId || !tenantId) return;
@@ -268,8 +311,29 @@ export function useSingleTicket(ticketId: string) {
         email: user?.email,
         avatarUrl: user?.avatarUrl,
       };
-      await updateRepairTicketStatus(ticketId, newStatus, author, tenantId, reason);
-      await fetchTicket();
+      const normStatus = normalizeRepairStatus(newStatus);
+
+      // Instant optimistic local state update (status and condition are independent)
+      setTicket((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          status: normStatus,
+        };
+      });
+
+      try {
+        const result = await updateRepairTicketStatus(ticketId, normStatus, author, tenantId, reason);
+        if (result && !result.success) {
+          await fetchTicket();
+          throw new Error(result.error || 'Failed to update status');
+        }
+        await fetchTicket();
+        return result;
+      } catch (err: any) {
+        await fetchTicket();
+        throw err;
+      }
     },
     [ticketId, tenantId, user, fetchTicket]
   );
@@ -295,14 +359,12 @@ export function useSingleTicket(ticketId: string) {
           updatedEquipment.name = fields.equipmentName.trim();
         }
         if (fields.serialNumber !== undefined) {
-          updatedEquipment.serialNumber = fields.serialNumber ? String(fields.serialNumber).trim() : null;
+          updatedEquipment.serialNumber = fields.serialNumber ? (String(fields.serialNumber).trim() || null) : null;
         }
 
         const nextStatus = fields.status !== undefined ? normalizeRepairStatus(fields.status) : prev.status;
         const nextCondition = fields.condition !== undefined
           ? fields.condition
-          : fields.status !== undefined
-          ? calculateEquipmentCondition(nextStatus)
           : prev.condition;
 
         const nextTicket: RepairTicket = {
@@ -311,25 +373,25 @@ export function useSingleTicket(ticketId: string) {
           internalReference:
             fields.internalReference !== undefined
               ? fields.internalReference
-                ? String(fields.internalReference).trim()
+                ? (String(fields.internalReference).trim() || null)
                 : null
               : prev.internalReference,
           supplierId:
             fields.supplierId !== undefined
               ? fields.supplierId
-                ? String(fields.supplierId).trim()
+                ? (String(fields.supplierId).trim() || null)
                 : null
               : prev.supplierId,
           owner:
             fields.owner !== undefined
               ? fields.owner
-                ? String(fields.owner).trim()
+                ? (String(fields.owner).trim() || null)
                 : null
               : prev.owner,
           requestedBy:
             fields.requestedBy !== undefined
               ? fields.requestedBy
-                ? String(fields.requestedBy).trim()
+                ? (String(fields.requestedBy).trim() || 'Warehouse Tech')
                 : 'Warehouse Tech'
               : prev.requestedBy,
           priority: fields.priority !== undefined ? fields.priority : prev.priority,
@@ -475,3 +537,62 @@ export function useSingleTicket(ticketId: string) {
     deleteAttachment: handleDeleteAttachment,
   };
 }
+
+/**
+ * Hook to fetch all suppliers belonging to the active tenant.
+ */
+export function useTenantSuppliers() {
+  const { user, tenant } = useAuth();
+  const tenantId = user?.tenantId || tenant?.tenantId || '';
+  const [suppliers, setSuppliers] = useState<Array<{ id: string; name: string; type?: string }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchSuppliers = useCallback(async () => {
+    if (!tenantId) return;
+    setLoading(true);
+    try {
+      const data = await fetchTenantSuppliers(tenantId);
+      setSuppliers(data);
+    } catch (err) {
+      console.warn('[useTenantSuppliers] error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [tenantId]);
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, [fetchSuppliers]);
+
+  return { suppliers, loading, refresh: fetchSuppliers };
+}
+
+/**
+ * Hook to fetch all active crew members belonging to the active tenant.
+ */
+export function useTenantCrew() {
+  const { user, tenant } = useAuth();
+  const tenantId = user?.tenantId || tenant?.tenantId || '';
+  const [crew, setCrew] = useState<Array<{ id: string; name: string; email?: string }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchCrew = useCallback(async () => {
+    if (!tenantId) return;
+    setLoading(true);
+    try {
+      const data = await fetchTenantCrewMembers(tenantId);
+      setCrew(data);
+    } catch (err) {
+      console.warn('[useTenantCrew] error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [tenantId]);
+
+  useEffect(() => {
+    fetchCrew();
+  }, [fetchCrew]);
+
+  return { crew, loading, refresh: fetchCrew };
+}
+

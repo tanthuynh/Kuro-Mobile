@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   Modal,
   Pressable,
@@ -186,24 +187,32 @@ export function AddActionNoteModal({
 
             {/* Input Box */}
             <View style={styles.inputContainer}>
-              <Input
-                label={entryType === 'action' ? 'Action Details' : 'Note Content'}
-                placeholder={
-                  entryType === 'action'
-                    ? 'e.g. Disassembled chassis, replaced ribbon cable, verified power supply output...'
-                    : 'e.g. Waiting on parts shipment from supplier, expected delivery tomorrow...'
-                }
+              <TextInput
+                placeholder={entryType === 'action' ? 'Action details...' : 'Add note...'}
+                placeholderTextColor={colors.mutedForeground}
                 value={content}
-                onChangeText={(val) => {
+                onChangeText={(val: string) => {
                   setContent(val);
                   if (error) setError(null);
                 }}
                 multiline
                 numberOfLines={4}
-                error={error || undefined}
+                textAlignVertical="top"
                 testID="action-note-input"
-                style={styles.multilineInput}
+                style={[
+                  styles.multilineInput,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: error ? colors.destructive : colors.border,
+                    color: colors.foreground,
+                  },
+                ]}
               />
+              {error ? (
+                <Text style={[styles.errorText, { color: colors.destructive, fontSize: typography.fontSize.xs, marginTop: 6 }]}>
+                  {error}
+                </Text>
+              ) : null}
             </View>
 
             {/* Action Buttons */}
@@ -317,8 +326,16 @@ const styles = StyleSheet.create({
   },
   multilineInput: {
     fontFamily: 'Calibri',
+    fontSize: 14,
     minHeight: 100,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 12,
     textAlignVertical: 'top',
+  },
+  errorText: {
+    fontFamily: 'Calibri',
+    fontWeight: '500',
   },
   buttonRow: {
     flexDirection: 'row',

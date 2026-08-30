@@ -583,24 +583,30 @@ export function createActionLogEntry(
     user?.email ||
     'Technician';
 
-  const userId = user?.id || user?.uid;
+  const userId = user?.id || user?.uid || 'system';
   const randomSuffix = Math.random().toString(36).substring(2, 9);
   const id = `act_${Date.now()}_${randomSuffix}`;
 
-  return {
+  const userObj: Record<string, any> = {
+    id: userId,
+    name: userName,
+  };
+  if (user?.email) userObj.email = user.email;
+  if (user?.avatarUrl) userObj.avatarUrl = user.avatarUrl;
+  if (user?.firstName) userObj.firstName = user.firstName;
+  if (user?.lastName) userObj.lastName = user.lastName;
+
+  const entry: Record<string, any> = {
     id,
-    user: {
-      id: userId,
-      name: userName,
-      email: user?.email,
-      avatarUrl: user?.avatarUrl,
-      firstName: user?.firstName,
-      lastName: user?.lastName,
-    },
+    user: userObj,
     action: (actionText || '').trim() || 'Updated ticket',
     timestamp: new Date().toISOString(),
-    tenantId,
   };
+  if (tenantId && typeof tenantId === 'string' && tenantId.trim()) {
+    entry.tenantId = tenantId.trim();
+  }
+
+  return JSON.parse(JSON.stringify(entry)) as RepairActionLog;
 }
 
 // ============================================================================

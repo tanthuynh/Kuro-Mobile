@@ -51,7 +51,7 @@ export function QuickStatusSelector({
   showHeader = false,
   testID = 'quick-status-selector',
 }: QuickStatusSelectorProps) {
-  const { colors, typography } = useTheme();
+  const { colors, typography, isDark } = useTheme();
 
   const getStatusIcon = (status: RepairStatus, color: string) => {
     switch (status) {
@@ -66,7 +66,7 @@ export function QuickStatusSelector({
       case 'Cancel':
         return <XCircle size={13} color={color} />;
       default:
-        return <Wrench size={13} color={color} />;
+        return null;
     }
   };
 
@@ -74,13 +74,13 @@ export function QuickStatusSelector({
     <View style={styles.container} testID={testID}>
       {showHeader ? (
         <View style={styles.headerRow}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground, fontSize: typography.fontSize.md }]}>
-            Status Updates
+          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
+            STATUS
           </Text>
           {isUpdating ? (
             <View style={styles.updatingIndicator}>
               <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={[styles.updatingText, { color: colors.primary, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.updatingText, { color: colors.primary, fontSize: 10 }]}>
                 Updating...
               </Text>
             </View>
@@ -98,6 +98,9 @@ export function QuickStatusSelector({
           };
 
           const isCurrent = status === currentStatus;
+          const activeBg = isDark
+            ? `${config.color}22`
+            : `${config.color}15`;
 
           return (
             <Pressable
@@ -111,8 +114,8 @@ export function QuickStatusSelector({
               style={({ pressed }) => [
                 styles.statusButton,
                 {
-                  backgroundColor: isCurrent ? config.color : config.bgColor,
-                  borderColor: isCurrent ? config.color : config.borderColor,
+                  backgroundColor: isCurrent ? activeBg : colors.surface,
+                  borderColor: isCurrent ? config.color : colors.border,
                 },
                 pressed && !isCurrent && { opacity: 0.8, transform: [{ scale: 0.98 }] },
                 disabled && !isCurrent && { opacity: 0.4 },
@@ -122,14 +125,14 @@ export function QuickStatusSelector({
               accessibilityState={{ selected: isCurrent, disabled: disabled || isCurrent }}
               accessibilityLabel={`Set status to ${status}`}
             >
-              {getStatusIcon(status, isCurrent ? '#FFFFFF' : config.color)}
+              {getStatusIcon(status, isCurrent ? config.color : colors.mutedForeground)}
               <Text
                 style={[
                   styles.buttonLabel,
                   {
-                    color: isCurrent ? '#FFFFFF' : config.color,
+                    color: isCurrent ? config.color : colors.mutedForeground,
                     fontSize: 11,
-                    fontWeight: isCurrent ? '700' : '600',
+                    fontWeight: '500',
                   },
                 ]}
                 numberOfLines={1}
@@ -150,7 +153,6 @@ export function QuickStatusSelector({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    marginVertical: 4,
   },
   headerRow: {
     flexDirection: 'row',
@@ -160,9 +162,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 10,
     fontWeight: '700',
-    lineHeight: 22,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
   updatingIndicator: {
     flexDirection: 'row',
@@ -171,9 +174,7 @@ const styles = StyleSheet.create({
   },
   updatingText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
     fontWeight: '600',
-    lineHeight: 16,
   },
   buttonsRow: {
     flexDirection: 'row',

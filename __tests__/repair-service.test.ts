@@ -22,6 +22,8 @@ import {
   uploadRepairDamagePhoto,
   syncRepairToRtdbLedger,
   updateEquipmentRepairCondition,
+  fetchTenantSuppliers,
+  fetchTenantCrewMembers,
 } from '@/services/repair-service';
 import * as firestore from 'firebase/firestore';
 import * as rtdb from 'firebase/database';
@@ -562,18 +564,18 @@ describe('repair-service', () => {
         expect.anything(),
         expect.objectContaining({
           status: 'Pending',
-          condition: 'Out of Service',
           actions: expect.anything(),
         })
       );
     });
 
-    it('SVC-UPD-02: Resolving repair to Completed restores condition to Available to Use (Tier 1)', async () => {
+    it('SVC-UPD-02: Updating status preserves condition independently (Tier 1)', async () => {
       mockFirestore.getDoc.mockResolvedValue({
         exists: () => true,
         data: () => ({
           tenantId: 'tenant-alpha',
           status: 'Under Repair',
+          condition: 'Out of Service',
           equipment: { id: 'eq-1', serialNumber: 'SN-001', quantity: 1 },
         }),
       });
@@ -591,12 +593,16 @@ describe('repair-service', () => {
         expect.anything(),
         expect.objectContaining({
           status: 'Completed',
-          condition: 'Available to Use',
         })
       );
 
-      // Verify RTDB ledger release (set to null)
-      expect(mockRtdb.set).toHaveBeenCalledWith(expect.anything(), null);
+      // Verify RTDB ledger maintains lock for Out of Service condition
+      expect(mockRtdb.set).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          i: expect.objectContaining({ 'eq-1': { q: 1 } }),
+        })
+      );
     });
 
     it('SVC-UPD-03: Rejects invalid status transition (Tier 2)', async () => {
@@ -704,7 +710,6 @@ describe('repair-service', () => {
         expect.anything(),
         expect.objectContaining({
           status: 'Under Repair',
-          condition: 'Out of Service',
         })
       );
     });
@@ -1246,7 +1251,7 @@ describe('repair-service', () => {
       expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
     });
 
-    it('SVC-FLD-14: auto-derives condition to Available to Use and releases RTDB lock when status updates to Completed without explicit condition', async () => {
+    it('SVC-FLD-14: status updates independently without mutating condition when not specified', async () => {
       mockFirestore.getDoc.mockResolvedValue({
         exists: () => true,
         data: () => ({
@@ -1269,10 +1274,8 @@ describe('repair-service', () => {
         expect.anything(),
         expect.objectContaining({
           status: 'Completed',
-          condition: 'Available to Use',
         })
       );
-      expect(mockRtdb.set).toHaveBeenCalledWith(expect.anything(), null);
     });
 
     it('SVC-FLD-15: rejects illegal status transitions in updateRepairTicketFields', async () => {
@@ -1368,5 +1371,256 @@ describe('repair-service', () => {
       expect(resCompleted.success).toBe(true);
     });
   });
+
+  // ==========================================================================
+  // 11. TENANT SUPPLIERS & CREW MEMBERS FETCHERS (SVC-PICK)
+  // ==========================================================================
+  describe('fetchTenantSuppliers & fetchTenantCrewMembers', () => {
+    it('SVC-PICK-01: fetchTenantSuppliers retrieves and filters suppliers from contacts collection', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'c-1',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Robe UK Supplies',
+            types: ['Supplier'],
+            email: 'supplies@robe.co.uk',
+            phone: '+44 1234 567890',
+          }),
+        },
+        {
+          id: 'c-2',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Clay Paky Italy',
+            isSupplier: true,
+            email: 'info@claypaky.it',
+          }),
+        },
+        {
+          id: 'c-3',
+          data: () => ({
+            tenantId: 'tenant-beta', // Foreign tenant
+            name: 'Foreign Supplier',
+            types: ['Supplier'],
+          }),
+        },
+        {
+          id: 'c-4',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'ACME Client Corp',
+            types: ['Client'], // Not a supplier
+          }),
+        },
+      ]);
+
+      const suppliers = await fetchTenantSuppliers('tenant-alpha');
+      expect(suppliers).toHaveLength(2);
+      expect(suppliers[0].name).toBe('Clay Paky Italy');
+      expect(suppliers[1].name).toBe('Robe UK Supplies');
+    });
+
+    it('SVC-PICK-02: fetchTenantSuppliers returns empty array for empty tenantId or errors', async () => {
+      expect(await fetchTenantSuppliers('')).toEqual([]);
+
+      mockFirestore.getDocs.mockRejectedValueOnce(new Error('Firestore error'));
+      expect(await fetchTenantSuppliers('tenant-alpha')).toEqual([]);
+    });
+
+    it('SVC-PICK-03: fetchTenantCrewMembers retrieves and maps active users belonging to tenant', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'u-1',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'David Lighting Tech',
+            email: 'david@kuro.test',
+            role: 'Technician',
+            position: 'Senior Lighting Lead',
+            disabled: false,
+          }),
+        },
+        {
+          id: 'u-2',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            firstName: 'Alex',
+            lastName: 'Technician',
+            email: 'alex@kuro.test',
+            role: 'Admin',
+            disabled: false,
+          }),
+        },
+        {
+          id: 'u-3',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Disabled User',
+            disabled: true, // Should be excluded
+          }),
+        },
+        {
+          id: 'u-4',
+          data: () => ({
+            tenantId: 'tenant-beta', // Foreign tenant
+            name: 'Beta User',
+          }),
+        },
+      ]);
+
+      const crew = await fetchTenantCrewMembers('tenant-alpha');
+      expect(crew).toHaveLength(2);
+      expect(crew[0].name).toBe('Alex Technician');
+      expect(crew[1].name).toBe('David Lighting Tech');
+    });
+
+    it('SVC-PICK-04: fetchTenantCrewMembers returns empty array for empty tenantId or errors', async () => {
+      expect(await fetchTenantCrewMembers('')).toEqual([]);
+
+      mockFirestore.getDocs.mockRejectedValueOnce(new Error('Firestore error'));
+      expect(await fetchTenantCrewMembers('tenant-alpha')).toEqual([]);
+    });
+
+    it('SVC-PICK-05: handles raw docSnap objects where data is a plain property instead of a function', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'c-plain-1',
+          data: {
+            tenantId: 'tenant-alpha',
+            name: 'Plain Object Supplier',
+            types: ['Supplier'],
+          },
+        },
+      ]);
+      const suppliers = await fetchTenantSuppliers('tenant-alpha');
+      expect(suppliers).toHaveLength(1);
+      expect(suppliers[0].name).toBe('Plain Object Supplier');
+
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'u-plain-1',
+          data: {
+            tenantId: 'tenant-alpha',
+            name: 'Plain Object Crew Member',
+            role: 'Technician',
+          },
+        },
+      ]);
+      const crew = await fetchTenantCrewMembers('tenant-alpha');
+      expect(crew).toHaveLength(1);
+      expect(crew[0].name).toBe('Plain Object Crew Member');
+    });
+
+    it('SVC-PICK-06: fetchTenantSuppliers recognizes vendor and manufacturer types', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'c-vendor-1',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Pro Sound Vendor Direct',
+            types: ['Vendor'],
+            email: 'sales@prosoundvendor.com',
+          }),
+        },
+        {
+          id: 'c-manuf-1',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Avolites Manufacturer Parts',
+            types: ['Manufacturer'],
+            website: 'https://avolites.com',
+          }),
+        },
+      ]);
+
+      const suppliers = await fetchTenantSuppliers('tenant-alpha');
+      expect(suppliers).toHaveLength(2);
+      expect(suppliers[0].name).toBe('Avolites Manufacturer Parts');
+      expect(suppliers[1].name).toBe('Pro Sound Vendor Direct');
+    });
+
+    it('SVC-PICK-07: fetchTenantCrewMembers filters out archived, deleted, and inactive users', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'u-archived',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Archived Tech',
+            archived: true,
+          }),
+        },
+        {
+          id: 'u-deleted',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Deleted Tech',
+            isDeleted: true,
+          }),
+        },
+        {
+          id: 'u-inactive',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Inactive Tech',
+            active: false,
+          }),
+        },
+        {
+          id: 'u-active',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Active Lead Tech',
+            role: 'Lead Technician',
+          }),
+        },
+      ]);
+
+      const crew = await fetchTenantCrewMembers('tenant-alpha');
+      expect(crew).toHaveLength(1);
+      expect(crew[0].name).toBe('Active Lead Tech');
+    });
+
+    it('SVC-PICK-08: fetchTenantSuppliers recognizes companyName field and maps manufacturer type', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'c-comp-1',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            companyName: 'Luminex Network Intelligence',
+            types: ['Manufacturer'],
+            phone: '+32 11 812 189',
+          }),
+        },
+      ]);
+
+      const suppliers = await fetchTenantSuppliers('tenant-alpha');
+      expect(suppliers).toHaveLength(1);
+      expect(suppliers[0].name).toBe('Luminex Network Intelligence');
+      expect(suppliers[0].type).toBe('Manufacturer');
+      expect(suppliers[0].phone).toBe('+32 11 812 189');
+    });
+
+    it('SVC-PICK-09: fetchTenantCrewMembers recognizes displayName field when name is omitted', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'u-disp-1',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            displayName: 'Jordan Stagehand',
+            email: 'jordan@kuro.test',
+            role: 'Stagehand',
+          }),
+        },
+      ]);
+
+      const crew = await fetchTenantCrewMembers('tenant-alpha');
+      expect(crew).toHaveLength(1);
+      expect(crew[0].name).toBe('Jordan Stagehand');
+      expect(crew[0].role).toBe('Stagehand');
+    });
+  });
 });
+
+
 
