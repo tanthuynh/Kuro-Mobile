@@ -88,7 +88,7 @@ export function LogisticsDestinationCard({
             {destination.time ? (
               <View style={styles.timeTag}>
                 <Clock size={12} color={colors.mutedForeground} />
-                <Text style={[styles.timeTagText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                <Text style={[styles.timeTagText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                   {destination.time}
                 </Text>
               </View>
@@ -98,7 +98,7 @@ export function LogisticsDestinationCard({
           {destination.distance || destination.estTravelTime ? (
             <View style={styles.distanceBadge}>
               <Compass size={11} color={colors.mutedForeground} />
-              <Text style={[styles.distanceText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.distanceText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                 {[destination.distance, destination.estTravelTime].filter(Boolean).join(' • ')}
               </Text>
             </View>
@@ -116,7 +116,7 @@ export function LogisticsDestinationCard({
         {destination.address ? (
           <View style={styles.addressRow}>
             <MapPin size={14} color={colors.primary} style={{ marginTop: 2 }} />
-            <Text style={[styles.addressText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.addressText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
               {destination.address}
             </Text>
           </View>
@@ -126,7 +126,7 @@ export function LogisticsDestinationCard({
         {destination.contact ? (
           <View style={styles.contactRow}>
             <Phone size={13} color={colors.mutedForeground} style={{ marginTop: 2 }} />
-            <Text style={[styles.contactText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.contactText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
               {destination.contact}
             </Text>
           </View>
@@ -135,7 +135,7 @@ export function LogisticsDestinationCard({
         {/* Detail Note */}
         {destination.detailNote ? (
           <View style={[styles.noteBox, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-            <Text style={[styles.noteText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.noteText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
               {destination.detailNote}
             </Text>
           </View>
@@ -202,9 +202,9 @@ const styles = StyleSheet.create({
   },
   timeTagText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   distanceBadge: {
     flexDirection: 'row',
@@ -213,9 +213,9 @@ const styles = StyleSheet.create({
   },
   distanceText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   nameSection: {
     marginTop: 2,
@@ -233,9 +233,9 @@ const styles = StyleSheet.create({
   },
   addressText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     flex: 1,
-    lineHeight: 16,
+    lineHeight: 18,
     fontWeight: '500',
   },
   contactRow: {
@@ -245,10 +245,10 @@ const styles = StyleSheet.create({
   },
   contactText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     flex: 1,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   noteBox: {
     padding: 8,
@@ -258,9 +258,9 @@ const styles = StyleSheet.create({
   },
   noteText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontStyle: 'italic',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   actionsBar: {
     flexDirection: 'row',

@@ -166,23 +166,36 @@ export function getEventOperationalWindow(event: {
   setupTime?: Date | null;
   startTime?: Date | null;
   finishTime?: Date | null;
+  rehearsalTime?: Date | null;
   eventStartDate?: Date | null;
   eventFinishDate?: Date | null;
   pickupTime?: Date | null;
   packdownTime?: Date | null;
 }): { start: Date | null; end: Date | null } {
+  if (!event) return { start: null, end: null };
+
   const startCandidates = [
-    event.deliveryTime,
-    event.setupTime,
-    event.startTime,
-    event.eventStartDate,
+    parseFirestoreDate(event.deliveryTime),
+    parseFirestoreDate(event.setupTime),
+    parseFirestoreDate(event.startTime),
+    parseFirestoreDate(event.rehearsalTime),
+    parseFirestoreDate(event.eventStartDate),
+    parseFirestoreDate(event.pickupTime),
+    parseFirestoreDate(event.packdownTime),
+    parseFirestoreDate(event.finishTime),
+    parseFirestoreDate(event.eventFinishDate),
   ].filter((d): d is Date => d instanceof Date && !isNaN(d.getTime()));
 
   const endCandidates = [
-    event.packdownTime,
-    event.pickupTime,
-    event.finishTime,
-    event.eventFinishDate,
+    parseFirestoreDate(event.packdownTime),
+    parseFirestoreDate(event.pickupTime),
+    parseFirestoreDate(event.finishTime),
+    parseFirestoreDate(event.rehearsalTime),
+    parseFirestoreDate(event.eventFinishDate),
+    parseFirestoreDate(event.setupTime),
+    parseFirestoreDate(event.deliveryTime),
+    parseFirestoreDate(event.startTime),
+    parseFirestoreDate(event.eventStartDate),
   ].filter((d): d is Date => d instanceof Date && !isNaN(d.getTime()));
 
   let start: Date | null = null;

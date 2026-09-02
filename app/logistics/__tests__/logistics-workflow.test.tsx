@@ -298,7 +298,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
   // ==========================================================================
   // SCENARIO 1: DRIVER LOGISTICS FEED & FILTERING WORKFLOW
   // ==========================================================================
-  describe('Scenario 1: Driver opens Logistics tab, views assigned jobs feed, switches tabs/filters, clicks on active job', () => {
+  describe('Scenario 1: Driver opens Logistics tab, views jobs feed, switches interactive status filters, clicks on active job', () => {
     it('renders real-time jobs feed and calculates accurate summary metrics', async () => {
       jest.spyOn(logisticsService, 'subscribeToLogistics').mockImplementation((tenantId, onUpdate) => {
         if (tenantId === tenantAlpha) {
@@ -309,16 +309,14 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
         return () => {};
       });
 
-      const { getByText, findByText, getByTestId } = render(<LogisticsFeedScreen />);
+      const { findByText, getByTestId, getByText } = render(<LogisticsFeedScreen />);
 
-      // Verify Header
-      expect(getByText('Logistics & Transport')).toBeTruthy();
-
-      // Verify Aggregated Metrics: Total=4, Active=1, Scheduled=2, Completed=1
-      expect(getByTestId('metric-card-active')).toBeTruthy();
-      expect(getByTestId('metric-card-scheduled')).toBeTruthy();
+      // Verify Aggregated Metrics: All, Pending, Planned, In Progress, Completed
+      expect(getByTestId('metric-card-all')).toBeTruthy();
+      expect(getByTestId('metric-card-pending')).toBeTruthy();
+      expect(getByTestId('metric-card-planned')).toBeTruthy();
+      expect(getByTestId('metric-card-in-progress')).toBeTruthy();
       expect(getByTestId('metric-card-completed')).toBeTruthy();
-      expect(getByTestId('metric-card-total')).toBeTruthy();
 
       // Verify Feed Job Cards render
       expect(await findByText('Sydney Opera House Gala Audio Run')).toBeTruthy();
@@ -327,7 +325,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       expect(getByText('Metro Theatre Return Run')).toBeTruthy();
     });
 
-    it('filters jobs dynamically when toggling "Assigned to Me" vs "All Jobs"', async () => {
+    it('filters feed jobs via top-row interactive status metric cards ("In Progress", "Planned", "Completed", "All")', async () => {
       jest.spyOn(logisticsService, 'subscribeToLogistics').mockImplementation((_tId, onUpdate) => {
         onUpdate(mockDatasetJobs);
         return () => {};
@@ -335,53 +333,20 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       const { getByTestId, queryByText, findByText, getByText } = render(<LogisticsFeedScreen />);
 
-      expect(await findByText('Qudos Bank Arena Video Wall Transport')).toBeTruthy(); // Assigned to Alex Rivera
-
-      // Tap "Assigned to Me"
-      const assignedMeToggle = getByTestId('toggle-assigned-me');
+      // Filter by In Progress
+      const inProgressCard = getByTestId('metric-card-in-progress');
       await act(async () => {
-        fireEvent.press(assignedMeToggle);
-      });
-
-      // Sam Fisher's jobs should remain
-      expect(await findByText('Sydney Opera House Gala Audio Run')).toBeTruthy();
-      expect(getByText('Enmore Theatre Lighting Delivery')).toBeTruthy();
-      expect(getByText('Metro Theatre Return Run')).toBeTruthy();
-
-      // Alex Rivera's job should be filtered out
-      expect(queryByText('Qudos Bank Arena Video Wall Transport')).toBeNull();
-
-      // Tap back to "All Jobs"
-      const allJobsToggle = getByTestId('toggle-all-jobs');
-      await act(async () => {
-        fireEvent.press(allJobsToggle);
-      });
-
-      expect(await findByText('Qudos Bank Arena Video Wall Transport')).toBeTruthy();
-    });
-
-    it('filters feed jobs via status filter chips ("Active", "Scheduled", "Completed")', async () => {
-      jest.spyOn(logisticsService, 'subscribeToLogistics').mockImplementation((_tId, onUpdate) => {
-        onUpdate(mockDatasetJobs);
-        return () => {};
-      });
-
-      const { getByTestId, queryByText, findByText, getByText } = render(<LogisticsFeedScreen />);
-
-      // Filter by Active
-      const activeChip = getByTestId('status-filter-active');
-      await act(async () => {
-        fireEvent.press(activeChip);
+        fireEvent.press(inProgressCard);
       });
 
       expect(await findByText('Enmore Theatre Lighting Delivery')).toBeTruthy();
       expect(queryByText('Sydney Opera House Gala Audio Run')).toBeNull();
       expect(queryByText('Metro Theatre Return Run')).toBeNull();
 
-      // Filter by Scheduled
-      const scheduledChip = getByTestId('status-filter-scheduled');
+      // Filter by Planned
+      const plannedCard = getByTestId('metric-card-planned');
       await act(async () => {
-        fireEvent.press(scheduledChip);
+        fireEvent.press(plannedCard);
       });
 
       expect(await findByText('Sydney Opera House Gala Audio Run')).toBeTruthy();
@@ -389,13 +354,24 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       expect(queryByText('Enmore Theatre Lighting Delivery')).toBeNull();
 
       // Filter by Completed
-      const completedChip = getByTestId('status-filter-completed');
+      const completedCard = getByTestId('metric-card-completed');
       await act(async () => {
-        fireEvent.press(completedChip);
+        fireEvent.press(completedCard);
       });
 
       expect(await findByText('Metro Theatre Return Run')).toBeTruthy();
       expect(queryByText('Sydney Opera House Gala Audio Run')).toBeNull();
+
+      // Filter by All
+      const allCard = getByTestId('metric-card-all');
+      await act(async () => {
+        fireEvent.press(allCard);
+      });
+
+      expect(await findByText('Sydney Opera House Gala Audio Run')).toBeTruthy();
+      expect(getByText('Enmore Theatre Lighting Delivery')).toBeTruthy();
+      expect(getByText('Qudos Bank Arena Video Wall Transport')).toBeTruthy();
+      expect(getByText('Metro Theatre Return Run')).toBeTruthy();
     });
 
     it('filters feed jobs via search keyword input and handles empty search reset', async () => {
@@ -464,7 +440,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
   // SCENARIO 2: JOB ACTIVATION & BACKGROUND GPS TRACKING LIFECYCLE
   // ==========================================================================
   describe('Scenario 2: Driver activates scheduled job -> triggers status transition to "In Progress" AND startTrackingJob syncing GPS coordinates to Firestore', () => {
-    it('activates scheduled job, starts background GPS updates, and writes initial GPS location to Firestore', async () => {
+    it('activates scheduled job via Play button, starts background GPS updates, and writes initial GPS location to Firestore', async () => {
       mockSearchParamId = 'job-alpha-701';
       const scheduledJob = { ...mockDatasetJobs[0] };
 
@@ -479,11 +455,11 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       const { findByTestId, getByText } = render(<LogisticsJobDetailScreen />);
 
-      const activateBtn = await findByTestId('activate-job-btn');
-      expect(getByText('Activate Job / Start Route')).toBeTruthy();
+      const playBtn = await findByTestId('play-job-btn');
+      expect(getByText('Play')).toBeTruthy();
 
       await act(async () => {
-        fireEvent.press(activateBtn);
+        fireEvent.press(playBtn);
       });
 
       // 1. Verify startTrackingJob was invoked with driver info
@@ -533,7 +509,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       expect(locationTrackingService.getActiveTenantId()).toBe(tenantAlpha);
     });
 
-    it('updates live GPS banner to BROADCASTING and renders real-time coordinates', async () => {
+    it('updates header tracking status badge to Tracking and confirms live GPS banner is removed', async () => {
       mockSearchParamId = 'job-alpha-702';
       const activeTrackingJob: LogisticsEntry = {
         ...mockDatasetJobs[1],
@@ -545,12 +521,11 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
         return () => {};
       });
 
-      const { findByTestId, getByText } = render(<LogisticsJobDetailScreen />);
+      const { findByTestId, getByText, queryByTestId } = render(<LogisticsJobDetailScreen />);
 
-      expect(await findByTestId('live-gps-tracking-banner')).toBeTruthy();
-      expect(getByText('GPS Tracking Active')).toBeTruthy();
-      expect(getByText('BROADCASTING')).toBeTruthy();
-      expect(getByText(/Lat: -33\.89880, Lng: 151\.17550/)).toBeTruthy();
+      expect(await findByTestId('header-tracking-status-badge')).toBeTruthy();
+      expect(getByText('Tracking')).toBeTruthy();
+      expect(queryByTestId('live-gps-tracking-banner')).toBeNull();
     });
 
     it('handles permission denial gracefully and displays error banner without unhandled crash', async () => {
@@ -571,13 +546,71 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       const { findByTestId } = render(<LogisticsJobDetailScreen />);
 
-      const activateBtn = await findByTestId('activate-job-btn');
+      const playBtn = await findByTestId('play-job-btn');
       await act(async () => {
-        fireEvent.press(activateBtn);
+        fireEvent.press(playBtn);
       });
 
       expect(locationTrackingService.isTrackingActive()).toBe(false);
       expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
+    });
+
+    it('pauses GPS tracking via Pause button and preserves job status', async () => {
+      mockSearchParamId = 'job-alpha-702';
+      const activeJob: LogisticsEntry = {
+        ...mockDatasetJobs[1],
+        status: 'In Progress',
+        isTrackingActive: true,
+      };
+
+      jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+        cb(activeJob);
+        return () => {};
+      });
+
+      const stopTrackingSpy = jest.spyOn(locationTrackingService, 'stopTrackingJob').mockResolvedValueOnce(undefined);
+      const updateStatusSpy = jest.spyOn(logisticsService, 'updateLogisticsStatus');
+
+      const { findByTestId } = render(<LogisticsJobDetailScreen />);
+
+      const pauseBtn = await findByTestId('pause-job-btn');
+      await act(async () => {
+        fireEvent.press(pauseBtn);
+      });
+
+      expect(stopTrackingSpy).toHaveBeenCalledWith('job-alpha-702');
+      expect(updateStatusSpy).not.toHaveBeenCalled();
+    });
+
+    it('QuickStatusSelector executes 1-click status transitions in Job Overview', async () => {
+      mockSearchParamId = 'job-alpha-701';
+      const scheduledJob = { ...mockDatasetJobs[0] };
+
+      jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+        cb(scheduledJob);
+        return () => {};
+      });
+
+      const updateStatusSpy = jest.spyOn(logisticsService, 'updateLogisticsStatus').mockResolvedValueOnce(undefined);
+      const startTrackingSpy = jest.spyOn(locationTrackingService, 'startTrackingJob').mockResolvedValueOnce(true);
+
+      const { findByTestId } = render(<LogisticsJobDetailScreen />);
+
+      const inProgressPill = await findByTestId('status-btn-in-progress');
+      await act(async () => {
+        fireEvent.press(inProgressPill);
+      });
+
+      expect(startTrackingSpy).toHaveBeenCalledWith(
+        'job-alpha-701',
+        tenantAlpha,
+        expect.anything()
+      );
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'job-alpha-701',
+        'In Progress',
+        expect.anything()
+      );
     });
   });
 
@@ -766,7 +799,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
   // SCENARIO 6: JOB COMPLETION & BACKGROUND GPS DEACTIVATION
   // ==========================================================================
   describe('Scenario 6: Driver completes job -> triggers status transition to "Completed" AND triggers stopTrackingJob deactivating GPS polling', () => {
-    it('completes active job, deactivates background GPS updates, and updates Firestore state', async () => {
+    it('completes active job via Finish button, deactivates background GPS updates, and updates Firestore state', async () => {
       mockSearchParamId = 'job-alpha-702';
       const activeJob: LogisticsEntry = {
         ...mockDatasetJobs[1],
@@ -790,11 +823,11 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       const { findByTestId, getByText } = render(<LogisticsJobDetailScreen />);
 
-      const completeBtn = await findByTestId('complete-job-btn');
-      expect(getByText('Complete Job')).toBeTruthy();
+      const finishBtn = await findByTestId('finish-job-btn');
+      expect(getByText('Finish')).toBeTruthy();
 
       await act(async () => {
-        fireEvent.press(completeBtn);
+        fireEvent.press(finishBtn);
       });
 
       // 1. Verify stopTrackingJob was called
@@ -820,7 +853,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       expect(locationTrackingService.getActiveTrackingJobId()).toBeNull();
     });
 
-    it('renders completed job state with success badge and inactive GPS banner', async () => {
+    it('renders completed job state with success badge and Idle header tracking status', async () => {
       mockSearchParamId = 'job-alpha-704';
       const completedJob: LogisticsEntry = {
         ...mockDatasetJobs[3],
@@ -833,16 +866,12 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
         return () => {};
       });
 
-      const { findByTestId, getByText, queryByTestId } = render(<LogisticsJobDetailScreen />);
+      const { findByTestId, getByTestId, getByText, queryByTestId } = render(<LogisticsJobDetailScreen />);
 
-      expect(await findByTestId('live-gps-tracking-banner')).toBeTruthy();
-      expect(getByText('GPS Tracking Inactive')).toBeTruthy();
-      expect(getByText('IDLE')).toBeTruthy();
-      expect(getByText('Job is marked completed. Location tracking stopped.')).toBeTruthy();
-
-      // Action buttons for Activate and Complete should not be visible on completed job
-      expect(queryByTestId('activate-job-btn')).toBeNull();
-      expect(queryByTestId('complete-job-btn')).toBeNull();
+      expect(await findByTestId('header-tracking-status-badge')).toBeTruthy();
+      expect(getByText('Idle')).toBeTruthy();
+      expect(getByTestId('detail-job-status-badge')).toBeTruthy();
+      expect(queryByTestId('live-gps-tracking-banner')).toBeNull();
     });
   });
 
@@ -989,12 +1018,12 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       const appendNoteSpy = jest.spyOn(logisticsService, 'appendLogisticsNote').mockResolvedValue(undefined);
 
       const detailRender = render(<LogisticsJobDetailScreen />);
-      expect(await detailRender.findByText('Sydney Opera House Gala Audio Run')).toBeTruthy();
+      expect(await detailRender.findByText('[#701] Sydney Opera House Gala Audio Run')).toBeTruthy();
 
-      // 3. Driver Activates Job / Starts Route
-      const activateBtn = await detailRender.findByTestId('activate-job-btn');
+      // 3. Driver Activates Job / Starts Route via Play button
+      const playBtn = await detailRender.findByTestId('play-job-btn');
       await act(async () => {
-        fireEvent.press(activateBtn);
+        fireEvent.press(playBtn);
       });
 
       expect(startTrackingSpy).toHaveBeenCalledWith(
@@ -1048,7 +1077,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
         tenantAlpha
       );
 
-      // 7. Driver Completes Job
+      // 7. Driver Completes Job via Finish button
       // Transition job state to In Progress for component re-render
       currentJobState = {
         ...currentJobState,
@@ -1057,9 +1086,9 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       };
 
       const completeDetailRender = render(<LogisticsJobDetailScreen />);
-      const completeBtn = await completeDetailRender.findByTestId('complete-job-btn');
+      const finishBtn = await completeDetailRender.findByTestId('finish-job-btn');
       await act(async () => {
-        fireEvent.press(completeBtn);
+        fireEvent.press(finishBtn);
       });
 
       expect(stopTrackingSpy).toHaveBeenCalledWith('job-alpha-701');

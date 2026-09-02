@@ -205,6 +205,43 @@ export function isJobScheduled(status?: string | null, role?: string | null): bo
 }
 
 /**
+ * Checks whether a logistics status represents a pending / draft / unassigned job.
+ *
+ * @param status Status name.
+ * @returns `true` if job is pending / draft / unassigned.
+ */
+export function isJobPending(status?: string | null): boolean {
+  if (!status || typeof status !== 'string') {
+    return false;
+  }
+
+  const s = status.trim().toLowerCase();
+  const pendingStatuses = new Set(['pending', 'draft', 'unassigned']);
+  return pendingStatuses.has(s);
+}
+
+/**
+ * Checks whether a logistics status represents a planned / scheduled / confirmed / ready job.
+ *
+ * @param status Status name.
+ * @returns `true` if job is planned / scheduled.
+ */
+export function isJobPlanned(status?: string | null): boolean {
+  if (!status || typeof status !== 'string') {
+    return false;
+  }
+
+  const s = status.trim().toLowerCase();
+  const plannedStatuses = new Set(['planned', 'scheduled', 'confirmed', 'ready', 'assigned']);
+  return plannedStatuses.has(s);
+}
+
+/**
+ * Alias for isJobActive to match standard lifecycle naming.
+ */
+export const isJobInProgress = isJobActive;
+
+/**
  * Validates whether transitioning from `currentStatus` to `newStatus` is valid.
  *
  * @param currentStatus Current job status.
@@ -235,7 +272,7 @@ export function isValidStatusTransition(
   const cancelledStatuses = new Set(['cancelled', 'canceled', 'void']);
 
   // Draft / Scheduled / Confirmed can transition to Active, Completed, Cancelled, Archived
-  const draftOrScheduled = new Set(['draft', 'scheduled', 'pending', 'confirmed', 'ready', 'assigned']);
+  const draftOrScheduled = new Set(['draft', 'scheduled', 'pending', 'confirmed', 'ready', 'assigned', 'planned']);
   if (draftOrScheduled.has(curr)) {
     return true;
   }
@@ -266,7 +303,7 @@ export function isValidStatusTransition(
  * @param entries Array of logistics entries.
  * @param user Current authenticated user/driver.
  * @param onlyAssigned If true, filters strictly to jobs assigned to the driver.
- * @param statusFilter 'all', 'active', 'scheduled', 'completed', 'in_transit', or specific status.
+ * @param statusFilter 'all', 'active', 'scheduled', 'pending', 'planned', 'in progress', 'completed', 'in_transit', or specific status.
  * @param search Search keyword matching against venue, event, driver, notes, or destination.
  * @returns Filtered array of logistics entries.
  */
@@ -326,12 +363,16 @@ export function filterLogisticsForDriver(
   if (statusFilter && statusFilter.toLowerCase() !== 'all' && statusFilter.trim() !== '') {
     const sf = statusFilter.trim().toLowerCase();
 
-    if (sf === 'active') {
+    if (sf === 'pending') {
+      result = result.filter((entry) => isJobPending(entry.status));
+    } else if (sf === 'planned') {
+      result = result.filter((entry) => isJobPlanned(entry.status));
+    } else if (sf === 'in progress' || sf === 'in-progress' || sf === 'in_progress' || sf === 'active') {
       result = result.filter((entry) => isJobActive(entry.status));
-    } else if (sf === 'scheduled') {
-      result = result.filter((entry) => isJobScheduled(entry.status));
     } else if (sf === 'completed') {
       result = result.filter((entry) => isJobCompleted(entry.status));
+    } else if (sf === 'scheduled') {
+      result = result.filter((entry) => isJobScheduled(entry.status));
     } else if (sf === 'in_transit' || sf === 'in-transit' || sf === 'in transit') {
       result = result.filter((entry) => {
         const s = (entry.status || '').toLowerCase();
@@ -392,7 +433,7 @@ export function filterLogisticsForDriver(
  * Computes aggregated summary metrics across a set of logistics entries.
  *
  * @param entries Array of logistics entries.
- * @returns Metrics breakdown `{ total, active, scheduled, completed, inTransit }`.
+ * @returns Metrics breakdown `{ total, all, pending, planned, inProgress, completed, active, scheduled, inTransit }`.
  */
 export function computeLogisticsMetrics(
   entries: LogisticsEntry[] | null | undefined
@@ -400,16 +441,21 @@ export function computeLogisticsMetrics(
   if (!entries || !Array.isArray(entries)) {
     return {
       total: 0,
+      all: 0,
+      pending: 0,
+      planned: 0,
+      inProgress: 0,
+      completed: 0,
       active: 0,
       scheduled: 0,
-      completed: 0,
       inTransit: 0,
     };
   }
 
   let total = 0;
-  let active = 0;
-  let scheduled = 0;
+  let pending = 0;
+  let planned = 0;
+  let inProgress = 0;
   let completed = 0;
   let inTransit = 0;
 
@@ -420,11 +466,14 @@ export function computeLogisticsMetrics(
 
     total++;
 
-    if (isJobActive(entry.status)) {
-      active++;
+    if (isJobPending(entry.status)) {
+      pending++;
     }
-    if (isJobScheduled(entry.status)) {
-      scheduled++;
+    if (isJobPlanned(entry.status)) {
+      planned++;
+    }
+    if (isJobActive(entry.status)) {
+      inProgress++;
     }
     if (isJobCompleted(entry.status)) {
       completed++;
@@ -438,9 +487,13 @@ export function computeLogisticsMetrics(
 
   return {
     total,
-    active,
-    scheduled,
+    all: total,
+    pending,
+    planned,
+    inProgress,
     completed,
+    active: inProgress,
+    scheduled: planned + pending,
     inTransit,
   };
 }

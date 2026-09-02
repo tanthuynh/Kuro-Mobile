@@ -10,6 +10,9 @@ import {
   isJobActive,
   isJobCompleted,
   isJobScheduled,
+  isJobPending,
+  isJobPlanned,
+  isJobInProgress,
   isValidStatusTransition,
   filterLogisticsForDriver,
   computeLogisticsMetrics,
@@ -426,15 +429,45 @@ describe('Logistics Engine Domain Functions', () => {
     });
   });
 
+  describe('isJobPending and isJobPlanned', () => {
+    it('recognizes pending statuses', () => {
+      expect(isJobPending('Pending')).toBe(true);
+      expect(isJobPending('Draft')).toBe(true);
+      expect(isJobPending('Unassigned')).toBe(true);
+      expect(isJobPending('Scheduled')).toBe(false);
+      expect(isJobPending('Completed')).toBe(false);
+    });
+
+    it('recognizes planned statuses', () => {
+      expect(isJobPlanned('Planned')).toBe(true);
+      expect(isJobPlanned('Scheduled')).toBe(true);
+      expect(isJobPlanned('Confirmed')).toBe(true);
+      expect(isJobPlanned('Ready')).toBe(true);
+      expect(isJobPlanned('Assigned')).toBe(true);
+      expect(isJobPlanned('Pending')).toBe(false);
+      expect(isJobPlanned('Completed')).toBe(false);
+    });
+  });
+
   describe('computeLogisticsMetrics', () => {
     it('returns zeroed metrics for null, undefined, or empty array', () => {
-      const zeroMetrics = { total: 0, active: 0, scheduled: 0, completed: 0, inTransit: 0 };
+      const zeroMetrics = {
+        total: 0,
+        all: 0,
+        pending: 0,
+        planned: 0,
+        inProgress: 0,
+        completed: 0,
+        active: 0,
+        scheduled: 0,
+        inTransit: 0,
+      };
       expect(computeLogisticsMetrics(null)).toEqual(zeroMetrics);
       expect(computeLogisticsMetrics(undefined)).toEqual(zeroMetrics);
       expect(computeLogisticsMetrics([])).toEqual(zeroMetrics);
     });
 
-    it('accurately tallies total, active, scheduled, completed, and inTransit counts ignoring archived entries', () => {
+    it('accurately tallies total, pending, planned, inProgress, completed, active, scheduled, and inTransit counts ignoring archived entries', () => {
       const entries: LogisticsEntry[] = [
         {
           id: '1',
@@ -514,9 +547,13 @@ describe('Logistics Engine Domain Functions', () => {
       const metrics = computeLogisticsMetrics(entries);
       expect(metrics).toEqual({
         total: 5,
-        active: 2,     // 'In Transit' and 'En Route'
-        scheduled: 2,  // 'Scheduled' and 'Pending'
+        all: 5,
+        pending: 1,    // 'Pending'
+        planned: 1,    // 'Scheduled'
+        inProgress: 2, // 'In Transit' and 'En Route'
         completed: 1,  // 'Completed' (ignoring archived)
+        active: 2,     // 'In Transit' and 'En Route'
+        scheduled: 2,  // 'Scheduled' + 'Pending'
         inTransit: 2,  // 'In Transit' and 'En Route'
       });
     });

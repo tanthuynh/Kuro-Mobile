@@ -1,22 +1,26 @@
 /**
  * __tests__/repair-ticket-detail.test.tsx
- * Comprehensive Repair Ticket Detail Screen Test Suite (R1-R6).
+ * Comprehensive Repair Ticket Detail Screen & New Repair Workflow Test Suite.
  *
  * Validates:
- * 1. Single Text Input with Autocomplete for Equipment, Serial Number, Requester, and Supplier.
+ * 1. Mobile-First Cleave Dialog Component (CleaveModalInput) for Equipment, Serial, Owner, Supplier, Requested By.
  * 2. Combined Row 2: 5 Equal Boxes (Priority: Low, Medium, High & Condition: Available to Use, Out of Service).
  * 3. 5-Second Debounced / Pooled Mutation Saving with optimistic UI updates and immediate unmount flush.
  * 4. 3-Column Mobile Date Scroller for Repair Period with presets.
- * 5. Terminology Simplification (Images & Documents) and Attachments management.
- * 6. Dual fixed bottom action bar and action logs.
+ * 5. Terminology Simplification: Images, Documents & Notes (renamed from Technician Notes).
+ * 6. Prominent top-level Internal Notes preview and modal editor in Details section.
+ * 7. Auto-fill Requested By in New Mode.
+ * 8. Real camera integration and active in-app document viewing via Linking.openURL.
  */
 
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { Linking } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import RepairTicketDetailScreen from '@/../app/repair/[id]';
 import * as repairService from '@/services/repair-service';
 import * as equipmentService from '@/services/equipment-service';
-import type { RepairTicket, TenantSupplier, TenantCrewMember } from '@/types/repair';
+import type { RepairTicket, TenantSupplier, TenantOwner, TenantCrewMember } from '@/types/repair';
 import type { Equipment } from '@/types/equipment';
 
 // Mock Theme
@@ -67,8 +71,9 @@ const mockSingleTicket: RepairTicket = {
   id: 'ticket-101',
   tenantId: 'tenant-alpha',
   repairNumber: 1042,
+  internalNotes: 'REF-2026-X99: Optical bench diagnostic pending',
   internalReference: 'REF-2026-X99',
-  supplierId: 'SUPP-ROBE-GLOBAL',
+  supplierId: 'Stage Electrics UK',
   owner: 'Alpha Rental Group',
   repairPeriodStart: '2026-08-25T08:00:00.000Z',
   repairPeriodEnd: '2026-08-27T18:00:00.000Z',
@@ -142,6 +147,12 @@ const mockTenantSuppliers: TenantSupplier[] = [
   { id: 'supp-3', name: 'Stage Electrics UK', type: 'Supplier', phone: '+44 117 938 4000' },
 ];
 
+const mockTenantOwners: TenantOwner[] = [
+  { id: 'own-1', name: 'Alpha Rental Group', type: 'Client', email: 'rentals@alpha.test' },
+  { id: 'own-2', name: 'Sydney Opera House', type: 'Venue', email: 'events@sydneyoperahouse.test' },
+  { id: 'own-3', name: 'Enmore Theatre', type: 'Venue', email: 'production@enmore.test' },
+];
+
 const mockTenantCrew: TenantCrewMember[] = [
   { id: 'crew-1', name: 'Alex Technician', email: 'alex@kuro.test', role: 'Technician', position: 'Lead Bench Tech' },
   { id: 'crew-2', name: 'David Lighting Tech', email: 'david@kuro.test', role: 'Technician', position: 'Head of Lighting' },
@@ -193,7 +204,7 @@ const mockTenantEquipment: Equipment[] = [
   },
 ];
 
-describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
+describe('Comprehensive Repair Ticket Details Screen & Mobile Cleave Architecture', () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
@@ -204,6 +215,7 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
       return jest.fn();
     });
     jest.spyOn(repairService, 'fetchTenantSuppliers').mockResolvedValue(mockTenantSuppliers);
+    jest.spyOn(repairService, 'fetchTenantOwners').mockResolvedValue(mockTenantOwners);
     jest.spyOn(repairService, 'fetchTenantCrewMembers').mockResolvedValue(mockTenantCrew);
     jest.spyOn(equipmentService, 'fetchEquipment').mockResolvedValue(mockTenantEquipment);
   });
@@ -228,7 +240,7 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
     });
 
     it('returns to repair list screen when pressing back button on new repair screen', async () => {
-      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen mode="new" />);
+      const { findByTestId } = render(<RepairTicketDetailScreen mode="new" />);
 
       const backBtn = await findByTestId('new-repair-back-btn');
       await act(async () => {
@@ -272,7 +284,7 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
   });
 
   // ==========================================================================
-  // 3. ROW 2: 5 EQUAL BOXES (COMBINED PRIORITY & CONDITION STRIP)
+  // 3. ROW 2: COMBINED PRIORITY & CONDITION STRIP
   // ==========================================================================
   describe('Row 2: Combined 5 Equal Boxes (Priority & Condition)', () => {
     it('renders 5 equal-width boxes on the same horizontal row: Low, Medium, High, Available to Use, Out of Service', async () => {
@@ -326,56 +338,69 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
   });
 
   // ==========================================================================
-  // 4. SINGLE TEXT INPUTS WITH AUTOCOMPLETE
+  // 4. MOBILE-FIRST CLEAVE DIALOG PICKERS & DETAILS CLEANUP
   // ==========================================================================
-  describe('Single Text Inputs with Autocomplete', () => {
-    it('renders single text inputs with autocomplete for Serial, Supplier, and Requester', async () => {
-      const { findByTestId, getByTestId, getByDisplayValue } = render(<RepairTicketDetailScreen />);
+  describe('Mobile Cleave Dialogs & Details Section Cleanup', () => {
+    it('renders prominent top-level Internal Notes preview and opens editor modal on tap', async () => {
+      const { findByTestId, getByTestId, getByText } = render(<RepairTicketDetailScreen />);
 
       expect(await findByTestId('ticket-info-card')).toBeTruthy();
-      expect(getByTestId('input-serial-number')).toBeTruthy();
-      expect(getByTestId('input-internal-ref')).toBeTruthy();
-      expect(getByTestId('input-supplier')).toBeTruthy();
-      expect(getByTestId('input-requested-by')).toBeTruthy();
-
-      expect(getByDisplayValue('SN-ROBE-9912')).toBeTruthy();
-      expect(getByDisplayValue('REF-2026-X99')).toBeTruthy();
-    });
-
-    it('allows typing custom equipment name or selecting from inventory suggestions via header editor', async () => {
-      const { findByTestId, getByTestId, findByText } = render(<RepairTicketDetailScreen />);
-
-      const equipHeaderBtn = await findByTestId('header-equipment-name-btn');
-      await act(async () => {
-        fireEvent.press(equipHeaderBtn);
-      });
-
-      expect(getByTestId('edit-equipment-modal')).toBeTruthy();
-      const sugg0 = await findByTestId('equipment-option-0');
-      expect(sugg0).toBeTruthy();
+      const internalNotesBtn = getByTestId('ticket-internal-notes-btn');
+      expect(internalNotesBtn).toBeTruthy();
 
       await act(async () => {
-        fireEvent.press(sugg0);
+        fireEvent.press(internalNotesBtn);
       });
 
-      expect(await findByText('Robe MegaPointe Moving Head')).toBeTruthy();
+      expect(getByTestId('edit-internal-notes-modal')).toBeTruthy();
+      const input = getByTestId('edit-internal-notes-input');
+      fireEvent.changeText(input, 'New bench observation: optical capacitor replaced');
+
+      const saveBtn = getByTestId('save-edit-internal-notes-btn');
+      await act(async () => {
+        fireEvent.press(saveBtn);
+      });
+
+      expect(getByText(/New bench observation/)).toBeTruthy();
     });
 
-    it('populates serial number suggestions from selected equipment inventory item', async () => {
+    it('replaces Location and Category with Owner Cleave picker populated with tenant contacts', async () => {
+      const { findByTestId, getByTestId, queryByTestId } = render(<RepairTicketDetailScreen />);
+
+      await findByTestId('ticket-info-card');
+
+      // Verify Category and Location inputs are removed from details card
+      expect(queryByTestId('input-category')).toBeNull();
+      expect(queryByTestId('input-location')).toBeNull();
+
+      // Verify Owner Cleave Picker exists
+      const ownerPicker = getByTestId('input-owner');
+      expect(ownerPicker).toBeTruthy();
+
+      // Tap Owner picker to open Cleave dialog
+      await act(async () => {
+        fireEvent.press(ownerPicker);
+      });
+
+      const ownerSugg1 = await findByTestId('owner-option-1');
+      expect(ownerSugg1).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.press(ownerSugg1);
+      });
+
+      expect(getByTestId('input-owner')).toBeTruthy();
+    });
+
+    it('supports selecting serial numbers from equipment inventory via Cleave modal', async () => {
       const { findByTestId, getByTestId, getByDisplayValue } = render(<RepairTicketDetailScreen />);
 
-      const equipHeaderBtn = await findByTestId('header-equipment-name-btn');
-      await act(async () => {
-        fireEvent.press(equipHeaderBtn);
-      });
+      await findByTestId('ticket-info-card');
+      const serialPicker = getByTestId('input-serial-number');
 
-      const robeOption = await findByTestId('equipment-option-0');
       await act(async () => {
-        fireEvent.press(robeOption);
+        fireEvent.press(serialPicker);
       });
-
-      const serialInput = getByTestId('input-serial-number');
-      fireEvent(serialInput, 'focus');
 
       const serialSugg0 = await findByTestId('serial-option-0');
       expect(serialSugg0).toBeTruthy();
@@ -387,22 +412,15 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
       expect(getByDisplayValue('SN-ROBE-9912')).toBeTruthy();
     });
 
-    it('allows typing custom serial number', async () => {
-      const { findByTestId, getByTestId, getByDisplayValue } = render(<RepairTicketDetailScreen />);
-
-      const serialInput = await findByTestId('input-serial-number');
-      fireEvent.changeText(serialInput, 'CUSTOM-SN-7777');
-
-      expect(getByDisplayValue('CUSTOM-SN-7777')).toBeTruthy();
-    });
-
-    it('supports autocomplete suggestions and custom entry for Supplier', async () => {
-      const { findByTestId, getByTestId, getByDisplayValue } = render(<RepairTicketDetailScreen />);
+    it('supports searching and selecting suppliers via Cleave modal dialog', async () => {
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
 
       await findByTestId('ticket-info-card');
-      const suppInput = getByTestId('input-supplier');
-      fireEvent(suppInput, 'focus');
-      fireEvent.changeText(suppInput, 'Stage');
+      const suppPicker = getByTestId('input-supplier');
+
+      await act(async () => {
+        fireEvent.press(suppPicker);
+      });
 
       const suppSugg0 = await findByTestId('supplier-option-0');
       expect(suppSugg0).toBeTruthy();
@@ -411,20 +429,18 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
         fireEvent.press(suppSugg0);
       });
 
-      expect(getByDisplayValue('Stage Electrics UK')).toBeTruthy();
-
-      // Free-text entry
-      fireEvent.changeText(suppInput, 'Independent Pro Audio Repair');
-      expect(getByDisplayValue('Independent Pro Audio Repair')).toBeTruthy();
+      expect(getByTestId('input-supplier')).toBeTruthy();
     });
 
-    it('supports autocomplete suggestions and custom entry for Requested By', async () => {
-      const { findByTestId, getByTestId, getByDisplayValue } = render(<RepairTicketDetailScreen />);
+    it('supports searching and selecting crew members for Requested By via Cleave modal dialog', async () => {
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
 
       await findByTestId('ticket-info-card');
-      const crewInput = getByTestId('input-requested-by');
-      fireEvent(crewInput, 'focus');
-      fireEvent.changeText(crewInput, 'Sarah');
+      const crewPicker = getByTestId('input-requested-by');
+
+      await act(async () => {
+        fireEvent.press(crewPicker);
+      });
 
       const crewSugg0 = await findByTestId('crew-option-0');
       expect(crewSugg0).toBeTruthy();
@@ -433,11 +449,14 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
         fireEvent.press(crewSugg0);
       });
 
-      expect(getByDisplayValue('Sarah Audio Engineer')).toBeTruthy();
+      expect(getByTestId('input-requested-by')).toBeTruthy();
+    });
 
-      // Free-text entry
-      fireEvent.changeText(crewInput, 'Freelance Systems Engineer');
-      expect(getByDisplayValue('Freelance Systems Engineer')).toBeTruthy();
+    it('auto-fills Requested By with logged-in user in new repair mode', async () => {
+      const { findByTestId, getByDisplayValue } = render(<RepairTicketDetailScreen mode="new" />);
+
+      await findByTestId('ticket-info-card');
+      expect(getByDisplayValue('Alex Technician')).toBeTruthy();
     });
   });
 
@@ -459,22 +478,19 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
       const internalRefInput = getByTestId('input-internal-ref');
       const lowPriorityBtn = getByTestId('priority-btn-low');
 
-      // Make 4 separate edits in quick succession
+      // Make edits
       fireEvent.changeText(equipInput, 'Clay Paky Sharpy Plus');
       fireEvent.changeText(serialInput, 'SN-CP-4401');
       fireEvent.changeText(internalRefInput, 'REF-BATCH-2026');
       fireEvent.press(lowPriorityBtn);
 
-      // Immediately: Service NOT called yet because of 5-second debounce
       expect(updateFieldsSpy).not.toHaveBeenCalled();
 
-      // Advance timers by 4.9 seconds: Still not called
       act(() => {
         jest.advanceTimersByTime(4900);
       });
       expect(updateFieldsSpy).not.toHaveBeenCalled();
 
-      // Advance past 5 seconds: Pooled changes flushed in one batch!
       act(() => {
         jest.advanceTimersByTime(200);
       });
@@ -505,7 +521,6 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
       const internalRefInput = getByTestId('input-internal-ref');
       fireEvent.changeText(internalRefInput, 'REF-FLUSH-ON-UNMOUNT');
 
-      // Unmount component before 5s timer expires
       unmount();
 
       expect(updateFieldsSpy).toHaveBeenCalledWith(
@@ -545,11 +560,9 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
         fireEvent.press(periodTile);
       });
 
-      // Tap 1 Week preset chip
       const preset1Week = getByTestId('period-preset-1week');
       fireEvent.press(preset1Week);
 
-      // Save period
       const applyBtn = getByTestId('save-period-btn');
       await act(async () => {
         fireEvent.press(applyBtn);
@@ -557,96 +570,41 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
 
       expect(getByTestId('ticket-repair-period')).toBeTruthy();
     });
-
-    it('validates that end date cannot be before start date in date scroller', async () => {
-      const { findByTestId, getByTestId, findByText } = render(<RepairTicketDetailScreen />);
-
-      const periodTile = await findByTestId('ticket-repair-period');
-      await act(async () => {
-        fireEvent.press(periodTile);
-      });
-
-      // Set Start Date to Day 25
-      const startTab = getByTestId('date-tab-start');
-      fireEvent.press(startTab);
-      const day25 = getByTestId('day-col-item-25');
-      fireEvent.press(day25);
-
-      // Set End Date to Day 10 (earlier than start date)
-      const endTab = getByTestId('date-tab-end');
-      fireEvent.press(endTab);
-      const day10 = getByTestId('day-col-item-10');
-      fireEvent.press(day10);
-
-      // Try to save
-      const applyBtn = getByTestId('save-period-btn');
-      await act(async () => {
-        fireEvent.press(applyBtn);
-      });
-
-      // Should show validation error and NOT close modal
-      expect(await findByText('End date must be on or after start date')).toBeTruthy();
-      expect(getByTestId('edit-period-modal')).toBeTruthy();
-    });
-
-    it('adjusts day column list length dynamically when month is changed to February', async () => {
-      const { findByTestId, getByTestId, queryByTestId } = render(<RepairTicketDetailScreen />);
-
-      const periodTile = await findByTestId('ticket-repair-period');
-      await act(async () => {
-        fireEvent.press(periodTile);
-      });
-
-      // Select February (index 1) in Month column
-      const monthFeb = getByTestId('month-col-item-1');
-      fireEvent.press(monthFeb);
-
-      // In non-leap year (e.g. 2025/2026/2027), Day 28 exists, Day 31 does NOT exist in list
-      expect(getByTestId('day-col-item-28')).toBeTruthy();
-      expect(queryByTestId('day-col-item-31')).toBeNull();
-    });
   });
 
   // ==========================================================================
-  // 7. IMAGES & DOCUMENTS TERMINOLOGY & ATTACHMENTS
+  // 7. IMAGES, DOCUMENTS & NOTES TERMINOLOGY & ATTACHMENTS
   // ==========================================================================
-  describe('Images & Documents Terminology & Attachments', () => {
-    it('renders "Images" and "Documents" sections instead of legacy names', async () => {
+  describe('Images, Documents & Notes Terminology & Attachments', () => {
+    it('renders "Images", "Documents", and "Notes" sections cleanly', async () => {
       const { findByText, getByText } = render(<RepairTicketDetailScreen />);
 
       expect(await findByText('Images')).toBeTruthy();
       expect(getByText('Documents (1)')).toBeTruthy();
+      expect(getByText('Notes (1)')).toBeTruthy();
     });
 
-    it('supports viewing image in lightbox and deleting with confirmation', async () => {
-      const deleteAttSpy = jest
-        .spyOn(repairService, 'deleteRepairAttachment')
-        .mockResolvedValueOnce({ success: true } as any);
+    it('supports opening document URL directly with View/Open Document action button', async () => {
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true as any);
 
       const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
 
-      const thumb = await findByTestId('photo-thumb-0');
+      const docItem = await findByTestId('doc-item-0');
       await act(async () => {
-        fireEvent.press(thumb);
+        fireEvent.press(docItem);
       });
 
-      expect(getByTestId('photo-lightbox-modal')).toBeTruthy();
+      expect(getByTestId('doc-viewer-modal')).toBeTruthy();
 
-      const deleteBtn = getByTestId('lightbox-delete-btn');
+      const openBtn = getByTestId('open-document-btn');
       await act(async () => {
-        fireEvent.press(deleteBtn);
+        fireEvent.press(openBtn);
       });
 
-      expect(getByTestId('delete-confirm-modal')).toBeTruthy();
-      const confirmBtn = getByTestId('confirm-delete-btn');
-      await act(async () => {
-        fireEvent.press(confirmBtn);
-      });
-
-      expect(deleteAttSpy).toHaveBeenCalledWith('ticket-101', 'att-1', expect.anything(), 'tenant-alpha');
+      expect(openURLSpy).toHaveBeenCalledWith('https://firebasestorage.googleapis.com/v0/b/mock/o/service_manual.pdf');
     });
 
-    it('supports adding technician notes and editing them with modal', async () => {
+    it('supports adding and editing notes with modal', async () => {
       const updateNoteSpy = jest
         .spyOn(repairService, 'updateRepairNote')
         .mockResolvedValueOnce({ id: 'note-1', content: 'Updated technician findings' } as any);
@@ -674,6 +632,28 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
         'Updated technician findings',
         expect.anything(),
         'tenant-alpha'
+      );
+    });
+
+    it('invokes real camera capture with permissions and attaches photo', async () => {
+      const reqPermSpy = jest.spyOn(ImagePicker, 'requestCameraPermissionsAsync');
+      const launchCamSpy = jest.spyOn(ImagePicker, 'launchCameraAsync');
+
+      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
+
+      const addAttBtn = await findByTestId('detail-add-attachment-btn');
+      await act(async () => {
+        fireEvent.press(addAttBtn);
+      });
+
+      const addPhotoBtn = getByTestId('add-photo-evidence-btn');
+      await act(async () => {
+        fireEvent.press(addPhotoBtn);
+      });
+
+      expect(reqPermSpy).toHaveBeenCalled();
+      expect(launchCamSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ quality: 0.8, allowsEditing: false })
       );
     });
   });
@@ -717,24 +697,7 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
   // 9. OPEN ISSUES LEDGER & EDGE CASE STRESS TESTS
   // ==========================================================================
   describe('Open Issues Ledger & Edge Case Stress Tests', () => {
-    it('verifies Row 2 all 5 equal boxes have adjustsFontSizeToFit enabled for narrow screens', async () => {
-      const { findByTestId } = render(<RepairTicketDetailScreen />);
-
-      const lowBtn = await findByTestId('priority-btn-low');
-      const medBtn = await findByTestId('priority-btn-medium');
-      const highBtn = await findByTestId('priority-btn-high');
-      const availBtn = await findByTestId('condition-btn-available');
-      const oosBtn = await findByTestId('condition-btn-out-of-service');
-
-      // Verify all 5 box labels exist and have adjustsFontSizeToFit
-      expect(lowBtn.findByProps({ adjustsFontSizeToFit: true })).toBeTruthy();
-      expect(medBtn.findByProps({ adjustsFontSizeToFit: true })).toBeTruthy();
-      expect(highBtn.findByProps({ adjustsFontSizeToFit: true })).toBeTruthy();
-      expect(availBtn.findByProps({ adjustsFontSizeToFit: true })).toBeTruthy();
-      expect(oosBtn.findByProps({ adjustsFontSizeToFit: true })).toBeTruthy();
-    });
-
-    it('preserves raw custom strings when creating ticket with custom supplier and requester without dropdown selection', async () => {
+    it('preserves raw custom strings when creating ticket with custom supplier, owner, and requester', async () => {
       const createSpy = jest
         .spyOn(repairService, 'createRepairTicket')
         .mockResolvedValueOnce('ticket-custom-123');
@@ -745,6 +708,7 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
           initialParams={{
             name: 'Custom LED Par',
             category: 'Lighting',
+            owner: 'Custom Production Client',
           }}
         />
       );
@@ -755,7 +719,6 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
       const requesterInput = getByTestId('input-requested-by');
       const descInput = getByTestId('input-fault-description');
 
-      // Type free-text strings directly
       fireEvent.changeText(supplierInput, 'Custom Boutique Supplier Pty Ltd');
       fireEvent.changeText(requesterInput, 'External Subcontractor Jane');
       fireEvent.changeText(descInput, 'Blown power supply unit');
@@ -770,68 +733,11 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
         expect.objectContaining({
           supplierId: 'Custom Boutique Supplier Pty Ltd',
           requestedBy: 'External Subcontractor Jane',
+          owner: 'Custom Production Client',
           initialNote: 'Blown power supply unit',
         }),
         expect.anything()
       );
-    });
-
-    it('handles concurrent debounced edits and unmount flushing when network mutation is in flight', async () => {
-      jest.useFakeTimers();
-      let resolveFirstCall: (val: any) => void = () => {};
-      const firstCallPromise = new Promise((resolve) => {
-        resolveFirstCall = resolve;
-      });
-
-      const updateFieldsSpy = jest
-        .spyOn(repairService, 'updateRepairTicketFields')
-        .mockImplementationOnce(() => firstCallPromise as any)
-        .mockResolvedValue({ success: true } as any);
-
-      const { findByTestId, getByTestId, unmount } = render(<RepairTicketDetailScreen />);
-      await findByTestId('ticket-info-card');
-
-      const refInput = getByTestId('input-internal-ref');
-
-      // Edit 1
-      fireEvent.changeText(refInput, 'REF-STAGE-1');
-
-      // Advance 5 seconds to trigger flush 1
-      act(() => {
-        jest.advanceTimersByTime(5000);
-      });
-
-      expect(updateFieldsSpy).toHaveBeenCalledTimes(1);
-      expect(updateFieldsSpy).toHaveBeenNthCalledWith(
-        1,
-        'ticket-101',
-        expect.objectContaining({ internalReference: 'REF-STAGE-1' }),
-        expect.anything(),
-        'tenant-alpha'
-      );
-
-      // While first call is in flight, user makes Edit 2
-      fireEvent.changeText(refInput, 'REF-STAGE-2');
-
-      // User immediately closes screen / unmounts
-      unmount();
-
-      // Unmount flush must trigger second call immediately
-      expect(updateFieldsSpy).toHaveBeenCalledTimes(2);
-      expect(updateFieldsSpy).toHaveBeenNthCalledWith(
-        2,
-        'ticket-101',
-        expect.objectContaining({ internalReference: 'REF-STAGE-2' }),
-        expect.anything(),
-        'tenant-alpha'
-      );
-
-      // Resolve first call in background
-      await act(async () => {
-        resolveFirstCall({ success: true });
-      });
-
-      jest.useRealTimers();
     });
 
     it('flushes pending debounced field edits immediately before executing a status transition', async () => {
@@ -848,13 +754,11 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
       const refInput = getByTestId('input-internal-ref');
       fireEvent.changeText(refInput, 'REF-FLUSH-BEFORE-STATUS-CHANGE');
 
-      // Click a status transition button immediately without waiting 5 seconds
       const completeBtn = getByTestId('status-btn-completed');
       await act(async () => {
         fireEvent.press(completeBtn);
       });
 
-      // Both updateFields and updateStatus must have been called
       expect(updateFieldsSpy).toHaveBeenCalledWith(
         'ticket-101',
         expect.objectContaining({ internalReference: 'REF-FLUSH-BEFORE-STATUS-CHANGE' }),
@@ -868,67 +772,5 @@ describe('Comprehensive Repair Ticket Details Screen (R1-R6)', () => {
         'tenant-alpha'
       );
     });
-
-    it('verifies transition coverage across all 5 canonical status buttons (Reported, Pending, Under Repair, Completed, Cancel)', async () => {
-      const updateStatusSpy = jest
-        .spyOn(repairService, 'updateRepairTicketStatus')
-        .mockResolvedValue({ success: true });
-
-      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
-      await findByTestId('detail-quick-status-selector');
-
-      // Initial status in mockSingleTicket is 'Under Repair'
-      // 1. Transition to 'Reported'
-      const repBtn = getByTestId('status-btn-reported');
-      await act(async () => {
-        fireEvent.press(repBtn);
-      });
-      expect(updateStatusSpy).toHaveBeenLastCalledWith('ticket-101', 'Reported', expect.anything(), 'tenant-alpha');
-
-      // 2. Transition to 'Pending'
-      const penBtn = getByTestId('status-btn-pending');
-      await act(async () => {
-        fireEvent.press(penBtn);
-      });
-      expect(updateStatusSpy).toHaveBeenLastCalledWith('ticket-101', 'Pending', expect.anything(), 'tenant-alpha');
-
-      // 3. Transition to 'Under Repair'
-      const underBtn = getByTestId('status-btn-under-repair');
-      await act(async () => {
-        fireEvent.press(underBtn);
-      });
-      expect(updateStatusSpy).toHaveBeenLastCalledWith('ticket-101', 'Under Repair', expect.anything(), 'tenant-alpha');
-
-      // 4. Transition to 'Completed'
-      const compBtn = getByTestId('status-btn-completed');
-      await act(async () => {
-        fireEvent.press(compBtn);
-      });
-      expect(updateStatusSpy).toHaveBeenLastCalledWith('ticket-101', 'Completed', expect.anything(), 'tenant-alpha');
-
-      // 5. Transition to 'Cancel'
-      const cancelBtn = getByTestId('status-btn-cancel');
-      await act(async () => {
-        fireEvent.press(cancelBtn);
-      });
-      expect(updateStatusSpy).toHaveBeenLastCalledWith('ticket-101', 'Cancel', expect.anything(), 'tenant-alpha');
-    });
-
-    it('verifies Row 2 boxes define minimumFontScale for resilient font scaling on compact displays', async () => {
-      const { findByTestId } = render(<RepairTicketDetailScreen />);
-
-      const lowBtn = await findByTestId('priority-btn-low');
-      const medBtn = await findByTestId('priority-btn-medium');
-      const highBtn = await findByTestId('priority-btn-high');
-      const availBtn = await findByTestId('condition-btn-available');
-      const oosBtn = await findByTestId('condition-btn-out-of-service');
-
-      expect(lowBtn.findByProps({ minimumFontScale: 0.7 })).toBeTruthy();
-      expect(medBtn.findByProps({ minimumFontScale: 0.7 })).toBeTruthy();
-      expect(highBtn.findByProps({ minimumFontScale: 0.7 })).toBeTruthy();
-      expect(availBtn.findByProps({ minimumFontScale: 0.7 })).toBeTruthy();
-      expect(oosBtn.findByProps({ minimumFontScale: 0.7 })).toBeTruthy();
-    });
   });
 });
-

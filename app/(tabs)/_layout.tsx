@@ -52,38 +52,10 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Jobs',
-          tabBarLabel: 'Jobs',
+          title: 'Events',
+          tabBarLabel: 'Events',
           tabBarIcon: ({ color, focused, size }) => (
             <CalendarDays
-              size={size || 22}
-              color={color}
-              strokeWidth={focused ? 2.5 : 2}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="scanner"
-        options={{
-          title: 'Scanner',
-          tabBarLabel: 'Scanner',
-          tabBarIcon: ({ color, focused, size }) => (
-            <QrCode
-              size={size || 22}
-              color={color}
-              strokeWidth={focused ? 2.5 : 2}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="inventory"
-        options={{
-          title: 'Equipment',
-          tabBarLabel: 'Equipment',
-          tabBarIcon: ({ color, focused, size }) => (
-            <Package
               size={size || 22}
               color={color}
               strokeWidth={focused ? 2.5 : 2}
@@ -131,6 +103,18 @@ export default function TabsLayout() {
               strokeWidth={focused ? 2.5 : 2}
             />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="scanner"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="inventory"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

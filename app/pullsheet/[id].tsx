@@ -177,7 +177,7 @@ export default function PullSheetScreen() {
                     styles.categoryChipText,
                     {
                       color: isSelected ? colors.primaryForeground : colors.foreground,
-                      fontSize: typography.fontSize.xs,
+                      fontSize: typography.fontSize.sm,
                       fontWeight: isSelected ? '700' : '500',
                     },
                   ]}
@@ -284,9 +284,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryChip: {
-    minHeight: 24,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    minHeight: 28,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 9999,
     borderWidth: 1,
     justifyContent: 'center',
@@ -294,8 +294,8 @@ const styles = StyleSheet.create({
   },
   categoryChipText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
   },
   sectionBlock: {
     marginBottom: 8,
@@ -310,14 +310,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   emptySubtitle: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     textAlign: 'center',
   },
   fabContainer: {

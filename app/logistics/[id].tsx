@@ -1,11 +1,13 @@
 /**
  * app/logistics/[id].tsx
  * Logistics Job Detail Screen in Kuro Mobile.
- * Displays full schedule, vehicle & driver specs, active GPS tracking banner,
- * 1-tap smart action destination stops, status management, and internal notes history.
+ * Refactored to match Repair Detail styling: bracketed [#eventNumber] title,
+ * header tracking status badge, 3-button (Play/Pause/Finish) controls row,
+ * simplified Job Overview with vehicle name lookup and QuickStatusSelector,
+ * and standard uppercase typography.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,49 +16,44 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
-  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ArrowLeft,
   Truck,
   MapPin,
-  Calendar,
-  Clock,
   User,
   Radio,
   Play,
+  Pause,
   CheckCircle2,
   Sliders,
-  Plus,
   FileText,
   AlertTriangle,
-  History,
-  Navigation,
-  Compass,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
 import { useAuth } from '@/context/auth-context';
 import { useLogisticsJob } from '@/hooks/use-logistics';
-import { startTrackingJob, stopTrackingJob, isTrackingActive as checkTrackingActive } from '@/services/location-tracking-service';
+import { startTrackingJob, stopTrackingJob } from '@/services/location-tracking-service';
+import { fetchVehicleById } from '@/services/logistics-service';
 import { ScreenHeader } from '@/components/layout/screen-header';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { QuickStatusSelector } from '@/components/repair/quick-status-selector';
 import { LogisticsDestinationCard } from '@/components/logistics/LogisticsDestinationCard';
 import { LogisticsStatusModal } from '@/components/logistics/LogisticsStatusModal';
 import { LogisticsNotesModal } from '@/components/logistics/LogisticsNotesModal';
-import { parseFirestoreDate, formatStageTime, formatEventDateRange, formatTimeAgo } from '@/lib/date-utils';
 import { isJobActive, isJobCompleted, isJobScheduled } from '@/lib/logistics-engine';
-import type { LogisticsStatus, LogisticsEntry } from '@/types/logistics';
+import type { LogisticsStatus } from '@/types/logistics';
 
 export default function LogisticsJobDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const jobId = Array.isArray(id) ? id[0] : id || '';
 
   const router = useRouter();
-  const { colors, typography, spacing, layout } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const { user, tenant } = useAuth();
 
   const {
@@ -70,17 +67,56 @@ export default function LogisticsJobDetailScreen() {
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
-  const [isActivating, setIsActivating] = useState(false);
+  const [isStartingTracking, setIsStartingTracking] = useState(false);
+  const [isPausingTracking, setIsPausingTracking] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [vehicleDisplayName, setVehicleDisplayName] = useState<string | null>(null);
 
   const tenantId = user?.tenantId || tenant?.tenantId || job?.tenantId || '';
 
-  // 1-Tap Activate Job / Start Route action
-  const handleActivateJob = async () => {
+  // Resolve vehicle name from vehicleId
+  useEffect(() => {
+    let isMounted = true;
+
+    const resolveVehicle = async () => {
+      if (!job?.vehicleId || !job.vehicleId.trim()) {
+        if (isMounted) setVehicleDisplayName(null);
+        return;
+      }
+
+      try {
+        const vehicle = await fetchVehicleById(job.vehicleId, tenantId);
+        if (!isMounted) return;
+
+        if (vehicle && vehicle.name) {
+          const formatted = vehicle.rego && !vehicle.name.includes(vehicle.rego)
+            ? `${vehicle.name} (${vehicle.rego})`
+            : vehicle.name;
+          setVehicleDisplayName(formatted);
+        } else if (vehicle && vehicle.rego) {
+          setVehicleDisplayName(vehicle.rego);
+        } else {
+          setVehicleDisplayName(job.vehicleId);
+        }
+      } catch {
+        if (isMounted) setVehicleDisplayName(job.vehicleId);
+      }
+    };
+
+    resolveVehicle();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [job?.vehicleId, tenantId]);
+
+  // Play Action: Starts GPS tracking and updates status to 'In Progress'
+  const handlePlay = async () => {
     if (!job) return;
     try {
-      setIsActivating(true);
+      setIsStartingTracking(true);
       setActionError(null);
 
       // 1. Start background/foreground GPS tracking
@@ -92,15 +128,32 @@ export default function LogisticsJobDetailScreen() {
       // 2. Update status to In Progress
       await updateStatus('In Progress', 'Driver started route and initiated GPS tracking');
     } catch (err: any) {
-      console.error('[LogisticsDetail] Activate job error:', err);
-      setActionError(err?.message || 'Failed to activate job and start GPS tracking');
+      console.error('[LogisticsDetail] Play error:', err);
+      setActionError(err?.message || 'Failed to start GPS tracking and activate job');
     } finally {
-      setIsActivating(false);
+      setIsStartingTracking(false);
     }
   };
 
-  // 1-Tap Complete Job action
-  const handleCompleteJob = async () => {
+  // Pause Action: Stops GPS tracking and leaves job status unchanged
+  const handlePause = async () => {
+    if (!job) return;
+    try {
+      setIsPausingTracking(true);
+      setActionError(null);
+
+      // 1. Stop GPS tracking
+      await stopTrackingJob(job.id);
+    } catch (err: any) {
+      console.error('[LogisticsDetail] Pause error:', err);
+      setActionError(err?.message || 'Failed to pause GPS tracking');
+    } finally {
+      setIsPausingTracking(false);
+    }
+  };
+
+  // Finish Action: Stops GPS tracking and updates status to 'Completed'
+  const handleFinish = async () => {
     if (!job) return;
     try {
       setIsCompleting(true);
@@ -112,10 +165,37 @@ export default function LogisticsJobDetailScreen() {
       // 2. Update status to Completed
       await updateStatus('Completed', 'Driver marked job as completed');
     } catch (err: any) {
-      console.error('[LogisticsDetail] Complete job error:', err);
+      console.error('[LogisticsDetail] Finish error:', err);
       setActionError(err?.message || 'Failed to complete job');
     } finally {
       setIsCompleting(false);
+    }
+  };
+
+  // Quick Status Selector Submit Handler
+  const handleQuickStatusSelect = async (newStatus: string) => {
+    if (!job || isUpdatingStatus) return;
+    try {
+      setIsUpdatingStatus(true);
+      setActionError(null);
+
+      // If transitioning to completed or cancelled, stop tracking
+      if (isJobCompleted(newStatus) || newStatus.toLowerCase() === 'cancelled' || newStatus.toLowerCase() === 'cancel') {
+        await stopTrackingJob(job.id);
+      } else if (isJobActive(newStatus) && !job.isTrackingActive) {
+        // If transitioning to active status and tracking is off, start tracking
+        await startTrackingJob(job.id, tenantId, {
+          driverId: user?.id || user?.uid,
+          driverName: user?.name || user?.email,
+        });
+      }
+
+      await updateStatus(newStatus, `Status updated to ${newStatus} via Quick Status`);
+    } catch (err: any) {
+      console.error('[LogisticsDetail] Quick status error:', err);
+      setActionError(err?.message || `Failed to update status to ${newStatus}`);
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -125,7 +205,7 @@ export default function LogisticsJobDetailScreen() {
     setActionError(null);
 
     // If new status is Completed, stop tracking
-    if (isJobCompleted(newStatus)) {
+    if (isJobCompleted(newStatus) || newStatus.toLowerCase() === 'cancelled') {
       await stopTrackingJob(job.id);
     } else if (isJobActive(newStatus) && !job.isTrackingActive) {
       // If transitioning to active status, also start tracking
@@ -182,7 +262,7 @@ export default function LogisticsJobDetailScreen() {
         <Text style={[styles.errorTitle, { color: colors.foreground, marginTop: 12, fontSize: typography.fontSize.base }]}>
           Logistics Job Not Found
         </Text>
-        <Text style={[styles.errorSub, { color: colors.mutedForeground, marginTop: 4, fontSize: typography.fontSize.xs }]}>
+        <Text style={[styles.errorSub, { color: colors.mutedForeground, marginTop: 4, fontSize: typography.fontSize.sm }]}>
           {error?.message || 'The requested logistics job could not be loaded.'}
         </Text>
         <Button
@@ -198,18 +278,17 @@ export default function LogisticsJobDetailScreen() {
     );
   }
 
-  const startDate = parseFirestoreDate(job.start);
-  const endDate = parseFirestoreDate(job.end);
-  const dateRangeStr = formatEventDateRange(startDate, endDate);
-  const startTimeStr = startDate ? formatStageTime(startDate, 'timeOnly') : '';
-  const endTimeStr = endDate ? formatStageTime(endDate, 'timeOnly') : '';
-  const timeWindowStr = startTimeStr && endTimeStr ? `${startTimeStr} - ${endTimeStr}` : startTimeStr || 'Not scheduled';
-
-  const eventNumDisplay = job.eventNumber ? `#${job.eventNumber}` : `#${job.id.substring(0, 7).toUpperCase()}`;
-  const titleDisplay = job.eventName || job.location || `Job ${eventNumDisplay}`;
+  const eventNumDisplay =
+    job.eventNumber !== undefined && job.eventNumber !== null
+      ? `[#${job.eventNumber}]`
+      : job.id
+      ? `[#${job.id.substring(0, 7).toUpperCase()}]`
+      : '';
+  const titleDisplay = eventNumDisplay
+    ? `${eventNumDisplay} ${job.eventName || job.location || 'Transport Job'}`
+    : job.eventName || job.location || 'Transport Job';
 
   const isTracking = Boolean(job.isTrackingActive);
-  const isActive = isJobActive(job.status);
   const isCompleted = isJobCompleted(job.status);
 
   // Parse internal notes lines
@@ -223,7 +302,7 @@ export default function LogisticsJobDetailScreen() {
       {/* Top Header */}
       <ScreenHeader
         title={titleDisplay}
-        subtitle={`${eventNumDisplay} • ${job.location || 'Transport Job'}`}
+        subtitle={job.location || 'Transport Job'}
         leftAction={
           <Pressable
             onPress={() => router.back()}
@@ -235,15 +314,13 @@ export default function LogisticsJobDetailScreen() {
           </Pressable>
         }
         rightAction={
-          <Button
-            variant="outline"
-            size="sm"
-            icon={<Plus size={14} color={colors.primary} />}
-            onPress={() => setIsNotesModalOpen(true)}
-            testID="detail-add-note-btn"
+          <Badge
+            variant={isTracking ? 'brand' : 'secondary'}
+            icon={isTracking ? <Radio size={12} color={colors.primary} /> : undefined}
+            testID="header-tracking-status-badge"
           >
-            Note
-          </Button>
+            {isTracking ? 'Tracking' : 'Idle'}
+          </Badge>
         }
       />
 
@@ -261,209 +338,156 @@ export default function LogisticsJobDetailScreen() {
         {actionError ? (
           <View style={[styles.errorBanner, { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: colors.destructive }]}>
             <AlertTriangle size={14} color={colors.destructive} />
-            <Text style={[styles.errorBannerText, { color: colors.destructive, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.errorBannerText, { color: colors.destructive, fontSize: typography.fontSize.sm }]}>
               {actionError}
             </Text>
           </View>
         ) : null}
 
-        {/* Live GPS Tracking Banner */}
-        <Card style={styles.card} testID="live-gps-tracking-banner">
-          <CardContent
-            style={[
-              styles.trackingBannerContent,
-              {
-                backgroundColor: isTracking
-                  ? 'rgba(34, 197, 94, 0.12)'
-                  : colors.muted,
-                borderColor: isTracking ? colors.primary : colors.border,
-              },
-            ]}
-          >
-            <View style={styles.trackingHeader}>
-              <View style={styles.trackingHeaderLeft}>
-                <Radio size={16} color={isTracking ? colors.primary : colors.mutedForeground} />
-                <Text
-                  style={[
-                    styles.trackingTitle,
-                    {
-                      color: isTracking ? colors.primary : colors.foreground,
-                      fontSize: typography.fontSize.sm,
-                    },
-                  ]}
-                >
-                  {isTracking ? 'GPS Tracking Active' : 'GPS Tracking Inactive'}
-                </Text>
-              </View>
+        {/* 3-Button Control Row (Play, Pause, Finish) */}
+        <Card style={styles.card} testID="job-controls-card">
+          <CardContent style={styles.controlButtonsRow}>
+            {/* Play Button */}
+            <Button
+              variant="primary"
+              size="default"
+              icon={<Play size={16} color={colors.primaryForeground} />}
+              onPress={handlePlay}
+              loading={isStartingTracking}
+              disabled={isStartingTracking}
+              style={styles.controlBtn}
+              testID="play-job-btn"
+              accessibilityLabel="Play and start tracking"
+            >
+              Play
+            </Button>
 
-              <Badge variant={isTracking ? 'brand' : 'secondary'} testID="tracking-status-badge">
-                {isTracking ? 'BROADCASTING' : 'IDLE'}
-              </Badge>
-            </View>
+            {/* Pause Button */}
+            <Button
+              variant="outline"
+              size="default"
+              icon={<Pause size={16} color={colors.foreground} />}
+              onPress={handlePause}
+              loading={isPausingTracking}
+              disabled={isPausingTracking || !isTracking}
+              style={styles.controlBtn}
+              testID="pause-job-btn"
+              accessibilityLabel="Pause tracking"
+            >
+              Pause
+            </Button>
 
-            {isTracking && job.currentLocation ? (
-              <View style={styles.coordsBlock}>
-                <Text style={[styles.coordsText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
-                  Lat: {job.currentLocation.latitude.toFixed(5)}, Lng: {job.currentLocation.longitude.toFixed(5)}
-                </Text>
-                {job.lastLocationUpdate ? (
-                  <Text style={[styles.coordsSub, { color: colors.mutedForeground, fontSize: 11 }]}>
-                    Last ping: {formatTimeAgo(job.lastLocationUpdate)}
-                  </Text>
-                ) : null}
-              </View>
-            ) : (
-              <Text style={[styles.trackingSubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                {isCompleted
-                  ? 'Job is marked completed. Location tracking stopped.'
-                  : 'Start route to begin live location updates for fleet monitoring.'}
-              </Text>
-            )}
+            {/* Finish Button */}
+            <Button
+              variant="primary"
+              size="default"
+              icon={<CheckCircle2 size={16} color={colors.primaryForeground} />}
+              onPress={handleFinish}
+              loading={isCompleting}
+              disabled={isCompleting || isCompleted}
+              style={[styles.controlBtn, { backgroundColor: colors.status.online }]}
+              testID="finish-job-btn"
+              accessibilityLabel="Finish and complete job"
+            >
+              Finish
+            </Button>
           </CardContent>
-        </Card>
 
-        {/* Quick Action Control Bar */}
-        <Card style={styles.card} testID="job-action-buttons-card">
-          <CardContent style={styles.actionsGrid}>
-            {!isActive && !isCompleted ? (
-              <Button
-                variant="primary"
-                size="default"
-                icon={<Play size={16} color={colors.primaryForeground} />}
-                onPress={handleActivateJob}
-                loading={isActivating}
-                disabled={isActivating}
-                style={styles.actionBtn}
-                testID="activate-job-btn"
-              >
-                Activate Job / Start Route
-              </Button>
-            ) : null}
+          <View style={styles.secondaryActionsContainer}>
+            <Button
+              variant="outline"
+              size="default"
+              icon={<Sliders size={15} color={colors.foreground} />}
+              onPress={() => setIsStatusModalOpen(true)}
+              style={styles.halfBtn}
+              testID="change-status-btn"
+            >
+              Change Status
+            </Button>
 
-            {isActive && !isCompleted ? (
-              <Button
-                variant="primary"
-                size="default"
-                icon={<CheckCircle2 size={16} color={colors.primaryForeground} />}
-                onPress={handleCompleteJob}
-                loading={isCompleting}
-                disabled={isCompleting}
-                style={[styles.actionBtn, { backgroundColor: colors.status.online }]}
-                testID="complete-job-btn"
-              >
-                Complete Job
-              </Button>
-            ) : null}
-
-            <View style={styles.secondaryActionRow}>
-              <Button
-                variant="outline"
-                size="default"
-                icon={<Sliders size={15} color={colors.foreground} />}
-                onPress={() => setIsStatusModalOpen(true)}
-                style={styles.halfBtn}
-                testID="change-status-btn"
-              >
-                Change Status
-              </Button>
-
-              <Button
-                variant="outline"
-                size="default"
-                icon={<FileText size={15} color={colors.foreground} />}
-                onPress={() => setIsNotesModalOpen(true)}
-                style={styles.halfBtn}
-                testID="add-note-btn"
-              >
-                Add Note
-              </Button>
-            </View>
-          </CardContent>
+            <Button
+              variant="outline"
+              size="default"
+              icon={<FileText size={15} color={colors.foreground} />}
+              onPress={() => setIsNotesModalOpen(true)}
+              style={styles.halfBtn}
+              testID="add-note-btn"
+            >
+              Add Note
+            </Button>
+          </View>
         </Card>
 
         {/* Job Overview & Metadata Card */}
         <Card style={styles.card} testID="job-overview-card">
-          <CardHeader style={styles.cardHeader}>
-            <View style={styles.cardHeaderLeft}>
-              <Truck size={16} color={colors.primary} />
-              <Text style={[styles.cardTitle, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                Job Overview & Schedule
+          <CardContent style={styles.overviewCardContent}>
+            {/* Section Header */}
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
+                JOB OVERVIEW
               </Text>
-            </View>
-            <Badge variant={getStatusBadgeVariant(job.status)} testID="detail-job-status-badge">
-              {job.status}
-            </Badge>
-          </CardHeader>
-
-          <CardContent style={styles.overviewGrid}>
-            {/* Driver */}
-            <View style={styles.overviewItem}>
-              <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                Driver
-              </Text>
-              <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                {job.driverName || 'Unassigned'}
-              </Text>
+              <Badge variant={getStatusBadgeVariant(job.status)} testID="detail-job-status-badge">
+                {job.status}
+              </Badge>
             </View>
 
-            {/* Vehicle */}
-            <View style={styles.overviewItem}>
-              <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                Vehicle Rego / ID
-              </Text>
-              <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                {job.vehicleId || 'Not Assigned'}
-              </Text>
+            {/* Driver and Vehicle Row */}
+            <View style={styles.driverVehicleRow}>
+              {/* Driver */}
+              <View style={styles.overviewField}>
+                <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                  Driver
+                </Text>
+                <View style={styles.fieldValueRow}>
+                  <User size={15} color={colors.primary} />
+                  <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
+                    {job.driverName || 'Unassigned'}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Vehicle */}
+              <View style={styles.overviewField}>
+                <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                  Vehicle
+                </Text>
+                <View style={styles.fieldValueRow}>
+                  <Truck size={15} color={colors.primary} />
+                  <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
+                    {vehicleDisplayName || job.vehicleId || 'Not Assigned'}
+                  </Text>
+                </View>
+              </View>
             </View>
 
-            {/* Location / Hub */}
-            <View style={styles.overviewItem}>
-              <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                Origin / Hub
-              </Text>
-              <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                {job.location || 'Warehouse'}
-              </Text>
-            </View>
-
-            {/* Event Number */}
-            <View style={styles.overviewItem}>
-              <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                Event Number
-              </Text>
-              <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                {job.eventNumber ? `#${job.eventNumber}` : 'N/A'}
-              </Text>
-            </View>
-
-            {/* Schedule Date */}
-            <View style={[styles.overviewItem, { width: '100%' }]}>
-              <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                Scheduled Window
-              </Text>
-              <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                {dateRangeStr} {timeWindowStr !== 'Not scheduled' ? `(${timeWindowStr})` : ''}
-              </Text>
+            {/* QuickStatusSelector */}
+            <View style={styles.quickStatusContainer}>
+              <QuickStatusSelector
+                currentStatus={job.status}
+                statuses={['Pending', 'Scheduled', 'In Progress', 'Completed', 'Cancelled']}
+                onSelectStatus={handleQuickStatusSelect}
+                isUpdating={isUpdatingStatus}
+                showHeader={true}
+                headerTitle="STATUS"
+                testID="job-quick-status-selector"
+              />
             </View>
           </CardContent>
         </Card>
 
         {/* Destination Stops List */}
         <View style={styles.stopsSection} testID="destination-stops-section">
-          <View style={styles.stopsSectionHeader}>
-            <View style={styles.stopsHeaderLeft}>
-              <Navigation size={16} color={colors.primary} />
-              <Text style={[styles.stopsHeaderTitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-                Destination Stops ({job.destinations?.length || 0})
-              </Text>
-            </View>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
+              DESTINATION STOPS ({job.destinations?.length || 0})
+            </Text>
           </View>
 
           {!job.destinations || job.destinations.length === 0 ? (
             <Card style={styles.card}>
               <CardContent style={styles.emptyStopsContent}>
                 <MapPin size={24} color={colors.mutedForeground} />
-                <Text style={[styles.emptyStopsText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                <Text style={[styles.emptyStopsText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                   No destinations or itinerary stops specified for this job.
                 </Text>
               </CardContent>
@@ -483,18 +507,15 @@ export default function LogisticsJobDetailScreen() {
 
         {/* Internal Notes History */}
         <Card style={styles.card} testID="job-notes-history-card">
-          <CardHeader style={styles.cardHeader}>
-            <View style={styles.cardHeaderLeft}>
-              <History size={16} color={colors.primary} />
-              <Text style={[styles.cardTitle, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                Internal Notes & Activity ({parsedNotes.length})
+          <CardContent style={styles.notesContent}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
+                INTERNAL NOTES & ACTIVITY ({parsedNotes.length})
               </Text>
             </View>
-          </CardHeader>
 
-          <CardContent style={styles.notesContent}>
             {parsedNotes.length === 0 ? (
-              <Text style={[styles.emptyNotesText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.emptyNotesText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                 No internal notes recorded yet.
               </Text>
             ) : (
@@ -502,7 +523,7 @@ export default function LogisticsJobDetailScreen() {
                 {parsedNotes.map((noteLine, idx) => (
                   <View key={`note-${idx}`} style={[styles.noteRow, { borderBottomColor: colors.border }]}>
                     <FileText size={13} color={colors.primary} style={{ marginTop: 2 }} />
-                    <Text style={[styles.noteLineText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+                    <Text style={[styles.noteLineText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
                       {noteLine}
                     </Text>
                   </View>
@@ -580,126 +601,76 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
   },
-  trackingBannerContent: {
-    padding: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    gap: 6,
-  },
-  trackingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  trackingHeaderLeft: {
+  controlButtonsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  trackingTitle: {
-    fontFamily: 'Calibri',
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-  },
-  trackingSubtitle: {
-    fontFamily: 'Calibri',
-    fontSize: 12,
-    fontWeight: '400',
-    lineHeight: 16,
-  },
-  coordsBlock: {
-    marginTop: 2,
-    gap: 2,
-  },
-  coordsText: {
-    fontFamily: 'Calibri',
-    fontSize: 12,
-    fontWeight: '600',
-    lineHeight: 16,
-  },
-  coordsSub: {
-    fontFamily: 'Calibri',
-    fontSize: 12,
-    fontWeight: '400',
-    lineHeight: 16,
-  },
-  actionsGrid: {
     padding: 12,
     gap: 8,
   },
-  actionBtn: {
-    width: '100%',
+  controlBtn: {
+    flex: 1,
+    minHeight: 48,
   },
-  secondaryActionRow: {
+  secondaryActionsContainer: {
     flexDirection: 'row',
     gap: 8,
+    paddingHorizontal: 12,
+    paddingBottom: 12,
   },
   halfBtn: {
     flex: 1,
   },
-  cardHeader: {
+  sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 8,
   },
-  cardHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  cardTitle: {
+  sectionHeaderLabel: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
-    lineHeight: 22,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    lineHeight: 18,
   },
-  overviewGrid: {
+  overviewCardContent: {
     padding: 14,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 12,
   },
-  overviewItem: {
-    width: '46%',
+  driverVehicleRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  overviewField: {
+    flex: 1,
+    gap: 4,
   },
   overviewLabel: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
+  },
+  fieldValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   overviewValue: {
     fontFamily: 'Calibri',
     fontSize: 14,
     fontWeight: '600',
     lineHeight: 20,
-    marginTop: 1,
+  },
+  quickStatusContainer: {
+    marginTop: 4,
+    paddingTop: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
   },
   stopsSection: {
     gap: 8,
-  },
-  stopsSectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    marginTop: 4,
-  },
-  stopsHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stopsHeaderTitle: {
-    fontFamily: 'Calibri',
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 22,
   },
   emptyStopsContent: {
     padding: 24,
@@ -709,8 +680,8 @@ const styles = StyleSheet.create({
   },
   emptyStopsText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -719,8 +690,8 @@ const styles = StyleSheet.create({
   },
   emptyNotesText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     fontStyle: 'italic',
   },
   notesList: {
@@ -735,8 +706,8 @@ const styles = StyleSheet.create({
   },
   noteLineText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     flex: 1,
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

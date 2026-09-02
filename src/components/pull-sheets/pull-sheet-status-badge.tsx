@@ -45,7 +45,7 @@ export const PullSheetStatusBadge: React.FC<PullSheetStatusBadgeProps> = ({
           styles.badgeText,
           {
             color: config.color,
-            fontSize: typography.fontSize.xs,
+            fontSize: typography.fontSize.sm,
           },
         ]}
       >
@@ -78,9 +78,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 24,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    minHeight: 26,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
     borderRadius: 9999,
     borderWidth: 1,
     alignSelf: 'flex-start',
@@ -93,8 +93,9 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     fontWeight: '600',
     letterSpacing: 0.2,
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

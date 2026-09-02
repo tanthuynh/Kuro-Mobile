@@ -115,7 +115,7 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
               styles.qtyText,
               {
                 color: isPrepped ? colors.status.online : colors.foreground,
-                fontSize: typography.fontSize.xs,
+                fontSize: typography.fontSize.sm,
               },
             ]}
           >
@@ -143,7 +143,7 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
             <Text
               style={[
                 styles.internalNoteText,
-                { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
               ]}
               numberOfLines={1}
             >
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   qtyBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    minHeight: 24,
+    minHeight: 26,
     borderRadius: 6,
     borderWidth: 1,
     minWidth: 38,
@@ -188,8 +188,9 @@ const styles = StyleSheet.create({
   },
   qtyText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     fontWeight: '700',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   contentCol: {
     flex: 1,
@@ -201,9 +202,10 @@ const styles = StyleSheet.create({
   },
   internalNoteText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     marginTop: 2,
     fontStyle: 'italic',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   statusBadgeWrap: {
     justifyContent: 'center',

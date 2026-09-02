@@ -133,7 +133,7 @@ export const ScanHudOverlay: React.FC<ScanHudOverlayProps> = ({
           <Text
             style={[
               styles.hudMessage,
-              { color: 'rgba(255, 255, 255, 0.9)', fontSize: typography.fontSize.xs },
+              { color: 'rgba(255, 255, 255, 0.9)', fontSize: typography.fontSize.sm },
             ]}
             numberOfLines={2}
           >
@@ -146,6 +146,8 @@ export const ScanHudOverlay: React.FC<ScanHudOverlayProps> = ({
         onPress={onDismiss}
         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         style={styles.closeBtn}
+        accessibilityRole="button"
+        accessibilityLabel="Dismiss scan notification"
       >
         <X size={16} color="#FFFFFF" />
       </Pressable>
@@ -191,9 +193,12 @@ const styles = StyleSheet.create({
   hudMessage: {
     fontFamily: 'Calibri',
     marginTop: 2,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   closeBtn: {
-    padding: 4,
+    minHeight: 48,
+    minWidth: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -69,8 +69,8 @@ export const ConnectionStatusBar: React.FC<ConnectionStatusBarProps> = ({
             styles.messageText,
             {
               color: textColor,
-              fontSize: typography.fontSize.xs,
-              lineHeight: typography.lineHeight.xs,
+              fontSize: typography.fontSize.sm,
+              lineHeight: typography.lineHeight.sm,
             },
           ]}
         >
@@ -88,7 +88,7 @@ export const ConnectionStatusBar: React.FC<ConnectionStatusBarProps> = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <RefreshCw size={14} color={textColor} />
-          <Text style={[styles.retryText, { color: textColor, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.retryText, { color: textColor, fontSize: typography.fontSize.sm }]}>
             {isRetrying ? 'Retrying...' : 'Retry'}
           </Text>
         </Pressable>

@@ -1,8 +1,10 @@
 /**
  * app/logistics/__tests__/logistics-detail.test.tsx
  * Milestone 4: Logistics Detail Screen Component Tests.
- * Verifies job detail rendering, GPS tracking banner, destination stops list,
- * status transitions modal, notes modal, and 1-tap activation / completion actions.
+ * Verifies bracketed [#eventNumber] title, header tracking status badge,
+ * removal of live GPS banner, 3-button (Play/Pause/Finish) controls,
+ * stripped Job Overview with vehicle name resolution, QuickStatusSelector,
+ * and internal notes history.
  */
 
 import React from 'react';
@@ -65,7 +67,7 @@ const mockSingleJob: LogisticsEntry = {
   status: 'Scheduled',
   driverName: 'Sam Fisher',
   assigneeId: 'usr-driver-01',
-  vehicleId: 'VAN-04 (NSW-KURO1)',
+  vehicleId: 'veh-van-04',
   start: new Date('2026-08-27T08:00:00Z'),
   end: new Date('2026-08-27T14:00:00Z'),
   createdBy: 'Fleet Coordinator',
@@ -106,17 +108,35 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
       cb(mockSingleJob);
       return () => {};
     });
+    jest.spyOn(logisticsService, 'fetchVehicleById').mockResolvedValue({
+      id: 'veh-van-04',
+      name: 'Van 04',
+      rego: 'NSW-KURO1',
+    });
   });
 
-  it('renders job overview, driver, vehicle, and destination stops list', async () => {
-    const { getByText, findAllByText, getByTestId, findByTestId } = render(<LogisticsJobDetailScreen />);
+  it('renders bracketed event title, header tracking status badge, stripped job overview, and destinations', async () => {
+    const { getByText, findByText, getByTestId, findByTestId, queryByTestId } = render(<LogisticsJobDetailScreen />);
 
-    const titles = await findAllByText('Festival Stage 1 Audio Delivery');
-    expect(titles.length).toBeGreaterThan(0);
-    expect(getByText('#777')).toBeTruthy();
-    expect(getByText('VAN-04 (NSW-KURO1)')).toBeTruthy();
-    const samNames = await findAllByText('Sam Fisher');
-    expect(samNames.length).toBeGreaterThan(0);
+    // ScreenHeader Title formatted with [#eventNumber]
+    expect(await findByText('[#777] Festival Stage 1 Audio Delivery')).toBeTruthy();
+
+    // Header Tracking Status Badge (Idle initially)
+    expect(getByTestId('header-tracking-status-badge')).toBeTruthy();
+    expect(getByText('Idle')).toBeTruthy();
+
+    // Large GPS Tracking Banner is removed
+    expect(queryByTestId('live-gps-tracking-banner')).toBeNull();
+
+    // Job Overview displays Driver and resolved Vehicle name
+    expect(getByTestId('job-overview-card')).toBeTruthy();
+    expect(getByText('Sam Fisher')).toBeTruthy();
+    expect(await findByText('Van 04 (NSW-KURO1)')).toBeTruthy();
+
+    // QuickStatusSelector is present in Job Overview
+    expect(getByTestId('job-quick-status-selector')).toBeTruthy();
+
+    // Destination stops list
     expect(getByTestId('destination-stops-section')).toBeTruthy();
     expect(await findByTestId('destination-stop-dest-101')).toBeTruthy();
     expect(getByTestId('destination-stop-dest-102')).toBeTruthy();
@@ -124,7 +144,27 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     expect(getByText('VIP Tent Return Hub')).toBeTruthy();
   });
 
-  it('activates job and initiates live GPS tracking', async () => {
+  it('renders Tracking badge in header when job tracking is active', async () => {
+    const activeTrackingJob: LogisticsEntry = {
+      ...mockSingleJob,
+      isTrackingActive: true,
+      status: 'In Progress',
+    };
+
+    jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+      cb(activeTrackingJob);
+      return () => {};
+    });
+
+    const { findByTestId, getByText, queryByTestId } = render(<LogisticsJobDetailScreen />);
+
+    const badge = await findByTestId('header-tracking-status-badge');
+    expect(badge).toBeTruthy();
+    expect(getByText('Tracking')).toBeTruthy();
+    expect(queryByTestId('live-gps-tracking-banner')).toBeNull();
+  });
+
+  it('play button starts GPS tracking and updates status to "In Progress"', async () => {
     const startTrackingSpy = jest
       .spyOn(locationTrackingService, 'startTrackingJob')
       .mockResolvedValueOnce(true);
@@ -133,11 +173,11 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
       .spyOn(logisticsService, 'updateLogisticsStatus')
       .mockResolvedValueOnce(undefined);
 
-    const { getByTestId, findByTestId } = render(<LogisticsJobDetailScreen />);
+    const { findByTestId } = render(<LogisticsJobDetailScreen />);
 
-    const activateBtn = await findByTestId('activate-job-btn');
+    const playBtn = await findByTestId('play-job-btn');
     await act(async () => {
-      fireEvent.press(activateBtn);
+      fireEvent.press(playBtn);
     });
 
     expect(startTrackingSpy).toHaveBeenCalledWith(
@@ -153,7 +193,36 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     );
   });
 
-  it('completes job and stops live GPS tracking', async () => {
+  it('pause button stops GPS tracking while preserving job status', async () => {
+    const activeJob: LogisticsEntry = {
+      ...mockSingleJob,
+      status: 'In Progress',
+      isTrackingActive: true,
+    };
+
+    jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+      cb(activeJob);
+      return () => {};
+    });
+
+    const stopTrackingSpy = jest
+      .spyOn(locationTrackingService, 'stopTrackingJob')
+      .mockResolvedValueOnce(undefined);
+
+    const updateStatusSpy = jest.spyOn(logisticsService, 'updateLogisticsStatus');
+
+    const { findByTestId } = render(<LogisticsJobDetailScreen />);
+
+    const pauseBtn = await findByTestId('pause-job-btn');
+    await act(async () => {
+      fireEvent.press(pauseBtn);
+    });
+
+    expect(stopTrackingSpy).toHaveBeenCalledWith('job-alpha-101');
+    expect(updateStatusSpy).not.toHaveBeenCalled();
+  });
+
+  it('finish button stops GPS tracking and updates status to "Completed"', async () => {
     const activeJob: LogisticsEntry = {
       ...mockSingleJob,
       status: 'In Progress',
@@ -173,11 +242,11 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
       .spyOn(logisticsService, 'updateLogisticsStatus')
       .mockResolvedValueOnce(undefined);
 
-    const { getByTestId, findByTestId } = render(<LogisticsJobDetailScreen />);
+    const { findByTestId } = render(<LogisticsJobDetailScreen />);
 
-    const completeBtn = await findByTestId('complete-job-btn');
+    const finishBtn = await findByTestId('finish-job-btn');
     await act(async () => {
-      fireEvent.press(completeBtn);
+      fireEvent.press(finishBtn);
     });
 
     expect(stopTrackingSpy).toHaveBeenCalledWith('job-alpha-101');
@@ -185,6 +254,34 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
       'job-alpha-101',
       'Completed',
       expect.objectContaining({ tenantId: 'tenant-omega' })
+    );
+  });
+
+  it('QuickStatusSelector performs 1-click status transitions', async () => {
+    const updateStatusSpy = jest
+      .spyOn(logisticsService, 'updateLogisticsStatus')
+      .mockResolvedValueOnce(undefined);
+
+    const startTrackingSpy = jest
+      .spyOn(locationTrackingService, 'startTrackingJob')
+      .mockResolvedValueOnce(true);
+
+    const { findByTestId } = render(<LogisticsJobDetailScreen />);
+
+    const inProgressPill = await findByTestId('status-btn-in-progress');
+    await act(async () => {
+      fireEvent.press(inProgressPill);
+    });
+
+    expect(startTrackingSpy).toHaveBeenCalledWith(
+      'job-alpha-101',
+      'tenant-omega',
+      expect.anything()
+    );
+    expect(updateStatusSpy).toHaveBeenCalledWith(
+      'job-alpha-101',
+      'In Progress',
+      expect.anything()
     );
   });
 
@@ -267,3 +364,4 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     expect(getByText('2026-08-27 07:00 [Sam Fisher]: Vehicle inspected, tire pressure OK.')).toBeTruthy();
   });
 });
+

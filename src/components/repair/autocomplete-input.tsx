@@ -112,7 +112,7 @@ export function AutocompleteInput<T>({
   return (
     <View style={[styles.wrapper, containerStyle]} testID={testID}>
       {label ? (
-        <Text style={[styles.label, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+        <Text style={[styles.label, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
           {label}
         </Text>
       ) : null}
@@ -158,7 +158,7 @@ export function AutocompleteInput<T>({
               onBlur?.();
             }, 200);
           }}
-          style={[styles.input, { color: colors.foreground, fontSize: typography.fontSize.sm }]}
+          style={[styles.input, { color: colors.foreground, fontSize: typography.fontSize.base }]}
           testID={inputTestID}
           autoCapitalize="none"
           autoCorrect={false}
@@ -184,7 +184,7 @@ export function AutocompleteInput<T>({
           {filtered.length === 0 ? (
             emptySuggestionsMessage ? (
               <View style={styles.emptyItem}>
-                <Text style={[styles.emptyText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                <Text style={[styles.emptyText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                   {emptySuggestionsMessage}
                 </Text>
               </View>
@@ -218,7 +218,7 @@ export function AutocompleteInput<T>({
                     <Text
                       style={[
                         styles.suggestionLabel,
-                        { color: colors.foreground, fontSize: typography.fontSize.sm },
+                        { color: colors.foreground, fontSize: typography.fontSize.base },
                       ]}
                       numberOfLines={1}
                     >
@@ -228,7 +228,7 @@ export function AutocompleteInput<T>({
                       <Text
                         style={[
                           styles.suggestionSublabel,
-                          { color: colors.mutedForeground, fontSize: 10 },
+                          { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                         ]}
                         numberOfLines={1}
                       >
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
-    minHeight: 42,
+    minHeight: 48,
   },
   iconContainer: {
     marginRight: 8,
@@ -306,10 +306,11 @@ const styles = StyleSheet.create({
     maxHeight: 180,
   },
   suggestionItem: {
-    paddingVertical: 9,
+    paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     justifyContent: 'center',
+    minHeight: 48,
   },
   suggestionLabel: {
     fontFamily: 'Calibri',

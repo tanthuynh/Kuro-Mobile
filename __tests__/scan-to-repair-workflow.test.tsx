@@ -74,9 +74,6 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
 
     expect(await findByDisplayValue('Sony FX6 Cinema Camera')).toBeTruthy();
     expect(getByDisplayValue('SN-FX6-9921')).toBeTruthy();
-    expect(getByDisplayValue('BAR-FX6-01')).toBeTruthy();
-    expect(getByDisplayValue('Cameras & Optics')).toBeTruthy();
-    expect(getByDisplayValue('Bay 4 / Shelf C')).toBeTruthy();
   });
 
   it('validates mandatory fault description before submission', async () => {

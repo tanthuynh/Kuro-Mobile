@@ -23,6 +23,7 @@ import {
   syncRepairToRtdbLedger,
   updateEquipmentRepairCondition,
   fetchTenantSuppliers,
+  fetchTenantOwners,
   fetchTenantCrewMembers,
 } from '@/services/repair-service';
 import * as firestore from 'firebase/firestore';
@@ -1619,8 +1620,219 @@ describe('repair-service', () => {
       expect(crew[0].name).toBe('Jordan Stagehand');
       expect(crew[0].role).toBe('Stagehand');
     });
+
+    it('SVC-PICK-10: fetchTenantOwners queries tenant contacts for clients and venues', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'c-client-1',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Alpha Production Group',
+            types: ['Client'],
+            email: 'info@alphaprod.com',
+            address: { fullAddress: '123 Show St, Sydney' },
+          }),
+        },
+        {
+          id: 'c-venue-1',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            company: 'Sydney Opera House Concert Hall',
+            types: ['Venue'],
+            phone: '+61 2 9250 7111',
+          }),
+        },
+        {
+          id: 'c-supp-only',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Parts Supplier Direct',
+            types: ['Supplier'], // Not a client or venue, should be excluded
+          }),
+        },
+      ]);
+
+      const owners = await fetchTenantOwners('tenant-alpha');
+      expect(owners).toHaveLength(2);
+      expect(owners[0].name).toBe('Alpha Production Group');
+      expect(owners[0].type).toBe('Client');
+      expect(owners[1].name).toBe('Sydney Opera House Concert Hall');
+      expect(owners[1].type).toBe('Venue');
+    });
+
+    it('SVC-PICK-11: fetchTenantOwners returns empty array on error or empty tenantId', async () => {
+      expect(await fetchTenantOwners('')).toEqual([]);
+
+      mockFirestore.getDocs.mockRejectedValueOnce(new Error('Firestore network timeout'));
+      expect(await fetchTenantOwners('tenant-alpha')).toEqual([]);
+    });
+
+    it('SVC-PICK-12: appendRepairNote writes note to ticket array and syncs note entity doc to tenants/{tenantId}/entities/repair-{ticketId}/documents', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-alpha',
+          notes: [],
+        }),
+      });
+
+      const setDocSpy = mockFirestore.setDoc;
+      const note = await appendRepairNote(
+        'ticket-101',
+        'Bench testing complete. All optics aligned.',
+        { id: 'usr-1', name: 'Alex Technician', email: 'alex@kuro.test' },
+        'tenant-alpha'
+      );
+
+      expect(note.content).toBe('Bench testing complete. All optics aligned.');
+      expect(note.user?.name).toBe('Alex Technician');
+      expect(setDocSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          type: 'Note',
+          category: 'Notes',
+          content: 'Bench testing complete. All optics aligned.',
+          tenantId: 'tenant-alpha',
+          ticketId: 'ticket-101',
+        })
+      );
+    });
+
+    it('SVC-PICK-13: fetchTenantOwners correctly categorizes contacts with isClient and isVenue boolean flags', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'c-client-bool',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Client Via Boolean Flag',
+            isClient: true,
+          }),
+        },
+        {
+          id: 'c-venue-bool',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Venue Via Boolean Flag',
+            isVenue: true,
+          }),
+        },
+      ]);
+
+      const owners = await fetchTenantOwners('tenant-alpha');
+      expect(owners).toHaveLength(2);
+      expect(owners[0].name).toBe('Client Via Boolean Flag');
+      expect(owners[0].type).toBe('Client');
+      expect(owners[1].name).toBe('Venue Via Boolean Flag');
+      expect(owners[1].type).toBe('Venue');
+    });
+
+    it('SVC-PICK-14: fetchTenantSuppliers correctly categorizes contacts with isSupplier boolean flag', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'c-supp-bool',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Supplier Via Boolean Flag',
+            isSupplier: true,
+          }),
+        },
+      ]);
+
+      const suppliers = await fetchTenantSuppliers('tenant-alpha');
+      expect(suppliers).toHaveLength(1);
+      expect(suppliers[0].name).toBe('Supplier Via Boolean Flag');
+      expect(suppliers[0].type).toBe('Supplier');
+    });
+
+    it('SVC-PICK-15: uploadRepairDamagePhoto handles mock fallback if fetch fails', async () => {
+      mockStorage.uploadBytes.mockResolvedValueOnce({ ref: { fullPath: 'mock/path' } });
+      mockStorage.getDownloadURL.mockResolvedValueOnce('https://storage.mock/download.jpg');
+
+      const result = await uploadRepairDamagePhoto(
+        'tenant-alpha',
+        'ticket-101',
+        'file:///local/cache/damage_img.jpg',
+        'damage_img.jpg'
+      );
+
+      expect(result.url).toBe('https://storage.mock/download.jpg');
+      expect(result.attachment.type).toBe('Photo');
+      expect(result.attachment.fileName).toBe('damage_img.jpg');
+    });
+
+    it('SVC-PICK-16: fetchTenantOwners filters out archived, disabled, and inactive contacts', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 'c-archived',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Archived Client',
+            types: ['Client'],
+            archived: true,
+          }),
+        },
+        {
+          id: 'c-deleted',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Deleted Venue',
+            types: ['Venue'],
+            isDeleted: true,
+          }),
+        },
+        {
+          id: 'c-active',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Active Concert Hall',
+            types: ['Venue'],
+          }),
+        },
+      ]);
+
+      const owners = await fetchTenantOwners('tenant-alpha');
+      expect(owners).toHaveLength(1);
+      expect(owners[0].name).toBe('Active Concert Hall');
+    });
+
+    it('SVC-PICK-17: fetchTenantSuppliers filters out archived, disabled, and inactive contacts', async () => {
+      mockFirestore.getDocs.mockResolvedValueOnce([
+        {
+          id: 's-disabled',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Disabled Supplier',
+            types: ['Supplier'],
+            disabled: true,
+          }),
+        },
+        {
+          id: 's-inactive',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Inactive Vendor',
+            types: ['Vendor'],
+            active: false,
+          }),
+        },
+        {
+          id: 's-active',
+          data: () => ({
+            tenantId: 'tenant-alpha',
+            name: 'Active Audio Vendor',
+            types: ['Vendor'],
+          }),
+        },
+      ]);
+
+      const suppliers = await fetchTenantSuppliers('tenant-alpha');
+      expect(suppliers).toHaveLength(1);
+      expect(suppliers[0].name).toBe('Active Audio Vendor');
+    });
   });
 });
+
+
 
 
 

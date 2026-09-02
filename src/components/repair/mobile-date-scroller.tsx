@@ -231,7 +231,7 @@ export function MobileDateScroller({
           <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Calendar size={18} color={colors.primary} />
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
+              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
                 Repair Period Dates
               </Text>
             </View>
@@ -245,6 +245,7 @@ export function MobileDateScroller({
             <Pressable
               style={[styles.presetChip, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => handleSetPreset('today')}
+              hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
               testID="period-preset-today"
             >
               <Text style={[styles.presetText, { color: colors.foreground }]}>Today</Text>
@@ -253,6 +254,7 @@ export function MobileDateScroller({
             <Pressable
               style={[styles.presetChip, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => handleSetPreset('3days')}
+              hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
               testID="period-preset-3days"
             >
               <Text style={[styles.presetText, { color: colors.foreground }]}>3 Days</Text>
@@ -261,6 +263,7 @@ export function MobileDateScroller({
             <Pressable
               style={[styles.presetChip, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => handleSetPreset('1week')}
+              hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
               testID="period-preset-1week"
             >
               <Text style={[styles.presetText, { color: colors.foreground }]}>1 Week</Text>
@@ -269,6 +272,7 @@ export function MobileDateScroller({
             <Pressable
               style={[styles.presetChip, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => handleSetPreset('2weeks')}
+              hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
               testID="period-preset-2weeks"
             >
               <Text style={[styles.presetText, { color: colors.foreground }]}>2 Weeks</Text>
@@ -283,6 +287,7 @@ export function MobileDateScroller({
                 },
               ]}
               onPress={() => handleSetPreset('clear')}
+              hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
               testID="period-preset-clear"
             >
               <Text style={[styles.presetText, { color: isDark ? '#F87171' : '#DC2626' }]}>Clear</Text>
@@ -481,14 +486,15 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   presetChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 9999,
     borderWidth: 1,
+    minHeight: 36,
   },
   presetText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
   },
   selectorTabsRow: {
@@ -502,13 +508,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
+    minHeight: 48,
   },
   selectorTabLabel: {
     fontFamily: 'Calibri',
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: '700',
     letterSpacing: 0.5,
     marginBottom: 2,
+    lineHeight: 18,
   },
   selectorTabValue: {
     fontFamily: 'Calibri',
@@ -523,7 +531,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     textAlign: 'center',
     fontWeight: '600',
   },
@@ -538,11 +546,12 @@ const styles = StyleSheet.create({
   },
   columnHeader: {
     fontFamily: 'Calibri',
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 4,
     letterSpacing: 0.5,
+    lineHeight: 18,
   },
   columnScroll: {
     flex: 1,
@@ -554,6 +563,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 40,
   },
   columnItemText: {
     fontFamily: 'Calibri',

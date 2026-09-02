@@ -176,9 +176,13 @@ export interface LogisticsFilterParams {
  */
 export interface LogisticsMetrics {
   total: number;
+  all?: number;
+  pending: number;
+  planned: number;
+  inProgress: number;
+  completed: number;
   active: number;
   scheduled: number;
-  completed: number;
   inTransit: number;
 }
 

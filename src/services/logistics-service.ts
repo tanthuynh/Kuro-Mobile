@@ -25,6 +25,7 @@ import type {
   LogisticsDestination,
   DriverLocation,
   LogisticsStatus,
+  Vehicle,
 } from '@/types/logistics';
 
 // ============================================================================
@@ -286,6 +287,51 @@ export async function getLogisticsEntry(
   }
 
   return entry;
+}
+
+/**
+ * Fetches a single vehicle document by ID with optional tenant isolation check.
+ *
+ * @param vehicleId Target vehicle document ID.
+ * @param tenantId Optional tenant ID to enforce isolation.
+ * @returns Mapped Vehicle or null if not found/unauthorized.
+ */
+export async function fetchVehicleById(
+  vehicleId: string,
+  tenantId?: string
+): Promise<Vehicle | null> {
+  if (!vehicleId || !vehicleId.trim()) return null;
+
+  try {
+    const docRef = doc(db, 'vehicles', vehicleId.trim());
+    const snap = await getDoc(docRef);
+
+    if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
+      return null;
+    }
+
+    const data = snap.data();
+    if (tenantId && data?.tenantId && data.tenantId !== tenantId) {
+      console.warn('[logisticsService] Tenant mismatch on fetchVehicleById');
+      return null;
+    }
+
+    return {
+      id: snap.id,
+      name: String(data?.name || ''),
+      rego: String(data?.rego || ''),
+      color: data?.color ? String(data.color) : undefined,
+      size: data?.size ? String(data.size) : undefined,
+      make: data?.make ? String(data.make) : undefined,
+      model: data?.model ? String(data.model) : undefined,
+      notes: data?.notes ? String(data.notes) : undefined,
+      tenantId: data?.tenantId ? String(data.tenantId) : undefined,
+      order: typeof data?.order === 'number' ? data.order : undefined,
+    } as Vehicle;
+  } catch (err) {
+    console.warn('[logisticsService] fetchVehicleById error:', err);
+    return null;
+  }
 }
 
 // ============================================================================

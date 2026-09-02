@@ -58,7 +58,7 @@ export const PullSheetSectionHeader: React.FC<PullSheetSectionHeaderProps> = ({
           <Text
             style={[
               styles.countText,
-              { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+              { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
             ]}
           >
             {itemCount} {itemCount === 1 ? 'item' : 'items'}
@@ -88,15 +88,15 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     letterSpacing: 0.3,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   countBadge: {
-    minHeight: 24,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    minHeight: 26,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
     borderRadius: 9999,
     borderWidth: 1,
     justifyContent: 'center',
@@ -104,8 +104,8 @@ const styles = StyleSheet.create({
   },
   countText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

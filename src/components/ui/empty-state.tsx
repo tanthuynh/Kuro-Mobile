@@ -66,8 +66,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           styles.title,
           {
             color: colors.foreground,
-            fontSize: typography.fontSize.md,
-            lineHeight: typography.lineHeight.md,
+            fontSize: typography.fontSize.lg,
+            lineHeight: typography.lineHeight.lg,
           },
         ]}
       >
@@ -80,8 +80,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             styles.description,
             {
               color: colors.mutedForeground,
-              fontSize: typography.fontSize.xs,
-              lineHeight: 16,
+              fontSize: typography.fontSize.sm,
+              lineHeight: typography.lineHeight.sm,
               marginVertical: spacing.xs,
             },
           ]}

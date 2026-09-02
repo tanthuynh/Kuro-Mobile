@@ -328,6 +328,19 @@ export interface TenantSupplier {
 }
 
 /**
+ * Tenant owner contact representation from Firestore `contacts` collection (Clients and Venues).
+ */
+export interface TenantOwner {
+  id: string;
+  name: string;
+  type?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  fullAddress?: string;
+}
+
+/**
  * Tenant crew member representation from Firestore `users` collection.
  */
 export interface TenantCrewMember {
@@ -340,4 +353,5 @@ export interface TenantCrewMember {
   position?: string;
   avatarUrl?: string;
 }
+
 

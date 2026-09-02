@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   AlertOctagon,
   XCircle,
+  Clock,
+  Truck,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
@@ -34,37 +36,104 @@ export const FIVE_CANONICAL_STATUSES: RepairStatus[] = [
   'Cancel',
 ];
 
-export interface QuickStatusSelectorProps {
-  currentStatus: RepairStatus;
-  onSelectStatus: (newStatus: RepairStatus) => void | Promise<void>;
+export const LOGISTICS_CANONICAL_STATUSES: string[] = [
+  'Pending',
+  'Scheduled',
+  'In Progress',
+  'Completed',
+  'Cancelled',
+];
+
+export const LOGISTICS_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  Pending: {
+    label: 'Pending',
+    color: '#F59E0B',
+  },
+  Scheduled: {
+    label: 'Scheduled',
+    color: '#3B82F6',
+  },
+  'In Progress': {
+    label: 'In Progress',
+    color: '#8B5CF6',
+  },
+  'In Transit': {
+    label: 'In Transit',
+    color: '#3B82F6',
+  },
+  Completed: {
+    label: 'Completed',
+    color: '#10B981',
+  },
+  Cancelled: {
+    label: 'Cancelled',
+    color: '#EF4444',
+  },
+};
+
+export interface QuickStatusSelectorProps<T extends string = string> {
+  currentStatus: T;
+  onSelectStatus: (newStatus: T) => void | Promise<void>;
+  statuses?: T[];
+  statusConfigs?: Record<string, { label?: string; color: string; bgColor?: string; borderColor?: string }>;
   disabled?: boolean;
   isUpdating?: boolean;
   showHeader?: boolean;
+  headerTitle?: string;
   testID?: string;
 }
 
-export function QuickStatusSelector({
+export function QuickStatusSelector<T extends string = string>({
   currentStatus,
   onSelectStatus,
+  statuses,
+  statusConfigs,
   disabled = false,
   isUpdating = false,
   showHeader = false,
+  headerTitle = 'STATUS',
   testID = 'quick-status-selector',
-}: QuickStatusSelectorProps) {
+}: QuickStatusSelectorProps<T>) {
   const { colors, typography, isDark } = useTheme();
 
-  const getStatusIcon = (status: RepairStatus, color: string) => {
+  const statusesToRender: T[] = statuses || (FIVE_CANONICAL_STATUSES as unknown as T[]);
+
+  const getStatusConfig = (status: string) => {
+    if (statusConfigs && statusConfigs[status]) {
+      return statusConfigs[status];
+    }
+    if (REPAIR_STATUS_CONFIG[status as RepairStatus]) {
+      return REPAIR_STATUS_CONFIG[status as RepairStatus];
+    }
+    if (LOGISTICS_STATUS_CONFIG[status]) {
+      return LOGISTICS_STATUS_CONFIG[status];
+    }
+    return {
+      label: status,
+      color: colors.foreground,
+      bgColor: colors.card,
+      borderColor: colors.border,
+    };
+  };
+
+  const getStatusIcon = (status: string, color: string) => {
     switch (status) {
       case 'Reported':
-        return <AlertOctagon size={13} color={color} />;
+        return <AlertOctagon size={14} color={color} />;
       case 'Pending':
-        return <Package size={13} color={color} />;
+        return <Package size={14} color={color} />;
       case 'Under Repair':
-        return <Wrench size={13} color={color} />;
+        return <Wrench size={14} color={color} />;
       case 'Completed':
-        return <CheckCircle2 size={13} color={color} />;
+        return <CheckCircle2 size={14} color={color} />;
       case 'Cancel':
-        return <XCircle size={13} color={color} />;
+      case 'Cancelled':
+        return <XCircle size={14} color={color} />;
+      case 'Scheduled':
+        return <Clock size={14} color={color} />;
+      case 'In Progress':
+      case 'In Transit':
+        return <Truck size={14} color={color} />;
       default:
         return null;
     }
@@ -74,13 +143,13 @@ export function QuickStatusSelector({
     <View style={styles.container} testID={testID}>
       {showHeader ? (
         <View style={styles.headerRow}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
-            STATUS
+          <Text style={[styles.sectionTitle, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+            {headerTitle}
           </Text>
           {isUpdating ? (
             <View style={styles.updatingIndicator}>
               <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={[styles.updatingText, { color: colors.primary, fontSize: 10 }]}>
+              <Text style={[styles.updatingText, { color: colors.primary, fontSize: typography.fontSize.sm }]}>
                 Updating...
               </Text>
             </View>
@@ -89,15 +158,15 @@ export function QuickStatusSelector({
       ) : null}
 
       <View style={styles.buttonsRow}>
-        {FIVE_CANONICAL_STATUSES.map((status) => {
-          const config = REPAIR_STATUS_CONFIG[status] || {
-            label: status,
-            color: colors.foreground,
-            bgColor: colors.card,
-            borderColor: colors.border,
-          };
+        {statusesToRender.map((status) => {
+          const config = getStatusConfig(status);
 
-          const isCurrent = status === currentStatus;
+          const isCurrent =
+            status === currentStatus ||
+            (typeof status === 'string' &&
+              typeof currentStatus === 'string' &&
+              status.trim().toLowerCase() === currentStatus.trim().toLowerCase());
+
           const activeBg = isDark
             ? `${config.color}22`
             : `${config.color}15`;
@@ -131,8 +200,8 @@ export function QuickStatusSelector({
                   styles.buttonLabel,
                   {
                     color: isCurrent ? config.color : colors.mutedForeground,
-                    fontSize: 11,
-                    fontWeight: '500',
+                    fontSize: typography.fontSize.sm,
+                    fontWeight: '600',
                   },
                 ]}
                 numberOfLines={1}
@@ -140,7 +209,7 @@ export function QuickStatusSelector({
                 adjustsFontSizeToFit
                 minimumFontScale={0.8}
               >
-                {status === 'Under Repair' ? 'In Repair' : status}
+                {config.label || (status === 'Under Repair' ? 'In Repair' : status)}
               </Text>
             </Pressable>
           );
@@ -162,10 +231,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Calibri',
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: '700',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
+    lineHeight: 18,
   },
   updatingIndicator: {
     flexDirection: 'row',
@@ -174,7 +244,9 @@ const styles = StyleSheet.create({
   },
   updatingText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     fontWeight: '600',
+    lineHeight: 18,
   },
   buttonsRow: {
     flexDirection: 'row',
@@ -192,7 +264,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
     borderRadius: 8,
     borderWidth: 1,
-    minHeight: 42,
+    minHeight: 48,
   },
   buttonLabel: {
     fontFamily: 'Calibri',

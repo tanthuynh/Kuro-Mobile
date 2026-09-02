@@ -123,11 +123,13 @@ export default function RepairsScreen() {
                     styles.metricLabel,
                     {
                       color: isSelected ? colors.foreground : colors.mutedForeground,
-                      fontSize: typography.fontSize.xs,
+                      fontSize: typography.fontSize.sm,
                       fontWeight: isSelected ? '700' : '600',
                     },
                   ]}
                   numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
                 >
                   {card.label}
                 </Text>
@@ -253,6 +255,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+    minHeight: 48,
   },
   metricNumber: {
     fontFamily: 'Calibri',
@@ -261,9 +264,9 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 16,
+    lineHeight: 18,
     marginTop: 2,
   },
   searchContainer: {
@@ -279,7 +282,9 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontFamily: 'Calibri',
+    fontSize: 14,
     fontWeight: '500',
+    lineHeight: 20,
   },
   emptyContainer: {
     padding: 32,
@@ -292,15 +297,15 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
     marginTop: 8,
   },
   emptySubtitle: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 14,
+    lineHeight: 20,
     textAlign: 'center',
   },
 });

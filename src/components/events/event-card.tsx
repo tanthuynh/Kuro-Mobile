@@ -136,7 +136,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                   <Text
                     style={[
                       styles.eventNumberText,
-                      { color: colors.foreground, fontSize: typography.fontSize.xs },
+                      { color: colors.foreground, fontSize: typography.fontSize.sm },
                     ]}
                   >
                     #{event.eventNumber}
@@ -157,7 +157,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                 <Text
                   style={[
                     styles.typeLabel,
-                    { color: typeColor, fontSize: typography.fontSize.xs },
+                    { color: typeColor, fontSize: typography.fontSize.sm },
                   ]}
                 >
                   {typeName}
@@ -188,7 +188,7 @@ export const EventCard: React.FC<EventCardProps> = ({
               <Text
                 style={[
                   styles.metaText,
-                  { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                  { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                 ]}
               >
                 {displayDate}
@@ -200,7 +200,7 @@ export const EventCard: React.FC<EventCardProps> = ({
               <Text
                 style={[
                   styles.metaText,
-                  { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                  { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                 ]}
               >
                 {timingString}
@@ -217,7 +217,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                   numberOfLines={1}
                   style={[
                     styles.metaText,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs, maxWidth: 160 },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm, maxWidth: 160 },
                   ]}
                 >
                   {venueName || 'Venue Assigned'}
@@ -232,7 +232,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                   numberOfLines={1}
                   style={[
                     styles.metaText,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs, maxWidth: 160 },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm, maxWidth: 160 },
                   ]}
                 >
                   {clientName || 'Client Assigned'}
@@ -247,7 +247,7 @@ export const EventCard: React.FC<EventCardProps> = ({
               <Text
                 style={[
                   styles.equipmentCountText,
-                  { color: colors.primary, fontSize: typography.fontSize.xs },
+                  { color: colors.primary, fontSize: typography.fontSize.sm },
                 ]}
               >
                 {event.equipmentItems.length} Quote Line Items
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   eventNumberBadge: {
-    minHeight: 24,
+    minHeight: 26,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
@@ -315,12 +315,12 @@ const styles = StyleSheet.create({
   },
   eventNumberText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   typePill: {
-    minHeight: 24,
+    minHeight: 26,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -337,10 +337,10 @@ const styles = StyleSheet.create({
   },
   typeLabel: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   eventName: {
     fontFamily: 'Calibri',
@@ -366,8 +366,9 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     fontWeight: '400',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   equipmentSummary: {
     paddingTop: 6,
@@ -376,8 +377,9 @@ const styles = StyleSheet.create({
   },
   equipmentCountText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   actionsRow: {
     flexDirection: 'row',

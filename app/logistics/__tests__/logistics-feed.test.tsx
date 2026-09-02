@@ -1,8 +1,8 @@
 /**
  * app/logistics/__tests__/logistics-feed.test.tsx
  * Milestone 4: Logistics Feed Component Tests.
- * Verifies real-time feed rendering, metrics display, driver assignment toggle,
- * status filter chips, search filtering, and navigation.
+ * Verifies real-time feed rendering, interactive top-row status metric cards,
+ * search filtering, and navigation.
  */
 
 import React from 'react';
@@ -129,6 +129,25 @@ const mockLogisticsJobs: LogisticsEntry[] = [
     archived: false,
     isTrackingActive: false,
   },
+  {
+    id: 'job-delta-04',
+    tenantId: 'tenant-omega',
+    eventNumber: 504,
+    eventName: 'Hordern Pavilion Backline Delivery',
+    location: 'Moore Park, Sydney NSW',
+    status: 'Pending',
+    driverName: 'Unassigned',
+    assigneeId: '',
+    vehicleId: '',
+    start: new Date('2026-08-28T10:00:00Z'),
+    end: new Date('2026-08-28T14:00:00Z'),
+    createdBy: 'Fleet Dispatcher',
+    updatedBy: 'Fleet Dispatcher',
+    createdAt: '2026-08-27T09:00:00Z',
+    updatedAt: '2026-08-27T09:00:00Z',
+    archived: false,
+    isTrackingActive: false,
+  },
 ];
 
 describe('Milestone 4: Logistics Feed Screen Component Tests', () => {
@@ -144,89 +163,109 @@ describe('Milestone 4: Logistics Feed Screen Component Tests', () => {
       });
   });
 
-  it('renders feed header and calculates summary metrics correctly', async () => {
+  it('renders interactive status metric cards and calculates summary metrics correctly', async () => {
     const { getByText, findByText, getByTestId } = render(<LogisticsFeedScreen />);
 
     expect(subscribeMock).toHaveBeenCalledWith('tenant-omega', expect.any(Function), expect.any(Function));
 
-    // Screen title
-    expect(getByText('Logistics & Transport')).toBeTruthy();
-
-    // Metrics cards
-    expect(getByTestId('metric-card-active')).toBeTruthy();
-    expect(getByTestId('metric-card-scheduled')).toBeTruthy();
+    // Interactive metrics cards
+    expect(getByTestId('metric-card-all')).toBeTruthy();
+    expect(getByTestId('metric-card-pending')).toBeTruthy();
+    expect(getByTestId('metric-card-planned')).toBeTruthy();
+    expect(getByTestId('metric-card-in-progress')).toBeTruthy();
     expect(getByTestId('metric-card-completed')).toBeTruthy();
-    expect(getByTestId('metric-card-total')).toBeTruthy();
 
-    // Metric numbers: Active=1, Scheduled=1, Completed=1, Total=3
+    // Metric numbers and cards
     expect(await findByText('Sydney Opera House Audio Run')).toBeTruthy();
     expect(getByText('Enmore Theatre Lighting Rig')).toBeTruthy();
     expect(getByText('Qudos Bank Arena Video Wall')).toBeTruthy();
+    expect(getByText('Hordern Pavilion Backline Delivery')).toBeTruthy();
   });
 
-  it('filters feed jobs when toggling "Assigned to Me"', async () => {
+  it('filters feed jobs when tapping top-row interactive status metric cards', async () => {
     const { getByTestId, queryByText, findByText, getByText } = render(<LogisticsFeedScreen />);
 
     expect(await findByText('Sydney Opera House Audio Run')).toBeTruthy();
     expect(getByText('Enmore Theatre Lighting Rig')).toBeTruthy();
     expect(getByText('Qudos Bank Arena Video Wall')).toBeTruthy();
+    expect(getByText('Hordern Pavilion Backline Delivery')).toBeTruthy();
 
-    // Tap "Assigned to Me"
-    const assignedToggle = getByTestId('toggle-assigned-me');
+    // Tap "Pending" metric card
+    const pendingCard = getByTestId('metric-card-pending');
     await act(async () => {
-      fireEvent.press(assignedToggle);
+      fireEvent.press(pendingCard);
     });
 
-    // Sam Fisher's jobs should remain
-    expect(await findByText('Sydney Opera House Audio Run')).toBeTruthy();
-    expect(getByText('Qudos Bank Arena Video Wall')).toBeTruthy();
-    // Jack Reacher's job should be filtered out
+    expect(await findByText('Hordern Pavilion Backline Delivery')).toBeTruthy();
+    expect(queryByText('Sydney Opera House Audio Run')).toBeNull();
     expect(queryByText('Enmore Theatre Lighting Rig')).toBeNull();
+    expect(queryByText('Qudos Bank Arena Video Wall')).toBeNull();
 
-    // Tap "All Jobs"
-    const allJobsToggle = getByTestId('toggle-all-jobs');
+    // Tap "In Progress" metric card
+    const inProgressCard = getByTestId('metric-card-in-progress');
     await act(async () => {
-      fireEvent.press(allJobsToggle);
-    });
-
-    expect(await findByText('Enmore Theatre Lighting Rig')).toBeTruthy();
-  });
-
-  it('filters feed jobs when clicking status filter chips', async () => {
-    const { getByTestId, queryByText, findByText, getByText } = render(<LogisticsFeedScreen />);
-
-    // Click "Active" status chip
-    const activeChip = getByTestId('status-filter-active');
-    await act(async () => {
-      fireEvent.press(activeChip);
+      fireEvent.press(inProgressCard);
     });
 
     expect(await findByText('Sydney Opera House Audio Run')).toBeTruthy();
     expect(queryByText('Enmore Theatre Lighting Rig')).toBeNull();
     expect(queryByText('Qudos Bank Arena Video Wall')).toBeNull();
+    expect(queryByText('Hordern Pavilion Backline Delivery')).toBeNull();
 
-    // Click "Completed" status chip
-    const completedChip = getByTestId('status-filter-completed');
+    // Tap "Planned" metric card
+    const plannedCard = getByTestId('metric-card-planned');
     await act(async () => {
-      fireEvent.press(completedChip);
+      fireEvent.press(plannedCard);
+    });
+
+    expect(await findByText('Enmore Theatre Lighting Rig')).toBeTruthy();
+    expect(queryByText('Sydney Opera House Audio Run')).toBeNull();
+    expect(queryByText('Qudos Bank Arena Video Wall')).toBeNull();
+    expect(queryByText('Hordern Pavilion Backline Delivery')).toBeNull();
+
+    // Tap "Completed" metric card
+    const completedCard = getByTestId('metric-card-completed');
+    await act(async () => {
+      fireEvent.press(completedCard);
     });
 
     expect(await findByText('Qudos Bank Arena Video Wall')).toBeTruthy();
     expect(queryByText('Sydney Opera House Audio Run')).toBeNull();
     expect(queryByText('Enmore Theatre Lighting Rig')).toBeNull();
+    expect(queryByText('Hordern Pavilion Backline Delivery')).toBeNull();
+
+    // Tap "All" metric card
+    const allCard = getByTestId('metric-card-all');
+    await act(async () => {
+      fireEvent.press(allCard);
+    });
+
+    expect(await findByText('Sydney Opera House Audio Run')).toBeTruthy();
+    expect(getByText('Enmore Theatre Lighting Rig')).toBeTruthy();
+    expect(getByText('Qudos Bank Arena Video Wall')).toBeTruthy();
+    expect(getByText('Hordern Pavilion Backline Delivery')).toBeTruthy();
   });
 
-  it('filters feed jobs via search keyword input', async () => {
+  it('filters feed jobs via search keyword input and allows resetting filters from empty state', async () => {
     const { getByTestId, queryByText, findByText, getByText } = render(<LogisticsFeedScreen />);
 
     const searchInput = getByTestId('logistics-search-input');
     await act(async () => {
-      fireEvent.changeText(searchInput, 'Newtown');
+      fireEvent.changeText(searchInput, 'NonExistentPlaceXYZ');
     });
 
-    expect(await findByText('Enmore Theatre Lighting Rig')).toBeTruthy();
+    expect(await findByText('No Logistics Jobs Found')).toBeTruthy();
     expect(queryByText('Sydney Opera House Audio Run')).toBeNull();
-    expect(queryByText('Qudos Bank Arena Video Wall')).toBeNull();
+
+    // Reset filters button
+    const resetBtn = getByTestId('reset-logistics-filters-btn');
+    await act(async () => {
+      fireEvent.press(resetBtn);
+    });
+
+    expect(await findByText('Sydney Opera House Audio Run')).toBeTruthy();
+    expect(getByText('Enmore Theatre Lighting Rig')).toBeTruthy();
+    expect(getByText('Qudos Bank Arena Video Wall')).toBeTruthy();
   });
 
   it('navigates to job detail screen when pressing a job card', async () => {

@@ -59,8 +59,8 @@ export const CardTitle: React.FC<CardTitleProps> = ({ children, style }) => {
         styles.title,
         {
           color: colors.cardForeground,
-          fontSize: typography.fontSize.md,
-          lineHeight: typography.lineHeight.md,
+          fontSize: typography.fontSize.lg,
+          lineHeight: typography.lineHeight.lg,
         },
         style,
       ]}
@@ -83,8 +83,8 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({ children, styl
         styles.description,
         {
           color: colors.mutedForeground,
-          fontSize: typography.fontSize.xs,
-          lineHeight: typography.lineHeight.xs,
+          fontSize: typography.fontSize.sm,
+          lineHeight: typography.lineHeight.sm,
         },
         style,
       ]}

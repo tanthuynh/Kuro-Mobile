@@ -99,7 +99,7 @@ export function AddActionNoteModal({
               ) : (
                 <FileText size={18} color={colors.primary} />
               )}
-              <Text style={[styles.headerTitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
+              <Text style={[styles.headerTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
                 {entryType === 'action' ? 'Log Technician Action' : 'Add Technician Note'}
               </Text>
             </View>
@@ -134,7 +134,7 @@ export function AddActionNoteModal({
                     styles.typeTabText,
                     {
                       color: entryType === 'action' ? colors.primaryForeground : colors.mutedForeground,
-                      fontSize: typography.fontSize.xs,
+                      fontSize: typography.fontSize.sm,
                     },
                   ]}
                 >
@@ -159,7 +159,7 @@ export function AddActionNoteModal({
                     styles.typeTabText,
                     {
                       color: entryType === 'note' ? colors.primaryForeground : colors.mutedForeground,
-                      fontSize: typography.fontSize.xs,
+                      fontSize: typography.fontSize.sm,
                     },
                   ]}
                 >
@@ -172,14 +172,14 @@ export function AddActionNoteModal({
             <View style={styles.metaRow}>
               <View style={styles.metaItem}>
                 <User size={13} color={colors.mutedForeground} />
-                <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                   Author: <Text style={{ color: colors.foreground, fontWeight: '600' }}>{userName}</Text>
                 </Text>
               </View>
 
               <View style={styles.metaItem}>
                 <Clock size={13} color={colors.mutedForeground} />
-                <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                   Now
                 </Text>
               </View>
@@ -209,7 +209,7 @@ export function AddActionNoteModal({
                 ]}
               />
               {error ? (
-                <Text style={[styles.errorText, { color: colors.destructive, fontSize: typography.fontSize.xs, marginTop: 6 }]}>
+                <Text style={[styles.errorText, { color: colors.destructive, fontSize: typography.fontSize.sm, marginTop: 6 }]}>
                   {error}
                 </Text>
               ) : null}

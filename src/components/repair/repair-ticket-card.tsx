@@ -93,7 +93,7 @@ export function RepairTicketCard({
                 {repairNumDisplay}
               </Text>
               <Text 
-                style={[styles.equipmentName, { color: colors.foreground, fontSize: typography.fontSize.sm, flexShrink: 1, marginLeft: 6 }]} 
+                style={[styles.equipmentName, { color: colors.foreground, fontSize: typography.fontSize.base, flexShrink: 1, marginLeft: 6 }]} 
                 numberOfLines={1}
               >
                 {ticket.equipment?.name || 'Unknown Asset'}
@@ -116,6 +116,7 @@ export function RepairTicketCard({
                     styles.statusBadgeText,
                     {
                       color: statusConfig.color,
+                      fontSize: typography.fontSize.sm,
                     },
                   ]}
                 >
@@ -130,11 +131,11 @@ export function RepairTicketCard({
             <View style={styles.cleanTextMetaGroup}>
               {ticket.priority && ticket.priority !== 'None' ? (
                 <View style={styles.metaItem}>
-                  <LayoutGrid size={12} color={colors.mutedForeground} />
+                  <LayoutGrid size={14} color={colors.mutedForeground} />
                   <Text
                     style={[
                       styles.priorityText,
-                      { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                      { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                     ]}
                     testID={`card-priority-${ticket.priority.toLowerCase()}`}
                   >
@@ -152,13 +153,13 @@ export function RepairTicketCard({
                 style={styles.conditionTextGroup}
                 testID={`card-condition-${isOutOfService ? 'out-of-service' : 'available'}`}
               >
-                <Activity size={12} color={colors.mutedForeground} />
+                <Activity size={14} color={colors.mutedForeground} />
                 <Text
                   style={[
                     styles.conditionText,
                     {
                       color: colors.mutedForeground,
-                      fontSize: typography.fontSize.xs,
+                      fontSize: typography.fontSize.sm,
                     },
                   ]}
                 >
@@ -171,8 +172,8 @@ export function RepairTicketCard({
                 <>
                   <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
                   <View style={styles.imagesCountGroup}>
-                    <ImageIcon size={11} color={colors.mutedForeground} />
-                    <Text style={[styles.imagesCountText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                    <ImageIcon size={14} color={colors.mutedForeground} />
+                    <Text style={[styles.imagesCountText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                       {photoCount}
                     </Text>
                   </View>
@@ -184,9 +185,9 @@ export function RepairTicketCard({
             <View style={styles.peopleGroup}>
               {ticket.owner ? (
                 <View style={styles.personItem}>
-                  <Users size={12} color={colors.mutedForeground} />
+                  <Users size={14} color={colors.mutedForeground} />
                   <Text
-                    style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}
+                    style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
                     numberOfLines={1}
                   >
                     {ticket.owner}
@@ -199,9 +200,9 @@ export function RepairTicketCard({
               ) : null}
 
               <View style={styles.personItem}>
-                <UserCheck size={12} color={colors.mutedForeground} />
+                <UserCheck size={14} color={colors.mutedForeground} />
                 <Text
-                  style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}
+                  style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
                   numberOfLines={1}
                 >
                   {ticket.requestedBy || 'Unknown'}
@@ -241,9 +242,9 @@ const styles = StyleSheet.create({
   },
   ticketIdText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   equipmentName: {
     fontFamily: 'Calibri',
@@ -264,9 +265,9 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontFamily: 'Calibri',
-    fontSize: 11,
-    fontWeight: '500',
-    lineHeight: 14,
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 18,
   },
   secondRow: {
     flexDirection: 'row',
@@ -286,11 +287,12 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   separatorDot: {
-    fontSize: 11,
+    fontSize: 13,
   },
   conditionTextGroup: {
     flexDirection: 'row',
@@ -299,8 +301,9 @@ const styles = StyleSheet.create({
   },
   conditionText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   imagesCountGroup: {
     flexDirection: 'row',
@@ -309,8 +312,9 @@ const styles = StyleSheet.create({
   },
   imagesCountText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   peopleGroup: {
     flexDirection: 'row',
@@ -328,8 +332,8 @@ const styles = StyleSheet.create({
   },
   personText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

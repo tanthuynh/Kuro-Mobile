@@ -11,6 +11,7 @@ import {
   subscribeSingleLogisticsEntry,
   fetchTenantLogistics,
   getLogisticsEntry,
+  fetchVehicleById,
   updateLogisticsStatus,
   appendLogisticsNote,
   updateJobLocation,
@@ -374,6 +375,63 @@ describe('Logistics Service (Firestore)', () => {
       });
 
       const result = await getLogisticsEntry('job-1', 'tenant-1');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('fetchVehicleById', () => {
+    it('returns null when vehicleId is empty or whitespace', async () => {
+      expect(await fetchVehicleById('')).toBeNull();
+      expect(await fetchVehicleById('   ')).toBeNull();
+    });
+
+    it('returns null when vehicle document does not exist', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => false,
+      });
+
+      const result = await fetchVehicleById('veh-nonexistent');
+      expect(result).toBeNull();
+    });
+
+    it('returns mapped vehicle when document exists', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        id: 'veh-van-04',
+        data: () => ({
+          name: 'Van 04',
+          rego: 'NSW-KURO1',
+          tenantId: 'tenant-1',
+          make: 'Toyota',
+          model: 'HiAce',
+        }),
+      });
+
+      const result = await fetchVehicleById('veh-van-04', 'tenant-1');
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 'veh-van-04',
+          name: 'Van 04',
+          rego: 'NSW-KURO1',
+          tenantId: 'tenant-1',
+          make: 'Toyota',
+          model: 'HiAce',
+        })
+      );
+    });
+
+    it('returns null on tenant mismatch', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        id: 'veh-van-04',
+        data: () => ({
+          name: 'Van 04',
+          rego: 'NSW-KURO1',
+          tenantId: 'tenant-other',
+        }),
+      });
+
+      const result = await fetchVehicleById('veh-van-04', 'tenant-1');
       expect(result).toBeNull();
     });
   });

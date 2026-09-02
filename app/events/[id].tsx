@@ -150,7 +150,7 @@ export default function EventDetailsScreen() {
               <Text style={[styles.ctaTitle, { color: colors.foreground, fontSize: typography.fontSize.md }]}>
                 Warehouse Operations
               </Text>
-              <Text style={[styles.ctaSubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.ctaSubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                 {event.equipmentItems?.length || 0} line items listed on quote
               </Text>
             </View>
@@ -242,7 +242,7 @@ export default function EventDetailsScreen() {
             <Text style={[styles.infoMainText, { color: colors.cardForeground, fontSize: typography.fontSize.base }]}>
               {event.venueId || 'Sydney Showground (Hall 5 & Dock 2)'}
             </Text>
-            <Text style={[styles.addressText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs, marginVertical: 4 }]}>
+            <Text style={[styles.addressText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginVertical: 4 }]}>
               1 Showground Rd, Sydney Olympic Park NSW 2127
             </Text>
 
@@ -312,14 +312,14 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   errorSubtitle: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
   },
   ctaCard: {
     marginBottom: 16,
@@ -337,8 +337,8 @@ const styles = StyleSheet.create({
   },
   ctaSubtitle: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     marginTop: 2,
   },
   ctaButtonsRow: {
@@ -360,9 +360,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   cardContentNoTop: {
     paddingTop: 4,
@@ -376,8 +376,8 @@ const styles = StyleSheet.create({
   },
   addressText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
   },
   actionRow: {
     flexDirection: 'row',

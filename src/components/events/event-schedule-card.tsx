@@ -125,7 +125,7 @@ export const EventScheduleCard: React.FC<EventScheduleCardProps> = ({
           <Text
             style={[
               styles.headerTitle,
-              { color: colors.foreground, fontSize: typography.fontSize.md },
+              { color: colors.foreground, fontSize: typography.fontSize.lg, lineHeight: typography.lineHeight.lg },
             ]}
           >
             Operational Schedule & Timeline
@@ -256,7 +256,7 @@ export const EventScheduleCard: React.FC<EventScheduleCardProps> = ({
                 <Text
                   style={[
                     styles.stageSubtitle,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm, lineHeight: typography.lineHeight.sm },
                   ]}
                 >
                   {stage.subtitle}
@@ -280,7 +280,7 @@ export const EventScheduleCard: React.FC<EventScheduleCardProps> = ({
                     <Text
                       style={[
                         styles.timingText,
-                        { color: colors.foreground, fontSize: typography.fontSize.xs },
+                        { color: colors.foreground, fontSize: typography.fontSize.sm, lineHeight: typography.lineHeight.sm },
                       ]}
                     >
                       Time: {formatStageTime(stage.start, 'dateTime')}
@@ -290,7 +290,7 @@ export const EventScheduleCard: React.FC<EventScheduleCardProps> = ({
                       <Text
                         style={[
                           styles.timingText,
-                          { color: colors.foreground, fontSize: typography.fontSize.xs },
+                          { color: colors.foreground, fontSize: typography.fontSize.sm, lineHeight: typography.lineHeight.sm },
                         ]}
                       >
                         Start: {formatStageTime(stage.start, 'dateTime')}
@@ -298,7 +298,7 @@ export const EventScheduleCard: React.FC<EventScheduleCardProps> = ({
                       <Text
                         style={[
                           styles.timingText,
-                          { color: colors.foreground, fontSize: typography.fontSize.xs },
+                          { color: colors.foreground, fontSize: typography.fontSize.sm, lineHeight: typography.lineHeight.sm },
                         ]}
                       >
                         Finish: {formatStageTime(stage.end, 'dateTime')}

@@ -92,14 +92,14 @@ export function LogisticsNotesModal({
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <User size={13} color={colors.mutedForeground} />
-            <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
               Author: <Text style={{ color: colors.foreground, fontWeight: '600' }}>{authorName}</Text>
             </Text>
           </View>
 
           <View style={styles.metaItem}>
             <Clock size={13} color={colors.mutedForeground} />
-            <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
               Now
             </Text>
           </View>
@@ -109,7 +109,7 @@ export function LogisticsNotesModal({
         {error ? (
           <View style={[styles.errorBanner, { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: colors.destructive }]}>
             <AlertTriangle size={14} color={colors.destructive} />
-            <Text style={[styles.errorText, { color: colors.destructive, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.errorText, { color: colors.destructive, fontSize: typography.fontSize.sm }]}>
               {error}
             </Text>
           </View>

@@ -125,7 +125,7 @@ export const CameraViewfinder: React.FC<CameraViewfinderProps> = ({
         />
       ) : (
         <View style={styles.fallbackBackground}>
-          <Text style={[styles.simText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.simText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, lineHeight: typography.lineHeight.sm }]}>
             {Platform.OS === 'web'
               ? 'Web Simulator Mode Active'
               : !permission?.granted
@@ -319,18 +319,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 16,
-    minHeight: 32,
+    minHeight: 36,
   },
   modeText: {
     fontFamily: 'Calibri',
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
+    lineHeight: 18,
   },
   torchButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -342,8 +343,9 @@ const styles = StyleSheet.create({
   promptText: {
     fontFamily: 'Calibri',
     color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 12,
+    fontSize: 13,
     textAlign: 'center',
     fontWeight: '500',
+    lineHeight: 18,
   },
 });

@@ -146,7 +146,8 @@ export const Input = forwardRef<TextInput, InputProps>(
               styles.errorText,
               {
                 color: colors.destructive,
-                fontSize: typography.fontSize.xs,
+                fontSize: typography.fontSize.sm,
+                lineHeight: typography.lineHeight.sm,
                 marginTop: spacing.xs,
               },
             ]}
@@ -159,7 +160,8 @@ export const Input = forwardRef<TextInput, InputProps>(
               styles.helperText,
               {
                 color: colors.mutedForeground,
-                fontSize: typography.fontSize.xs,
+                fontSize: typography.fontSize.sm,
+                lineHeight: typography.lineHeight.sm,
                 marginTop: spacing.xs,
               },
             ]}

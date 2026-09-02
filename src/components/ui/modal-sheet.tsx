@@ -90,8 +90,8 @@ export const ModalSheet: React.FC<ModalSheetProps> = ({
                       styles.title,
                       {
                         color: colors.foreground,
-                        fontSize: typography.fontSize.md,
-                        lineHeight: typography.lineHeight.md,
+                        fontSize: typography.fontSize.lg,
+                        lineHeight: typography.lineHeight.lg,
                       },
                     ]}
                     numberOfLines={1}

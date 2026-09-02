@@ -76,7 +76,7 @@ export function useLogistics(options?: UseLogisticsOptions): UseLogisticsResult 
     options?.initialOnlyAssigned ?? false
   );
   const [statusFilter, setStatusFilter] = useState<string>(
-    options?.initialStatusFilter ?? 'all'
+    options?.initialStatusFilter ?? 'All'
   );
   const [searchQuery, setSearchQuery] = useState<string>(
     options?.initialSearchQuery ?? ''

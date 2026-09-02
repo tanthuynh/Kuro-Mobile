@@ -59,11 +59,11 @@ export function RepairPhotoGallery({
       <View style={styles.headerRow}>
         <View style={styles.titleWithCount}>
           <ImageIcon size={16} color={colors.primary} />
-          <Text style={[styles.title, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
+          <Text style={[styles.title, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
             {title}
           </Text>
           <View style={[styles.countBadge, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
-            <Text style={[styles.countText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.countText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
               {photos.length}
             </Text>
           </View>
@@ -74,7 +74,7 @@ export function RepairPhotoGallery({
       {photos.length === 0 ? (
         <View style={[styles.emptyContainer, { borderColor: colors.border, backgroundColor: colors.card }]}>
           <Camera size={26} color={colors.mutedForeground} />
-          <Text style={[styles.emptyText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.emptyText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
             No photos attached.
           </Text>
         </View>
@@ -156,7 +156,7 @@ export function RepairPhotoGallery({
           />
 
           <View style={styles.lightboxHeader}>
-            <Text style={[styles.lightboxTitle, { color: '#FFFFFF', fontSize: typography.fontSize.sm }]}>
+            <Text style={[styles.lightboxTitle, { color: '#FFFFFF', fontSize: typography.fontSize.base }]}>
               Image Preview
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

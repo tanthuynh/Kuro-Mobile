@@ -129,7 +129,7 @@ export default function InventoryScreen() {
                   styles.availPillText,
                   {
                     color: isSelected ? colors.foreground : colors.mutedForeground,
-                    fontSize: typography.fontSize.xs,
+                    fontSize: typography.fontSize.sm,
                     fontWeight: isSelected ? '700' : '500',
                   },
                 ]}
@@ -195,7 +195,7 @@ export default function InventoryScreen() {
         {activeItem ? (
           <View>
             {activeItem.manufacturer ? (
-              <Text style={[styles.detailItemManufacturer, { color: colors.primary, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.detailItemManufacturer, { color: colors.primary, fontSize: typography.fontSize.sm }]}>
                 {activeItem.manufacturer}
               </Text>
             ) : null}
@@ -212,34 +212,34 @@ export default function InventoryScreen() {
             <View style={[styles.specGrid, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               {activeItem.model ? (
                 <View style={styles.specRow}>
-                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Model</Text>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>Model</Text>
                   <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.model}</Text>
                 </View>
               ) : null}
 
               {activeItem.barcode ? (
                 <View style={styles.specRow}>
-                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Barcode</Text>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>Barcode</Text>
                   <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.barcode}</Text>
                 </View>
               ) : null}
 
               {activeItem.serialNumber ? (
                 <View style={styles.specRow}>
-                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Primary Serial</Text>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>Primary Serial</Text>
                   <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.serialNumber}</Text>
                 </View>
               ) : null}
 
               {activeItem.knownLocation ? (
                 <View style={styles.specRow}>
-                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Warehouse Location</Text>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>Warehouse Location</Text>
                   <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.knownLocation}</Text>
                 </View>
               ) : null}
 
               <View style={styles.specRow}>
-                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Fleet Quantity</Text>
+                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>Fleet Quantity</Text>
                 <Text style={[styles.specValue, { color: colors.status.online, fontSize: typography.fontSize.base }]}>
                   {Math.max(0, (activeItem.quantity || 1) - (activeItem.consumedQuantity || 0))} available / {activeItem.quantity || 1} total
                 </Text>
@@ -247,14 +247,14 @@ export default function InventoryScreen() {
 
               {activeItem.weight ? (
                 <View style={styles.specRow}>
-                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Weight</Text>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>Weight</Text>
                   <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.weight} kg</Text>
                 </View>
               ) : null}
 
               {activeItem.powerW ? (
                 <View style={styles.specRow}>
-                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>Power Draw</Text>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>Power Draw</Text>
                   <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>{activeItem.powerW} W</Text>
                 </View>
               ) : null}
@@ -268,7 +268,7 @@ export default function InventoryScreen() {
                 </Text>
                 {activeItem.serialNumbers.map((sn, i) => (
                   <View key={sn.id || i} style={[styles.serialUnitRow, { borderTopColor: colors.border }]}>
-                    <Text style={[styles.serialUnitText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+                    <Text style={[styles.serialUnitText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
                       #{i + 1}: {sn.serial}
                     </Text>
                     <Badge
@@ -362,8 +362,8 @@ const styles = StyleSheet.create({
   },
   availPillText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
   },
   listContent: {
     paddingBottom: 32,
@@ -378,14 +378,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   emptySubtitle: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     textAlign: 'center',
   },
   modalOverlay: {
@@ -408,17 +408,17 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   modalBody: {},
   detailItemManufacturer: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   detailItemName: {
     fontFamily: 'Calibri',
@@ -445,9 +445,9 @@ const styles = StyleSheet.create({
   },
   specLabel: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   specValue: {
     fontFamily: 'Calibri',
@@ -478,8 +478,8 @@ const styles = StyleSheet.create({
   },
   serialUnitText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
   },
   modalActionRow: {
     flexDirection: 'row',

@@ -123,7 +123,7 @@ export const OnlineIndicator: React.FC<OnlineIndicatorProps> = ({
             styles.label,
             {
               color: colors.mutedForeground,
-              fontSize: typography.fontSize.xs,
+              fontSize: typography.fontSize.sm,
               marginLeft: spacing.xs,
             },
           ]}

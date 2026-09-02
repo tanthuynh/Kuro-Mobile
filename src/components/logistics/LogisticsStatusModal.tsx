@@ -111,7 +111,7 @@ export function LogisticsStatusModal({
       <View>
         {/* Current Status Pill */}
         <View style={styles.currentStatusRow}>
-          <Text style={[styles.currentStatusLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.currentStatusLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
             Current Status:
           </Text>
           <Badge variant="outline">{currentStatus}</Badge>
@@ -121,7 +121,7 @@ export function LogisticsStatusModal({
         {error ? (
           <View style={[styles.errorBanner, { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: colors.destructive }]}>
             <AlertTriangle size={14} color={colors.destructive} />
-            <Text style={[styles.errorText, { color: colors.destructive, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.errorText, { color: colors.destructive, fontSize: typography.fontSize.sm }]}>
               {error}
             </Text>
           </View>

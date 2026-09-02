@@ -88,7 +88,7 @@ export const EventFilterTabs: React.FC<EventFilterTabsProps> = ({
                     styles.countText,
                     {
                       color: isActive ? colors.primaryForeground : colors.mutedForeground,
-                      fontSize: typography.fontSize.xs,
+                      fontSize: typography.fontSize.sm,
                       fontWeight: '700',
                     },
                   ]}
@@ -116,15 +116,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    minHeight: 38,
+    minHeight: 48,
   },
   tabLabel: {
     fontFamily: 'Calibri',
     marginRight: 6,
   },
   countBadge: {
-    minHeight: 24,
-    minWidth: 24,
+    minHeight: 26,
+    minWidth: 26,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 9999,
@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
   },
   countText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

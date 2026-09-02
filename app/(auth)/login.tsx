@@ -188,7 +188,7 @@ export default function LoginScreen() {
               <Text style={[styles.noticeTitle, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
                 {logoutNotice.title}
               </Text>
-              <Text style={[styles.noticeDescription, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.noticeDescription, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                 {logoutNotice.description}
               </Text>
             </View>
@@ -197,7 +197,7 @@ export default function LoginScreen() {
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               style={styles.noticeDismiss}
             >
-              <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.xs }}>✕</Text>
+              <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.sm }}>✕</Text>
             </Pressable>
           </View>
         ) : null}
@@ -575,13 +575,14 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     fontFamily: 'Calibri',
-    fontSize: 11,
+    fontSize: 13,
     textTransform: 'uppercase',
     fontWeight: '600',
     letterSpacing: 0.5,
+    lineHeight: 18,
   },
   googleButton: {
-    height: 44,
+    minHeight: 48,
   },
   emailDisplayBox: {
     flexDirection: 'row',

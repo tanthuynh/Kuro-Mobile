@@ -99,11 +99,11 @@ export const PullSheetStatusSheet: React.FC<PullSheetStatusSheetProps> = ({
         </Text>
 
         <View style={styles.metaRow}>
-          <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
             Required Quantity: <Text style={{ color: colors.foreground, fontWeight: '700' }}>{item.quantity}</Text>
           </Text>
           {item.scannedQuantity !== undefined ? (
-            <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
               Scanned: <Text style={{ color: colors.status.online, fontWeight: '700' }}>{item.scannedQuantity}</Text>
             </Text>
           ) : null}
@@ -115,7 +115,7 @@ export const PullSheetStatusSheet: React.FC<PullSheetStatusSheetProps> = ({
             <Text
               style={[
                 styles.noteText,
-                { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
               ]}
             >
               {item.internalNote}
@@ -127,7 +127,7 @@ export const PullSheetStatusSheet: React.FC<PullSheetStatusSheetProps> = ({
           <View style={styles.barcodesContainer}>
             <View style={styles.barcodeHeaderRow}>
               <Barcode size={14} color={colors.primary} style={{ marginRight: 6 }} />
-              <Text style={[styles.barcodeTitle, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.barcodeTitle, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
                 Scanned Asset Serials ({item.scannedBarcodes.length}):
               </Text>
             </View>
@@ -143,7 +143,7 @@ export const PullSheetStatusSheet: React.FC<PullSheetStatusSheetProps> = ({
                     },
                   ]}
                 >
-                  <Text style={[styles.barcodeChipText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+                  <Text style={[styles.barcodeChipText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
                     {barcode}
                   </Text>
                 </View>
@@ -171,7 +171,7 @@ export const PullSheetStatusSheet: React.FC<PullSheetStatusSheetProps> = ({
       <Text
         style={[
           styles.optionsHeader,
-          { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+          { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
         ]}
       >
         SELECT OPERATIONAL STATUS

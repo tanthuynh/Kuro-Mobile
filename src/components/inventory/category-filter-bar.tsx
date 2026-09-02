@@ -62,7 +62,7 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
                   styles.chipText,
                   {
                     color: isSelected ? colors.primaryForeground : colors.foreground,
-                    fontSize: typography.fontSize.xs,
+                    fontSize: typography.fontSize.sm,
                     fontWeight: isSelected ? '700' : '500',
                   },
                 ]}
@@ -88,11 +88,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderWidth: 1,
-    minHeight: 34,
+    minHeight: 48,
     justifyContent: 'center',
     alignItems: 'center',
   },
   chipText: {
     fontFamily: 'Calibri',
+    fontSize: 13,
+    lineHeight: 18,
   },
 });

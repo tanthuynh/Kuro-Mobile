@@ -64,7 +64,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
                 <Text
                   style={[
                     styles.manufacturerText,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                   ]}
                 >
                   {item.manufacturer}
@@ -96,7 +96,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
               <Text
                 style={[
                   styles.barcodeText,
-                  { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                  { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                 ]}
               >
                 {item.barcode}
@@ -113,7 +113,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
                   numberOfLines={1}
                   style={[
                     styles.specText,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs, maxWidth: 140 },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm, maxWidth: 140 },
                   ]}
                 >
                   {item.knownLocation}
@@ -127,7 +127,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
                 <Text
                   style={[
                     styles.specText,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                   ]}
                 >
                   {item.powerW} W
@@ -141,7 +141,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
                 <Text
                   style={[
                     styles.specText,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                   ]}
                 >
                   {item.weight} kg
@@ -153,7 +153,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
           {/* Footer: Availability stock & Serials count */}
           <View style={[styles.footerRow, { borderTopColor: colors.border }]}>
             <View style={styles.stockCol}>
-              <Text style={[styles.stockLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.stockLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                 Fleet Stock:
               </Text>
               <Text
@@ -161,7 +161,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
                   styles.stockValue,
                   {
                     color: available > 0 ? colors.status.online : colors.destructive,
-                    fontSize: typography.fontSize.xs,
+                    fontSize: typography.fontSize.sm,
                   },
                 ]}
               >
@@ -173,7 +173,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
               <Text
                 style={[
                   styles.serialsCount,
-                  { color: colors.primary, fontSize: typography.fontSize.xs },
+                  { color: colors.primary, fontSize: typography.fontSize.sm },
                 ]}
               >
                 {item.serialNumbers.length} Serials
@@ -202,12 +202,12 @@ const styles = StyleSheet.create({
   },
   manufacturerText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 2,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   nameText: {
     fontFamily: 'Calibri',
@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
   },
   barcodeText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     marginLeft: 4,
   },
   specsRow: {
@@ -240,8 +240,8 @@ const styles = StyleSheet.create({
   },
   specText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
   },
   footerRow: {
     flexDirection: 'row',
@@ -257,19 +257,19 @@ const styles = StyleSheet.create({
   },
   stockLabel: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
   },
   stockValue: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   serialsCount: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

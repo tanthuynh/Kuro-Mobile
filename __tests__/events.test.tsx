@@ -221,4 +221,285 @@ describe('Milestone 2: Events Feed & Details', () => {
       expect(result.current.event?.eventName).toBe('Neon Horizon Music Festival');
     });
   });
+
+  describe('EventsFeedScreen (app/(tabs)/index.tsx)', () => {
+    const mockRouterPush = jest.fn();
+    beforeEach(() => {
+      mockRouterPush.mockClear();
+      const expoRouter = require('expo-router');
+      expoRouter.useRouter = () => ({
+        push: mockRouterPush,
+        replace: jest.fn(),
+        back: jest.fn(),
+      });
+    });
+
+    afterEach(async () => {
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 100));
+      });
+    });
+
+    const mockEventsList: Event[] = [
+      {
+        ...sampleEvent,
+        id: 'ev-1',
+        eventName: 'Sydney Symphony Orchestra',
+        eventNumber: 2001,
+        eventStatusId: 'Inquiry',
+        clientId: 'Sydney Opera House',
+        venueId: 'Concert Hall',
+        notes: 'Acoustic shell setup',
+        startTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
+        finishTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000 + 8 * 3600 * 1000),
+      },
+      {
+        ...sampleEvent,
+        id: 'ev-2',
+        eventName: 'Tech Summit Keynote',
+        eventNumber: 2002,
+        eventStatusId: 'Pending',
+        clientId: 'CloudTech APAC',
+        venueId: 'ICC Sydney',
+        notes: 'High speed fiber uplink required',
+        startTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        finishTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 10 * 3600 * 1000),
+      },
+      {
+        ...sampleEvent,
+        id: 'ev-3',
+        eventName: 'Neon Lights Festival',
+        eventNumber: 2003,
+        eventStatusId: 'Confirmed',
+        clientId: 'LiveNation APAC',
+        venueId: 'Showground Arena',
+        notes: 'Mainstage lighting rig',
+        startTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+        finishTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 12 * 3600 * 1000),
+      },
+      {
+        ...sampleEvent,
+        id: 'ev-4',
+        eventName: 'Corporate Product Launch',
+        eventNumber: 2004,
+        eventStatusId: 'Completed',
+        clientId: 'Alpha Corp',
+        venueId: 'Harbour Ballroom',
+        notes: 'LED display wall',
+        startTime: new Date(Date.now() + 0.1 * 24 * 60 * 60 * 1000),
+        finishTime: new Date(Date.now() + 0.3 * 24 * 60 * 60 * 1000),
+      },
+    ];
+
+    it('renders top 5 status metric cards with correct counts', () => {
+      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
+        onData(mockEventsList);
+        return jest.fn();
+      });
+
+      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const { getByTestId, getByText } = render(<EventsFeedScreen />);
+
+      expect(getByTestId('metric-card-all')).toBeTruthy();
+      expect(getByTestId('metric-card-inquiry')).toBeTruthy();
+      expect(getByTestId('metric-card-pending')).toBeTruthy();
+      expect(getByTestId('metric-card-confirmed')).toBeTruthy();
+      expect(getByTestId('metric-card-completed')).toBeTruthy();
+
+      expect(getByText('Sydney Symphony Orchestra')).toBeTruthy();
+      expect(getByText('Tech Summit Keynote')).toBeTruthy();
+      expect(getByText('Neon Lights Festival')).toBeTruthy();
+      expect(getByText('Corporate Product Launch')).toBeTruthy();
+    });
+
+    it('filters events list when tapping status metric cards', () => {
+      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
+        onData(mockEventsList);
+        return jest.fn();
+      });
+
+      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const { getByTestId, queryByText, getByText } = render(<EventsFeedScreen />);
+
+      // Filter by Inquiry
+      fireEvent.press(getByTestId('metric-card-inquiry'));
+      expect(getByText('Sydney Symphony Orchestra')).toBeTruthy();
+      expect(queryByText('Tech Summit Keynote')).toBeNull();
+      expect(queryByText('Neon Lights Festival')).toBeNull();
+
+      // Filter by Pending
+      fireEvent.press(getByTestId('metric-card-pending'));
+      expect(queryByText('Sydney Symphony Orchestra')).toBeNull();
+      expect(getByText('Tech Summit Keynote')).toBeTruthy();
+      expect(queryByText('Neon Lights Festival')).toBeNull();
+
+      // Filter by Confirmed
+      fireEvent.press(getByTestId('metric-card-confirmed'));
+      expect(queryByText('Sydney Symphony Orchestra')).toBeNull();
+      expect(queryByText('Tech Summit Keynote')).toBeNull();
+      expect(getByText('Neon Lights Festival')).toBeTruthy();
+
+      // Filter back to All
+      fireEvent.press(getByTestId('metric-card-all'));
+      expect(getByText('Sydney Symphony Orchestra')).toBeTruthy();
+      expect(getByText('Tech Summit Keynote')).toBeTruthy();
+      expect(getByText('Neon Lights Festival')).toBeTruthy();
+    });
+
+    it('filters events in real-time using search bar and clears query', () => {
+      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
+        onData(mockEventsList);
+        return jest.fn();
+      });
+
+      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const { getByTestId, queryByText, getByText } = render(<EventsFeedScreen />);
+
+      const searchInput = getByTestId('events-feed-search-input');
+
+      // Search by venue "ICC"
+      fireEvent.changeText(searchInput, 'ICC');
+      expect(getByText('Tech Summit Keynote')).toBeTruthy();
+      expect(queryByText('Sydney Symphony Orchestra')).toBeNull();
+
+      // Search by event number "#2003"
+      fireEvent.changeText(searchInput, '2003');
+      expect(getByText('Neon Lights Festival')).toBeTruthy();
+      expect(queryByText('Tech Summit Keynote')).toBeNull();
+
+      // Search by notes "fiber"
+      fireEvent.changeText(searchInput, 'fiber');
+      expect(getByText('Tech Summit Keynote')).toBeTruthy();
+
+      // Clear search
+      fireEvent.press(getByTestId('events-feed-search-clear'));
+      expect(getByText('Sydney Symphony Orchestra')).toBeTruthy();
+      expect(getByText('Tech Summit Keynote')).toBeTruthy();
+    });
+
+    it('renders EmptyState when no events match and resets filters on action button', () => {
+      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
+        onData(mockEventsList);
+        return jest.fn();
+      });
+
+      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const { getByTestId, getByText } = render(<EventsFeedScreen />);
+
+      const searchInput = getByTestId('events-feed-search-input');
+
+      fireEvent.changeText(searchInput, 'nonexistent query 12345');
+
+      expect(getByTestId('empty-events-state')).toBeTruthy();
+      expect(getByText('No Events Found')).toBeTruthy();
+
+      // Press Reset Filters button
+      fireEvent.press(getByTestId('reset-filters-btn'));
+
+      expect(getByText('Sydney Symphony Orchestra')).toBeTruthy();
+    });
+
+    it('navigates to Event Details screen when pressing an event card', () => {
+      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
+        onData(mockEventsList);
+        return jest.fn();
+      });
+
+      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const { getByTestId } = render(<EventsFeedScreen />);
+
+      fireEvent.press(getByTestId('feed-event-ev-1'));
+
+      expect(mockRouterPush).toHaveBeenCalledWith('/events/ev-1');
+    });
+
+    it('handles rapid typing and metric card switching under high event volume', () => {
+      const largeEventList: Event[] = Array.from({ length: 200 }, (_, i) => ({
+        ...sampleEvent,
+        id: `ev-stress-${i}`,
+        eventName: `Production Festival Show ${i}`,
+        eventNumber: 3000 + i,
+        eventStatusId: (['Inquiry', 'Pending', 'Confirmed', 'Completed'] as const)[i % 4],
+        clientId: `Client Partner ${i % 10}`,
+        venueId: `Venue Location ${i % 5}`,
+        notes: `Production stage rig notes ${i}`,
+        startTime: new Date(Date.now() + ((i % 25) + 1) * 24 * 60 * 60 * 1000),
+        finishTime: new Date(Date.now() + ((i % 25) + 2) * 24 * 60 * 60 * 1000),
+      }));
+
+      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
+        onData(largeEventList);
+        return jest.fn();
+      });
+
+      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const { getByTestId, queryByText, getByText } = render(<EventsFeedScreen />);
+
+      const searchInput = getByTestId('events-feed-search-input');
+
+      // Rapidly simulate keystrokes
+      const searchTerms = ['P', 'Pr', 'Pro', 'Prod', 'Production Festival Show 15'];
+      for (const term of searchTerms) {
+        fireEvent.changeText(searchInput, term);
+      }
+
+      expect(getByText('Production Festival Show 15')).toBeTruthy();
+      expect(queryByText('Production Festival Show 16')).toBeNull();
+
+      // Switch to Confirmed tab rapidly
+      fireEvent.press(getByTestId('metric-card-confirmed'));
+
+      // Show 14 is Confirmed (14 % 4 === 2)
+      fireEvent.changeText(searchInput, 'Production Festival Show 14');
+      expect(getByText('Production Festival Show 14')).toBeTruthy();
+
+      // Clear search
+      fireEvent.press(getByTestId('events-feed-search-clear'));
+
+      // Switch back to All
+      fireEvent.press(getByTestId('metric-card-all'));
+
+      expect(getByText('Production Festival Show 0')).toBeTruthy();
+    });
+
+    it('navigates to Pull Sheet and Continuous Scanner from event card buttons', () => {
+      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
+        onData(mockEventsList);
+        return jest.fn();
+      });
+
+      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const { getByTestId } = render(<EventsFeedScreen />);
+
+      fireEvent.press(getByTestId('card-pullsheet-btn-ev-1'));
+      expect(mockRouterPush).toHaveBeenCalledWith('/pullsheet/ev-1');
+
+      fireEvent.press(getByTestId('card-scan-btn-ev-1'));
+      expect(mockRouterPush).toHaveBeenCalledWith({
+        pathname: '/(tabs)/scanner',
+        params: { eventId: 'ev-1' },
+      });
+    });
+
+    it('triggers refresh when pull-to-refresh is activated on FlatList', async () => {
+      const mockFetch = jest.spyOn(eventService, 'fetchTenantEvents').mockResolvedValue(mockEventsList);
+      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
+        onData(mockEventsList);
+        return jest.fn();
+      });
+
+      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const { getByTestId } = render(<EventsFeedScreen />);
+
+      const flatList = getByTestId('events-flatlist');
+      const { refreshControl } = flatList.props;
+
+      expect(refreshControl).toBeDefined();
+      await act(async () => {
+        await refreshControl.props.onRefresh();
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith('tenant-abc');
+    });
+  });
 });

@@ -21,6 +21,7 @@ import {
   deleteRepairAttachment,
   uploadRepairDamagePhoto,
   fetchTenantSuppliers,
+  fetchTenantOwners,
   fetchTenantCrewMembers,
 } from '@/services/repair-service';
 import {
@@ -568,6 +569,35 @@ export function useTenantSuppliers() {
 }
 
 /**
+ * Hook to fetch all owner contacts (clients and venues) belonging to the active tenant.
+ */
+export function useTenantOwners() {
+  const { user, tenant } = useAuth();
+  const tenantId = user?.tenantId || tenant?.tenantId || '';
+  const [owners, setOwners] = useState<Array<{ id: string; name: string; type?: string; email?: string }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchOwners = useCallback(async () => {
+    if (!tenantId) return;
+    setLoading(true);
+    try {
+      const data = await fetchTenantOwners(tenantId);
+      setOwners(data);
+    } catch (err) {
+      console.warn('[useTenantOwners] error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [tenantId]);
+
+  useEffect(() => {
+    fetchOwners();
+  }, [fetchOwners]);
+
+  return { owners, loading, refresh: fetchOwners };
+}
+
+/**
  * Hook to fetch all active crew members belonging to the active tenant.
  */
 export function useTenantCrew() {
@@ -595,4 +625,5 @@ export function useTenantCrew() {
 
   return { crew, loading, refresh: fetchCrew };
 }
+
 

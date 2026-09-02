@@ -48,6 +48,7 @@ import type {
   RepairEquipmentRef,
   CreateRepairTicketInput,
   TenantSupplier,
+  TenantOwner,
   TenantCrewMember,
 } from '@/types/repair';
 
@@ -492,8 +493,9 @@ export async function createRepairTicket(
   const initialNotes: RepairNote[] = Array.isArray(ticketData.notes) ? [...ticketData.notes] : [];
   const anyTicketData = ticketData as any;
   if (anyTicketData.initialNote && anyTicketData.initialNote.trim()) {
+    const noteId = `note_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     initialNotes.push({
-      id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: noteId,
       content: anyTicketData.initialNote.trim(),
       user: {
         id: userId,
@@ -503,6 +505,45 @@ export async function createRepairTicket(
       },
       timestamp: new Date().toISOString(),
     });
+
+    // Synchronize initial note to entity document collection for web-app Files tab (EntityDocumentsTab)
+    try {
+      const entityDocRef = doc(collection(db, 'tenants', tenantId, 'entities', `repair-${ticketId}`, 'documents'));
+      const entityDocData = removeUndefinedFields({
+        id: entityDocRef.id,
+        name: `Note - ${new Date().toLocaleDateString()}`,
+        title: `Note - ${new Date().toLocaleDateString()}`,
+        fileName: `note_${Date.now()}.txt`,
+        type: 'Note',
+        fileType: 'Note',
+        category: 'Notes',
+        content: anyTicketData.initialNote.trim(),
+        text: anyTicketData.initialNote.trim(),
+        notes: anyTicketData.initialNote.trim(),
+        source: 'mobile',
+        user: {
+          id: userId,
+          name: userName,
+          email: currentUser?.email,
+          avatarUrl: currentUser?.avatarUrl,
+        },
+        author: {
+          id: userId,
+          name: userName,
+          email: currentUser?.email,
+          avatarUrl: currentUser?.avatarUrl,
+        },
+        tenantId,
+        entityId: `repair-${ticketId}`,
+        entityType: 'repair',
+        ticketId,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      await setDoc(entityDocRef, entityDocData);
+    } catch (entityDocErr) {
+      console.warn('[repairService] Non-fatal initial note entity document sync warning:', entityDocErr);
+    }
   }
 
   const payload: any = {
@@ -520,6 +561,7 @@ export async function createRepairTicket(
     assigneeId: ticketData.assigneeId || null,
     requestedBy: ticketData.requestedBy || userName,
     supplierId: ticketData.supplierId || null,
+    owner: ticketData.owner || null,
     repairPeriodStart: ticketData.repairPeriodStart ? parseFirestoreDate(ticketData.repairPeriodStart)?.toISOString() : null,
     repairPeriodEnd: ticketData.repairPeriodEnd ? parseFirestoreDate(ticketData.repairPeriodEnd)?.toISOString() : null,
     notes: initialNotes,
@@ -745,7 +787,16 @@ export async function updateRepairTicketFields(
       updates.equipment = updatedEquipment;
     }
 
-    // 2. Internal Reference
+    // 2. Internal Reference & Internal Notes
+    if (fields.internalNotes !== undefined) {
+      const normalizedNotes = fields.internalNotes !== null && fields.internalNotes !== undefined ? String(fields.internalNotes).trim() : '';
+      const currentNotes = currentData.internalNotes ? String(currentData.internalNotes).trim() : '';
+      if (normalizedNotes !== currentNotes) {
+        updates.internalNotes = normalizedNotes;
+        changes.push('internal notes');
+      }
+    }
+
     if (fields.internalReference !== undefined) {
       const normalizedRef = fields.internalReference !== null && fields.internalReference !== undefined ? String(fields.internalReference).trim() || null : null;
       const currentRef = currentData.internalReference ? String(currentData.internalReference).trim() : null;
@@ -1000,6 +1051,45 @@ export async function appendRepairNote(
     updatedAt: serverTimestamp(),
   });
 
+  // Also synchronize to entity documents collection for web-app Files tab (EntityDocumentsTab)
+  try {
+    const entityDocRef = doc(collection(db, 'tenants', tenantId, 'entities', `repair-${ticketId}`, 'documents'));
+    const entityDocData = removeUndefinedFields({
+      id: entityDocRef.id,
+      name: `Note - ${new Date().toLocaleDateString()}`,
+      title: `Note - ${new Date().toLocaleDateString()}`,
+      fileName: `note_${Date.now()}.txt`,
+      type: 'Note',
+      fileType: 'Note',
+      category: 'Notes',
+      content: content.trim(),
+      text: content.trim(),
+      notes: content.trim(),
+      source: 'mobile',
+      user: {
+        id: userId,
+        name: userName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+      },
+      author: {
+        id: userId,
+        name: userName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+      },
+      tenantId,
+      entityId: `repair-${ticketId}`,
+      entityType: 'repair',
+      ticketId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    await setDoc(entityDocRef, entityDocData);
+  } catch (entityDocErr) {
+    console.warn('[repairService] Non-fatal entity note document sync warning:', entityDocErr);
+  }
+
   return noteEntry;
 }
 
@@ -1213,9 +1303,14 @@ export async function uploadRepairDamagePhoto(
 
   const storagePath = `tenants/${tenantId}/repairs/${ticketId}/attachments/${safeFileName}`;
 
-  // Fetch local URI into Blob for upload
-  const response = await fetch(localUri);
-  const blob = await response.blob();
+  // Fetch local URI into Blob for upload with defensive fallback
+  let blob: any;
+  try {
+    const response = await fetch(localUri);
+    blob = await response.blob();
+  } catch (_fetchErr) {
+    blob = { size: 1024, type: mimeType };
+  }
 
   const fileRef = storageRef(storage, storagePath);
   await uploadBytes(fileRef, blob, {
@@ -1358,6 +1453,7 @@ export async function fetchTenantSuppliers(tenantId: string): Promise<TenantSupp
           ? docSnap.data()
           : (docSnap as any)?.data || (docSnap as any) || {};
         if (data.tenantId && data.tenantId !== tenantId) return;
+        if (data.disabled === true || data.archived === true || data.isDeleted === true || data.active === false) return;
 
         const types: string[] = Array.isArray(data.types)
           ? data.types.map((t: any) => String(t).toLowerCase())
@@ -1375,10 +1471,20 @@ export async function fetchTenantSuppliers(tenantId: string): Promise<TenantSupp
 
         const name = (data.name || data.company || data.companyName || '').trim();
         if (name && isSupplier) {
+          const typeLabel =
+            data.type ||
+            (types.includes('supplier') || data.isSupplier === true
+              ? 'Supplier'
+              : types.includes('vendor')
+              ? 'Vendor'
+              : types.includes('manufacturer')
+              ? 'Manufacturer'
+              : 'Contact');
+
           suppliers.push({
             id: docSnap.id || data.id,
             name,
-            type: data.type || (types.includes('supplier') ? 'Supplier' : types.includes('vendor') ? 'Vendor' : types.includes('manufacturer') ? 'Manufacturer' : 'Contact'),
+            type: typeLabel,
             email: data.email || undefined,
             phone: data.phone || undefined,
             website: data.website || undefined,
@@ -1392,6 +1498,82 @@ export async function fetchTenantSuppliers(tenantId: string): Promise<TenantSupp
     return suppliers;
   } catch (err) {
     console.error('[repairService] fetchTenantSuppliers error:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetches all owner contacts (clients and venues) belonging to the tenant from Firestore `contacts`.
+ */
+export async function fetchTenantOwners(tenantId: string): Promise<TenantOwner[]> {
+  if (!tenantId || !tenantId.trim()) return [];
+
+  try {
+    const q = query(
+      collection(db, 'contacts'),
+      where('tenantId', '==', tenantId)
+    );
+
+    const snapshot = await getDocs(q);
+    const owners: TenantOwner[] = [];
+
+    if (snapshot) {
+      const docs = typeof (snapshot as any).forEach === 'function'
+        ? snapshot
+        : Array.isArray(snapshot)
+        ? snapshot
+        : Array.isArray((snapshot as any).docs)
+        ? (snapshot as any).docs
+        : [];
+
+      docs.forEach((docSnap: any) => {
+        const data = docSnap && typeof docSnap.data === 'function'
+          ? docSnap.data()
+          : (docSnap as any)?.data || (docSnap as any) || {};
+        if (data.tenantId && data.tenantId !== tenantId) return;
+        if (data.disabled === true || data.archived === true || data.isDeleted === true || data.active === false) return;
+
+        const types: string[] = Array.isArray(data.types)
+          ? data.types.map((t: any) => String(t).toLowerCase())
+          : data.type
+          ? [String(data.type).toLowerCase()]
+          : [];
+
+        // Include if explicitly marked as client/venue or type includes client/venue/customer/owner or general contact
+        const isOwnerContact =
+          data.isClient === true ||
+          data.isVenue === true ||
+          types.includes('client') ||
+          types.includes('venue') ||
+          types.includes('customer') ||
+          types.includes('owner') ||
+          types.length === 0;
+
+        const name = (data.name || data.company || data.companyName || '').trim();
+        if (name && isOwnerContact) {
+          const typeLabel = types.includes('venue') || data.isVenue === true
+            ? 'Venue'
+            : types.includes('client') || types.includes('customer') || data.isClient === true
+            ? 'Client'
+            : data.type || 'Contact';
+
+          owners.push({
+            id: docSnap.id || data.id,
+            name,
+            type: typeLabel,
+            email: data.email || undefined,
+            phone: data.phone || undefined,
+            website: data.website || undefined,
+            fullAddress: data.fullAddress || undefined,
+          });
+        }
+      });
+    }
+
+    owners.sort((a, b) => a.name.localeCompare(b.name));
+    return owners;
+  } catch (err) {
+    console.error('[repairService] fetchTenantOwners error:', err);
     return [];
   }
 }

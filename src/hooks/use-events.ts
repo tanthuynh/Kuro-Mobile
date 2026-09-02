@@ -14,12 +14,28 @@ import {
   fetchSingleEvent,
 } from '@/services/event-service';
 import { categorizeEvents } from '@/lib/categorization';
+import { filterEvents, computeEventMetrics, type EventMetrics } from '@/lib/events-engine';
 import type { Event, CategorizedEvents } from '@/types/events';
 
 export type EventTabType = 'today' | 'in_progress' | 'upcoming' | 'all';
 
+export interface EventFeedMetrics extends EventMetrics {
+  totalActive: number;
+  todayCount: number;
+  inProgressCount: number;
+  upcomingCount: number;
+  completedCount: number;
+}
+
+export interface UseEventsOptions {
+  initialOffset?: number;
+  initialStatusFilter?: string;
+  initialSearchQuery?: string;
+}
+
 export interface UseEventsResult {
   events: Event[];
+  filteredEvents: Event[];
   categorized: CategorizedEvents;
   displayedEvents: Event[];
   selectedTab: EventTabType;
@@ -27,30 +43,34 @@ export interface UseEventsResult {
   targetDateOffset: number;
   setTargetDateOffset: (offset: number | ((prev: number) => number)) => void;
   resetDateOffset: () => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
-  metrics: {
-    totalActive: number;
-    todayCount: number;
-    inProgressCount: number;
-    upcomingCount: number;
-    completedCount: number;
-  };
+  metrics: EventFeedMetrics;
 }
 
 /**
  * Hook for subscribing to all active events for the current tenant.
  */
-export function useEvents(initialOffset: number = 0): UseEventsResult {
+export function useEvents(optionsOrOffset: number | UseEventsOptions = 0): UseEventsResult {
   const { user, tenant } = useAuth();
   const tenantId = tenant?.tenantId || user?.tenantId || '';
+
+  const initialOffset = typeof optionsOrOffset === 'number' ? optionsOrOffset : optionsOrOffset?.initialOffset ?? 0;
+  const initialStatus = typeof optionsOrOffset === 'object' ? optionsOrOffset?.initialStatusFilter ?? 'All' : 'All';
+  const initialSearch = typeof optionsOrOffset === 'object' ? optionsOrOffset?.initialSearchQuery ?? '' : '';
 
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [targetDateOffset, setTargetDateOffset] = useState<number>(initialOffset);
   const [selectedTab, setSelectedTab] = useState<EventTabType>('today');
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
+  const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
 
   useEffect(() => {
     if (!tenantId) {
@@ -99,12 +119,12 @@ export function useEvents(initialOffset: number = 0): UseEventsResult {
     }
   }, [tenantId]);
 
-  // Categorize events based on targetDateOffset
+  // Categorize events based on targetDateOffset (legacy support)
   const categorized = useMemo<CategorizedEvents>(() => {
     return categorizeEvents(events, { targetDateOffset });
   }, [events, targetDateOffset]);
 
-  // Filter events based on selected tab
+  // Filter events based on selected tab (legacy support)
   const displayedEvents = useMemo<Event[]>(() => {
     switch (selectedTab) {
       case 'today':
@@ -120,11 +140,22 @@ export function useEvents(initialOffset: number = 0): UseEventsResult {
     }
   }, [selectedTab, categorized, events]);
 
-  const metrics = useMemo(() => {
+  // Filter events using 30-day rolling window, status filter, and search query
+  const filteredEvents = useMemo<Event[]>(() => {
+    return filterEvents(events, {
+      status: statusFilter,
+      search: searchQuery,
+      windowDays: 30,
+    });
+  }, [events, statusFilter, searchQuery]);
+
+  const metrics = useMemo<EventFeedMetrics>(() => {
+    const domainMetrics = computeEventMetrics(events, { windowDays: 30 });
     const activeEvents = events.filter(
       (e) => !e.archived && e.eventStatusId !== 'Completed' && e.eventStatusId !== 'Cancelled'
     );
     return {
+      ...domainMetrics,
       totalActive: activeEvents.length,
       todayCount: categorized.todayJobs.length,
       inProgressCount: categorized.inProgress.length,
@@ -135,6 +166,7 @@ export function useEvents(initialOffset: number = 0): UseEventsResult {
 
   return {
     events,
+    filteredEvents,
     categorized,
     displayedEvents,
     selectedTab,
@@ -142,6 +174,10 @@ export function useEvents(initialOffset: number = 0): UseEventsResult {
     targetDateOffset,
     setTargetDateOffset,
     resetDateOffset,
+    statusFilter,
+    setStatusFilter,
+    searchQuery,
+    setSearchQuery,
     loading,
     error,
     refresh,

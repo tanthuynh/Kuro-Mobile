@@ -1,8 +1,12 @@
 /**
  * src/components/logistics/LogisticsJobCard.tsx
  * High-Contrast Logistics Job Feed Item Card in Kuro Mobile.
- * Displays event name, status badge, vehicle name/rego, driver name,
- * schedule times, destination count, location, and active tracking indicator.
+ * Clean 2-row layout matching Kuro Mobile Repairs tab standard.
+ *
+ * Top row: Left [Job/Event ID] + Name/Title; Right: tinted status badge pill with 1px border.
+ * Second row: Left meta (Location with MapPin size 14, Date/Schedule with Calendar size 14,
+ * Stops count with Navigation size 14, Live GPS indicator); Right driver name with UserCheck size 14,
+ * Vehicle name/rego with Truck size 14.
  */
 
 import React from 'react';
@@ -11,26 +15,28 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   Truck,
   MapPin,
   Calendar,
-  Clock,
-  User,
   Navigation,
-  ChevronRight,
   Radio,
+  UserCheck,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { parseFirestoreDate, formatStageTime, formatEventDateRange } from '@/lib/date-utils';
-import { isJobActive, isJobCompleted, isJobScheduled } from '@/lib/logistics-engine';
-import type { LogisticsEntry, LogisticsStatus } from '@/types/logistics';
+import {
+  isJobActive,
+  isJobCompleted,
+  isJobPending,
+  isJobPlanned,
+  isJobScheduled,
+} from '@/lib/logistics-engine';
+import type { LogisticsEntry } from '@/types/logistics';
 
 export interface LogisticsJobCardProps {
   job: LogisticsEntry;
@@ -43,7 +49,7 @@ export function LogisticsJobCard({
   onPress,
   testID = `logistics-job-card-${job.id}`,
 }: LogisticsJobCardProps) {
-  const { colors, typography, spacing, layout } = useTheme();
+  const { colors, typography, isDark } = useTheme();
   const router = useRouter();
 
   const handlePress = () => {
@@ -54,36 +60,38 @@ export function LogisticsJobCard({
     }
   };
 
-  const getStatusBadgeVariant = (status?: LogisticsStatus): BadgeVariant => {
-    if (!status) return 'secondary';
+  const getStatusColor = (status?: string): string => {
+    if (!status) return colors.mutedForeground;
     const s = status.trim().toLowerCase();
-
-    if (isJobActive(status)) {
-      return 'brand';
-    }
-    if (isJobCompleted(status)) {
-      return 'success';
-    }
-    if (isJobScheduled(status)) {
-      return 'warning';
-    }
-    if (s === 'cancelled' || s === 'canceled') {
-      return 'destructive';
-    }
-    return 'secondary';
+    if (isJobPending(status)) return '#F59E0B';
+    if (isJobPlanned(status)) return '#3B82F6';
+    if (isJobActive(status)) return '#8B5CF6';
+    if (isJobCompleted(status)) return '#10B981';
+    if (s === 'cancelled' || s === 'canceled') return '#EF4444';
+    return colors.mutedForeground;
   };
+
+  const statusColor = getStatusColor(job.status);
+  const statusBg = isDark ? `${statusColor}22` : `${statusColor}15`;
+
+  const jobNumDisplay =
+    job.eventNumber !== undefined && job.eventNumber !== null
+      ? `[#${job.eventNumber}]`
+      : job.id
+      ? `[#${job.id.substring(0, 6).toUpperCase()}]`
+      : '[JOB]';
+
+  const titleDisplay = job.eventName || job.location || `Job #${job.id.substring(0, 7).toUpperCase()}`;
 
   const startDate = parseFirestoreDate(job.start);
   const endDate = parseFirestoreDate(job.end);
   const dateRangeStr = formatEventDateRange(startDate, endDate);
   const startTimeStr = startDate ? formatStageTime(startDate, 'timeOnly') : '';
   const endTimeStr = endDate ? formatStageTime(endDate, 'timeOnly') : '';
-  const timeWindowStr = startTimeStr && endTimeStr ? `${startTimeStr} - ${endTimeStr}` : startTimeStr || 'Not scheduled';
+  const timeWindowStr = startTimeStr && endTimeStr ? `${startTimeStr} - ${endTimeStr}` : startTimeStr;
+  const scheduleDisplay = dateRangeStr || timeWindowStr || '';
 
   const destinationCount = Array.isArray(job.destinations) ? job.destinations.length : 0;
-  const eventNumDisplay = job.eventNumber ? `#${job.eventNumber}` : null;
-  const titleDisplay = job.eventName || job.location || `Job #${job.id.substring(0, 7).toUpperCase()}`;
-
   const isTracking = Boolean(job.isTrackingActive);
 
   return (
@@ -96,110 +104,145 @@ export function LogisticsJobCard({
           pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
         ]}
         accessibilityRole="button"
-        accessibilityLabel={`Logistics job ${titleDisplay}, status ${job.status}`}
+        accessibilityLabel={`Logistics job ${jobNumDisplay} ${titleDisplay}, status ${job.status}`}
       >
         <CardContent style={styles.content}>
-          {/* Top Row: Event Number & Status Badge / Tracking indicator */}
+          {/* Top Row: [Job/Event ID] + Name/Title (Left) & Tinted Status Badge (Right) */}
           <View style={styles.topRow}>
-            <View style={styles.topLeft}>
-              <Truck size={15} color={colors.primary} />
-              {eventNumDisplay ? (
-                <Text style={[styles.eventNumText, { color: colors.primary, fontSize: typography.fontSize.xs }]}>
-                  {eventNumDisplay}
+            <View style={styles.jobTitleContainer}>
+              <Text style={[styles.jobIdText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                {jobNumDisplay}
+              </Text>
+              <Text
+                style={[
+                  styles.jobName,
+                  { color: colors.foreground, fontSize: typography.fontSize.base, flexShrink: 1, marginLeft: 6 },
+                ]}
+                numberOfLines={1}
+              >
+                {titleDisplay}
+              </Text>
+            </View>
+
+            <View style={styles.statusContainer}>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {
+                    backgroundColor: statusBg,
+                    borderColor: statusColor,
+                  },
+                ]}
+                testID={`job-status-badge-${job.id}`}
+              >
+                <Text
+                  style={[
+                    styles.statusBadgeText,
+                    {
+                      color: statusColor,
+                      fontSize: typography.fontSize.sm,
+                    },
+                  ]}
+                >
+                  {job.status}
                 </Text>
-              ) : (
-                <Text style={[styles.eventNumText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                  #{job.id.substring(0, 6).toUpperCase()}
-                </Text>
-              )}
+              </View>
+            </View>
+          </View>
+
+          {/* Second Row: Left Meta (Location, Date, Stops, Live GPS) | Right Meta (Driver, Vehicle) */}
+          <View style={styles.secondRow}>
+            <View style={styles.leftMetaGroup}>
+              {job.location ? (
+                <View style={styles.metaItem}>
+                  <MapPin size={14} color={colors.mutedForeground} />
+                  <Text
+                    style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
+                    numberOfLines={1}
+                  >
+                    {job.location}
+                  </Text>
+                </View>
+              ) : null}
+
+              {job.location && scheduleDisplay ? (
+                <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+              ) : null}
+
+              {scheduleDisplay ? (
+                <View style={styles.metaItem}>
+                  <Calendar size={14} color={colors.mutedForeground} />
+                  <Text
+                    style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
+                    numberOfLines={1}
+                  >
+                    {scheduleDisplay}
+                  </Text>
+                </View>
+              ) : null}
+
+              {(job.location || scheduleDisplay) && destinationCount > 0 ? (
+                <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+              ) : null}
+
+              {destinationCount > 0 ? (
+                <View style={styles.metaItem}>
+                  <Navigation size={14} color={colors.mutedForeground} />
+                  <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                    {destinationCount} {destinationCount === 1 ? 'stop' : 'stops'}
+                  </Text>
+                </View>
+              ) : null}
+
+              {(job.location || scheduleDisplay || destinationCount > 0) && isTracking ? (
+                <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+              ) : null}
 
               {isTracking ? (
                 <View
-                  style={[styles.liveTrackingPill, { backgroundColor: colors.brandGreenScale.green2, borderColor: colors.brandGreenScale.green4 }]}
+                  style={[
+                    styles.liveTrackingPill,
+                    {
+                      backgroundColor: isDark ? 'rgba(34, 197, 94, 0.18)' : 'rgba(34, 197, 94, 0.12)',
+                      borderColor: '#22C55E',
+                    },
+                  ]}
                   testID={`job-live-tracking-pill-${job.id}`}
                 >
-                  <Radio size={11} color={colors.primary} />
-                  <Text style={[styles.liveTrackingText, { color: colors.primary }]}>
+                  <Radio size={11} color="#22C55E" />
+                  <Text style={[styles.liveTrackingText, { color: '#22C55E' }]}>
                     LIVE GPS
                   </Text>
                 </View>
               ) : null}
             </View>
 
-            <Badge variant={getStatusBadgeVariant(job.status)} testID={`job-status-badge-${job.id}`}>
-              {job.status}
-            </Badge>
-          </View>
-
-          {/* Job Title / Event Name */}
-          <View style={styles.titleSection}>
-            <Text
-              style={[styles.jobTitle, { color: colors.foreground }]}
-              numberOfLines={2}
-            >
-              {titleDisplay}
-            </Text>
-          </View>
-
-          {/* Location & Schedule Info */}
-          <View style={styles.metaSection}>
-            {job.location ? (
-              <View style={styles.metaRow}>
-                <MapPin size={13} color={colors.mutedForeground} />
+            <View style={styles.rightMetaGroup}>
+              <View style={styles.personItem}>
+                <UserCheck size={14} color={colors.mutedForeground} />
                 <Text
-                  style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}
-                  numberOfLines={1}
-                >
-                  {job.location}
-                </Text>
-              </View>
-            ) : null}
-
-            <View style={styles.metaRow}>
-              <Calendar size={13} color={colors.mutedForeground} />
-              <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-                {dateRangeStr} {timeWindowStr !== 'Not scheduled' ? `• ${timeWindowStr}` : ''}
-              </Text>
-            </View>
-          </View>
-
-          {/* Bottom Row: Driver, Vehicle, Stops Count & Chevron */}
-          <View style={[styles.bottomRow, { borderTopColor: colors.border }]}>
-            <View style={styles.bottomLeft}>
-              {/* Driver */}
-              <View style={styles.infoChip}>
-                <User size={12} color={colors.mutedForeground} />
-                <Text
-                  style={[styles.infoChipText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}
+                  style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
                   numberOfLines={1}
                 >
                   {job.driverName || 'Unassigned'}
                 </Text>
               </View>
 
-              {/* Vehicle */}
               {job.vehicleId ? (
-                <View style={styles.infoChip}>
-                  <Truck size={12} color={colors.mutedForeground} />
-                  <Text
-                    style={[styles.infoChipText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}
-                    numberOfLines={1}
-                  >
-                    {job.vehicleId}
-                  </Text>
-                </View>
+                <>
+                  <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+                  <View style={styles.personItem}>
+                    <Truck size={14} color={colors.mutedForeground} />
+                    <Text
+                      style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
+                      numberOfLines={1}
+                    >
+                      {job.vehicleId}
+                    </Text>
+                  </View>
+                </>
               ) : null}
-
-              {/* Stops Count */}
-              <View style={[styles.stopsPill, { backgroundColor: colors.muted }]}>
-                <Navigation size={11} color={colors.foreground} />
-                <Text style={[styles.stopsText, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
-                  {destinationCount} {destinationCount === 1 ? 'stop' : 'stops'}
-                </Text>
-              </View>
             </View>
-
-            <ChevronRight size={16} color={colors.mutedForeground} />
           </View>
         </CardContent>
       </Pressable>
@@ -217,7 +260,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   content: {
-    padding: 14,
+    padding: 12,
     gap: 8,
   },
   topRow: {
@@ -225,100 +268,104 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  topLeft: {
+  jobTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    flex: 1,
+    paddingRight: 8,
   },
-  eventNumText: {
+  jobIdText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    lineHeight: 16,
+    lineHeight: 18,
   },
-  liveTrackingPill: {
-    minHeight: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 9999,
-    borderWidth: 1,
-    marginLeft: 4,
-  },
-  liveTrackingText: {
-    fontFamily: 'Calibri',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-    lineHeight: 16,
-  },
-  titleSection: {
-    marginTop: 2,
-  },
-  jobTitle: {
+  jobName: {
     fontFamily: 'Calibri',
     fontSize: 14,
     fontWeight: '700',
     lineHeight: 20,
   },
-  metaSection: {
-    gap: 4,
+  statusContainer: {
+    flexShrink: 0,
   },
-  metaRow: {
-    flexDirection: 'row',
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
     alignItems: 'center',
-    gap: 5,
+    justifyContent: 'center',
   },
-  metaText: {
+  statusBadgeText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    flex: 1,
-    fontWeight: '400',
-    lineHeight: 16,
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 18,
   },
-  bottomRow: {
+  secondRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
-    paddingTop: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
-  bottomLeft: {
+  leftMetaGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-    flex: 1,
+    gap: 6,
+    flexShrink: 1,
   },
-  infoChip: {
+  metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 3,
+    flexShrink: 1,
   },
-  infoChipText: {
+  metaText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
-  stopsPill: {
-    minHeight: 24,
+  separatorDot: {
+    fontFamily: 'Calibri',
+    fontSize: 13,
+  },
+  liveTrackingPill: {
+    minHeight: 22,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
+    gap: 3,
+    paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 9999,
+    borderWidth: 1,
   },
-  stopsText: {
+  liveTrackingText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    fontWeight: '600',
-    lineHeight: 16,
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    lineHeight: 18,
+  },
+  rightMetaGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 6,
+    flexShrink: 1,
+    paddingLeft: 8,
+  },
+  personItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    flexShrink: 1,
+  },
+  personText: {
+    fontFamily: 'Calibri',
+    fontSize: 13,
+    fontWeight: '500',
+    lineHeight: 18,
   },
 });

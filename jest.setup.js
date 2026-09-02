@@ -140,6 +140,23 @@ jest.mock('expo-camera', () => {
   };
 });
 
+// Mock expo-image-picker
+jest.mock('expo-image-picker', () => ({
+  launchCameraAsync: jest.fn().mockResolvedValue({ canceled: true, assets: [] }),
+  launchImageLibraryAsync: jest.fn().mockResolvedValue({ canceled: true, assets: [] }),
+  requestCameraPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted', granted: true }),
+  requestMediaLibraryPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted', granted: true }),
+  getCameraPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted', granted: true }),
+  getMediaLibraryPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted', granted: true }),
+  useCameraPermissions: () => [{ granted: true, canAskAgain: true }, jest.fn().mockResolvedValue({ granted: true })],
+  useMediaLibraryPermissions: () => [{ granted: true, canAskAgain: true }, jest.fn().mockResolvedValue({ granted: true })],
+  MediaTypeOptions: {
+    All: 'All',
+    Videos: 'Videos',
+    Images: 'Images',
+  },
+}), { virtual: true });
+
 // Mock expo-haptics
 jest.mock('expo-haptics', () => ({
   notificationAsync: jest.fn().mockResolvedValue(undefined),
@@ -302,6 +319,98 @@ jest.mock('expo-linking', () => {
     openSettings: jest.fn().mockResolvedValue(undefined),
   };
 });
+
+// Mock expo-image-picker
+jest.mock('expo-image-picker', () => ({
+  requestCameraPermissionsAsync: jest.fn().mockResolvedValue({
+    status: 'granted',
+    granted: true,
+    canAskAgain: true,
+    expires: 'never',
+  }),
+  requestMediaLibraryPermissionsAsync: jest.fn().mockResolvedValue({
+    status: 'granted',
+    granted: true,
+    canAskAgain: true,
+    expires: 'never',
+  }),
+  getCameraPermissionsAsync: jest.fn().mockResolvedValue({
+    status: 'granted',
+    granted: true,
+    canAskAgain: true,
+    expires: 'never',
+  }),
+  getMediaLibraryPermissionsAsync: jest.fn().mockResolvedValue({
+    status: 'granted',
+    granted: true,
+    canAskAgain: true,
+    expires: 'never',
+  }),
+  launchCameraAsync: jest.fn().mockResolvedValue({
+    canceled: false,
+    assets: [
+      {
+        uri: 'file:///data/user/0/host.exp.exponent/cache/ExperienceData/camera.jpg',
+        width: 1080,
+        height: 1920,
+        type: 'image',
+        fileName: 'camera_capture.jpg',
+      },
+    ],
+  }),
+  launchImageLibraryAsync: jest.fn().mockResolvedValue({
+    canceled: false,
+    assets: [
+      {
+        uri: 'file:///data/user/0/host.exp.exponent/cache/ExperienceData/gallery.jpg',
+        width: 1080,
+        height: 1920,
+        type: 'image',
+        fileName: 'gallery_photo.jpg',
+      },
+    ],
+  }),
+  MediaTypeOptions: {
+    All: 'All',
+    Videos: 'Videos',
+    Images: 'Images',
+  },
+}));
+
+// Mock global fetch for local image URI blobs
+if (typeof global.fetch === 'undefined' || !jest.isMockFunction(global.fetch)) {
+  const originalFetch = global.fetch;
+  global.fetch = jest.fn((input, init) => {
+    if (
+      typeof input === 'string' &&
+      (input.startsWith('file://') ||
+        input.startsWith('content://') ||
+        input.startsWith('blob:') ||
+        input.startsWith('http://') ||
+        input.startsWith('https://'))
+    ) {
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        blob: () => Promise.resolve({ size: 1024, type: 'image/jpeg' }),
+        json: () => Promise.resolve({}),
+        text: () => Promise.resolve(''),
+      });
+    }
+    if (originalFetch) {
+      return originalFetch(input, init);
+    }
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      blob: () => Promise.resolve({ size: 1024, type: 'image/jpeg' }),
+      json: () => Promise.resolve({}),
+      text: () => Promise.resolve(''),
+    });
+  });
+}
+
+
 
 
 

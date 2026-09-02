@@ -55,54 +55,54 @@ export const Text = forwardRef<RNText, TextProps>(
           };
         case 'h2': // standard headings (e.g. sectionTitle)
           return {
-            fontSize: typography.fontSize.md, // 16
-            lineHeight: typography.lineHeight.md,
+            fontSize: typography.fontSize.lg, // 18
+            lineHeight: typography.lineHeight.lg, // 24
             fontWeight: typography.fontWeight.bold,
             color: colors.foreground,
           };
         case 'h3': // e.g. modalTitle
           return {
-            fontSize: typography.fontSize.base, // 14
-            lineHeight: typography.lineHeight.base,
+            fontSize: typography.fontSize.md, // 16
+            lineHeight: typography.lineHeight.md, // 22
             fontWeight: typography.fontWeight.bold,
             color: colors.foreground,
           };
         case 'h4':
           return {
             fontSize: typography.fontSize.base, // 14
-            lineHeight: typography.lineHeight.base,
+            lineHeight: typography.lineHeight.base, // 20
             fontWeight: typography.fontWeight.semibold,
             color: colors.foreground,
           };
         case 'subheading': // e.g. sectionSubtitle
           return {
-            fontSize: typography.fontSize.xs, // 12
-            lineHeight: typography.lineHeight.xs,
+            fontSize: typography.fontSize.base, // 14
+            lineHeight: typography.lineHeight.base, // 20
             fontWeight: typography.fontWeight.semibold,
             color: colors.foreground,
           };
         case 'body': // standard normal text (e.g. fieldValue)
           return {
             fontSize: typography.fontSize.base, // 14
-            lineHeight: typography.lineHeight.base,
+            lineHeight: typography.lineHeight.base, // 20
             color: colors.foreground,
           };
         case 'body-sm':
           return {
             fontSize: typography.fontSize.sm, // 13
-            lineHeight: typography.lineHeight.sm,
+            lineHeight: typography.lineHeight.sm, // 18
             color: colors.foreground,
           };
         case 'caption':
           return {
-            fontSize: typography.fontSize.xs, // 12
-            lineHeight: typography.lineHeight.xs,
+            fontSize: typography.fontSize.sm, // 13
+            lineHeight: typography.lineHeight.sm, // 18
             color: colors.mutedForeground,
           };
         case 'label': // standard field labels (e.g. fieldLabel)
           return {
-            fontSize: typography.fontSize.xs, // 12
-            lineHeight: typography.lineHeight.xs,
+            fontSize: typography.fontSize.sm, // 13
+            lineHeight: typography.lineHeight.sm, // 18
             fontWeight: typography.fontWeight.semibold,
             letterSpacing: 0.2,
             textTransform: 'uppercase',
@@ -110,8 +110,8 @@ export const Text = forwardRef<RNText, TextProps>(
           };
         case 'overline': // e.g. sectionHeaderLabel
           return {
-            fontSize: 10,
-            lineHeight: 12,
+            fontSize: typography.fontSize.xs, // 12
+            lineHeight: typography.lineHeight.xs, // 16
             fontWeight: typography.fontWeight.bold,
             letterSpacing: 0.6,
             textTransform: 'uppercase',
@@ -119,8 +119,8 @@ export const Text = forwardRef<RNText, TextProps>(
           };
         case 'muted':
           return {
-            fontSize: typography.fontSize.xs, // 12
-            lineHeight: typography.lineHeight.xs,
+            fontSize: typography.fontSize.sm, // 13
+            lineHeight: typography.lineHeight.sm, // 18
             color: colors.mutedForeground,
           };
         default:

@@ -127,7 +127,7 @@ export default function ScannerScreen() {
               <Text
                 style={[
                   styles.jobBannerSub,
-                  { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                  { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                 ]}
               >
                 {activePullsheet?.items?.length || 0} line items linked to this session
@@ -151,7 +151,7 @@ export default function ScannerScreen() {
                 style={styles.exitJobBtn}
                 testID="exit-job-scanner-mode-btn"
               >
-                <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.xs }}>
+                <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.sm }}>
                   Exit
                 </Text>
               </Pressable>
@@ -198,7 +198,7 @@ export default function ScannerScreen() {
 
           {recentScans.length > 0 ? (
             <Pressable onPress={clearRecentScans} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={[styles.clearBtnText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+              <Text style={[styles.clearBtnText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                 Clear
               </Text>
             </Pressable>
@@ -208,7 +208,7 @@ export default function ScannerScreen() {
         {recentScans.length === 0 ? (
           <View style={[styles.emptyScans, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Barcode size={32} color={colors.mutedForeground} style={{ marginBottom: 6 }} />
-            <Text style={[styles.emptyScansText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+            <Text style={[styles.emptyScansText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
               Scanned assets will appear in this live operational log.
             </Text>
           </View>
@@ -253,19 +253,19 @@ export default function ScannerScreen() {
                     </View>
 
                     <View style={styles.scanItemMetaRow}>
-                      <Text style={[styles.codeBadge, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                      <Text style={[styles.codeBadge, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                         {scan.code}
                       </Text>
                       {scan.location ? (
                         <>
                           <Text style={[styles.metaDot, { color: colors.border }]}>•</Text>
-                          <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                          <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                             {scan.location}
                           </Text>
                         </>
                       ) : null}
                       <Text style={[styles.metaDot, { color: colors.border }]}>•</Text>
-                      <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                      <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                         {scan.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                       </Text>
                     </View>
@@ -299,7 +299,7 @@ export default function ScannerScreen() {
 
             <View style={[styles.specGrid, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <View style={styles.specRow}>
-                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                   Scanned Code
                 </Text>
                 <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
@@ -309,7 +309,7 @@ export default function ScannerScreen() {
 
               {inspectedItem.location ? (
                 <View style={styles.specRow}>
-                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                     Warehouse Location
                   </Text>
                   <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
@@ -319,7 +319,7 @@ export default function ScannerScreen() {
               ) : null}
 
               <View style={styles.specRow}>
-                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
                   Scan Timestamp
                 </Text>
                 <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
@@ -398,8 +398,8 @@ const styles = StyleSheet.create({
   },
   jobBannerSub: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     marginTop: 2,
   },
   jobBannerActions: {
@@ -409,6 +409,8 @@ const styles = StyleSheet.create({
   exitJobBtn: {
     paddingHorizontal: 8,
     paddingVertical: 4,
+    minHeight: 48,
+    justifyContent: 'center',
   },
   manualCard: {
     marginTop: 12,
@@ -416,9 +418,9 @@ const styles = StyleSheet.create({
   },
   manualTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   recentHeaderRow: {
     flexDirection: 'row',
@@ -428,15 +430,15 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   clearBtnText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   emptyScans: {
     borderRadius: 8,
@@ -447,8 +449,8 @@ const styles = StyleSheet.create({
   },
   emptyScansText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     textAlign: 'center',
   },
   scanItemCard: {
@@ -474,17 +476,17 @@ const styles = StyleSheet.create({
   },
   codeBadge: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   metaDot: {
     marginHorizontal: 6,
   },
   metaText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
   },
   modalOverlay: {
     flex: 1,
@@ -496,6 +498,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     borderTopWidth: 1,
     padding: 20,
+    maxHeight: '85%',
   },
   modalHeaderRow: {
     flexDirection: 'row',
@@ -505,9 +508,9 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   modalBody: {},
   detailItemName: {
@@ -535,9 +538,9 @@ const styles = StyleSheet.create({
   },
   specLabel: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   specValue: {
     fontFamily: 'Calibri',

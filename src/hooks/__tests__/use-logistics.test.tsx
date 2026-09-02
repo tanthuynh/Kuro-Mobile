@@ -141,9 +141,13 @@ describe('useLogistics Hook', () => {
     expect(result.current.filteredEntries).toHaveLength(3);
     expect(result.current.metrics).toEqual({
       total: 3,
+      all: 3,
+      pending: 0,
+      planned: 1,
+      inProgress: 1,
+      completed: 1,
       active: 1,
       scheduled: 1,
-      completed: 1,
       inTransit: 1,
     });
   });

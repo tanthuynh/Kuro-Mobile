@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import RepairTicketDetailScreen from './[id]';
+import RepairTicketDetailScreen, { type RepairDetailViewProps } from './[id]';
 
-export default function NewRepairScreen() {
-  return <RepairTicketDetailScreen mode="new" />;
+export default function NewRepairScreen(props: Omit<RepairDetailViewProps, 'mode'> = {}) {
+  return <RepairTicketDetailScreen mode="new" {...props} />;
 }

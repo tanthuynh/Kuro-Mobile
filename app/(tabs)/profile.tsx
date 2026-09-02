@@ -288,7 +288,7 @@ export default function ProfileScreen() {
                 <Text
                   style={[
                     styles.userEmail,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.base },
                   ]}
                 >
                   {user?.email || 'operator@amiastudios.com'}
@@ -298,7 +298,7 @@ export default function ProfileScreen() {
                 <Text
                   style={[
                     styles.userTenant,
-                    { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                    { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
                   ]}
                 >
                   {displayTenantName}
@@ -316,7 +316,7 @@ export default function ProfileScreen() {
                     styles.onlineStatusText,
                     {
                       color: !isManualOffline ? colors.status.online : colors.mutedForeground,
-                      fontSize: typography.fontSize.xs,
+                      fontSize: typography.fontSize.sm,
                     },
                   ]}
                 >
@@ -345,7 +345,7 @@ export default function ProfileScreen() {
             <Text
               style={[
                 styles.sectionTitle,
-                { color: colors.cardForeground, fontSize: typography.fontSize.md },
+                { color: colors.cardForeground, fontSize: typography.fontSize.lg },
               ]}
             >
               App Appearance
@@ -375,7 +375,7 @@ export default function ProfileScreen() {
                     styles.themeBtnTextWide,
                     {
                       color: themeMode === 'dark' ? colors.primaryForeground : colors.foreground,
-                      fontSize: typography.fontSize.sm,
+                      fontSize: typography.fontSize.base,
                     },
                   ]}
                 >
@@ -405,7 +405,7 @@ export default function ProfileScreen() {
                     styles.themeBtnTextWide,
                     {
                       color: themeMode === 'light' ? colors.primaryForeground : colors.foreground,
-                      fontSize: typography.fontSize.sm,
+                      fontSize: typography.fontSize.base,
                     },
                   ]}
                 >
@@ -435,7 +435,7 @@ export default function ProfileScreen() {
                     styles.themeBtnTextWide,
                     {
                       color: themeMode === 'system' ? colors.primaryForeground : colors.foreground,
-                      fontSize: typography.fontSize.sm,
+                      fontSize: typography.fontSize.base,
                     },
                   ]}
                 >
@@ -464,7 +464,7 @@ export default function ProfileScreen() {
           <Text
             style={[
               styles.versionText,
-              { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+              { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
             ]}
           >
             Kuro RMS Mobile • Build 1.0.0 (Release)
@@ -518,32 +518,34 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   presenceRightSlot: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingLeft: 8,
     gap: 4,
+    minHeight: 48,
+    minWidth: 48,
   },
   onlineStatusText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   userEmail: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 14,
+    lineHeight: 20,
     marginTop: 2,
   },
   userTenant: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     marginTop: 2,
     fontWeight: '500',
   },
@@ -555,9 +557,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Calibri',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   themeButtonsGroupWide: {
     flexDirection: 'row',
@@ -578,7 +580,9 @@ const styles = StyleSheet.create({
   },
   themeBtnTextWide: {
     fontFamily: 'Calibri',
+    fontSize: 14,
     fontWeight: '600',
+    lineHeight: 20,
   },
   bottomActionPane: {
     paddingTop: 8,
@@ -589,8 +593,8 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     textAlign: 'center',
   },
 });

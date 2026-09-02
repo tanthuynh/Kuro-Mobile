@@ -87,8 +87,8 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
                   styles.subtitle,
                   {
                     color: colors.mutedForeground,
-                    fontSize: typography.fontSize.xs,
-                    lineHeight: typography.lineHeight.xs,
+                    fontSize: typography.fontSize.sm,
+                    lineHeight: typography.lineHeight.sm,
                     marginTop: 2,
                   },
                 ]}

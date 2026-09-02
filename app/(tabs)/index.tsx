@@ -1,86 +1,69 @@
 /**
  * app/(tabs)/index.tsx
- * Real-Time Jobs & Events Feed / Operational Command Dashboard in Kuro Mobile.
- * Connects directly to live Firestore tenant events with date scrubbing,
- * categorization tabs, operational metrics, and fast navigation to Pull Sheets and Scanner.
+ * Real-Time Production Events Feed in Kuro Mobile.
+ * Features 5 interactive status metric cards, real-time search filtering,
+ * 30-day forward rolling window filtering, FlatList with pull-to-refresh,
+ * and direct navigation to Event Details, Pull Sheets, and continuous barcode scanner.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  RefreshControl,
+  FlatList,
   Pressable,
+  RefreshControl,
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   CalendarDays,
-  Truck,
-  PackageCheck,
-  QrCode,
-  ChevronLeft,
-  ChevronRight,
   Search,
-  RotateCw,
-  PlusCircle,
-  FileSpreadsheet,
-  Layers,
+  X,
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
-import { useAuth } from '@/context/auth-context';
 import { useEvents } from '@/hooks/use-events';
-import { EventFilterTabs } from '@/components/events/event-filter-tabs';
-import { EventCard } from '@/components/events/event-card';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/ui/empty-state';
+import { EventCard } from '@/components/events/event-card';
+import type { Event } from '@/types/events';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { colors, typography, spacing, layout } = useTheme();
-  const { user, tenant } = useAuth();
+  const { colors, typography, spacing, isDark } = useTheme();
   const router = useRouter();
 
   const {
     events,
-    categorized,
-    displayedEvents,
-    selectedTab,
-    setSelectedTab,
-    targetDateOffset,
-    setTargetDateOffset,
-    resetDateOffset,
+    filteredEvents,
     loading,
-    refresh,
     metrics,
-  } = useEvents(0);
+    statusFilter,
+    setStatusFilter,
+    searchQuery,
+    setSearchQuery,
+    refresh,
+  } = useEvents();
 
-  const onRefresh = useCallback(async () => {
-    await refresh();
-  }, [refresh]);
-
-  const getGreeting = (): string => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
+  const handleEventPress = (event: Event) => {
+    router.push(`/events/${event.id}`);
   };
 
-  const getFormattedDate = (offsetDays: number): string => {
-    const d = new Date();
-    d.setDate(d.getDate() + offsetDays);
-    return d.toLocaleDateString('en-AU', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
+  const metricCards: Array<{
+    status: string;
+    label: string;
+    countKey: 'total' | 'inquiry' | 'pending' | 'confirmed' | 'completed';
+    color: string;
+  }> = [
+    { status: 'All', label: 'All', countKey: 'total', color: colors.foreground },
+    { status: 'Inquiry', label: 'Inquiry', countKey: 'inquiry', color: '#3B82F6' },
+    { status: 'Pending', label: 'Pending', countKey: 'pending', color: '#F59E0B' },
+    { status: 'Confirmed', label: 'Confirmed', countKey: 'confirmed', color: '#10B981' },
+    { status: 'Completed', label: 'Completed', countKey: 'completed', color: '#8B5CF6' },
+  ];
 
   return (
     <View
@@ -91,207 +74,143 @@ export default function HomeScreen() {
           paddingTop: insets.top + spacing.sm,
         },
       ]}
+      testID="events-feed-screen"
     >
+      {/* Top Status Metric Cards */}
+      <View style={[styles.metricsContainer, { paddingHorizontal: spacing.base, paddingTop: spacing.xs }]}>
+        <View style={styles.metricsGrid}>
+          {metricCards.map((card) => {
+            const isSelected = statusFilter.toLowerCase() === card.status.toLowerCase();
+            const count = metrics[card.countKey] ?? 0;
 
-      <ScrollView
-        contentContainerStyle={[styles.scrollContent, { padding: spacing.base }]}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        }
-      >
-        {/* Date Scrubber Navigation Bar */}
-        <View style={[styles.dateBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Pressable
-            onPress={() => setTargetDateOffset((prev) => prev - 1)}
-            style={styles.dateNavButton}
-            accessibilityRole="button"
-            accessibilityLabel="Previous day"
-            testID="date-scrubber-prev"
-          >
-            <ChevronLeft size={20} color={colors.foreground} />
-          </Pressable>
-
-          <View style={styles.dateDisplayCenter}>
-            <Text style={[styles.dateText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-              {targetDateOffset === 0 ? 'Today • ' : ''}
-              {getFormattedDate(targetDateOffset)}
-            </Text>
-            {targetDateOffset !== 0 ? (
+            return (
               <Pressable
-                onPress={resetDateOffset}
-                style={styles.todayBadge}
-                testID="date-scrubber-reset"
+                key={card.status}
+                onPress={() => setStatusFilter(card.status)}
+                style={({ pressed }) => [
+                  styles.metricCard,
+                  {
+                    backgroundColor: isSelected
+                      ? isDark
+                        ? 'rgba(59, 130, 246, 0.18)'
+                        : 'rgba(59, 130, 246, 0.12)'
+                      : colors.card,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                    borderWidth: isSelected ? 2 : 1,
+                  },
+                  pressed && { opacity: 0.8 },
+                ]}
+                testID={`metric-card-${card.status.toLowerCase().replace(/\s+/g, '-')}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={`Filter by ${card.label}, ${count} events`}
               >
-                <Text style={{ color: colors.primary, fontSize: typography.fontSize.xs, fontWeight: '600' }}>
-                  Jump to Today
+                <Text
+                  style={[
+                    styles.metricNumber,
+                    {
+                      color: card.color,
+                      fontSize: typography.fontSize.lg,
+                    },
+                  ]}
+                >
+                  {count}
+                </Text>
+                <Text
+                  style={[
+                    styles.metricLabel,
+                    {
+                      color: isSelected ? colors.foreground : colors.mutedForeground,
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: isSelected ? '700' : '600',
+                    },
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
+                >
+                  {card.label}
                 </Text>
               </Pressable>
-            ) : null}
-          </View>
-
-          <Pressable
-            onPress={() => setTargetDateOffset((prev) => prev + 1)}
-            style={styles.dateNavButton}
-            accessibilityRole="button"
-            accessibilityLabel="Next day"
-            testID="date-scrubber-next"
-          >
-            <ChevronRight size={20} color={colors.foreground} />
-          </Pressable>
+            );
+          })}
         </View>
+      </View>
 
-        {/* Operational Metrics 4-Grid */}
-        <View style={styles.metricsGrid}>
-          <View
-            style={[
-              styles.metricCard,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                borderLeftColor: colors.status.events,
-              },
-            ]}
-          >
-            <Text style={[styles.metricCount, { color: colors.status.events, fontSize: typography.fontSize.xl }]}>
-              {metrics.totalActive}
-            </Text>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-              Events
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.metricCard,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                borderLeftColor: colors.status.logistics,
-              },
-            ]}
-          >
-            <Text style={[styles.metricCount, { color: colors.status.logistics, fontSize: typography.fontSize.xl }]}>
-              {metrics.inProgressCount}
-            </Text>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-              In-Progress
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.metricCard,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                borderLeftColor: colors.status.dispatch,
-              },
-            ]}
-          >
-            <Text style={[styles.metricCount, { color: colors.status.dispatch, fontSize: typography.fontSize.xl }]}>
-              {metrics.todayCount}
-            </Text>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-              Pull Sheets
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.metricCard,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                borderLeftColor: colors.primary,
-              },
-            ]}
-          >
-            <Text style={[styles.metricCount, { color: colors.primary, fontSize: typography.fontSize.xl }]}>
-              {metrics.upcomingCount}
-            </Text>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
-              Upcoming
-            </Text>
-          </View>
-        </View>
-
-        {/* Quick Action Shortcuts */}
-        <View style={styles.quickActionsRow}>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<QrCode size={16} color={colors.primaryForeground} />}
-            onPress={() => router.push('/(tabs)/scanner')}
-            style={styles.quickActionButton}
-            testID="dashboard-fast-scanner-btn"
-          >
-            Continuous Scanner
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Search size={16} color={colors.secondaryForeground} />}
-            onPress={() => router.push('/(tabs)/inventory')}
-            style={styles.quickActionButton}
-            testID="dashboard-search-gear-btn"
-          >
-            Equipment Catalog
-          </Button>
-        </View>
-
-        {/* Category Segment Tabs */}
-        <EventFilterTabs
-          selectedTab={selectedTab}
-          onSelectTab={setSelectedTab}
-          counts={{
-            today: metrics.todayCount,
-            inProgress: metrics.inProgressCount,
-            upcoming: metrics.upcomingCount,
-            all: metrics.totalActive,
-          }}
+      {/* Search Input Bar */}
+      <View style={[styles.searchContainer, { paddingHorizontal: spacing.base, paddingTop: spacing.xs }]}>
+        <Input
+          placeholder="Search event name, #, client, venue, notes..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          leftIcon={<Search size={16} color={colors.mutedForeground} />}
+          rightIcon={
+            searchQuery ? (
+              <Pressable onPress={() => setSearchQuery('')} hitSlop={8} testID="events-feed-search-clear">
+                <X size={16} color={colors.mutedForeground} />
+              </Pressable>
+            ) : undefined
+          }
+          testID="events-feed-search-input"
         />
+      </View>
 
-        {/* Section Header */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground, fontSize: typography.fontSize.md }]}>
-            {selectedTab === 'today'
-              ? `Today's Operations (${displayedEvents.length})`
-              : selectedTab === 'in_progress'
-              ? `In-Progress Operations (${displayedEvents.length})`
-              : selectedTab === 'upcoming'
-              ? `Upcoming Operations (${displayedEvents.length})`
-              : `All Active Events (${displayedEvents.length})`}
+      {/* Main Events List */}
+      {loading && events.length === 0 ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.mutedForeground, marginTop: 12 }]}>
+            Loading events...
           </Text>
-          <Pressable onPress={onRefresh} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <RotateCw size={16} color={colors.mutedForeground} />
-          </Pressable>
         </View>
-
-        {/* Live Events Feed List */}
-        {displayedEvents.length === 0 ? (
-          <EmptyState
-            icon={<Layers size={40} color={colors.mutedForeground} />}
-            title="No Events Scheduled"
-            description={
-              selectedTab === 'today'
-                ? `No jobs match the date window for ${getFormattedDate(targetDateOffset)}.`
-                : 'No active production events found in this category.'
-            }
-            actionLabel={targetDateOffset !== 0 ? 'Back to Today' : undefined}
-            onAction={targetDateOffset !== 0 ? resetDateOffset : undefined}
-            testID="dashboard-empty-state"
-          />
-        ) : (
-          displayedEvents.map((event) => (
-            <EventCard key={event.id} event={event} testID={`event-card-item-${event.id}`} />
-          ))
-        )}
-      </ScrollView>
+      ) : (
+        <FlatList
+          data={filteredEvents}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <EventCard
+              event={item}
+              onPress={() => handleEventPress(item)}
+              testID={`feed-event-${item.id}`}
+            />
+          )}
+          contentContainerStyle={[styles.listContent, { padding: spacing.base }]}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={refresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyState
+              icon={<CalendarDays size={40} color={colors.mutedForeground} />}
+              title="No Events Found"
+              description={
+                searchQuery || statusFilter.toLowerCase() !== 'all'
+                  ? 'Try changing your filters or search keywords.'
+                  : 'No upcoming production events scheduled in the next 30 days.'
+              }
+              actionLabel={
+                searchQuery || statusFilter.toLowerCase() !== 'all' ? 'Reset Filters' : undefined
+              }
+              actionVariant="outline"
+              onAction={
+                searchQuery || statusFilter.toLowerCase() !== 'all'
+                  ? () => {
+                      setSearchQuery('');
+                      setStatusFilter('All');
+                    }
+                  : undefined
+              }
+              testID="empty-events-state"
+              actionTestID="reset-filters-btn"
+            />
+          }
+          testID="events-flatlist"
+        />
+      )}
     </View>
   );
 }
@@ -300,97 +219,50 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  dateBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    minHeight: 48,
-    marginBottom: 16,
-  },
-  dateNavButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dateDisplayCenter: {
-    alignItems: 'center',
-  },
-  dateText: {
-    fontFamily: 'Calibri',
-    fontWeight: '600',
-  },
-  todayBadge: {
-    marginTop: 2,
+  metricsContainer: {
+    marginBottom: 6,
   },
   metricsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
-    gap: 8,
+    width: '100%',
+    gap: 4,
   },
   metricCard: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderLeftWidth: 3,
+    paddingVertical: 8,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    minHeight: 48,
   },
-  metricCount: {
+  metricNumber: {
     fontFamily: 'Calibri',
+    fontSize: 20,
     fontWeight: '700',
   },
   metricLabel: {
     fontFamily: 'Calibri',
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 18,
     marginTop: 2,
-    fontWeight: '500',
   },
-  quickActionsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
+  searchContainer: {
+    marginBottom: 6,
   },
-  quickActionButton: {
+  listContent: {
+    paddingBottom: 40,
+  },
+  centerContainer: {
     flex: 1,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontFamily: 'Calibri',
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 22,
-  },
-  emptyContainer: {
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 24,
-    alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 12,
+    alignItems: 'center',
   },
-  emptyTitle: {
+  loadingText: {
     fontFamily: 'Calibri',
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 22,
-  },
-  emptySubtitle: {
-    fontFamily: 'Calibri',
-    fontSize: 12,
-    lineHeight: 16,
-    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 20,
   },
 });

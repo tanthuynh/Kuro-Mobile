@@ -62,37 +62,37 @@ export const PullSheetProgressBar: React.FC<PullSheetProgressBarProps> = ({
       {/* Metric Breakdown Badges */}
       <View style={styles.metricsRow}>
         <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
             Total Lines:
           </Text>
-          <Text style={[styles.metricValue, { color: colors.foreground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metricValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
             {progress.totalLines}
           </Text>
         </View>
 
         <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
             Prepped:
           </Text>
-          <Text style={[styles.metricValue, { color: colors.status.online, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metricValue, { color: colors.status.online, fontSize: typography.fontSize.sm }]}>
             {progress.preppedQuantity} / {progress.totalQuantity}
           </Text>
         </View>
 
         <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
             Pending:
           </Text>
-          <Text style={[styles.metricValue, { color: colors.status.degraded, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metricValue, { color: colors.status.degraded, fontSize: typography.fontSize.sm }]}>
             {progress.pendingQuantity}
           </Text>
         </View>
 
         <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
             Dispatched:
           </Text>
-          <Text style={[styles.metricValue, { color: '#8B5CF6', fontSize: typography.fontSize.xs }]}>
+          <Text style={[styles.metricValue, { color: '#8B5CF6', fontSize: typography.fontSize.sm }]}>
             {progress.dispatchedQuantity}
           </Text>
         </View>
