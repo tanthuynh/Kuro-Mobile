@@ -419,9 +419,10 @@ describe('Adversarial Challenger 2: QuickStatusSelector, Vehicle Resolution & UI
       });
     });
 
-    it('UI-ADV-01: Header displays bracketed title [#888] Grand Finale Fireworks Transport', async () => {
-      const { findByText } = render(<LogisticsJobDetailScreen />);
-      expect(await findByText('[#888] Grand Finale Fireworks Transport')).toBeTruthy();
+    it('UI-ADV-01: Header displays bracketed title [888] Grand Finale Fireworks Transport', async () => {
+      const { findByText, getByText } = render(<LogisticsJobDetailScreen />);
+      expect(await findByText('[888]')).toBeTruthy();
+      expect(getByText('Grand Finale Fireworks Transport')).toBeTruthy();
     });
 
     it('UI-ADV-02: live-gps-tracking-banner is STRICTLY ABSENT from rendered tree in both idle and tracking states', async () => {

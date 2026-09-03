@@ -118,8 +118,9 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
   it('renders bracketed event title, header tracking status badge, stripped job overview, and destinations', async () => {
     const { getByText, findByText, getByTestId, findByTestId, queryByTestId } = render(<LogisticsJobDetailScreen />);
 
-    // ScreenHeader Title formatted with [#eventNumber]
-    expect(await findByText('[#777] Festival Stage 1 Audio Delivery')).toBeTruthy();
+    // ScreenHeader Title formatted with idBadge [eventNumber] like Repairs
+    expect(await findByText('[777]')).toBeTruthy();
+    expect(getByText('Festival Stage 1 Audio Delivery')).toBeTruthy();
 
     // Header Tracking Status Badge (Idle initially)
     expect(getByTestId('header-tracking-status-badge')).toBeTruthy();
@@ -285,65 +286,41 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     );
   });
 
-  it('opens status transition modal and updates job status', async () => {
-    const updateStatusSpy = jest
-      .spyOn(logisticsService, 'updateLogisticsStatus')
-      .mockResolvedValueOnce(undefined);
+  it('disables Pending in quick status and has no change status button', async () => {
+    const { queryByTestId, getByTestId } = render(<LogisticsJobDetailScreen />);
 
-    const { getByTestId, findByTestId } = render(<LogisticsJobDetailScreen />);
+    // Change status button should not exist
+    expect(queryByTestId('change-status-btn')).toBeNull();
 
-    const changeStatusBtn = await findByTestId('change-status-btn');
-    await act(async () => {
-      fireEvent.press(changeStatusBtn);
-    });
-
-    expect(getByTestId('job-status-modal')).toBeTruthy();
-
-    // Select 'In Transit' option
-    const inTransitOpt = getByTestId('status-option-in-transit');
-    await act(async () => {
-      fireEvent.press(inTransitOpt);
-    });
-
-    // Enter note
-    const noteInput = getByTestId('status-note-input');
-    fireEvent.changeText(noteInput, 'Departing warehouse now.');
-
-    // Submit
-    const submitBtn = getByTestId('submit-status-btn');
-    await act(async () => {
-      fireEvent.press(submitBtn);
-    });
-
-    expect(updateStatusSpy).toHaveBeenCalledWith(
-      'job-alpha-101',
-      'In Transit',
-      expect.objectContaining({
-        note: 'Departing warehouse now.',
-        tenantId: 'tenant-omega',
-      })
-    );
+    // Pending button should be disabled for drivers
+    const pendingBtn = getByTestId('status-btn-pending');
+    expect(pendingBtn.props.accessibilityState.disabled).toBe(true);
   });
 
-  it('opens notes modal and appends an internal note', async () => {
+  it('renders main add note button at bottom and opens notes modal', async () => {
     const appendNoteSpy = jest
       .spyOn(logisticsService, 'appendLogisticsNote')
       .mockResolvedValueOnce(undefined);
 
-    const { getByTestId, findByTestId } = render(<LogisticsJobDetailScreen />);
+    const { getByTestId, findByTestId, queryByTestId, queryByText, getByText } = render(<LogisticsJobDetailScreen />);
 
+    // Internal notes & activity card is removed
+    expect(queryByTestId('job-notes-history-card')).toBeNull();
+    expect(queryByText(/INTERNAL NOTES/i)).toBeNull();
+
+    // Main add note button at bottom exists
     const addNoteBtn = await findByTestId('add-note-btn');
+    expect(addNoteBtn).toBeTruthy();
+
     await act(async () => {
       fireEvent.press(addNoteBtn);
     });
 
     expect(getByTestId('job-notes-modal')).toBeTruthy();
 
-    // Type note
     const noteInput = getByTestId('logistics-note-input');
     fireEvent.changeText(noteInput, 'Gate 3 access code is 5678.');
 
-    // Submit
     const submitBtn = getByTestId('submit-notes-btn');
     await act(async () => {
       fireEvent.press(submitBtn);
@@ -355,13 +332,6 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
       'Sam Fisher',
       'tenant-omega'
     );
-  });
-
-  it('renders internal notes history', async () => {
-    const { getByText, findByText } = render(<LogisticsJobDetailScreen />);
-
-    expect(await findByText('2026-08-27 06:00 [Fleet Coordinator]: Gear prepped on Pallet 4.')).toBeTruthy();
-    expect(getByText('2026-08-27 07:00 [Sam Fisher]: Vehicle inspected, tire pressure OK.')).toBeTruthy();
   });
 });
 

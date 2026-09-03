@@ -75,6 +75,7 @@ export interface QuickStatusSelectorProps<T extends string = string> {
   currentStatus: T;
   onSelectStatus: (newStatus: T) => void | Promise<void>;
   statuses?: T[];
+  disabledStatuses?: T[];
   statusConfigs?: Record<string, { label?: string; color: string; bgColor?: string; borderColor?: string }>;
   disabled?: boolean;
   isUpdating?: boolean;
@@ -87,6 +88,7 @@ export function QuickStatusSelector<T extends string = string>({
   currentStatus,
   onSelectStatus,
   statuses,
+  disabledStatuses,
   statusConfigs,
   disabled = false,
   isUpdating = false,
@@ -171,27 +173,31 @@ export function QuickStatusSelector<T extends string = string>({
             ? `${config.color}22`
             : `${config.color}15`;
 
+          const isStatusDisabled = Boolean(
+            disabled || (disabledStatuses && disabledStatuses.includes(status))
+          );
+
           return (
             <Pressable
               key={status}
               onPress={() => {
-                if (!disabled && !isUpdating && !isCurrent) {
+                if (!isStatusDisabled && !isUpdating && !isCurrent) {
                   onSelectStatus(status);
                 }
               }}
-              disabled={disabled || isUpdating || isCurrent}
+              disabled={isStatusDisabled || isUpdating || isCurrent}
               style={({ pressed }) => [
                 styles.statusButton,
                 {
                   backgroundColor: isCurrent ? activeBg : colors.surface,
                   borderColor: isCurrent ? config.color : colors.border,
                 },
-                pressed && !isCurrent && { opacity: 0.8, transform: [{ scale: 0.98 }] },
-                disabled && !isCurrent && { opacity: 0.4 },
+                pressed && !isCurrent && !isStatusDisabled && { opacity: 0.8, transform: [{ scale: 0.98 }] },
+                isStatusDisabled && !isCurrent && { opacity: 0.35 },
               ]}
               testID={`status-btn-${status.toLowerCase().replace(/\s+/g, '-')}`}
               accessibilityRole="button"
-              accessibilityState={{ selected: isCurrent, disabled: disabled || isCurrent }}
+              accessibilityState={{ selected: isCurrent, disabled: isStatusDisabled || isCurrent }}
               accessibilityLabel={`Set status to ${status}`}
             >
               {getStatusIcon(status, isCurrent ? config.color : colors.mutedForeground)}

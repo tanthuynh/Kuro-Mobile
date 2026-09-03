@@ -37,6 +37,7 @@ import type {
   EquipmentCondition,
   RepairAttachment,
   CreateRepairTicketInput,
+  TenantOwner,
 } from '@/types/repair';
 
 export interface RepairMetrics {
@@ -574,7 +575,7 @@ export function useTenantSuppliers() {
 export function useTenantOwners() {
   const { user, tenant } = useAuth();
   const tenantId = user?.tenantId || tenant?.tenantId || '';
-  const [owners, setOwners] = useState<Array<{ id: string; name: string; type?: string; email?: string }>>([]);
+  const [owners, setOwners] = useState<TenantOwner[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchOwners = useCallback(async () => {

@@ -86,42 +86,49 @@ describe('events-engine pure domain logic', () => {
       expect(isEventInRollingWindow(spanningEvent, baseAnchor)).toBe(true);
     });
 
-    it('returns true for events within 30 days in the future', () => {
+    it('returns true for events within 2 months (60 days) in the future', () => {
       const futureEvent = createMockEvent({
         id: 'future-event',
         startTime: new Date('2026-09-25T08:00:00.000Z'),
         finishTime: new Date('2026-09-25T20:00:00.000Z'),
       });
       expect(isEventInRollingWindow(futureEvent, baseAnchor)).toBe(true);
+
+      const twoMonthsEvent = createMockEvent({
+        id: 'two-months-event',
+        startTime: new Date('2026-10-25T08:00:00.000Z'), // ~54 days away
+        finishTime: new Date('2026-10-25T20:00:00.000Z'),
+      });
+      expect(isEventInRollingWindow(twoMonthsEvent, baseAnchor)).toBe(true);
     });
 
-    it('returns false for events starting > 30 days in the future', () => {
+    it('returns false for events starting > 2 months (60 days) in the future', () => {
       const distantEvent = createMockEvent({
         id: 'distant-event',
-        startTime: new Date('2026-10-15T08:00:00.000Z'), // ~44 days away
-        finishTime: new Date('2026-10-15T20:00:00.000Z'),
+        startTime: new Date('2026-11-15T08:00:00.000Z'), // ~75 days away
+        finishTime: new Date('2026-11-15T20:00:00.000Z'),
       });
       expect(isEventInRollingWindow(distantEvent, baseAnchor)).toBe(false);
     });
 
-    it('correctly handles multi-day spanning events right at the 30-day rolling window boundary', () => {
+    it('correctly handles multi-day spanning events right at the 2-month (60-day) rolling window boundary', () => {
       const localAnchor = new Date(2026, 8, 1, 12, 0, 0); // 1 Sept 2026
 
-      // Day 30 at 22:00 -> Starts within window (1 Oct 22:00), finishes after -> Included
-      const day30BoundaryEvent = createMockEvent({
-        id: 'day-30-boundary',
-        startTime: new Date(2026, 9, 1, 22, 0, 0),
-        finishTime: new Date(2026, 9, 5, 12, 0, 0),
+      // Day 60 at 22:00 -> Starts within 60-day window (31 Oct 22:00), finishes after -> Included
+      const day60BoundaryEvent = createMockEvent({
+        id: 'day-60-boundary',
+        startTime: new Date(2026, 9, 31, 22, 0, 0),
+        finishTime: new Date(2026, 10, 5, 12, 0, 0),
       });
-      expect(isEventInRollingWindow(day30BoundaryEvent, localAnchor)).toBe(true);
+      expect(isEventInRollingWindow(day60BoundaryEvent, localAnchor)).toBe(true);
 
-      // Day 31 at 08:00 -> Starts strictly after window (2 Oct 08:00) -> Excluded
-      const day31ExcludedEvent = createMockEvent({
-        id: 'day-31-excluded',
-        startTime: new Date(2026, 9, 2, 8, 0, 0),
-        finishTime: new Date(2026, 9, 5, 12, 0, 0),
+      // Day 61 at 08:00 -> Starts strictly after window (1 Nov 08:00) -> Excluded
+      const day61ExcludedEvent = createMockEvent({
+        id: 'day-61-excluded',
+        startTime: new Date(2026, 10, 2, 8, 0, 0),
+        finishTime: new Date(2026, 10, 5, 12, 0, 0),
       });
-      expect(isEventInRollingWindow(day31ExcludedEvent, localAnchor)).toBe(false);
+      expect(isEventInRollingWindow(day61ExcludedEvent, localAnchor)).toBe(false);
 
       // Multi-day event starting 10 days ago and ending on Day 25 -> Included
       const ongoingMultiDayEvent = createMockEvent({

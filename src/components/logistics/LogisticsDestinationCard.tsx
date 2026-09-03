@@ -74,7 +74,7 @@ export function LogisticsDestinationCard({
   return (
     <Card style={styles.card} testID={testID}>
       <CardContent style={styles.content}>
-        {/* Header Row: Stop Sequence & Timing */}
+        {/* Header Row: Stop Sequence, Destination Name & Timing */}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
             <Badge
@@ -85,40 +85,44 @@ export function LogisticsDestinationCard({
               {stopLabel}
             </Badge>
 
-            {destination.time ? (
-              <View style={styles.timeTag}>
-                <Clock size={12} color={colors.mutedForeground} />
-                <Text style={[styles.timeTagText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                  {destination.time}
-                </Text>
-              </View>
-            ) : null}
+            <Text
+              style={[styles.destinationName, { color: colors.foreground, fontSize: typography.fontSize.base }]}
+              numberOfLines={1}
+            >
+              {destination.destinationName || destination.address || 'Destination'}
+            </Text>
           </View>
 
-          {destination.distance || destination.estTravelTime ? (
-            <View style={styles.distanceBadge}>
-              <Compass size={11} color={colors.mutedForeground} />
-              <Text style={[styles.distanceText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                {[destination.distance, destination.estTravelTime].filter(Boolean).join(' • ')}
+          {destination.time ? (
+            <View style={styles.timeTag}>
+              <Clock size={12} color={colors.mutedForeground} />
+              <Text style={[styles.timeTagText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                {destination.time}
               </Text>
             </View>
           ) : null}
         </View>
 
-        {/* Destination Name */}
-        <View style={styles.nameSection}>
-          <Text style={[styles.destinationName, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-            {destination.destinationName || destination.address || 'Destination'}
-          </Text>
-        </View>
-
-        {/* Address */}
-        {destination.address ? (
+        {/* Address & Distance / Travel Time Row */}
+        {destination.address || destination.distance || destination.estTravelTime ? (
           <View style={styles.addressRow}>
-            <MapPin size={14} color={colors.primary} style={{ marginTop: 2 }} />
-            <Text style={[styles.addressText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-              {destination.address}
-            </Text>
+            {destination.address ? (
+              <View style={styles.addressLeft}>
+                <MapPin size={14} color={colors.primary} style={{ marginTop: 2 }} />
+                <Text style={[styles.addressText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
+                  {destination.address}
+                </Text>
+              </View>
+            ) : <View style={{ flex: 1 }} />}
+
+            {destination.distance || destination.estTravelTime ? (
+              <View style={styles.distanceBadge}>
+                <Compass size={11} color={colors.mutedForeground} />
+                <Text style={[styles.distanceText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                  {[destination.distance, destination.estTravelTime].filter(Boolean).join(' • ')}
+                </Text>
+              </View>
+            ) : null}
           </View>
         ) : null}
 
@@ -132,9 +136,9 @@ export function LogisticsDestinationCard({
           </View>
         ) : null}
 
-        {/* Detail Note */}
+        {/* Detail Note (clean transparent background with neutral border) */}
         {destination.detailNote ? (
-          <View style={[styles.noteBox, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+          <View style={[styles.noteBox, { backgroundColor: 'transparent', borderColor: colors.border }]}>
             <Text style={[styles.noteText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
               {destination.detailNote}
             </Text>
@@ -189,16 +193,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
+  },
+  destinationName: {
+    fontFamily: 'Calibri',
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
+    flex: 1,
   },
   timeTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    flexShrink: 0,
   },
   timeTagText: {
     fontFamily: 'Calibri',
@@ -206,30 +220,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     lineHeight: 18,
   },
-  distanceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  distanceText: {
-    fontFamily: 'Calibri',
-    fontSize: 13,
-    fontWeight: '500',
-    lineHeight: 18,
-  },
-  nameSection: {
-    marginTop: 2,
-  },
-  destinationName: {
-    fontFamily: 'Calibri',
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-  },
   addressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+  },
+  addressLeft: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 6,
+    flex: 1,
   },
   addressText: {
     fontFamily: 'Calibri',
@@ -237,6 +238,18 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 18,
     fontWeight: '500',
+  },
+  distanceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flexShrink: 0,
+  },
+  distanceText: {
+    fontFamily: 'Calibri',
+    fontSize: 13,
+    fontWeight: '500',
+    lineHeight: 18,
   },
   contactRow: {
     flexDirection: 'row',

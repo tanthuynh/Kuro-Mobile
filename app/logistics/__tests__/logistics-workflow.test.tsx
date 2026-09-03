@@ -730,10 +730,10 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
   });
 
   // ==========================================================================
-  // SCENARIO 5: DRIVER INTERNAL NOTES LOGGING & AUDIT TRAIL
+  // SCENARIO 5: DRIVER INTERNAL NOTES LOGGING (INTERNAL NOTES ONLY)
   // ==========================================================================
-  describe('Scenario 5: Driver appends internal notes -> notes update in Firestore with author and timestamp', () => {
-    it('opens notes modal and submits internal note with author attribution', async () => {
+  describe('Scenario 5: Driver internal notes logging (internal notes only, no activity portion)', () => {
+    it('renders internal notes card without activity portion, and submits note', async () => {
       mockSearchParamId = 'job-alpha-701';
       const jobWithNotes = { ...mockDatasetJobs[0] };
 
@@ -744,20 +744,24 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       const appendNoteSpy = jest.spyOn(logisticsService, 'appendLogisticsNote').mockResolvedValue(undefined);
 
-      const { findByTestId, getByTestId } = render(<LogisticsJobDetailScreen />);
+      const { queryByText, queryByTestId, findByTestId, getByTestId } = render(<LogisticsJobDetailScreen />);
+
+      // Internal notes & activity card is removed
+      expect(queryByTestId('job-notes-history-card')).toBeNull();
+      expect(queryByText(/INTERNAL NOTES/i)).toBeNull();
 
       const addNoteBtn = await findByTestId('add-note-btn');
+      expect(addNoteBtn).toBeTruthy();
+
       await act(async () => {
         fireEvent.press(addNoteBtn);
       });
 
       expect(getByTestId('job-notes-modal')).toBeTruthy();
 
-      // Enter driver note
       const noteInput = getByTestId('logistics-note-input');
-      fireEvent.changeText(noteInput, 'Dock 2 entry security code is #8844. Forklift driver on lunch until 12:30.');
+      fireEvent.changeText(noteInput, 'Dock 2 entry security code is #8844.');
 
-      // Submit note
       const submitBtn = getByTestId('submit-notes-btn');
       await act(async () => {
         fireEvent.press(submitBtn);
@@ -765,33 +769,10 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       expect(appendNoteSpy).toHaveBeenCalledWith(
         'job-alpha-701',
-        'Dock 2 entry security code is #8844. Forklift driver on lunch until 12:30.',
+        'Dock 2 entry security code is #8844.',
         'Sam Fisher',
         tenantAlpha
       );
-    });
-
-    it('renders audit notes history in chronological order', async () => {
-      mockSearchParamId = 'job-alpha-701';
-      const jobWithHistory: LogisticsEntry = {
-        ...mockDatasetJobs[0],
-        notes:
-          '2026-08-27 06:00 [Dispatch Coordinator]: Pallet 1 loaded with line-array speakers.\n2026-08-27 08:35 [Sam Fisher]: Arrived at Dock 2. Loading bay clear.',
-      };
-
-      jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
-        cb(jobWithHistory);
-        return () => {};
-      });
-
-      const { findByText } = render(<LogisticsJobDetailScreen />);
-
-      expect(
-        await findByText('2026-08-27 06:00 [Dispatch Coordinator]: Pallet 1 loaded with line-array speakers.')
-      ).toBeTruthy();
-      expect(
-        await findByText('2026-08-27 08:35 [Sam Fisher]: Arrived at Dock 2. Loading bay clear.')
-      ).toBeTruthy();
     });
   });
 
@@ -1018,7 +999,8 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       const appendNoteSpy = jest.spyOn(logisticsService, 'appendLogisticsNote').mockResolvedValue(undefined);
 
       const detailRender = render(<LogisticsJobDetailScreen />);
-      expect(await detailRender.findByText('[#701] Sydney Opera House Gala Audio Run')).toBeTruthy();
+      expect(await detailRender.findByText('[701]')).toBeTruthy();
+      expect(detailRender.getByText('Sydney Opera House Gala Audio Run')).toBeTruthy();
 
       // 3. Driver Activates Job / Starts Route via Play button
       const playBtn = await detailRender.findByTestId('play-job-btn');
@@ -1056,28 +1038,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       expect(openURLSpy).toHaveBeenCalledWith('tel:+61412345678');
 
-      // 6. Driver Appends Internal Delivery Note
-      const addNoteBtn = detailRender.getByTestId('add-note-btn');
-      await act(async () => {
-        fireEvent.press(addNoteBtn);
-      });
-
-      const noteInput = detailRender.getByTestId('logistics-note-input');
-      fireEvent.changeText(noteInput, 'Speakers unloaded at Dock 2. Moving to production office for mic racks.');
-
-      const submitNotesBtn = detailRender.getByTestId('submit-notes-btn');
-      await act(async () => {
-        fireEvent.press(submitNotesBtn);
-      });
-
-      expect(appendNoteSpy).toHaveBeenCalledWith(
-        'job-alpha-701',
-        'Speakers unloaded at Dock 2. Moving to production office for mic racks.',
-        'Sam Fisher',
-        tenantAlpha
-      );
-
-      // 7. Driver Completes Job via Finish button
+      // 6. Driver Completes Job via Finish button
       // Transition job state to In Progress for component re-render
       currentJobState = {
         ...currentJobState,

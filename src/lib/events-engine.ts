@@ -12,7 +12,7 @@ export interface EventFilterOptions {
   status?: string;        // 'All' | 'Inquiry' | 'Pending' | 'Confirmed' | 'Completed'
   search?: string;        // Search keywords
   referenceDate?: Date;   // Anchor date (defaults to current date)
-  windowDays?: number;    // Rolling window length in days (default: 30)
+  windowDays?: number;    // Rolling window length in days (default: 60 = 2 months)
 }
 
 export interface EventMetrics {
@@ -25,13 +25,13 @@ export interface EventMetrics {
 }
 
 /**
- * Checks whether an event falls within the rolling window (e.g. today 00:00:00 to today + 30 days 23:59:59).
+ * Checks whether an event falls within the rolling window (e.g. today 00:00:00 to today + 60 days / 2 months 23:59:59).
  * Excludes past events that ended prior to today 00:00:00.
  */
 export function isEventInRollingWindow(
   event: Event,
   referenceDate: Date = new Date(),
-  windowDays: number = 30
+  windowDays: number = 60
 ): boolean {
   if (!event || event.archived) return false;
 
@@ -57,7 +57,7 @@ export function isEventInRollingWindow(
 }
 
 /**
- * Filters events by rolling 30-day window, status, and search query.
+ * Filters events by rolling 2-month (60-day) window, status, and search query.
  */
 export function filterEvents(
   events: Event[],
@@ -68,7 +68,7 @@ export function filterEvents(
     status = 'All',
     search = '',
     referenceDate = new Date(),
-    windowDays = 30,
+    windowDays = 60,
   } = options;
 
   const trimmedSearch = search.trim().toLowerCase();
@@ -157,7 +157,7 @@ export function computeEventMetrics(
   }
 
   const refDate = options?.referenceDate || new Date();
-  const windowDays = options?.windowDays ?? 30;
+  const windowDays = options?.windowDays ?? 60;
 
   const windowEvents = events.filter((e) => isEventInRollingWindow(e, refDate, windowDays));
 

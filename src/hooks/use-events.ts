@@ -140,17 +140,17 @@ export function useEvents(optionsOrOffset: number | UseEventsOptions = 0): UseEv
     }
   }, [selectedTab, categorized, events]);
 
-  // Filter events using 30-day rolling window, status filter, and search query
+  // Filter events using 2-month (60-day) rolling window, status filter, and search query
   const filteredEvents = useMemo<Event[]>(() => {
     return filterEvents(events, {
       status: statusFilter,
       search: searchQuery,
-      windowDays: 30,
+      windowDays: 60,
     });
   }, [events, statusFilter, searchQuery]);
 
   const metrics = useMemo<EventFeedMetrics>(() => {
-    const domainMetrics = computeEventMetrics(events, { windowDays: 30 });
+    const domainMetrics = computeEventMetrics(events, { windowDays: 60 });
     const activeEvents = events.filter(
       (e) => !e.archived && e.eventStatusId !== 'Completed' && e.eventStatusId !== 'Cancelled'
     );

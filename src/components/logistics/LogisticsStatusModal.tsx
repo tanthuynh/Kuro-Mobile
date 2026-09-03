@@ -29,7 +29,6 @@ import {
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ModalSheet } from '@/components/ui/modal-sheet';
@@ -63,20 +62,17 @@ export function LogisticsStatusModal({
 }: LogisticsStatusModalProps) {
   const { colors, typography, spacing } = useTheme();
   const [selectedStatus, setSelectedStatus] = useState<string>(currentStatus);
-  const [note, setNote] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
       setSelectedStatus(currentStatus);
-      setNote('');
       setError(null);
     }
   }, [visible, currentStatus]);
 
   const handleClose = () => {
     setError(null);
-    setNote('');
     onClose();
   };
 
@@ -93,7 +89,7 @@ export function LogisticsStatusModal({
 
     try {
       setError(null);
-      await onSubmit(selectedStatus, note.trim() || undefined);
+      await onSubmit(selectedStatus);
       handleClose();
     } catch (err: any) {
       setError(err?.message || 'Failed to update status');
@@ -182,20 +178,6 @@ export function LogisticsStatusModal({
               </Pressable>
             );
           })}
-        </View>
-
-        {/* Optional Status Note Input */}
-        <View style={styles.inputContainer}>
-          <Input
-            label="Accompanying Note (Optional)"
-            placeholder="e.g. Arrived at loading bay dock 2, customer signed off..."
-            value={note}
-            onChangeText={setNote}
-            multiline
-            numberOfLines={3}
-            testID="status-note-input"
-            style={styles.multilineInput}
-          />
         </View>
 
         {/* Action Buttons */}
@@ -316,14 +298,6 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontFamily: 'Calibri',
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  multilineInput: {
-    fontFamily: 'Calibri',
-    minHeight: 80,
-    textAlignVertical: 'top',
   },
   buttonRow: {
     flexDirection: 'row',

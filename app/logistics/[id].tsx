@@ -43,7 +43,6 @@ import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { QuickStatusSelector } from '@/components/repair/quick-status-selector';
 import { LogisticsDestinationCard } from '@/components/logistics/LogisticsDestinationCard';
-import { LogisticsStatusModal } from '@/components/logistics/LogisticsStatusModal';
 import { LogisticsNotesModal } from '@/components/logistics/LogisticsNotesModal';
 import { isJobActive, isJobCompleted, isJobScheduled } from '@/lib/logistics-engine';
 import type { LogisticsStatus } from '@/types/logistics';
@@ -65,8 +64,7 @@ export default function LogisticsJobDetailScreen() {
     refresh,
   } = useLogisticsJob(jobId);
 
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   const [isStartingTracking, setIsStartingTracking] = useState(false);
   const [isPausingTracking, setIsPausingTracking] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -199,30 +197,15 @@ export default function LogisticsJobDetailScreen() {
     }
   };
 
-  // Status Modal Submit Handler
-  const handleStatusModalSubmit = async (newStatus: string, note?: string) => {
-    if (!job) return;
-    setActionError(null);
-
-    // If new status is Completed, stop tracking
-    if (isJobCompleted(newStatus) || newStatus.toLowerCase() === 'cancelled') {
-      await stopTrackingJob(job.id);
-    } else if (isJobActive(newStatus) && !job.isTrackingActive) {
-      // If transitioning to active status, also start tracking
-      await startTrackingJob(job.id, tenantId, {
-        driverId: user?.id || user?.uid,
-        driverName: user?.name || user?.email,
-      });
-    }
-
-    await updateStatus(newStatus, note);
-  };
-
-  // Notes Modal Submit Handler
+  // Notes Modal Submit Handler (adds internal note via logistics hook)
   const handleNotesModalSubmit = async (note: string) => {
     if (!job) return;
     setActionError(null);
-    await addNote(note);
+    try {
+      await addNote(note);
+    } catch (err: any) {
+      setActionError(err?.message || 'Failed to add note');
+    }
   };
 
   const getStatusBadgeVariant = (status?: LogisticsStatus): BadgeVariant => {
@@ -244,11 +227,16 @@ export default function LogisticsJobDetailScreen() {
     return 'secondary';
   };
 
+  // Back Navigation handler: Deterministically returns to the Logistics feed
+  const handleBack = () => {
+    router.replace('/(tabs)/logistics' as any);
+  };
+
   if (loading && !job) {
     return (
       <View style={[styles.screen, styles.centerContainer, { backgroundColor: colors.background }]} testID="logistics-detail-loading">
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.mutedForeground, marginTop: 12 }]}>
+        <Text style={[styles.loadingText, { color: colors.mutedForeground, marginTop: 12, fontSize: typography.fontSize.sm }]}>
           Loading logistics job details...
         </Text>
       </View>
@@ -268,7 +256,7 @@ export default function LogisticsJobDetailScreen() {
         <Button
           variant="outline"
           size="default"
-          onPress={() => router.back()}
+          onPress={handleBack}
           style={{ marginTop: 16 }}
           testID="job-not-found-back-btn"
         >
@@ -278,41 +266,26 @@ export default function LogisticsJobDetailScreen() {
     );
   }
 
-  const eventNumDisplay =
+  const idBadgeDisplay =
     job.eventNumber !== undefined && job.eventNumber !== null
-      ? `[#${job.eventNumber}]`
+      ? `[${job.eventNumber}]`
       : job.id
-      ? `[#${job.id.substring(0, 7).toUpperCase()}]`
-      : '';
-  const titleDisplay = eventNumDisplay
-    ? `${eventNumDisplay} ${job.eventName || job.location || 'Transport Job'}`
-    : job.eventName || job.location || 'Transport Job';
+      ? `[${job.id.substring(0, 7).toUpperCase()}]`
+      : undefined;
+  const titleDisplay = job.eventName || job.location || 'Transport Job';
 
   const isTracking = Boolean(job.isTrackingActive);
   const isCompleted = isJobCompleted(job.status);
-
-  // Parse internal notes lines
-  const parsedNotes = (job.notes || '')
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]} testID="logistics-detail-screen">
       {/* Top Header */}
       <ScreenHeader
         title={titleDisplay}
-        subtitle={job.location || 'Transport Job'}
-        leftAction={
-          <Pressable
-            onPress={() => router.back()}
-            style={[styles.backBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-            testID="logistics-detail-back-btn"
-            accessibilityLabel="Go back to Logistics Feed"
-          >
-            <ArrowLeft size={18} color={colors.foreground} />
-          </Pressable>
-        }
+        idBadge={idBadgeDisplay}
+        onBack={handleBack}
+        backTestID="logistics-detail-back-btn"
+        backAccessibilityLabel="Go back to Logistics Feed"
         rightAction={
           <Badge
             variant={isTracking ? 'brand' : 'secondary'}
@@ -392,30 +365,6 @@ export default function LogisticsJobDetailScreen() {
               Finish
             </Button>
           </CardContent>
-
-          <View style={styles.secondaryActionsContainer}>
-            <Button
-              variant="outline"
-              size="default"
-              icon={<Sliders size={15} color={colors.foreground} />}
-              onPress={() => setIsStatusModalOpen(true)}
-              style={styles.halfBtn}
-              testID="change-status-btn"
-            >
-              Change Status
-            </Button>
-
-            <Button
-              variant="outline"
-              size="default"
-              icon={<FileText size={15} color={colors.foreground} />}
-              onPress={() => setIsNotesModalOpen(true)}
-              style={styles.halfBtn}
-              testID="add-note-btn"
-            >
-              Add Note
-            </Button>
-          </View>
         </Card>
 
         {/* Job Overview & Metadata Card */}
@@ -460,11 +409,12 @@ export default function LogisticsJobDetailScreen() {
               </View>
             </View>
 
-            {/* QuickStatusSelector */}
+            {/* QuickStatusSelector (Pending is disabled for drivers) */}
             <View style={styles.quickStatusContainer}>
               <QuickStatusSelector
                 currentStatus={job.status}
                 statuses={['Pending', 'Scheduled', 'In Progress', 'Completed', 'Cancelled']}
+                disabledStatuses={['Pending']}
                 onSelectStatus={handleQuickStatusSelect}
                 isUpdating={isUpdatingStatus}
                 showHeader={true}
@@ -504,49 +454,27 @@ export default function LogisticsJobDetailScreen() {
             ))
           )}
         </View>
-
-        {/* Internal Notes History */}
-        <Card style={styles.card} testID="job-notes-history-card">
-          <CardContent style={styles.notesContent}>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
-                INTERNAL NOTES & ACTIVITY ({parsedNotes.length})
-              </Text>
-            </View>
-
-            {parsedNotes.length === 0 ? (
-              <Text style={[styles.emptyNotesText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                No internal notes recorded yet.
-              </Text>
-            ) : (
-              <View style={styles.notesList}>
-                {parsedNotes.map((noteLine, idx) => (
-                  <View key={`note-${idx}`} style={[styles.noteRow, { borderBottomColor: colors.border }]}>
-                    <FileText size={13} color={colors.primary} style={{ marginTop: 2 }} />
-                    <Text style={[styles.noteLineText, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                      {noteLine}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </CardContent>
-        </Card>
       </ScrollView>
 
-      {/* Status Modal */}
-      <LogisticsStatusModal
-        visible={isStatusModalOpen}
-        currentStatus={job.status}
-        onClose={() => setIsStatusModalOpen(false)}
-        onSubmit={handleStatusModalSubmit}
-        testID="job-status-modal"
-      />
+      {/* Bottom Sticky Action Bar (matching Repairs appearance) */}
+      <View style={[styles.bottomActionBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+        <Button
+          variant="outline"
+          size="default"
+          fullWidth
+          icon={<FileText size={16} color={colors.primary} />}
+          onPress={() => setIsAddNoteOpen(true)}
+          style={styles.bottomBarButton}
+          testID="add-note-btn"
+        >
+          Add Note
+        </Button>
+      </View>
 
-      {/* Notes Modal */}
+      {/* Add Note Modal */}
       <LogisticsNotesModal
-        visible={isNotesModalOpen}
-        onClose={() => setIsNotesModalOpen(false)}
+        visible={isAddNoteOpen}
+        onClose={() => setIsAddNoteOpen(false)}
         onSubmit={handleNotesModalSubmit}
         authorName={user?.name || user?.email || 'Driver'}
         testID="job-notes-modal"
@@ -611,13 +539,12 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 48,
   },
-  secondaryActionsContainer: {
+  bottomActionBar: {
+    padding: 12,
+    borderTopWidth: 1,
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
   },
-  halfBtn: {
+  bottomBarButton: {
     flex: 1,
   },
   sectionHeaderRow: {
@@ -684,30 +611,5 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     textAlign: 'center',
     fontStyle: 'italic',
-  },
-  notesContent: {
-    padding: 14,
-  },
-  emptyNotesText: {
-    fontFamily: 'Calibri',
-    fontSize: 13,
-    lineHeight: 18,
-    fontStyle: 'italic',
-  },
-  notesList: {
-    gap: 8,
-  },
-  noteRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    paddingVertical: 6,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  noteLineText: {
-    fontFamily: 'Calibri',
-    fontSize: 13,
-    flex: 1,
-    lineHeight: 18,
   },
 });

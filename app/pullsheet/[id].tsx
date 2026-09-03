@@ -42,8 +42,6 @@ import { PullSheetItemRow } from '@/components/pull-sheets/pull-sheet-item-row';
 import { PullSheetStatusSheet } from '@/components/pull-sheets/pull-sheet-status-sheet';
 import type { PullsheetItem } from '@/types/pull-sheet';
 
-const CATEGORIES = ['All', 'Audio', 'Lighting', 'Video', 'Rigging', 'Power', 'Cables', 'Misc'];
-
 export default function PullSheetScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -60,8 +58,6 @@ export default function PullSheetScreen() {
     error,
     searchQuery,
     setSearchQuery,
-    selectedCategory,
-    setSelectedCategory,
     updateStatus,
     advanceStatus,
     rollbackStatus,
@@ -95,21 +91,25 @@ export default function PullSheetScreen() {
     );
   }
 
+  const handleBack = () => {
+    if (typeof router.back === 'function') {
+      router.back();
+    } else if (eventId) {
+      router.replace(`/events/${eventId}` as any);
+    } else {
+      router.replace('/(tabs)' as any);
+    }
+  };
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       {/* Screen Header */}
       <ScreenHeader
         title={event ? event.eventName : 'Pull Sheet'}
-        subtitle={event?.eventNumber ? `Pull Sheet #${event.eventNumber}` : `Event ID: ${eventId}`}
-        leftAction={
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            testID="pullsheet-back-btn"
-          >
-            <ArrowLeft size={20} color={colors.foreground} />
-          </Pressable>
-        }
+        idBadge={event?.eventNumber ? `[${event.eventNumber}]` : undefined}
+        onBack={handleBack}
+        backTestID="pullsheet-back-btn"
+        backAccessibilityLabel="Go back to Event"
         rightAction={
           progress.pendingQuantity > 0 ? (
             <Button
@@ -137,7 +137,7 @@ export default function PullSheetScreen() {
         {/* Search Bar */}
         <View style={styles.searchWrap}>
           <Input
-            placeholder="Filter equipment, note, barcode..."
+            placeholder="Search equipment, note, barcode..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             leftIcon={<Search size={16} color={colors.mutedForeground} />}
@@ -151,63 +151,18 @@ export default function PullSheetScreen() {
           />
         </View>
 
-        {/* Category Chips Bar */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[styles.categoryChipsScroll, { gap: spacing.xs }]}
-        >
-          {CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            return (
-              <Pressable
-                key={cat}
-                onPress={() => setSelectedCategory(cat)}
-                style={[
-                  styles.categoryChip,
-                  {
-                    backgroundColor: isSelected ? colors.primary : colors.surface,
-                    borderColor: isSelected ? colors.primary : colors.border,
-                  },
-                ]}
-                testID={`pullsheet-category-chip-${cat.toLowerCase()}`}
-              >
-                <Text
-                  style={[
-                    styles.categoryChipText,
-                    {
-                      color: isSelected ? colors.primaryForeground : colors.foreground,
-                      fontSize: typography.fontSize.sm,
-                      fontWeight: isSelected ? '700' : '500',
-                    },
-                  ]}
-                >
-                  {cat}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
         {/* Grouped Sections List */}
         {filteredSections.length === 0 ? (
           <EmptyState
             icon={<Layers size={40} color={colors.mutedForeground} />}
             title="No Equipment Matches"
             description={
-              searchQuery || selectedCategory !== 'All'
-                ? 'No line items match your active search or category filters.'
+              searchQuery
+                ? 'No line items match your active search query.'
                 : 'No equipment items listed on this pull sheet.'
             }
-            actionLabel={searchQuery || selectedCategory !== 'All' ? 'Reset Filters' : undefined}
-            onAction={
-              searchQuery || selectedCategory !== 'All'
-                ? () => {
-                    setSearchQuery('');
-                    setSelectedCategory('All');
-                  }
-                : undefined
-            }
+            actionLabel={searchQuery ? 'Clear Search' : undefined}
+            onAction={searchQuery ? () => setSearchQuery('') : undefined}
             testID="pullsheet-empty-state"
           />
         ) : (
@@ -278,24 +233,6 @@ const styles = StyleSheet.create({
   },
   searchWrap: {
     marginBottom: 10,
-  },
-  categoryChipsScroll: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  categoryChip: {
-    minHeight: 28,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 9999,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  categoryChipText: {
-    fontFamily: 'Calibri',
-    fontSize: 13,
-    lineHeight: 18,
   },
   sectionBlock: {
     marginBottom: 8,

@@ -45,8 +45,11 @@ jest.mock('@/context/auth-context', () => ({
       authTenantId: null,
     },
     isAuthenticated: true,
-    isLoading: false,
   }),
+}));
+
+jest.mock('@/hooks/use-tickets', () => ({
+  useTenantOwners: () => ({ owners: [], loading: false, error: null }),
 }));
 
 const sampleEvent: Event = {
@@ -500,6 +503,74 @@ describe('Milestone 2: Events Feed & Details', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith('tenant-abc');
+    });
+  });
+
+  // ==========================================================================
+  // Milestone 2.3: Event Details Screen Layout & Actions
+  // ==========================================================================
+  describe('EventDetailsScreen', () => {
+    let mockRouterPush: jest.Mock;
+
+    beforeEach(() => {
+      mockRouterPush = jest.fn();
+      const expoRouter = require('expo-router');
+      expoRouter.useRouter = () => ({
+        push: mockRouterPush,
+        replace: jest.fn(),
+        back: jest.fn(),
+      });
+      expoRouter.useLocalSearchParams = () => ({ id: 'ev-101' });
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((id, tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+    });
+
+    it('renders combined Client & Venue card and Open in Maps button', () => {
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId, getByText, queryByTestId, queryByText } = render(<EventDetailsScreen />);
+
+      // Combined Client & Venue card exists
+      expect(getByTestId('event-client-venue-card')).toBeTruthy();
+      expect(getByText('Client & Venue')).toBeTruthy();
+      expect(getByText('CLIENT')).toBeTruthy();
+      expect(getByText('LiveNation APAC')).toBeTruthy();
+      expect(getByText('VENUE')).toBeTruthy();
+      expect(getByText('Sydney Showground Hall 5')).toBeTruthy();
+
+      // Open in Maps button exists
+      expect(getByTestId('open-maps-btn')).toBeTruthy();
+
+      // Production Lead, Call, and Email buttons are removed
+      expect(queryByText(/Production Lead/i)).toBeNull();
+      expect(queryByTestId('call-lead-btn')).toBeNull();
+      expect(queryByTestId('email-lead-btn')).toBeNull();
+
+      // Warehouse operations top CTA card and inline bottom button are removed
+      expect(queryByText('Warehouse Operations')).toBeNull();
+      expect(queryByTestId('open-pullsheet-bottom-btn')).toBeNull();
+    });
+
+    it('renders persistent bottom action bar with Pull Sheet and Scan Gear buttons', () => {
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId } = render(<EventDetailsScreen />);
+
+      const pullsheetBtn = getByTestId('event-details-pullsheet-btn');
+      const scanBtn = getByTestId('event-details-scan-btn');
+
+      expect(pullsheetBtn).toBeTruthy();
+      expect(scanBtn).toBeTruthy();
+
+      fireEvent.press(pullsheetBtn);
+      expect(mockRouterPush).toHaveBeenCalledWith('/pullsheet/ev-101');
+
+      fireEvent.press(scanBtn);
+      expect(mockRouterPush).toHaveBeenCalledWith({
+        pathname: '/(tabs)/scanner',
+        params: { eventId: 'ev-101' },
+      });
     });
   });
 });

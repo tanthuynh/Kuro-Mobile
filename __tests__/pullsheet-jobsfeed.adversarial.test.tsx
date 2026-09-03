@@ -942,10 +942,11 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
         return jest.fn();
       });
 
-      const { getByTestId, getByText } = render(<PullSheetScreen />);
+      const { getByTestId, getByText, queryByText } = render(<PullSheetScreen />);
 
       expect(getByText('Symphony Under the Stars')).toBeTruthy();
-      expect(getByText('Pull Sheet #2048')).toBeTruthy();
+      expect(getByText('[2048]')).toBeTruthy();
+      expect(queryByText(/Pull Sheet #/i)).toBeNull();
 
       // Back button press
       fireEvent.press(getByTestId('pullsheet-back-btn'));

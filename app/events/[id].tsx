@@ -5,7 +5,7 @@
  * notes, and direct entry into Mobile Pull Sheet & Prep Continuous Scanner.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -21,8 +21,7 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Phone,
-  Mail,
+  Building2,
   User,
   ExternalLink,
   FileSpreadsheet,
@@ -33,6 +32,7 @@ import {
 
 import { useTheme } from '@/context/theme-context';
 import { useSingleEvent } from '@/hooks/use-events';
+import { useTenantOwners } from '@/hooks/use-tickets';
 import { ScreenHeader } from '@/components/layout/screen-header';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
@@ -48,6 +48,22 @@ export default function EventDetailsScreen() {
 
   const eventId = Array.isArray(id) ? id[0] : id || '';
   const { event, loading, error, refresh } = useSingleEvent(eventId);
+  const { owners } = useTenantOwners();
+
+  const clientContact = useMemo(() => {
+    if (!event?.clientId) return null;
+    return owners.find(
+      (o) => o.id === event.clientId || o.name.toLowerCase() === event.clientId.toLowerCase()
+    );
+  }, [owners, event?.clientId]);
+
+  const venueContact = useMemo(() => {
+    const vId = event?.venueId;
+    if (!vId) return null;
+    return owners.find(
+      (o) => o.id === vId || (o.name && o.name.toLowerCase() === vId.toLowerCase())
+    );
+  }, [owners, event?.venueId]);
 
   const getStatusVariant = (status?: EventStatus): BadgeVariant => {
     switch (status) {
@@ -66,19 +82,7 @@ export default function EventDetailsScreen() {
     }
   };
 
-  const handleCall = (phone?: string) => {
-    if (!phone) return;
-    Linking.openURL(`tel:${phone.replace(/\s+/g, '')}`).catch((err) => {
-      console.warn('Could not open phone dialer:', err);
-    });
-  };
 
-  const handleEmail = (email?: string) => {
-    if (!email) return;
-    Linking.openURL(`mailto:${email}`).catch((err) => {
-      console.warn('Could not open mail client:', err);
-    });
-  };
 
   const handleOpenMaps = (address?: string) => {
     if (!address) return;
@@ -86,6 +90,10 @@ export default function EventDetailsScreen() {
     Linking.openURL(`https://maps.google.com/?q=${query}`).catch((err) => {
       console.warn('Could not open maps:', err);
     });
+  };
+
+  const handleBack = () => {
+    router.replace('/(tabs)' as any);
   };
 
   if (loading && !event) {
@@ -108,7 +116,7 @@ export default function EventDetailsScreen() {
         <Text style={[styles.errorSubtitle, { color: colors.mutedForeground, marginVertical: spacing.md, textAlign: 'center' }]}>
           {error?.message || `Unable to load event #${eventId}. It may have been archived or removed.`}
         </Text>
-        <Button variant="outline" onPress={() => router.back()}>
+        <Button variant="outline" onPress={handleBack} testID="event-not-found-back-btn">
           Back to Jobs Feed
         </Button>
       </View>
@@ -125,16 +133,10 @@ export default function EventDetailsScreen() {
       {/* Top Header */}
       <ScreenHeader
         title={event.eventName}
-        subtitle={event.eventNumber ? `Event #${event.eventNumber}` : 'Production Event'}
-        leftAction={
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            testID="event-details-back-btn"
-          >
-            <ArrowLeft size={20} color={colors.foreground} />
-          </Pressable>
-        }
+        idBadge={event.eventNumber ? `[${event.eventNumber}]` : undefined}
+        onBack={handleBack}
+        backTestID="event-details-back-btn"
+        backAccessibilityLabel="Go back to Events Feed"
         rightAction={
           <Badge variant={getStatusVariant(event.eventStatusId)}>
             {event.eventStatusId}
@@ -143,118 +145,56 @@ export default function EventDetailsScreen() {
       />
 
       <ScrollView contentContainerStyle={[styles.scrollContent, { padding: spacing.base }]}>
-        {/* Main CTA Banner: Open Pull Sheet & Continuous Scanner */}
-        <Card style={[styles.ctaCard, { backgroundColor: colors.brandGreenScale.green2, borderColor: colors.brandGreenScale.green4 }]}>
-          <CardContent style={styles.ctaCardContent}>
-            <View style={styles.ctaTextCol}>
-              <Text style={[styles.ctaTitle, { color: colors.foreground, fontSize: typography.fontSize.md }]}>
-                Warehouse Operations
-              </Text>
-              <Text style={[styles.ctaSubtitle, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                {event.equipmentItems?.length || 0} line items listed on quote
-              </Text>
-            </View>
-
-            <View style={styles.ctaButtonsRow}>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<FileSpreadsheet size={16} color={colors.secondaryForeground} />}
-                onPress={() => router.push(`/pullsheet/${event.id}`)}
-                style={styles.ctaBtn}
-                testID="event-details-pullsheet-btn"
-              >
-                Pull Sheet
-              </Button>
-
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<QrCode size={16} color={colors.primaryForeground} />}
-                onPress={() =>
-                  router.push({
-                    pathname: '/(tabs)/scanner',
-                    params: { eventId: event.id },
-                  })
-                }
-                style={styles.ctaBtn}
-                testID="event-details-scan-btn"
-              >
-                Scan Gear
-              </Button>
-            </View>
-          </CardContent>
-        </Card>
-
         {/* Schedule Timeline Stepper */}
         <EventScheduleCard event={event} />
 
-        {/* Client Contact Details Card */}
-        <Card style={styles.sectionCard}>
+        {/* Combined Client & Venue Details Card */}
+        <Card style={styles.sectionCard} testID="event-client-venue-card">
           <CardHeader style={styles.sectionHeader}>
             <View style={styles.headerTitleRow}>
-              <User size={18} color={colors.primary} style={{ marginRight: 8 }} />
+              <Building2 size={18} color={colors.primary} style={{ marginRight: 8 }} />
               <Text style={[styles.sectionTitle, { color: colors.foreground, fontSize: typography.fontSize.md }]}>
-                Client & Production Lead
+                Client & Venue
               </Text>
             </View>
           </CardHeader>
           <CardContent style={styles.cardContentNoTop}>
-            <Text style={[styles.infoMainText, { color: colors.cardForeground, fontSize: typography.fontSize.base }]}>
-              {event.clientId || 'Client Direct'}
-            </Text>
-
-            <View style={styles.actionRow}>
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<Phone size={14} color={colors.foreground} />}
-                onPress={() => handleCall('+61 2 9000 1234')}
-                style={styles.contactActionBtn}
-              >
-                Call Lead
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<Mail size={14} color={colors.foreground} />}
-                onPress={() => handleEmail('production@kuroevent.io')}
-                style={styles.contactActionBtn}
-              >
-                Email
-              </Button>
-            </View>
-          </CardContent>
-        </Card>
-
-        {/* Venue & Location Logistics Card */}
-        <Card style={styles.sectionCard}>
-          <CardHeader style={styles.sectionHeader}>
-            <View style={styles.headerTitleRow}>
-              <MapPin size={18} color={colors.primary} style={{ marginRight: 8 }} />
-              <Text style={[styles.sectionTitle, { color: colors.foreground, fontSize: typography.fontSize.md }]}>
-                Venue & Dock Location
+            {/* Client Section */}
+            <View style={styles.combinedFieldGroup}>
+              <Text style={[styles.fieldSubLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                CLIENT
+              </Text>
+              <Text style={[styles.infoMainText, { color: colors.cardForeground, fontSize: typography.fontSize.base }]}>
+                {clientContact?.name || event.clientId || 'Client Direct'}
               </Text>
             </View>
-          </CardHeader>
-          <CardContent style={styles.cardContentNoTop}>
-            <Text style={[styles.infoMainText, { color: colors.cardForeground, fontSize: typography.fontSize.base }]}>
-              {event.venueId || 'Sydney Showground (Hall 5 & Dock 2)'}
-            </Text>
-            <Text style={[styles.addressText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginVertical: 4 }]}>
-              1 Showground Rd, Sydney Olympic Park NSW 2127
-            </Text>
 
-            <Button
-              variant="outline"
-              size="sm"
-              icon={<ExternalLink size={14} color={colors.foreground} />}
-              onPress={() => handleOpenMaps('1 Showground Rd, Sydney Olympic Park NSW 2127')}
-              style={{ marginTop: spacing.sm }}
-            >
-              Open in Maps
-            </Button>
+            {/* Divider */}
+            <View style={[styles.cardDivider, { backgroundColor: colors.border }]} />
+
+            {/* Venue Section */}
+            <View style={styles.combinedFieldGroup}>
+              <Text style={[styles.fieldSubLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
+                VENUE
+              </Text>
+              <Text style={[styles.infoMainText, { color: colors.cardForeground, fontSize: typography.fontSize.base }]}>
+                {venueContact?.name || event.venueId || 'Sydney Showground (Hall 5 & Dock 2)'}
+              </Text>
+              <Text style={[styles.addressText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginVertical: 4 }]}>
+                {venueContact?.fullAddress || '1 Showground Rd, Sydney Olympic Park NSW 2127'}
+              </Text>
+
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<ExternalLink size={14} color={colors.foreground} />}
+                onPress={() => handleOpenMaps(venueContact?.fullAddress || '1 Showground Rd, Sydney Olympic Park NSW 2127')}
+                style={{ marginTop: spacing.xs, alignSelf: 'flex-start' }}
+                testID="open-maps-btn"
+              >
+                Open in Maps
+              </Button>
+            </View>
           </CardContent>
         </Card>
 
@@ -276,20 +216,37 @@ export default function EventDetailsScreen() {
             </CardContent>
           </Card>
         ) : null}
+      </ScrollView>
 
-        {/* Primary Bottom Action */}
+      {/* Persistent Bottom Action Bar */}
+      <View style={[styles.bottomActionBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+        <Button
+          variant="secondary"
+          size="default"
+          icon={<FileSpreadsheet size={16} color={colors.secondaryForeground} />}
+          onPress={() => router.push(`/pullsheet/${event.id}`)}
+          style={styles.bottomBarBtn}
+          testID="event-details-pullsheet-btn"
+        >
+          Pull Sheet
+        </Button>
+
         <Button
           variant="primary"
-          size="lg"
-          fullWidth
-          icon={<FileSpreadsheet size={18} color={colors.primaryForeground} />}
-          onPress={() => router.push(`/pullsheet/${event.id}`)}
-          style={{ marginTop: spacing.md }}
-          testID="open-pullsheet-bottom-btn"
+          size="default"
+          icon={<QrCode size={16} color={colors.primaryForeground} />}
+          onPress={() =>
+            router.push({
+              pathname: '/(tabs)/scanner',
+              params: { eventId: event.id },
+            })
+          }
+          style={styles.bottomBarBtn}
+          testID="event-details-scan-btn"
         >
-          Open Pull Sheet & Scan Gear
+          Scan Gear
         </Button>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -321,33 +278,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  ctaCard: {
-    marginBottom: 16,
-    borderWidth: 1,
-  },
-  ctaCardContent: {
-    gap: 12,
-  },
-  ctaTextCol: {},
-  ctaTitle: {
-    fontFamily: 'Calibri',
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-  },
-  ctaSubtitle: {
-    fontFamily: 'Calibri',
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 2,
-  },
-  ctaButtonsRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  ctaBtn: {
-    flex: 1,
-  },
   sectionCard: {
     marginBottom: 16,
   },
@@ -367,6 +297,21 @@ const styles = StyleSheet.create({
   cardContentNoTop: {
     paddingTop: 4,
   },
+  combinedFieldGroup: {
+    gap: 2,
+  },
+  fieldSubLabel: {
+    fontFamily: 'Calibri',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  cardDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: 10,
+  },
   infoMainText: {
     fontFamily: 'Calibri',
     fontSize: 14,
@@ -379,17 +324,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  actionRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-  },
-  contactActionBtn: {
-    flex: 1,
-  },
   notesText: {
     fontFamily: 'Calibri',
     fontSize: 14,
     lineHeight: 20,
+  },
+  bottomActionBar: {
+    padding: 12,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  bottomBarBtn: {
+    flex: 1,
+    minHeight: 48,
   },
 });

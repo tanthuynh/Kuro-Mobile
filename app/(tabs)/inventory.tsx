@@ -33,6 +33,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
 import { useEquipment } from '@/hooks/use-equipment';
+import { ScreenHeader } from '@/components/layout/screen-header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -70,16 +71,29 @@ export default function InventoryScreen() {
     await refresh();
   }, [refresh]);
 
+  const handleBack = () => {
+    router.replace('/(tabs)' as any);
+  };
+
   return (
     <View
       style={[
         styles.screen,
         {
           backgroundColor: colors.background,
-          paddingTop: insets.top + spacing.sm,
         },
       ]}
+      testID="inventory-screen"
     >
+      {/* Repairs-Styled Top Header */}
+      <ScreenHeader
+        title="Fleet Inventory"
+        idBadge="[INV]"
+        onBack={handleBack}
+        backTestID="inventory-header-back-btn"
+        backAccessibilityLabel="Go back to Dashboard"
+      />
+
       {/* Search Input Bar */}
       <View style={[styles.searchContainer, { paddingHorizontal: spacing.base, paddingTop: spacing.xs }]}>
         <Input

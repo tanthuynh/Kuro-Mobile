@@ -24,7 +24,7 @@ import {
 } from 'lucide-react-native';
 import { SvgXml } from 'react-native-svg';
 import { ref, onValue, set } from 'firebase/database';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 
 import { useTheme } from '@/context/theme-context';
 import { useAuth } from '@/context/auth-context';
@@ -177,18 +177,30 @@ export default function ProfileScreen() {
     return () => unsubscribe();
   }, [user?.uid, user?.id]);
 
-  // Fetch full live tenant metadata from Firestore `tenants/{tenantId}`
+  // Subscribe to real-time live tenant metadata from Firestore `tenants/{tenantId}`
   useEffect(() => {
-    if (user?.tenantId && user.tenantId !== 'root') {
-      getDoc(doc(db, 'tenants', user.tenantId))
-        .then((snap) => {
+    if (!user?.tenantId || user.tenantId === 'root') {
+      setLiveTenant(null);
+      return;
+    }
+
+    try {
+      const unsubscribe = onSnapshot(
+        doc(db, 'tenants', user.tenantId),
+        (snap) => {
           if (snap.exists()) {
             setLiveTenant(snap.data());
+          } else {
+            setLiveTenant(null);
           }
-        })
-        .catch((err) => {
-          console.warn('[ProfileScreen] Failed to fetch tenant metadata:', err);
-        });
+        },
+        (err) => {
+          console.warn('[ProfileScreen] Realtime tenant metadata listener error:', err);
+        }
+      );
+      return () => unsubscribe();
+    } catch (err) {
+      console.warn('[ProfileScreen] Failed to establish tenant metadata listener:', err);
     }
   }, [user?.tenantId]);
 

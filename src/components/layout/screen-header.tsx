@@ -6,6 +6,8 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { ArrowLeft } from 'lucide-react-native';
+import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/context/theme-context';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +16,7 @@ import { OnlineIndicator, type ConnectionStatus } from '@/components/ui/online-i
 export interface ScreenHeaderProps {
   title: string;
   subtitle?: string;
+  idBadge?: string;
   showTenantBadge?: boolean;
   tenantName?: string;
   showConnectionStatus?: boolean;
@@ -23,11 +26,15 @@ export interface ScreenHeaderProps {
   rightAction?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  onBack?: () => void;
+  backTestID?: string;
+  backAccessibilityLabel?: string;
 }
 
 export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   title,
   subtitle,
+  idBadge,
   showTenantBadge = false,
   tenantName,
   showConnectionStatus = false,
@@ -37,9 +44,34 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   rightAction,
   style,
   testID,
+  onBack,
+  backTestID = 'screen-header-back-btn',
+  backAccessibilityLabel = 'Go back',
 }) => {
   const insets = useSafeAreaInsets();
   const { colors, typography, spacing, layout } = useTheme();
+
+  const renderedLeft = leftAction ? (
+    <View style={styles.actionSlot}>{leftAction}</View>
+  ) : onBack ? (
+    <Pressable
+      onPress={onBack}
+      style={({ pressed }) => [
+        styles.backButton,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+        },
+        pressed && { opacity: 0.75 },
+      ]}
+      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+      accessibilityRole="button"
+      accessibilityLabel={backAccessibilityLabel}
+      testID={backTestID}
+    >
+      <ArrowLeft size={18} color={colors.foreground} />
+    </Pressable>
+  ) : null;
 
   return (
     <View
@@ -58,17 +90,31 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
     >
       <View style={[styles.contentRow, { minHeight: layout.headerHeight - spacing.sm }]}>
         <View style={styles.leftSlot}>
-          {leftAction ? <View style={styles.actionSlot}>{leftAction}</View> : null}
+          {renderedLeft}
           <View style={styles.titleBlock}>
             <View style={styles.titleLine}>
+              {idBadge ? (
+                <Text
+                  style={[
+                    styles.idBadge,
+                    {
+                      color: colors.mutedForeground,
+                      fontSize: typography.fontSize.lg,
+                    },
+                  ]}
+                >
+                  {idBadge}
+                </Text>
+              ) : null}
               <Text
                 numberOfLines={1}
                 style={[
                   styles.title,
                   {
                     color: colors.foreground,
-                    fontSize: typography.fontSize.xl,
-                    lineHeight: typography.lineHeight.xl,
+                    fontSize: typography.fontSize.lg,
+                    lineHeight: typography.lineHeight.lg,
+                    flexShrink: 1,
                   },
                 ]}
               >
@@ -160,6 +206,21 @@ const styles = StyleSheet.create({
     minWidth: 48,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 48,
+    minWidth: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  idBadge: {
+    fontFamily: 'Calibri',
+    fontWeight: '700',
+    marginRight: 4,
   },
   connectionIndicator: {
     marginRight: 4,

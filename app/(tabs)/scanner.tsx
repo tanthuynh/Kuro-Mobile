@@ -36,6 +36,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/context/theme-context';
 import { useScanner, type RecentScanRecord } from '@/context/scanner-context';
 import { useSingleEvent } from '@/hooks/use-events';
+import { ScreenHeader } from '@/components/layout/screen-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -86,16 +87,38 @@ export default function ScannerScreen() {
     setActiveEventId(null);
   };
 
+  const handleBack = () => {
+    if (activeEventId) {
+      router.replace(`/pullsheet/${activeEventId}` as any);
+    } else {
+      router.replace('/(tabs)' as any);
+    }
+  };
+
   return (
     <View
       style={[
         styles.screen,
         {
           backgroundColor: colors.background,
-          paddingTop: insets.top + spacing.sm,
         },
       ]}
+      testID="continuous-scanner-screen"
     >
+      {/* Repairs-Styled Top Header */}
+      <ScreenHeader
+        title={activeEvent?.eventName || 'Equipment Scanner'}
+        idBadge={activeEvent?.eventNumber ? `[${activeEvent.eventNumber}]` : '[SCAN]'}
+        onBack={handleBack}
+        backTestID="scanner-header-back-btn"
+        backAccessibilityLabel={activeEventId ? 'Return to Event Pull Sheet' : 'Return to Events'}
+        rightAction={
+          <Badge variant={activeEventId ? 'brand' : 'secondary'}>
+            {activeEventId ? 'Job Prep' : 'Continuous'}
+          </Badge>
+        }
+      />
+
       {/* Floating HUD Feedback Toast */}
       <ScanHudOverlay
         result={lastResult}

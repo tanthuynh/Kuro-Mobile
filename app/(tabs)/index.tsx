@@ -190,7 +190,7 @@ export default function HomeScreen() {
               description={
                 searchQuery || statusFilter.toLowerCase() !== 'all'
                   ? 'Try changing your filters or search keywords.'
-                  : 'No upcoming production events scheduled in the next 30 days.'
+                  : 'No upcoming production events scheduled in the next 2 months.'
               }
               actionLabel={
                 searchQuery || statusFilter.toLowerCase() !== 'all' ? 'Reset Filters' : undefined
