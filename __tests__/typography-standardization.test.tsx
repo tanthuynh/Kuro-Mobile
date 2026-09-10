@@ -337,7 +337,7 @@ describe('Typography Standardization & Legibility Hierarchy', () => {
         </ThemeProvider>
       );
 
-      const numNode = getByText('#1042');
+      const numNode = getByText('[1042]');
       const numStyle = StyleSheet.flatten(numNode.props.style);
       expect(numStyle.fontSize).toBe(13);
       expect(numStyle.lineHeight).toBe(18);

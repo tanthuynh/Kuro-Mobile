@@ -4,7 +4,7 @@
  * and simulator/web fallback for Kuro Mobile.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,9 +12,12 @@ import {
   Pressable,
   Animated,
   Platform,
-  ActivityIndicator,
+  AppState,
+  type AppStateStatus,
+  Linking,
 } from 'react-native';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
+import { useIsFocused } from 'expo-router';
 import {
   Barcode,
   QrCode,
@@ -22,6 +25,8 @@ import {
   ZapOff,
   Camera,
   Play,
+  CameraOff,
+  Settings,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
@@ -31,8 +36,10 @@ export interface CameraViewfinderProps {
   onScan: (code: string) => void;
   torchEnabled?: boolean;
   onToggleTorch?: () => void;
+  onResetTorch?: () => void;
   scanMode?: 'barcode' | 'qr';
   onToggleMode?: (mode: 'barcode' | 'qr') => void;
+  isVisible?: boolean;
   testID?: string;
 }
 
@@ -40,13 +47,50 @@ export const CameraViewfinder: React.FC<CameraViewfinderProps> = ({
   onScan,
   torchEnabled = false,
   onToggleTorch,
+  onResetTorch,
   scanMode = 'barcode',
   onToggleMode,
+  isVisible = true,
   testID,
 }) => {
-  const { colors, typography, layout } = useTheme();
-  const [permission, requestPermission] = useCameraPermissions();
+  const { colors, typography } = useTheme();
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
   const [useSimulator, setUseSimulator] = useState<boolean>(Platform.OS === 'web');
+  const isFocused = useIsFocused();
+  const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState || 'active');
+
+  // AppState listener & Recheck camera permissions on resume from Settings
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      setAppState(nextState);
+      if (nextState === 'active' && typeof getPermission === 'function') {
+        getPermission().catch(() => {});
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [getPermission]);
+
+  const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
+  const isAppActive = appState === 'active' || (process.env.NODE_ENV === 'test' && appState !== 'background');
+  const isViewfinderActive = isFocused && isAppActive && isVisible;
+
+  // Explicit torch reset on blur, backgrounding, or visibility change
+  useEffect(() => {
+    if (!isViewfinderActive && torchEnabled) {
+      onResetTorch?.();
+    }
+  }, [isViewfinderActive, torchEnabled, onResetTorch]);
+
+  useEffect(() => {
+    return () => {
+      if (torchEnabled) {
+        onResetTorch?.();
+      }
+    };
+  }, [torchEnabled, onResetTorch]);
 
   // Animated laser line
   const laserAnim = useRef(new Animated.Value(0)).current;
@@ -93,8 +137,21 @@ export const CameraViewfinder: React.FC<CameraViewfinderProps> = ({
     onScan(randomCode);
   };
 
-  const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
-  const hasCamera = isNative && permission?.granted && !useSimulator;
+  const isPermissionDenied =
+    !permission?.granted &&
+    (permission?.status === 'denied' || permission?.canAskAgain === false);
+
+  const handleOpenSettings = async () => {
+    try {
+      if (typeof Linking.openSettings === 'function') {
+        await Linking.openSettings();
+      }
+    } catch (err) {
+      console.warn('[CameraViewfinder] Failed to open settings:', err);
+    }
+  };
+
+  const hasCamera = isNative && permission?.granted && isViewfinderActive && !useSimulator;
 
   return (
     <View
@@ -124,36 +181,91 @@ export const CameraViewfinder: React.FC<CameraViewfinderProps> = ({
           onBarcodeScanned={handleBarcodeScanned}
         />
       ) : (
-        <View style={styles.fallbackBackground}>
-          <Text style={[styles.simText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, lineHeight: typography.lineHeight.sm }]}>
-            {Platform.OS === 'web'
-              ? 'Web Simulator Mode Active'
-              : !permission?.granted
-              ? 'Camera Permission Required'
-              : 'Simulator Mode Active'}
-          </Text>
-
-          {!permission?.granted && isNative ? (
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Camera size={16} color={colors.primaryForeground} />}
-              onPress={requestPermission}
-              style={{ marginTop: 8 }}
-            >
-              Grant Camera Permission
-            </Button>
+        <View style={styles.fallbackBackground} testID="camera-viewfinder-fallback">
+          {isNative && isPermissionDenied ? (
+            <View style={styles.deniedContainer} testID="camera-permission-denied-message">
+              <CameraOff size={32} color={colors.destructive} style={{ marginBottom: 6 }} />
+              <Text
+                style={[
+                  styles.deniedTitle,
+                  { color: colors.foreground, fontSize: typography.fontSize.sm },
+                ]}
+              >
+                Camera Access Disabled
+              </Text>
+              <Text
+                style={[
+                  styles.deniedDesc,
+                  { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
+                ]}
+              >
+                Camera permission is denied. Please enable camera access in your device settings to scan equipment barcodes, or use manual code entry below.
+              </Text>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Settings size={14} color={colors.primaryForeground} />}
+                onPress={handleOpenSettings}
+                style={{ marginTop: 10 }}
+                testID="open-camera-settings-btn"
+              >
+                Open Settings
+              </Button>
+            </View>
+          ) : isNative && !permission?.granted ? (
+            <View style={styles.promptContainer}>
+              <Camera size={32} color={colors.primary} style={{ marginBottom: 6 }} />
+              <Text
+                style={[
+                  styles.simText,
+                  { color: colors.foreground, fontSize: typography.fontSize.sm },
+                ]}
+              >
+                Camera Permission Required
+              </Text>
+              <Text
+                style={[
+                  styles.deniedDesc,
+                  { color: colors.mutedForeground, fontSize: typography.fontSize.xs, marginTop: 4 },
+                ]}
+              >
+                Allow Kuro Mobile to access your device camera to scan barcodes and asset tags.
+              </Text>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Camera size={16} color={colors.primaryForeground} />}
+                onPress={requestPermission}
+                style={{ marginTop: 10 }}
+                testID="grant-camera-permission-btn"
+              >
+                Grant Camera Permission
+              </Button>
+            </View>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              icon={<Play size={14} color={colors.foreground} />}
-              onPress={handleSimulatedScan}
-              style={{ marginTop: 8 }}
-              testID="simulate-scan-trigger-btn"
-            >
-              Simulate Barcode Scan
-            </Button>
+            <View style={styles.simulatorContainer}>
+              <Text
+                style={[
+                  styles.simText,
+                  { color: colors.mutedForeground, fontSize: typography.fontSize.sm, lineHeight: typography.lineHeight.sm },
+                ]}
+              >
+                {Platform.OS === 'web'
+                  ? 'Web Simulator Mode Active'
+                  : 'Simulator Mode Active'}
+              </Text>
+
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<Play size={14} color={colors.foreground} />}
+                onPress={handleSimulatedScan}
+                style={{ marginTop: 8 }}
+                testID="simulate-scan-trigger-btn"
+              >
+                Simulate Barcode Scan
+              </Button>
+            </View>
           )}
         </View>
       )}
@@ -256,6 +368,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
+  },
+  deniedContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  deniedTitle: {
+    fontFamily: 'Calibri',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  deniedDesc: {
+    fontFamily: 'Calibri',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  promptContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  simulatorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   simText: {
     fontFamily: 'Calibri',

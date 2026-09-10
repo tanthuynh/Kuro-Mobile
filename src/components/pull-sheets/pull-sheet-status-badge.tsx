@@ -12,6 +12,9 @@ import type { PullsheetItemStatus } from '@/types/pull-sheet';
 
 export interface PullSheetStatusBadgeProps {
   status?: string | PullsheetItemStatus;
+  scannedQuantity?: number;
+  targetQuantity?: number;
+  labelOverride?: string;
   onAdvance?: () => void;
   style?: ViewStyle;
   testID?: string;
@@ -19,6 +22,9 @@ export interface PullSheetStatusBadgeProps {
 
 export const PullSheetStatusBadge: React.FC<PullSheetStatusBadgeProps> = ({
   status = 'pending',
+  scannedQuantity,
+  targetQuantity,
+  labelOverride,
   onAdvance,
   style,
   testID,
@@ -26,6 +32,17 @@ export const PullSheetStatusBadge: React.FC<PullSheetStatusBadgeProps> = ({
   const { typography } = useTheme();
   const normalized = normalizePullsheetStatus(status);
   const config = STATUS_DISPLAY_CONFIG[normalized] || STATUS_DISPLAY_CONFIG.none;
+
+  let displayLabel = labelOverride || config.label;
+  if (!labelOverride && normalized === 'prepped_scanned') {
+    const target = targetQuantity !== undefined ? targetQuantity : 1;
+    const scanned = scannedQuantity !== undefined ? scannedQuantity : 0;
+    if (scanned > 0 && scanned < target) {
+      displayLabel = `Prepped ${scanned}/${target}`;
+    } else {
+      displayLabel = 'Prepped';
+    }
+  }
 
   const content = (
     <View
@@ -39,7 +56,6 @@ export const PullSheetStatusBadge: React.FC<PullSheetStatusBadgeProps> = ({
         style,
       ]}
     >
-      <View style={[styles.dot, { backgroundColor: config.color }]} />
       <Text
         style={[
           styles.badgeText,
@@ -49,7 +65,7 @@ export const PullSheetStatusBadge: React.FC<PullSheetStatusBadgeProps> = ({
           },
         ]}
       >
-        {config.label}
+        {displayLabel}
       </Text>
     </View>
   );

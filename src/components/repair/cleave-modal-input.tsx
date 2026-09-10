@@ -29,6 +29,7 @@ import {
 import { X, Search, Check, Edit2 } from 'lucide-react-native';
 import { useTheme } from '@/context/theme-context';
 import { Badge } from '@/components/ui/badge';
+import { platformShadow } from '@/lib/shadows';
 
 export interface CleaveModalInputProps<T = any> {
   label: string;
@@ -521,11 +522,13 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 18,
     borderWidth: 1,
     paddingBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 10,
+    ...platformShadow({
+      color: '#000',
+      offsetY: -3,
+      opacity: 0.25,
+      radius: 8,
+      elevation: 10,
+    }),
   },
   modalHeader: {
     flexDirection: 'row',

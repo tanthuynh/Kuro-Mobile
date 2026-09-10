@@ -9,7 +9,7 @@
  * Vehicle name/rego with Truck size 14.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -36,6 +36,7 @@ import {
   isJobPlanned,
   isJobScheduled,
 } from '@/lib/logistics-engine';
+import { fetchVehicleById, formatVehicleDisplayName } from '@/services/logistics-service';
 import type { LogisticsEntry } from '@/types/logistics';
 
 export interface LogisticsJobCardProps {
@@ -60,6 +61,34 @@ export function LogisticsJobCard({
     }
   };
 
+  // Resolve human-readable vehicle name from vehicleId if vehicleName not present
+  const [resolvedVehicleName, setResolvedVehicleName] = useState<string | null>(
+    job.vehicleName || null
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (job.vehicleName || !job.vehicleId || !job.vehicleId.trim()) {
+      return;
+    }
+
+    fetchVehicleById(job.vehicleId, job.tenantId)
+      .then((vehicle) => {
+        if (!isMounted) return;
+        setResolvedVehicleName(formatVehicleDisplayName(vehicle, job.vehicleId));
+      })
+      .catch(() => {
+        if (isMounted) setResolvedVehicleName(job.vehicleId || null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [job.vehicleId, job.vehicleName, job.tenantId]);
+
+  const vehicleDisplay = job.vehicleName || resolvedVehicleName || job.vehicleId;
+
   const getStatusColor = (status?: string): string => {
     if (!status) return colors.mutedForeground;
     const s = status.trim().toLowerCase();
@@ -76,12 +105,12 @@ export function LogisticsJobCard({
 
   const jobNumDisplay =
     job.eventNumber !== undefined && job.eventNumber !== null
-      ? `[#${job.eventNumber}]`
+      ? `[${job.eventNumber}]`
       : job.id
-      ? `[#${job.id.substring(0, 6).toUpperCase()}]`
+      ? `[${job.id.substring(0, 6).toUpperCase()}]`
       : '[JOB]';
 
-  const titleDisplay = job.eventName || job.location || `Job #${job.id.substring(0, 7).toUpperCase()}`;
+  const titleDisplay = job.eventName || job.location || `Job ${job.id.substring(0, 7).toUpperCase()}`;
 
   const startDate = parseFirestoreDate(job.start);
   const endDate = parseFirestoreDate(job.end);
@@ -107,7 +136,7 @@ export function LogisticsJobCard({
         accessibilityLabel={`Logistics job ${jobNumDisplay} ${titleDisplay}, status ${job.status}`}
       >
         <CardContent style={styles.content}>
-          {/* Top Row: [Job/Event ID] + Name/Title (Left) & Tinted Status Badge (Right) */}
+          {/* Top Row: [Job/Event ID] + Name/Title + Date (Left) & Tinted Status Badge (Right) */}
           <View style={styles.topRow}>
             <View style={styles.jobTitleContainer}>
               <Text style={[styles.jobIdText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
@@ -122,6 +151,23 @@ export function LogisticsJobCard({
               >
                 {titleDisplay}
               </Text>
+              {scheduleDisplay ? (
+                <>
+                  <Text style={[styles.separatorDot, { color: colors.border, marginHorizontal: 6 }]}>•</Text>
+                  <View style={styles.dateMetaItem}>
+                    <Calendar size={13} color={colors.mutedForeground} />
+                    <Text
+                      style={[
+                        styles.dateText,
+                        { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginLeft: 4 },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {scheduleDisplay}
+                    </Text>
+                  </View>
+                </>
+              ) : null}
             </View>
 
             <View style={styles.statusContainer}>
@@ -150,7 +196,7 @@ export function LogisticsJobCard({
             </View>
           </View>
 
-          {/* Second Row: Left Meta (Location, Date, Stops, Live GPS) | Right Meta (Driver, Vehicle) */}
+          {/* Second Row: Left Meta (Location, Stops, Live GPS) | Right Meta (Driver, Vehicle) */}
           <View style={styles.secondRow}>
             <View style={styles.leftMetaGroup}>
               {job.location ? (
@@ -165,23 +211,7 @@ export function LogisticsJobCard({
                 </View>
               ) : null}
 
-              {job.location && scheduleDisplay ? (
-                <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
-              ) : null}
-
-              {scheduleDisplay ? (
-                <View style={styles.metaItem}>
-                  <Calendar size={14} color={colors.mutedForeground} />
-                  <Text
-                    style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
-                    numberOfLines={1}
-                  >
-                    {scheduleDisplay}
-                  </Text>
-                </View>
-              ) : null}
-
-              {(job.location || scheduleDisplay) && destinationCount > 0 ? (
+              {job.location && destinationCount > 0 ? (
                 <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
               ) : null}
 
@@ -194,7 +224,7 @@ export function LogisticsJobCard({
                 </View>
               ) : null}
 
-              {(job.location || scheduleDisplay || destinationCount > 0) && isTracking ? (
+              {(job.location || destinationCount > 0) && isTracking ? (
                 <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
               ) : null}
 
@@ -236,8 +266,9 @@ export function LogisticsJobCard({
                     <Text
                       style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
                       numberOfLines={1}
+                      testID={`job-vehicle-name-${job.id}`}
                     >
-                      {job.vehicleId}
+                      {vehicleDisplay}
                     </Text>
                   </View>
                 </>
@@ -285,6 +316,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     lineHeight: 20,
+  },
+  dateMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    flexShrink: 1,
+  },
+  dateText: {
+    fontFamily: 'Calibri',
+    fontSize: 13,
+    fontWeight: '500',
+    lineHeight: 18,
   },
   statusContainer: {
     flexShrink: 0,

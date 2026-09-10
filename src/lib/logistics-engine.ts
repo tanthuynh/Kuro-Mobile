@@ -406,6 +406,12 @@ export function filterLogisticsForDriver(
       if (entry.status && entry.status.toLowerCase().includes(q)) {
         return true;
       }
+      if (entry.vehicleName && entry.vehicleName.toLowerCase().includes(q)) {
+        return true;
+      }
+      if (entry.vehicleId && entry.vehicleId.toLowerCase().includes(q)) {
+        return true;
+      }
 
       // Check destinations
       if (entry.destinations && Array.isArray(entry.destinations)) {

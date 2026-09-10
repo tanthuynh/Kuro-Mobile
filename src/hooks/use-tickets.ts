@@ -3,7 +3,7 @@
  * React Hook for Real-Time Multi-Tenant Repair Tickets Subscriptions and Filters.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
 import {
   subscribeTenantRepairTickets,
@@ -23,6 +23,9 @@ import {
   fetchTenantSuppliers,
   fetchTenantOwners,
   fetchTenantCrewMembers,
+  getPendingRepairOperations,
+  reconcilePendingRepairOperationsOnColdStart,
+  retryPendingRepairOperation,
 } from '@/services/repair-service';
 import {
   filterRepairTickets,
@@ -38,6 +41,7 @@ import type {
   RepairAttachment,
   CreateRepairTicketInput,
   TenantOwner,
+  PendingRepairOperationRecord,
 } from '@/types/repair';
 
 export interface RepairMetrics {
@@ -59,6 +63,68 @@ export function useTickets() {
   const [tickets, setTickets] = useState<RepairTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [pendingOperations, setPendingOperations] = useState<PendingRepairOperationRecord[]>([]);
+
+  // Synchronously purge stale tickets when tenantId changes
+  const currentTenantRef = useRef(tenantId);
+  if (currentTenantRef.current !== tenantId) {
+    currentTenantRef.current = tenantId;
+    setTickets([]);
+    setPendingOperations([]);
+    setLoading(tenantId ? true : false);
+    setError(null);
+  }
+
+  const userId = user?.id || (user as any)?.uid || 'system';
+
+  const refreshPendingOps = useCallback(async () => {
+    if (!tenantId) {
+      setPendingOperations([]);
+      return;
+    }
+    try {
+      const ops = await getPendingRepairOperations(tenantId, userId);
+      setPendingOperations(Array.isArray(ops) ? ops : []);
+    } catch (err) {
+      console.warn('[useTickets] Error fetching pending operations:', err);
+    }
+  }, [tenantId, userId]);
+
+  // Cold-start reconciliation on mount or tenant switch
+  useEffect(() => {
+    if (!tenantId) {
+      setPendingOperations([]);
+      return;
+    }
+    let isMounted = true;
+    reconcilePendingRepairOperationsOnColdStart(tenantId, userId)
+      .then(async () => {
+        if (isMounted) {
+          const ops = await getPendingRepairOperations(tenantId, userId);
+          setPendingOperations(Array.isArray(ops) ? ops : []);
+        }
+      })
+      .catch((err) => {
+        console.warn('[useTickets] Cold start pending repair reconciliation warning:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [tenantId, userId]);
+
+  const handleRetryOperation = useCallback(
+    async (operationId: string) => {
+      if (!tenantId) throw new Error('Cannot retry operation: tenantId missing');
+      const ops = await getPendingRepairOperations(tenantId, userId);
+      const record = ops.find((o) => o.operationId === operationId);
+      if (!record) throw new Error(`Pending operation ${operationId} not found`);
+      const response = await retryPendingRepairOperation(record);
+      await refreshPendingOps();
+      return response;
+    },
+    [tenantId, userId, refreshPendingOps]
+  );
 
   // Filter States
   const [statusFilter, setStatusFilter] = useState<string>('All');
@@ -145,13 +211,20 @@ export function useTickets() {
   const handleCreateTicket = useCallback(
     async (input: CreateRepairTicketInput) => {
       if (!tenantId) throw new Error('Cannot create ticket: tenantId missing');
-      return await createRepairTicket(tenantId, {
-        ...input,
-        requestedBy: input.requestedBy || user?.name || user?.email || 'Field Tech',
-        assignee: input.assignee || (user ? { id: user.id, name: user.name, email: user.email } : null),
-      });
+      try {
+        const res = await createRepairTicket(tenantId, {
+          ...input,
+          requestedBy: input.requestedBy || user?.name || user?.email || 'Field Tech',
+          assignee: input.assignee || (user ? { id: user.id, name: user.name, email: user.email } : null),
+        });
+        await refreshPendingOps();
+        return res;
+      } catch (err) {
+        await refreshPendingOps();
+        throw err;
+      }
     },
-    [tenantId, user]
+    [tenantId, user, refreshPendingOps]
   );
 
   const handleUpdateStatus = useCallback(
@@ -243,6 +316,11 @@ export function useTickets() {
     updateTicketFields: handleUpdateTicketFields,
     appendAction: handleAppendAction,
     appendNote: handleAppendNote,
+    // Durable Pending Operations
+    pendingOperations,
+    hasPendingOperations: (pendingOperations?.length ?? 0) > 0,
+    retryOperation: handleRetryOperation,
+    refreshPendingOperations: refreshPendingOps,
   };
 }
 
@@ -253,6 +331,18 @@ export function useSingleTicket(ticketId: string) {
   const [ticket, setTicket] = useState<RepairTicket | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Synchronously purge stale ticket when ticketId or tenantId changes
+  const currentScopeRef = useRef({ ticketId, tenantId });
+  if (
+    currentScopeRef.current.ticketId !== ticketId ||
+    currentScopeRef.current.tenantId !== tenantId
+  ) {
+    currentScopeRef.current = { ticketId, tenantId };
+    setTicket(null);
+    setLoading(ticketId && tenantId ? true : false);
+    setError(null);
+  }
 
   // Live real-time Firestore listener for all fields on the ticket document
   useEffect(() => {
@@ -267,14 +357,24 @@ export function useSingleTicket(ticketId: string) {
       ticketId,
       tenantId,
       (liveTicket) => {
-        setTicket(liveTicket);
-        setLoading(false);
-        setError(null);
+        if (
+          currentScopeRef.current.ticketId === ticketId &&
+          currentScopeRef.current.tenantId === tenantId
+        ) {
+          setTicket(liveTicket);
+          setLoading(false);
+          setError(null);
+        }
       },
       (err) => {
-        console.error('[useSingleTicket] Realtime subscription error:', err);
-        setError(err);
-        setLoading(false);
+        if (
+          currentScopeRef.current.ticketId === ticketId &&
+          currentScopeRef.current.tenantId === tenantId
+        ) {
+          console.error('[useSingleTicket] Realtime subscription error:', err);
+          setError(err);
+          setLoading(false);
+        }
       }
     );
 
@@ -549,16 +649,32 @@ export function useTenantSuppliers() {
   const [suppliers, setSuppliers] = useState<Array<{ id: string; name: string; type?: string }>>([]);
   const [loading, setLoading] = useState(false);
 
+  // Synchronously purge stale suppliers when tenantId changes
+  const currentTenantRef = useRef(tenantId);
+  if (currentTenantRef.current !== tenantId) {
+    currentTenantRef.current = tenantId;
+    setSuppliers([]);
+    setLoading(tenantId ? true : false);
+  }
+
   const fetchSuppliers = useCallback(async () => {
-    if (!tenantId) return;
+    if (!tenantId) {
+      setSuppliers([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const data = await fetchTenantSuppliers(tenantId);
-      setSuppliers(data);
+      if (currentTenantRef.current === tenantId) {
+        setSuppliers(data);
+      }
     } catch (err) {
       console.warn('[useTenantSuppliers] error:', err);
     } finally {
-      setLoading(false);
+      if (currentTenantRef.current === tenantId) {
+        setLoading(false);
+      }
     }
   }, [tenantId]);
 
@@ -578,16 +694,32 @@ export function useTenantOwners() {
   const [owners, setOwners] = useState<TenantOwner[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Synchronously purge stale owners when tenantId changes
+  const currentTenantRef = useRef(tenantId);
+  if (currentTenantRef.current !== tenantId) {
+    currentTenantRef.current = tenantId;
+    setOwners([]);
+    setLoading(tenantId ? true : false);
+  }
+
   const fetchOwners = useCallback(async () => {
-    if (!tenantId) return;
+    if (!tenantId) {
+      setOwners([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const data = await fetchTenantOwners(tenantId);
-      setOwners(data);
+      if (currentTenantRef.current === tenantId) {
+        setOwners(data);
+      }
     } catch (err) {
       console.warn('[useTenantOwners] error:', err);
     } finally {
-      setLoading(false);
+      if (currentTenantRef.current === tenantId) {
+        setLoading(false);
+      }
     }
   }, [tenantId]);
 
@@ -607,16 +739,32 @@ export function useTenantCrew() {
   const [crew, setCrew] = useState<Array<{ id: string; name: string; email?: string }>>([]);
   const [loading, setLoading] = useState(false);
 
+  // Synchronously purge stale crew when tenantId changes
+  const currentTenantRef = useRef(tenantId);
+  if (currentTenantRef.current !== tenantId) {
+    currentTenantRef.current = tenantId;
+    setCrew([]);
+    setLoading(tenantId ? true : false);
+  }
+
   const fetchCrew = useCallback(async () => {
-    if (!tenantId) return;
+    if (!tenantId) {
+      setCrew([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const data = await fetchTenantCrewMembers(tenantId);
-      setCrew(data);
+      if (currentTenantRef.current === tenantId) {
+        setCrew(data);
+      }
     } catch (err) {
       console.warn('[useTenantCrew] error:', err);
     } finally {
-      setLoading(false);
+      if (currentTenantRef.current === tenantId) {
+        setLoading(false);
+      }
     }
   }, [tenantId]);
 

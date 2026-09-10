@@ -270,4 +270,175 @@ describe('Milestone 3: Pull Sheet Management UI', () => {
       expect(result.current.searchQuery).toBe('Rigging');
     });
   });
+
+  describe('PullSheetItemRow Notes', () => {
+    it('renders internal note directly without "Note: " prefix', () => {
+      const itemWithNote: PullsheetItem = {
+        id: 'item-note-test',
+        description: 'Microphone Stand Heavy Base',
+        quantity: 4,
+        type: 'item',
+        status: 'confirmed',
+        internalNote: 'Inspect rubber feet before loading',
+      };
+      const { getByText, queryByText } = render(<PullSheetItemRow item={itemWithNote} />);
+      expect(getByText('Inspect rubber feet before loading')).toBeTruthy();
+      expect(queryByText(/Note:/i)).toBeNull();
+    });
+  });
+
+  describe('Unified Event Details & Pull Sheet Screen', () => {
+    it('renders unified event details screen with compact logistics and start scanning button', () => {
+      const mockPush = jest.fn();
+      const expoRouter = require('expo-router');
+      expoRouter.useRouter = () => ({
+        push: mockPush,
+        replace: jest.fn(),
+        back: jest.fn(),
+      });
+      expoRouter.useLocalSearchParams = () => ({ id: 'ev-101' });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
+        onUpdate(samplePullsheet);
+        return jest.fn();
+      });
+
+      const eventService = require('@/services/event-service');
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((id: any, tenantId: any, onData: any) => {
+        onData({
+          id: 'ev-101',
+          tenantId: 'tenant-abc',
+          eventName: 'Neon Horizon Music Festival',
+          eventNumber: 1042,
+          eventStatusId: 'Confirmed',
+          clientId: 'LiveNation APAC',
+          venueId: 'Sydney Showground Hall 5',
+          startTime: new Date('2026-08-25T08:00:00.000Z'),
+          finishTime: new Date('2026-08-25T10:00:00.000Z'),
+        });
+        return jest.fn();
+      });
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByText, getByTestId } = render(<EventDetailsScreen />);
+
+      // Event Details Header & Status
+      expect(getByText('Neon Horizon Music Festival')).toBeTruthy();
+      expect(getByText('[1042]')).toBeTruthy();
+
+      // Compact Schedule & Logistics Card
+      expect(getByTestId('event-client-venue-card')).toBeTruthy();
+      expect(getByText('PLANNING')).toBeTruthy();
+
+      // Equipment Section
+      expect(getByText('Equipment Pull Sheet')).toBeTruthy();
+      expect(getByTestId('pullsheet-progress-card')).toBeTruthy();
+      expect(getByText('Main Stage Audio Rig')).toBeTruthy();
+      expect(getByText('L-Acoustics K2 Line Array')).toBeTruthy();
+
+      // Sticky Bottom Action Bar
+      const scannerBtn = getByTestId('start-scanning-btn');
+      expect(scannerBtn).toBeTruthy();
+      expect(getByText('Start Scanning')).toBeTruthy();
+
+      // Tap Start Scanning expands in-sheet scanner
+      fireEvent.press(scannerBtn);
+      expect(getByTestId('scanner-expandable-sheet')).toBeTruthy();
+
+      // Child sub-item (Shackle & Safety Cable Kit) belonging to active prepped parent (K2 Rigging Bumper) is visible
+      expect(getByText('K2 Rigging Bumper')).toBeTruthy();
+      expect(getByText('Shackle & Safety Cable Kit')).toBeTruthy();
+      expect(getByText('L-Acoustics K2 Line Array')).toBeTruthy();
+    });
+
+    it('hides child items when parent item status is pending or none in scanner mode', () => {
+      const mockPush = jest.fn();
+      const expoRouter = require('expo-router');
+      expoRouter.useRouter = () => ({
+        push: mockPush,
+        replace: jest.fn(),
+        back: jest.fn(),
+      });
+      expoRouter.useLocalSearchParams = () => ({ id: 'ev-101' });
+
+      const pendingParentPullsheet: Pullsheet = {
+        id: 'ev-101',
+        eventId: 'ev-101',
+        tenantId: 'tenant-abc',
+        items: [
+          {
+            id: 'sec-1',
+            description: 'Staging & Rigging',
+            type: 'section-header',
+            quantity: 0,
+            status: 'none',
+          },
+          {
+            id: 'item-pend-parent',
+            description: 'Motor Hoist Distro Box',
+            quantity: 1,
+            type: 'item',
+            status: 'pending',
+            sectionId: 'sec-1',
+          },
+          {
+            id: 'sub-pend-child',
+            description: 'Pendant Remote Controller',
+            quantity: 1,
+            type: 'sub-item',
+            parentItemId: 'item-pend-parent',
+            status: 'none',
+            sectionId: 'sec-1',
+          },
+          {
+            id: 'item-conf-standalone',
+            description: 'Steel Cable Choker',
+            quantity: 4,
+            type: 'item',
+            status: 'confirmed',
+            sectionId: 'sec-1',
+          },
+        ],
+      };
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
+        onUpdate(pendingParentPullsheet);
+        return jest.fn();
+      });
+
+      const eventService = require('@/services/event-service');
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((id: any, tenantId: any, onData: any) => {
+        onData({
+          id: 'ev-101',
+          tenantId: 'tenant-abc',
+          eventName: 'Neon Horizon Music Festival',
+          eventNumber: 1042,
+          eventStatusId: 'Confirmed',
+          clientId: 'LiveNation APAC',
+          venueId: 'Sydney Showground Hall 5',
+          startTime: new Date('2026-08-25T08:00:00.000Z'),
+          finishTime: new Date('2026-08-25T10:00:00.000Z'),
+        });
+        return jest.fn();
+      });
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByText, getByTestId, queryByText } = render(<EventDetailsScreen />);
+
+      // In regular mode: all items are visible
+      expect(getByText('Motor Hoist Distro Box')).toBeTruthy();
+      expect(getByText('Pendant Remote Controller')).toBeTruthy();
+      expect(getByText('Steel Cable Choker')).toBeTruthy();
+
+      // Enter scanner mode
+      fireEvent.press(getByTestId('start-scanning-btn'));
+
+      // Both pending parent and its child are hidden
+      expect(queryByText('Motor Hoist Distro Box')).toBeNull();
+      expect(queryByText('Pendant Remote Controller')).toBeNull();
+
+      // Standalone confirmed item remains visible
+      expect(getByText('Steel Cable Choker')).toBeTruthy();
+    });
+  });
 });

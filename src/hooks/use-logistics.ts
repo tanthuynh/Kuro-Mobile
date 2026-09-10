@@ -5,7 +5,7 @@
  * computes driver filtered entries and aggregate metrics, and exposes mutation actions.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
 import {
   subscribeToLogistics,
@@ -16,6 +16,8 @@ import {
   appendLogisticsNote,
   updateJobLocation,
   stopJobTracking,
+  fetchVehicleById,
+  formatVehicleDisplayName,
 } from '@/services/logistics-service';
 import {
   filterLogisticsForDriver,
@@ -36,11 +38,11 @@ export interface UseLogisticsOptions {
 export interface UseLogisticsResult {
   entries: LogisticsEntry[];
   filteredEntries: LogisticsEntry[];
+  metrics: LogisticsMetrics;
   loading: boolean;
   error: Error | null;
-  metrics: LogisticsMetrics;
 
-  // Filter States & Setters
+  // Filter Controls
   onlyAssigned: boolean;
   setOnlyAssigned: (val: boolean | ((prev: boolean) => boolean)) => void;
   statusFilter: string;
@@ -70,6 +72,15 @@ export function useLogistics(options?: UseLogisticsOptions): UseLogisticsResult 
   const [entries, setEntries] = useState<LogisticsEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Synchronously purge stale logistics entries when tenantId changes
+  const currentTenantRef = useRef(tenantId);
+  if (currentTenantRef.current !== tenantId) {
+    currentTenantRef.current = tenantId;
+    setEntries([]);
+    setLoading(tenantId ? true : false);
+    setError(null);
+  }
 
   // Filter States
   const [onlyAssigned, setOnlyAssigned] = useState<boolean>(
@@ -123,21 +134,84 @@ export function useLogistics(options?: UseLogisticsOptions): UseLogisticsResult 
     };
   }, [user]);
 
+  // Resolved vehicle display names indexed by vehicleId
+  const [vehicleNamesMap, setVehicleNamesMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!entries.length || !tenantId) {
+      return;
+    }
+
+    const unmappedIds = Array.from(
+      new Set(
+        entries
+          .map((e) => e.vehicleId)
+          .filter((vId): vId is string => Boolean(vId && vId.trim() && !vehicleNamesMap[vId]))
+      )
+    );
+
+    if (!unmappedIds.length) {
+      return;
+    }
+
+    let isMounted = true;
+
+    Promise.all(
+      unmappedIds.map(async (vId) => {
+        try {
+          const veh = await fetchVehicleById(vId, tenantId);
+          return { vId, name: formatVehicleDisplayName(veh, vId) };
+        } catch {
+          return { vId, name: vId };
+        }
+      })
+    ).then((resolved) => {
+      if (!isMounted) return;
+      setVehicleNamesMap((prev) => {
+        const next = { ...prev };
+        resolved.forEach(({ vId, name }) => {
+          next[vId] = name;
+        });
+        return next;
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [entries, tenantId, vehicleNamesMap]);
+
+  // Enriched entries with resolved vehicleName
+  const enrichedEntries = useMemo(() => {
+    if (Object.keys(vehicleNamesMap).length === 0) {
+      return entries;
+    }
+    return entries.map((entry) => {
+      if (entry.vehicleId && vehicleNamesMap[entry.vehicleId]) {
+        return {
+          ...entry,
+          vehicleName: vehicleNamesMap[entry.vehicleId],
+        };
+      }
+      return entry;
+    });
+  }, [entries, vehicleNamesMap]);
+
   // Filtered entries computed via pure functional domain engine
   const filteredEntries = useMemo(() => {
     return filterLogisticsForDriver(
-      entries,
+      enrichedEntries,
       driverUser,
       onlyAssigned,
       statusFilter,
       searchQuery
     );
-  }, [entries, driverUser, onlyAssigned, statusFilter, searchQuery]);
+  }, [enrichedEntries, driverUser, onlyAssigned, statusFilter, searchQuery]);
 
   // Aggregated summary metrics across tenant entries
   const metrics = useMemo(() => {
-    return computeLogisticsMetrics(entries);
-  }, [entries]);
+    return computeLogisticsMetrics(enrichedEntries);
+  }, [enrichedEntries]);
 
   // Mutation: Update job status
   const handleUpdateStatus = useCallback(
@@ -201,7 +275,7 @@ export function useLogistics(options?: UseLogisticsOptions): UseLogisticsResult 
   }, [tenantId]);
 
   return {
-    entries,
+    entries: enrichedEntries,
     filteredEntries,
     loading,
     error,
@@ -248,6 +322,18 @@ export function useSingleLogistics(entryId?: string | null): UseSingleLogisticsR
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Synchronously purge stale entry when entryId or tenantId changes
+  const currentScopeRef = useRef({ entryId, tenantId });
+  if (
+    currentScopeRef.current.entryId !== entryId ||
+    currentScopeRef.current.tenantId !== tenantId
+  ) {
+    currentScopeRef.current = { entryId, tenantId };
+    setEntry(null);
+    setLoading(entryId && tenantId ? true : false);
+    setError(null);
+  }
+
   const fetchJob = useCallback(async () => {
     if (!entryId || !tenantId) {
       setEntry(null);
@@ -257,13 +343,28 @@ export function useSingleLogistics(entryId?: string | null): UseSingleLogisticsR
     setLoading(true);
     try {
       const data = await getLogisticsEntry(entryId, tenantId);
-      setEntry(data);
-      setError(null);
+      if (
+        currentScopeRef.current.entryId === entryId &&
+        currentScopeRef.current.tenantId === tenantId
+      ) {
+        setEntry(data);
+        setError(null);
+      }
     } catch (err: any) {
-      console.error('[useSingleLogistics] Fetch error:', err);
-      setError(err);
+      if (
+        currentScopeRef.current.entryId === entryId &&
+        currentScopeRef.current.tenantId === tenantId
+      ) {
+        console.error('[useSingleLogistics] Fetch error:', err);
+        setError(err);
+      }
     } finally {
-      setLoading(false);
+      if (
+        currentScopeRef.current.entryId === entryId &&
+        currentScopeRef.current.tenantId === tenantId
+      ) {
+        setLoading(false);
+      }
     }
   }, [entryId, tenantId]);
 
@@ -281,13 +382,23 @@ export function useSingleLogistics(entryId?: string | null): UseSingleLogisticsR
       entryId,
       tenantId,
       (liveEntry) => {
-        setEntry(liveEntry);
-        setLoading(false);
+        if (
+          currentScopeRef.current.entryId === entryId &&
+          currentScopeRef.current.tenantId === tenantId
+        ) {
+          setEntry(liveEntry);
+          setLoading(false);
+        }
       },
       (err) => {
-        console.error('[useSingleLogistics] Subscription error:', err);
-        setError(err);
-        setLoading(false);
+        if (
+          currentScopeRef.current.entryId === entryId &&
+          currentScopeRef.current.tenantId === tenantId
+        ) {
+          console.error('[useSingleLogistics] Subscription error:', err);
+          setError(err);
+          setLoading(false);
+        }
       }
     );
 

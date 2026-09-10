@@ -119,7 +119,7 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
               },
             ]}
           >
-            {scannedQty !== undefined ? `${scannedQty}/${targetQty}` : `x${targetQty}`}
+            {scannedQty !== undefined ? `${scannedQty}/${targetQty}` : `${targetQty}`}
           </Text>
         </View>
 
@@ -147,7 +147,7 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
               ]}
               numberOfLines={1}
             >
-              Note: {item.internalNote}
+              {item.internalNote}
             </Text>
           ) : null}
         </View>
@@ -157,6 +157,8 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
           <View style={styles.statusBadgeWrap}>
             <PullSheetStatusBadge
               status={item.status}
+              scannedQuantity={item.scannedQuantity}
+              targetQuantity={item.quantity}
               onAdvance={onAdvanceStatus ? () => onAdvanceStatus(item.id) : undefined}
             />
           </View>

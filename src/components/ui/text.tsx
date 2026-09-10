@@ -137,7 +137,7 @@ export const Text = forwardRef<RNText, TextProps>(
 
     return (
       <RNText
-        ref={ref}
+        ref={ref as any}
         style={[
           styles.base,
           { fontFamily },

@@ -194,6 +194,7 @@ export interface RepairTicket {
  * Input payload for creating a new repair ticket from mobile form / scanner.
  */
 export interface CreateRepairTicketInput {
+  id?: string;
   tenantId?: string;
   equipment: {
     id?: string | null;
@@ -354,4 +355,70 @@ export interface TenantCrewMember {
   avatarUrl?: string;
 }
 
+// ============================================================================
+// HARDENING & IDEMPOTENT COMMAND TYPES
+// ============================================================================
 
+export type RepairCommandAction =
+  | 'create_ticket'
+  | 'update_status'
+  | 'update_fields'
+  | 'add_attachment';
+
+export interface PendingRepairOperationRecord {
+  operationId: string;
+  tenantId: string;
+  userId: string;
+  ticketId?: string;
+  action: RepairCommandAction;
+  payload: Record<string, any>;
+  timestamp: number;
+  state: 'in_flight' | 'outcome_unknown' | 'reconciling';
+}
+
+export interface RepairCommandPayload {
+  operationId: string;
+  tenantId: string;
+  action: RepairCommandAction;
+  ticketId?: string;
+  clientTimestamp?: number;
+  ticketData?: any;
+  newStatus?: RepairStatus;
+  reason?: string;
+  updates?: any;
+  attachment?: RepairAttachment;
+}
+
+export interface RepairCommandResponse {
+  success: boolean;
+  status?: 'committed' | 'processing' | 'not_found' | 'error';
+  operationId?: string;
+  ticketId?: string;
+  repairNumber?: number;
+  ticket?: RepairTicket;
+  error?: string;
+}
+
+export interface RepairDraft {
+  tenantId?: string;
+  equipmentName?: string;
+  equipmentId?: string;
+  serialNumber?: string;
+  barcode?: string;
+  category?: string;
+  location?: string;
+  owner?: string;
+  supplierId?: string;
+  requestedBy?: string;
+  priority?: RepairPriority;
+  condition?: EquipmentCondition;
+  status?: RepairStatus;
+  faultDescription?: string;
+  internalNotes?: string;
+  internalReference?: string;
+  repairPeriodStart?: string | null;
+  repairPeriodEnd?: string | null;
+  stagedPhotos?: Array<{ id: string; url: string; uri?: string; fileName?: string }>;
+  lastModified?: number;
+  updatedAt?: number;
+}

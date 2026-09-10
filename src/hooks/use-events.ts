@@ -5,7 +5,7 @@
  * manages date offset scrubbing, and automatically categorizes jobs.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
 import {
   subscribeTenantEvents,
@@ -72,6 +72,15 @@ export function useEvents(optionsOrOffset: number | UseEventsOptions = 0): UseEv
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
 
+  // Synchronously purge stale events when tenantId changes (render-time identity guard)
+  const currentTenantRef = useRef(tenantId);
+  if (currentTenantRef.current !== tenantId) {
+    currentTenantRef.current = tenantId;
+    setEvents([]);
+    setLoading(tenantId ? true : false);
+    setError(null);
+  }
+
   useEffect(() => {
     if (!tenantId) {
       setEvents([]);
@@ -85,13 +94,17 @@ export function useEvents(optionsOrOffset: number | UseEventsOptions = 0): UseEv
     const unsubscribe = subscribeTenantEvents(
       tenantId,
       (fetchedEvents) => {
-        setEvents(fetchedEvents);
-        setLoading(false);
+        if (currentTenantRef.current === tenantId) {
+          setEvents(fetchedEvents);
+          setLoading(false);
+        }
       },
       (err) => {
-        console.error('[useEvents] Subscription error:', err);
-        setError(err);
-        setLoading(false);
+        if (currentTenantRef.current === tenantId) {
+          console.error('[useEvents] Subscription error:', err);
+          setError(err);
+          setLoading(false);
+        }
       }
     );
 
@@ -104,18 +117,26 @@ export function useEvents(optionsOrOffset: number | UseEventsOptions = 0): UseEv
     setTargetDateOffset(0);
   }, []);
 
+  const refreshGenRef = useRef(0);
   const refresh = useCallback(async () => {
     if (!tenantId) return;
+    const reqGen = ++refreshGenRef.current;
     try {
       setLoading(true);
       const freshEvents = await fetchTenantEvents(tenantId);
-      setEvents(freshEvents);
-      setError(null);
+      if (reqGen === refreshGenRef.current && currentTenantRef.current === tenantId) {
+        setEvents(freshEvents);
+        setError(null);
+      }
     } catch (err: any) {
-      console.error('[useEvents] Refresh error:', err);
-      setError(err);
+      if (reqGen === refreshGenRef.current) {
+        console.error('[useEvents] Refresh error:', err);
+        setError(err);
+      }
     } finally {
-      setLoading(false);
+      if (reqGen === refreshGenRef.current) {
+        setLoading(false);
+      }
     }
   }, [tenantId]);
 
@@ -203,6 +224,18 @@ export function useSingleEvent(eventId: string): UseSingleEventResult {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Synchronously purge stale event when eventId or tenantId changes
+  const currentScopeRef = useRef({ eventId, tenantId });
+  if (
+    currentScopeRef.current.eventId !== eventId ||
+    currentScopeRef.current.tenantId !== tenantId
+  ) {
+    currentScopeRef.current = { eventId, tenantId };
+    setEvent(null);
+    setLoading(eventId && tenantId ? true : false);
+    setError(null);
+  }
+
   useEffect(() => {
     if (!eventId || !tenantId) {
       setEvent(null);
@@ -217,13 +250,23 @@ export function useSingleEvent(eventId: string): UseSingleEventResult {
       eventId,
       tenantId,
       (fetchedEvent) => {
-        setEvent(fetchedEvent);
-        setLoading(false);
+        if (
+          currentScopeRef.current.eventId === eventId &&
+          currentScopeRef.current.tenantId === tenantId
+        ) {
+          setEvent(fetchedEvent);
+          setLoading(false);
+        }
       },
       (err) => {
-        console.error(`[useSingleEvent] Subscription error for ${eventId}:`, err);
-        setError(err);
-        setLoading(false);
+        if (
+          currentScopeRef.current.eventId === eventId &&
+          currentScopeRef.current.tenantId === tenantId
+        ) {
+          console.error(`[useSingleEvent] Subscription error for ${eventId}:`, err);
+          setError(err);
+          setLoading(false);
+        }
       }
     );
 
@@ -232,18 +275,30 @@ export function useSingleEvent(eventId: string): UseSingleEventResult {
     };
   }, [eventId, tenantId]);
 
+  const refreshGenRef = useRef(0);
   const refresh = useCallback(async () => {
     if (!eventId || !tenantId) return;
+    const reqGen = ++refreshGenRef.current;
     try {
       setLoading(true);
       const freshEvent = await fetchSingleEvent(eventId, tenantId);
-      setEvent(freshEvent);
-      setError(null);
+      if (
+        reqGen === refreshGenRef.current &&
+        currentScopeRef.current.eventId === eventId &&
+        currentScopeRef.current.tenantId === tenantId
+      ) {
+        setEvent(freshEvent);
+        setError(null);
+      }
     } catch (err: any) {
-      console.error(`[useSingleEvent] Refresh error for ${eventId}:`, err);
-      setError(err);
+      if (reqGen === refreshGenRef.current) {
+        console.error(`[useSingleEvent] Refresh error for ${eventId}:`, err);
+        setError(err);
+      }
     } finally {
-      setLoading(false);
+      if (reqGen === refreshGenRef.current) {
+        setLoading(false);
+      }
     }
   }, [eventId, tenantId]);
 

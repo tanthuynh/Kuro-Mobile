@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import { useTheme } from '@/context/theme-context';
+import { platformShadow } from '@/lib/shadows';
 
 export interface AutocompleteInputProps<T> {
   label?: string;
@@ -295,11 +296,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 4,
     zIndex: 9999,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
+    ...platformShadow({
+      color: '#000',
+      offsetY: 4,
+      opacity: 0.25,
+      radius: 6,
+      elevation: 8,
+    }),
     overflow: 'hidden',
   },
   dropdownScroll: {

@@ -123,6 +123,7 @@ export interface LogisticsEntry {
   id: string;
   tenantId: string;
   vehicleId?: string | null;
+  vehicleName?: string;
   driverName?: string;
   assigneeId?: string | null;
   eventName?: string;

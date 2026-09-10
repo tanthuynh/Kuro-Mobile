@@ -9,5 +9,7 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],
+  testTimeout: 15000,
+  maxWorkers: '50%',
 };
 

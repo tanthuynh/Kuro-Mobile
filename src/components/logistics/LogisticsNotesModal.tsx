@@ -119,7 +119,7 @@ export function LogisticsNotesModal({
         <View style={styles.inputContainer}>
           <Input
             label="Note Content"
-            placeholder="e.g. Loading dock requires security clearance badge, call site manager on arrival..."
+            placeholder=""
             value={content}
             onChangeText={(val) => {
               setContent(val);

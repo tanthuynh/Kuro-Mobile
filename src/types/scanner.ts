@@ -7,11 +7,14 @@
 import type { PullsheetItem } from './pull-sheet';
 import type { Equipment } from './equipment';
 
+export type ScanTargetStatus = 'confirmed' | 'prepped_scanned' | 'returned' | 'deprepped';
+
 export type ScanEvaluationType =
   | 'SUCCESS'
   | 'ALREADY_COMPLETED'
   | 'NOT_ON_PULLSHEET'
-  | 'UNKNOWN_CODE';
+  | 'UNKNOWN_CODE'
+  | 'INVALID_TRANSITION';
 
 export interface ScanEvaluationResult {
   type: ScanEvaluationType;
@@ -20,6 +23,8 @@ export interface ScanEvaluationResult {
   newScannedCount?: number;
   isFullyPrepped?: boolean;
   message?: string;
+  targetStatus?: ScanTargetStatus;
+  warningOnly?: boolean;
 }
 
 export type ScannerMode = 'continuous' | 'single' | 'lookup';

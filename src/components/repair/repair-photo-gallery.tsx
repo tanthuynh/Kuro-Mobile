@@ -25,6 +25,7 @@ import {
 
 import { useTheme } from '@/context/theme-context';
 import { Button } from '@/components/ui/button';
+import { platformShadow } from '@/lib/shadows';
 import type { RepairAttachment } from '@/types/repair';
 
 export interface RepairPhotoGalleryProps {
@@ -281,12 +282,13 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
+    ...platformShadow({
+      color: '#000',
+      offsetY: 1,
+      opacity: 0.3,
+      radius: 2,
+      elevation: 4,
+    }),
   },
   lightboxOverlay: {
     flex: 1,

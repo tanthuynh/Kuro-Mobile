@@ -31,10 +31,23 @@ import type {
   Role,
   LogoutReason,
   LogoutNotice,
+  UserProfileResult,
 } from '../types/auth';
 import { STORAGE_KEYS, API_CONFIG } from '../constants/config';
 
 export { STORAGE_KEYS };
+
+/**
+ * Sanitized logging helper that strips raw credential objects, tokens, and payloads.
+ */
+export function logAuthError(context: string, error: any): void {
+  const code = error?.code || 'unknown_code';
+  let msg = typeof error?.message === 'string' ? error.message : 'Unknown error occurred';
+  // Redact potential JWT tokens or credentials embedded in error messages
+  msg = msg.replace(/ey[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g, '[REDACTED_JWT]');
+  msg = msg.replace(/(password|secret|token|credential)=([^\s&]+)/gi, '$1=[REDACTED]');
+  console.error(`[authService] ${context} error (${code}): ${msg}`);
+}
 
 /**
  * Step 1: Resolve email address against Singapore Cloud Function / Firestore to determine Identity Platform Tenant ID.
@@ -203,7 +216,7 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
     return result;
 
   } catch (error: any) {
-    console.error('[authService] lookupAuthTenantId error:', error);
+    logAuthError('lookupAuthTenantId', error);
     
     // Map specific Firestore error codes
     if (error.code === 'unavailable' || error.message?.includes('network')) {
@@ -280,7 +293,7 @@ export async function signInWithTenant(
     };
 
   } catch (error: any) {
-    console.error('[authService] signInWithTenant error:', error);
+    logAuthError('signInWithTenant', error);
 
     let friendlyMessage = 'An unexpected error occurred during sign in. Please try again.';
 
@@ -323,7 +336,7 @@ export async function signInWithTenant(
 export async function getUserProfile(
   uid: string,
   email?: string
-): Promise<{ success: boolean; profile?: UserProfile; error?: string }> {
+): Promise<UserProfileResult> {
   try {
     if (!uid) {
       return { success: false, error: 'User UID is required.' };
@@ -346,10 +359,25 @@ export async function getUserProfile(
     }
 
     if (!userSnap.exists()) {
-      return { success: false, error: 'User profile not found in database.' };
+      return {
+        success: false,
+        isRevoked: true,
+        reason: 'profile_error',
+        error: 'User profile not found in database.',
+      };
     }
 
     const rawUser = { id: userSnap.id, ...userSnap.data() } as Partial<User>;
+
+    // Enforce account status check: inactive or disabled accounts are immediately rejected
+    if (rawUser.status === 'Inactive' || (rawUser as any).disabled === true) {
+      return {
+        success: false,
+        isRevoked: true,
+        reason: 'profile_error',
+        error: 'User account is inactive or disabled. Please contact your administrator.',
+      };
+    }
 
     let roleName = rawUser.role || '';
     let accessRights: string[] = rawUser.accessRights || [];
@@ -392,8 +420,8 @@ export async function getUserProfile(
           roleName = 'Client';
           accessRights = [];
         }
-      } catch (roleErr) {
-        console.warn('[authService] Could not fetch role doc for profile hydration:', roleErr);
+      } catch (roleErr: any) {
+        console.warn(`[authService] Could not fetch role doc for profile hydration (${roleErr?.code || 'unknown'}): ${roleErr?.message || ''}`);
       }
     }
 
@@ -402,17 +430,29 @@ export async function getUserProfile(
     let tenantSlug = '';
 
     if (!isSuperAdmin && rawUser.tenantId) {
-      try {
-        const tenantSnap = await getDoc(doc(db, 'tenants', rawUser.tenantId));
-        if (tenantSnap.exists()) {
-          const tenantData = tenantSnap.data() as Partial<Tenant>;
-          tenantName = tenantData.company || (tenantData as any).name || tenantData.slug || rawUser.tenantName || 'Amia Studios';
-          tenantSlug = tenantData.slug || '';
-          tenantModules = tenantData.enabledModules || tenantModules;
-        }
-      } catch (tenantErr) {
-        console.warn('[authService] Could not fetch tenant doc for profile hydration:', tenantErr);
+      const tenantSnap = await getDoc(doc(db, 'tenants', rawUser.tenantId));
+      if (!tenantSnap.exists()) {
+        return {
+          success: false,
+          isRevoked: true,
+          reason: 'profile_error',
+          error: 'Organization not found in database.',
+        };
       }
+
+      const tenantData = tenantSnap.data() as Partial<Tenant>;
+      if (tenantData.billingStatus === 'Cancelled') {
+        return {
+          success: false,
+          isRevoked: true,
+          reason: 'profile_error',
+          error: 'Organization subscription is cancelled. Please contact support.',
+        };
+      }
+
+      tenantName = tenantData.company || (tenantData as any).name || tenantData.slug || rawUser.tenantName || 'Amia Studios';
+      tenantSlug = tenantData.slug || '';
+      tenantModules = tenantData.enabledModules || tenantModules;
     }
 
     const firstName = rawUser.firstName || '';
@@ -446,10 +486,27 @@ export async function getUserProfile(
     return { success: true, profile };
 
   } catch (error: any) {
-    console.error('[authService] getUserProfile error:', error);
+    logAuthError('getUserProfile', error);
+
+    const isTransient =
+      error?.code === 'unavailable' ||
+      error?.code === 'deadline-exceeded' ||
+      error?.message?.toLowerCase().includes('network') ||
+      error?.message?.toLowerCase().includes('offline') ||
+      error?.message?.toLowerCase().includes('failed to fetch');
+
+    const isRevoked =
+      error?.code === 'permission-denied' ||
+      error?.code === 'unauthenticated' ||
+      error?.code === 'auth/user-disabled' ||
+      error?.code === 'auth/user-token-expired';
+
     return {
       success: false,
-      error: error.message || 'Failed to load user profile.',
+      isTransient,
+      isRevoked,
+      reason: isRevoked ? 'auth_revoked' : undefined,
+      error: error?.message || 'Failed to load user profile.',
     };
   }
 }
@@ -463,32 +520,58 @@ export async function signOutUser(reason: LogoutReason = 'manual'): Promise<void
 
     // 1. Teardown RTDB online presence and active connection records
     if (currentUid && reason !== 'session') {
-      await stopPresence(currentUid);
+      await stopPresence(currentUid).catch(() => {});
     }
 
-    // 2. Store logout notice for display after navigation
+    // 2. Teardown background GPS tracking if active
+    try {
+      const { stopTrackingJob } = require('./location-tracking-service');
+      if (typeof stopTrackingJob === 'function') {
+        await stopTrackingJob();
+      }
+    } catch {}
+
+    // 3. Clear equipment cache and notify identity loss
+    try {
+      const { clearEquipmentCache, handleAuthIdentityChange } = require('./equipment-cache');
+      if (typeof clearEquipmentCache === 'function') {
+        clearEquipmentCache();
+      }
+      if (typeof handleAuthIdentityChange === 'function') {
+        handleAuthIdentityChange(null);
+      }
+    } catch {}
+
+    // 4. Store logout notice for display after navigation
     if (reason !== 'manual') {
       const notice = createLogoutNotice(reason);
       await AsyncStorage.setItem(STORAGE_KEYS.LOGOUT_NOTICE, JSON.stringify(notice));
     }
 
-    // 3. Clear cached profile and tokens from AsyncStorage
+    // 5. Clear cached profile, tokens, session, and tenant lookup from AsyncStorage
     await AsyncStorage.multiRemove([
       STORAGE_KEYS.USER_PROFILE,
       STORAGE_KEYS.AUTH_TENANT_ID,
       STORAGE_KEYS.SESSION_ID,
+      STORAGE_KEYS.TENANT_LOOKUP,
     ]);
 
-    // 4. Reset tenant scoping on Firebase Auth
+    // 6. Reset tenant scoping on Firebase Auth
     auth.tenantId = null;
 
-    // 5. Sign out from Firebase Auth
+    // 7. Sign out from Firebase Auth
     await firebaseSignOut(auth);
 
-  } catch (error) {
-    console.error('[authService] signOutUser error:', error);
-    // Ensure auth tenantId is cleared even on error
+  } catch (error: any) {
+    logAuthError('signOutUser', error);
+    // Ensure auth tenantId and storage are cleared even on error
     auth.tenantId = null;
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.USER_PROFILE,
+      STORAGE_KEYS.AUTH_TENANT_ID,
+      STORAGE_KEYS.SESSION_ID,
+      STORAGE_KEYS.TENANT_LOOKUP,
+    ]).catch(() => {});
     await firebaseSignOut(auth).catch(() => {});
   }
 }
@@ -555,7 +638,7 @@ export async function sendTenantPasswordReset(
 
     return { success: true };
   } catch (error: any) {
-    console.error('[authService] sendTenantPasswordReset error:', error);
+    logAuthError('sendTenantPasswordReset', error);
     return {
       success: false,
       error: error.message || 'Failed to send password reset email.',

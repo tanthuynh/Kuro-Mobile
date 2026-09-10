@@ -632,7 +632,7 @@ describe('Tier 5 Adversarial & Empirical Challenge Suite (Milestone 1)', () => {
 
       expect(mockStorage.ref).toHaveBeenCalledWith(
         expect.anything(),
-        expect.stringMatching(new RegExp(`^tenants/${tenantId}/repairs/${ticketId}/attachments/`))
+        expect.stringMatching(new RegExp(`^tenants/${tenantId}/entity_documents/repair-${ticketId}/`))
       );
       expect(result.url).toBe('https://storage.googleapis.com/test-photo.jpg');
     });

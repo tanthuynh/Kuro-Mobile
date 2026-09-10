@@ -35,8 +35,17 @@ import {
 import { useTheme } from '@/context/theme-context';
 import { useAuth } from '@/context/auth-context';
 import { useLogisticsJob } from '@/hooks/use-logistics';
-import { startTrackingJob, stopTrackingJob } from '@/services/location-tracking-service';
-import { fetchVehicleById } from '@/services/logistics-service';
+import {
+  startTrackingJob,
+  stopTrackingJob,
+  isTrackingActive,
+  getActiveTrackingJobId,
+  addLocationListener,
+  addSyncStatusListener,
+  getSyncStatus,
+  type SyncStatusInfo,
+} from '@/services/location-tracking-service';
+import { fetchVehicleById, formatVehicleDisplayName } from '@/services/logistics-service';
 import { ScreenHeader } from '@/components/layout/screen-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
@@ -44,6 +53,7 @@ import { Button } from '@/components/ui/button';
 import { QuickStatusSelector } from '@/components/repair/quick-status-selector';
 import { LogisticsDestinationCard } from '@/components/logistics/LogisticsDestinationCard';
 import { LogisticsNotesModal } from '@/components/logistics/LogisticsNotesModal';
+import { useConsistentBack } from '@/hooks/use-consistent-back';
 import { isJobActive, isJobCompleted, isJobScheduled } from '@/lib/logistics-engine';
 import type { LogisticsStatus } from '@/types/logistics';
 
@@ -71,6 +81,31 @@ export default function LogisticsJobDetailScreen() {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [vehicleDisplayName, setVehicleDisplayName] = useState<string | null>(null);
+  const [isDeviceTracking, setIsDeviceTracking] = useState<boolean>(() => {
+    return isTrackingActive() && getActiveTrackingJobId() === jobId;
+  });
+  const [syncStatus, setSyncStatus] = useState<SyncStatusInfo>(() => getSyncStatus());
+
+  // Listen to device tracking and sync status updates
+  useEffect(() => {
+    const updateTracking = () => {
+      setIsDeviceTracking(isTrackingActive() && getActiveTrackingJobId() === jobId);
+    };
+    updateTracking();
+
+    const unsubLoc = addLocationListener(() => {
+      updateTracking();
+    });
+    const unsubSync = addSyncStatusListener((statusInfo) => {
+      setSyncStatus(statusInfo);
+      updateTracking();
+    });
+
+    return () => {
+      unsubLoc();
+      unsubSync();
+    };
+  }, [jobId]);
 
   const tenantId = user?.tenantId || tenant?.tenantId || job?.tenantId || '';
 
@@ -87,17 +122,7 @@ export default function LogisticsJobDetailScreen() {
       try {
         const vehicle = await fetchVehicleById(job.vehicleId, tenantId);
         if (!isMounted) return;
-
-        if (vehicle && vehicle.name) {
-          const formatted = vehicle.rego && !vehicle.name.includes(vehicle.rego)
-            ? `${vehicle.name} (${vehicle.rego})`
-            : vehicle.name;
-          setVehicleDisplayName(formatted);
-        } else if (vehicle && vehicle.rego) {
-          setVehicleDisplayName(vehicle.rego);
-        } else {
-          setVehicleDisplayName(job.vehicleId);
-        }
+        setVehicleDisplayName(formatVehicleDisplayName(vehicle, job.vehicleId));
       } catch {
         if (isMounted) setVehicleDisplayName(job.vehicleId);
       }
@@ -227,10 +252,18 @@ export default function LogisticsJobDetailScreen() {
     return 'secondary';
   };
 
-  // Back Navigation handler: Deterministically returns to the Logistics feed
-  const handleBack = () => {
-    router.replace('/(tabs)/logistics' as any);
-  };
+  // Back Navigation handler: Deterministically returns to the Logistics feed,
+  // intercepting open modals first.
+  const { handleBack } = useConsistentBack({
+    fallbackRoute: '/(tabs)/logistics',
+    onBeforeBack: () => {
+      if (isAddNoteOpen) {
+        setIsAddNoteOpen(false);
+        return true;
+      }
+      return false;
+    },
+  });
 
   if (loading && !job) {
     return (
@@ -251,7 +284,7 @@ export default function LogisticsJobDetailScreen() {
           Logistics Job Not Found
         </Text>
         <Text style={[styles.errorSub, { color: colors.mutedForeground, marginTop: 4, fontSize: typography.fontSize.sm }]}>
-          {error?.message || 'The requested logistics job could not be loaded.'}
+          {error?.message || (jobId ? 'The requested logistics job could not be loaded.' : 'No Logistics Job ID was provided in the route.')}
         </Text>
         <Button
           variant="outline"
@@ -260,7 +293,7 @@ export default function LogisticsJobDetailScreen() {
           style={{ marginTop: 16 }}
           testID="job-not-found-back-btn"
         >
-          Go Back
+          Return to Logistics
         </Button>
       </View>
     );
@@ -274,7 +307,10 @@ export default function LogisticsJobDetailScreen() {
       : undefined;
   const titleDisplay = job.eventName || job.location || 'Transport Job';
 
-  const isTracking = Boolean(job.isTrackingActive);
+  const isDocTrackingActive = Boolean(job.isTrackingActive);
+  const isPermissionDenied = syncStatus.status === 'permission_denied';
+  // Never show tracking as active when the required permission is unavailable
+  const isTracking = !isPermissionDenied && (isDeviceTracking || isDocTrackingActive);
   const isCompleted = isJobCompleted(job.status);
 
   return (
@@ -288,11 +324,11 @@ export default function LogisticsJobDetailScreen() {
         backAccessibilityLabel="Go back to Logistics Feed"
         rightAction={
           <Badge
-            variant={isTracking ? 'brand' : 'secondary'}
+            variant={isPermissionDenied ? 'destructive' : isTracking ? 'brand' : 'secondary'}
             icon={isTracking ? <Radio size={12} color={colors.primary} /> : undefined}
             testID="header-tracking-status-badge"
           >
-            {isTracking ? 'Tracking' : 'Idle'}
+            {isPermissionDenied ? 'Permission Required' : isTracking ? 'Tracking' : 'Idle'}
           </Badge>
         }
       />
@@ -307,6 +343,26 @@ export default function LogisticsJobDetailScreen() {
           />
         }
       >
+        {/* Offline sync notification banner */}
+        {syncStatus.status === 'offline_failed' ? (
+          <View style={[styles.errorBanner, { backgroundColor: 'rgba(245, 158, 11, 0.15)', borderColor: '#F59E0B' }]} testID="offline-sync-warning">
+            <AlertTriangle size={14} color="#F59E0B" />
+            <Text style={[styles.errorBannerText, { color: '#F59E0B', fontSize: typography.fontSize.sm }]}>
+              GPS Sync Offline: Live location updates are pending network reconnection.
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Permission revoked warning banner */}
+        {isPermissionDenied ? (
+          <View style={[styles.errorBanner, { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: colors.destructive }]} testID="permission-revoked-warning">
+            <AlertTriangle size={14} color={colors.destructive} />
+            <Text style={[styles.errorBannerText, { color: colors.destructive, fontSize: typography.fontSize.sm }]}>
+              Location permission required: Tracking is halted until permission is re-granted.
+            </Text>
+          </View>
+        ) : null}
+
         {/* Error notification if action failed */}
         {actionError ? (
           <View style={[styles.errorBanner, { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: colors.destructive }]}>
@@ -320,7 +376,7 @@ export default function LogisticsJobDetailScreen() {
         {/* 3-Button Control Row (Play, Pause, Finish) */}
         <Card style={styles.card} testID="job-controls-card">
           <CardContent style={styles.controlButtonsRow}>
-            {/* Play Button */}
+            {/* Start Button */}
             <Button
               variant="primary"
               size="default"
@@ -330,9 +386,9 @@ export default function LogisticsJobDetailScreen() {
               disabled={isStartingTracking}
               style={styles.controlBtn}
               testID="play-job-btn"
-              accessibilityLabel="Play and start tracking"
+              accessibilityLabel="Start tracking"
             >
-              Play
+              Start
             </Button>
 
             {/* Pause Button */}

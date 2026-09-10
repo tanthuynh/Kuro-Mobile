@@ -2,7 +2,8 @@
  * src/components/events/event-card.tsx
  * High-contrast production event / job card for Kuro Mobile.
  * Displays event number (#1042), title, status badge, timing range,
- * client/venue logistics, and quick action shortcuts to Pull Sheet and Scanner.
+ * client/venue logistics, and line items count.
+ * Navigates directly to the unified Event Details screen on tap.
  */
 
 import React from 'react';
@@ -10,18 +11,12 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   CalendarDays,
-  Clock,
   MapPin,
-  FileSpreadsheet,
-  QrCode,
-  ChevronRight,
   User,
 } from 'lucide-react-native';
 import { useTheme } from '@/context/theme-context';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge, type BadgeVariant } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { formatEventDateRange, formatStageTime } from '@/lib/date-utils';
+import { formatEventDateRange } from '@/lib/date-utils';
 import type { Event, EventStatus } from '@/types/events';
 
 export interface EventCardProps {
@@ -31,8 +26,6 @@ export interface EventCardProps {
   typeName?: string;
   typeColor?: string;
   onPress?: () => void;
-  onOpenPullsheet?: () => void;
-  onOpenScanner?: () => void;
   testID?: string;
 }
 
@@ -43,11 +36,9 @@ export const EventCard: React.FC<EventCardProps> = ({
   typeName = 'Production',
   typeColor = '#60A5FA',
   onPress,
-  onOpenPullsheet,
-  onOpenScanner,
   testID,
 }) => {
-  const { colors, typography, spacing, layout, isDark } = useTheme();
+  const { colors, typography, isDark } = useTheme();
   const router = useRouter();
 
   const getStatusColor = (status: EventStatus): string => {
@@ -78,27 +69,6 @@ export const EventCard: React.FC<EventCardProps> = ({
     }
   };
 
-  const handlePullsheetPress = (e: any) => {
-    e?.stopPropagation?.();
-    if (onOpenPullsheet) {
-      onOpenPullsheet();
-    } else {
-      router.push(`/pullsheet/${event.id}`);
-    }
-  };
-
-  const handleScannerPress = (e: any) => {
-    e?.stopPropagation?.();
-    if (onOpenScanner) {
-      onOpenScanner();
-    } else {
-      router.push({
-        pathname: '/(tabs)/scanner',
-        params: { eventId: event.id },
-      });
-    }
-  };
-
   const displayDate = formatEventDateRange(
     event.deliveryTime || event.eventStartDate || event.startTime,
     event.packdownTime || event.eventFinishDate || event.finishTime
@@ -106,9 +76,9 @@ export const EventCard: React.FC<EventCardProps> = ({
 
   const eventNumDisplay =
     event.eventNumber !== undefined && event.eventNumber !== null
-      ? `#${event.eventNumber}`
+      ? `[${event.eventNumber}]`
       : event.id
-      ? `[#${event.id.substring(0, 6).toUpperCase()}]`
+      ? `[${event.id.substring(0, 6).toUpperCase()}]`
       : '';
 
   const quoteCount = event.equipmentItems?.length || 0;
@@ -117,7 +87,7 @@ export const EventCard: React.FC<EventCardProps> = ({
     <Pressable onPress={handleCardPress} testID={testID || `event-card-${event.id}`}>
       <Card style={styles.card}>
         <CardContent style={styles.content}>
-          {/* Top Row: Event # + Name (Left) & Status Badge Pill (Right) */}
+          {/* Top Row: Event # + Name + Date (Left) & Status Badge Pill (Right) */}
           <View style={styles.topRow}>
             <View style={styles.eventTitleContainer}>
               {eventNumDisplay ? (
@@ -134,27 +104,20 @@ export const EventCard: React.FC<EventCardProps> = ({
               >
                 {event.eventName}
               </Text>
-            </View>
-
-            <View style={styles.statusContainer}>
-              {typeName ? (
-                <View
-                  style={[
-                    styles.typePill,
-                    {
-                      backgroundColor: `${typeColor}20`,
-                      borderColor: `${typeColor}40`,
-                      marginRight: 6,
-                    },
-                  ]}
-                >
-                  <View style={[styles.typeDot, { backgroundColor: typeColor }]} />
-                  <Text style={[styles.typeLabel, { color: typeColor }]}>
-                    {typeName}
+              {displayDate ? (
+                <View style={styles.dateContainer}>
+                  <CalendarDays size={14} color={colors.mutedForeground} />
+                  <Text
+                    style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
+                    numberOfLines={1}
+                  >
+                    {displayDate}
                   </Text>
                 </View>
               ) : null}
+            </View>
 
+            <View style={styles.statusContainer}>
               <View
                 style={[
                   styles.statusBadge,
@@ -180,23 +143,23 @@ export const EventCard: React.FC<EventCardProps> = ({
             </View>
           </View>
 
-          {/* Second Row: Metadata (Date, Venue, Items) | Right: Client */}
+          {/* Second Row: Type Badge + Venue + Items | Right: Client */}
           <View style={styles.secondRow}>
             <View style={styles.leftMetaGroup}>
-              {displayDate ? (
-                <View style={styles.metaItem}>
-                  <CalendarDays size={14} color={colors.mutedForeground} />
-                  <Text
-                    style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
-                    numberOfLines={1}
-                  >
-                    {displayDate}
+              {typeName ? (
+                <View
+                  style={[
+                    styles.typePill,
+                    {
+                      backgroundColor: `${typeColor}20`,
+                      borderColor: `${typeColor}40`,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.typeLabel, { color: typeColor, fontSize: typography.fontSize.sm }]}>
+                    {typeName}
                   </Text>
                 </View>
-              ) : null}
-
-              {(venueName || event.venueId) && displayDate ? (
-                <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
               ) : null}
 
               {venueName || event.venueId ? (
@@ -213,7 +176,9 @@ export const EventCard: React.FC<EventCardProps> = ({
 
               {quoteCount > 0 ? (
                 <>
-                  <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+                  {venueName || event.venueId ? (
+                    <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+                  ) : null}
                   <View style={styles.metaItem}>
                     <Text
                       style={[styles.quoteCountText, { color: colors.primary, fontSize: typography.fontSize.sm }]}
@@ -239,35 +204,6 @@ export const EventCard: React.FC<EventCardProps> = ({
                 </View>
               </View>
             ) : null}
-          </View>
-
-          {/* Action Buttons Row */}
-          <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<FileSpreadsheet size={15} color={colors.secondaryForeground} />}
-              onPress={handlePullsheetPress}
-              style={styles.actionBtn}
-              testID={`card-pullsheet-btn-${event.id}`}
-            >
-              Pull Sheet
-            </Button>
-
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<QrCode size={15} color={colors.primaryForeground} />}
-              onPress={handleScannerPress}
-              style={styles.actionBtn}
-              testID={`card-scan-btn-${event.id}`}
-            >
-              Scan Gear
-            </Button>
-
-            <View style={styles.chevronWrap}>
-              <ChevronRight size={18} color={colors.mutedForeground} />
-            </View>
           </View>
         </CardContent>
       </Card>
@@ -308,6 +244,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     lineHeight: 20,
   },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginLeft: 8,
+    flexShrink: 0,
+  },
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -323,18 +266,11 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     borderWidth: 1,
   },
-  typeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 4,
-  },
   typeLabel: {
     fontFamily: 'Calibri',
     fontSize: 13,
+    fontWeight: '500',
     lineHeight: 18,
-    fontWeight: '700',
-    textTransform: 'uppercase',
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -402,20 +338,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     lineHeight: 18,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 8,
-    borderTopWidth: 1,
-    gap: 8,
-  },
-  actionBtn: {
-    flex: 1,
-  },
-  chevronWrap: {
-    paddingLeft: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

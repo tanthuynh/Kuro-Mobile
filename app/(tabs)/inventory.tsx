@@ -32,6 +32,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
+import { useConsistentBack } from '@/hooks/use-consistent-back';
 import { useEquipment } from '@/hooks/use-equipment';
 import { ScreenHeader } from '@/components/layout/screen-header';
 import { Input } from '@/components/ui/input';
@@ -71,9 +72,18 @@ export default function InventoryScreen() {
     await refresh();
   }, [refresh]);
 
-  const handleBack = () => {
-    router.replace('/(tabs)' as any);
-  };
+  const onBeforeBack = useCallback(() => {
+    if (activeItem) {
+      setActiveItem(null);
+      return true;
+    }
+    return false;
+  }, [activeItem]);
+
+  const { handleBack } = useConsistentBack({
+    fallbackRoute: '/(tabs)',
+    onBeforeBack,
+  });
 
   return (
     <View

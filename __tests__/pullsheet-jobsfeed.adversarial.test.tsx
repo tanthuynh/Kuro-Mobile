@@ -55,6 +55,7 @@ import { PullSheetStatusSheet } from '@/components/pull-sheets/pull-sheet-status
 import { EventCard } from '@/components/events/event-card';
 import { EventFilterTabs } from '@/components/events/event-filter-tabs';
 import PullSheetScreen from '../app/pullsheet/[id]';
+import EventDetailsScreen from '../app/events/[id]';
 
 // Types
 import type { Pullsheet, PullsheetItem, PullsheetItemStatus } from '@/types/pull-sheet';
@@ -64,6 +65,7 @@ import type { Event } from '@/types/events';
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
   useLocalSearchParams: jest.fn(),
+  useIsFocused: () => true,
 }));
 
 jest.mock('@/context/theme-context', () => {
@@ -903,26 +905,32 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
       venueId: 'Sydney Opera House Forecourt',
     };
 
-    it('EventCard forwards correct route parameters on Pull Sheet, Scan, and Card tap', () => {
-      const { getByTestId } = render(<EventCard event={sampleEvent} />);
+    it('EventCard forwards correct route parameters on Card tap without button row', () => {
+      const { getByTestId, queryByTestId } = render(<EventCard event={sampleEvent} />);
 
-      // Tap Pull Sheet shortcut
-      fireEvent.press(getByTestId('card-pullsheet-btn-ev-nav-test'));
-      expect(mockPush).toHaveBeenCalledWith('/pullsheet/ev-nav-test');
-
-      // Tap Scan shortcut
-      fireEvent.press(getByTestId('card-scan-btn-ev-nav-test'));
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: '/(tabs)/scanner',
-        params: { eventId: 'ev-nav-test' },
-      });
+      // Bottom action buttons are removed
+      expect(queryByTestId('card-pullsheet-btn-ev-nav-test')).toBeNull();
+      expect(queryByTestId('card-scan-btn-ev-nav-test')).toBeNull();
 
       // Tap card body
       fireEvent.press(getByTestId('event-card-ev-nav-test'));
       expect(mockPush).toHaveBeenCalledWith('/events/ev-nav-test');
     });
 
-    it('PullSheetScreen handles array-type or string route params and navigates back', () => {
+    it('PullSheetRedirectScreen seamlessly redirects route params to unified Event Details screen', () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: ['ev-stress-001'] });
+      const mockReplace = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({
+        push: mockPush,
+        back: mockBack,
+        replace: mockReplace,
+      });
+
+      render(<PullSheetScreen />);
+      expect(mockReplace).toHaveBeenCalledWith('/events/ev-stress-001');
+    });
+
+    it('EventDetailsScreen handles array-type or string route params and navigates back', () => {
       (useLocalSearchParams as jest.Mock).mockReturnValue({ id: ['ev-stress-001'] });
 
       jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
@@ -942,25 +950,22 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
         return jest.fn();
       });
 
-      const { getByTestId, getByText, queryByText } = render(<PullSheetScreen />);
+      const { getByTestId, getByText, queryByText } = render(<EventDetailsScreen />);
 
       expect(getByText('Symphony Under the Stars')).toBeTruthy();
       expect(getByText('[2048]')).toBeTruthy();
       expect(queryByText(/Pull Sheet #/i)).toBeNull();
 
       // Back button press
-      fireEvent.press(getByTestId('pullsheet-back-btn'));
+      fireEvent.press(getByTestId('event-details-back-btn'));
       expect(mockBack).toHaveBeenCalledTimes(1);
 
-      // FAB Continuous Scanner press
-      fireEvent.press(getByTestId('open-continuous-scanner-fab'));
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: '/(tabs)/scanner',
-        params: { eventId: 'ev-stress-001' },
-      });
+      // Sticky Bottom Action Bar Start Scanning press
+      fireEvent.press(getByTestId('start-scanning-btn'));
+      expect(getByTestId('scanner-expandable-sheet')).toBeTruthy();
     });
 
-    it('toggles Bulk Confirm header button based on pendingQuantity presence', async () => {
+    it('toggles Bulk Confirm header button based on pendingQuantity presence in EventDetailsScreen', async () => {
       let listenerCallback: ((data: Pullsheet | null) => void) | null = null;
       jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
         listenerCallback = onUpdate;
@@ -975,7 +980,7 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
         return jest.fn();
       });
 
-      const { getByTestId, queryByTestId } = render(<PullSheetScreen />);
+      const { getByTestId, queryByTestId } = render(<EventDetailsScreen />);
       expect(getByTestId('bulk-confirm-header-btn')).toBeTruthy();
 
       // 2. Real-time update: All items confirmed -> Confirm All button removed
@@ -993,6 +998,241 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
       });
 
       expect(queryByTestId('bulk-confirm-header-btn')).toBeNull();
+    });
+
+    it('ensures EventDetailsScreen scroll view prevents sticky bar overlap and handles keyboard taps', () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'ev-stress-001' });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
+        onUpdate({
+          id: 'ev-stress-001',
+          eventId: 'ev-stress-001',
+          tenantId: 'tenant-adversarial',
+          items: [
+            { id: 'it-1', description: 'Wireless Mic Kit', quantity: 2, type: 'item', status: 'pending' },
+          ],
+        });
+        return jest.fn();
+      });
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((eventId, tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      const { UNSAFE_getByType } = render(<EventDetailsScreen />);
+      const { ScrollView, StyleSheet } = require('react-native');
+      const scrollView = UNSAFE_getByType(ScrollView);
+
+      expect(scrollView.props.keyboardShouldPersistTaps).toBe('handled');
+      const resolvedContentStyle = StyleSheet.flatten(scrollView.props.contentContainerStyle);
+      expect(resolvedContentStyle.paddingBottom).toBeGreaterThanOrEqual(90);
+    });
+
+    it('executes bulkConfirm cleanly when header confirm button is pressed', async () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'ev-stress-001' });
+
+      const bulkSpy = jest.spyOn(pullSheetService, 'bulkConfirmPullsheet').mockResolvedValueOnce({ success: true });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
+        onUpdate({
+          id: 'ev-stress-001',
+          eventId: 'ev-stress-001',
+          tenantId: 'tenant-adversarial',
+          items: [
+            { id: 'it-1', description: 'Item 1', quantity: 1, type: 'item', status: 'pending' },
+          ],
+        });
+        return jest.fn();
+      });
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((eventId, tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      const { getByTestId } = render(<EventDetailsScreen />);
+      const bulkBtn = getByTestId('bulk-confirm-header-btn');
+      expect(bulkBtn).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.press(bulkBtn);
+      });
+
+      expect(bulkSpy).toHaveBeenCalledWith(
+        'ev-stress-001',
+        'tenant-adversarial',
+        expect.objectContaining({ uid: expect.any(String) })
+      );
+    });
+
+    it('falls back to truncated uppercase ID in EventDetailsScreen header when eventNumber is undefined', () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'ev-stress-001' });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
+        onUpdate({
+          id: 'ev-stress-001',
+          eventId: 'ev-stress-001',
+          tenantId: 'tenant-adversarial',
+          items: [],
+        });
+        return jest.fn();
+      });
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((eventId, tenantId, onData) => {
+        onData({
+          ...sampleEvent,
+          id: 'ev-stress-001',
+          eventNumber: undefined,
+        });
+        return jest.fn();
+      });
+
+      const { getByText } = render(<EventDetailsScreen />);
+      expect(getByText('[EV-STR]')).toBeTruthy();
+    });
+
+    it('omits leading separator dot on EventCard when date and venue are missing', () => {
+      const dateUtils = require('@/lib/date-utils');
+      const dateSpy = jest.spyOn(dateUtils, 'formatEventDateRange').mockReturnValueOnce('');
+
+      const minimalEvent = {
+        ...sampleEvent,
+        venueId: '',
+        equipmentItems: [{ id: 'eq-1' }, { id: 'eq-2' }],
+      };
+
+      const { getByText, queryByText } = render(
+        <EventCard event={minimalEvent as any} venueName="" />
+      );
+
+      expect(getByText('2 Quote Line Items')).toBeTruthy();
+      // Leading separator dot should NOT exist since no preceding metadata exists
+      expect(queryByText('•')).toBeNull();
+
+      dateSpy.mockRestore();
+    });
+
+    it('PullSheetRedirectScreen falls back to router.push when router.replace is unavailable', () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'ev-redirect-push' });
+      const mockPush = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({
+        push: mockPush,
+        replace: undefined,
+      });
+
+      render(<PullSheetScreen />);
+      expect(mockPush).toHaveBeenCalledWith('/events/ev-redirect-push');
+    });
+
+    it('EventDetailsScreen handleBack falls back to tabs when canGoBack returns false', async () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'ev-stress-001' });
+      const mockCanGoBack = jest.fn().mockReturnValue(false);
+      const mockReplace = jest.fn();
+      const mockBack = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({
+        canGoBack: mockCanGoBack,
+        replace: mockReplace,
+        back: mockBack,
+      });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
+        onUpdate({
+          id: 'ev-stress-001',
+          eventId: 'ev-stress-001',
+          tenantId: 'tenant-adversarial',
+          items: [],
+        });
+        return jest.fn();
+      });
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((eventId, tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      const { getByTestId } = render(<EventDetailsScreen />);
+      await act(async () => {
+        fireEvent.press(getByTestId('event-details-back-btn'));
+      });
+
+      expect(mockCanGoBack).toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
+      expect(mockBack).not.toHaveBeenCalled();
+    });
+
+    it('handles synchronous openURL error gracefully when opening maps in EventDetailsScreen', () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'ev-stress-001' });
+      const { Linking } = require('react-native');
+      const linkingSpy = jest.spyOn(Linking, 'openURL').mockImplementation(() => {
+        throw new Error('OS Linking handler unavailable');
+      });
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
+        onUpdate({
+          id: 'ev-stress-001',
+          eventId: 'ev-stress-001',
+          tenantId: 'tenant-adversarial',
+          items: [],
+        });
+        return jest.fn();
+      });
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((eventId, tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      const { queryByTestId, getByTestId } = render(<EventDetailsScreen />);
+      // Maps button was removed per design requirement; venue details are compactly displayed
+      expect(queryByTestId('open-maps-btn')).toBeNull();
+      expect(getByTestId('event-client-venue-card')).toBeTruthy();
+
+      linkingSpy.mockRestore();
+      consoleSpy.mockRestore();
+    });
+
+    it('renders Event Not Found and navigates cleanly on empty eventId', () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: '' });
+      const mockReplace = jest.fn();
+      const mockBack = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({
+        push: jest.fn(),
+        replace: mockReplace,
+        back: mockBack,
+        canGoBack: () => false,
+      });
+
+      const { getByTestId, getByText } = render(<EventDetailsScreen />);
+      expect(getByText('Event Not Found')).toBeTruthy();
+
+      const backBtn = getByTestId('event-not-found-back-btn');
+      expect(backBtn).toBeTruthy();
+      fireEvent.press(backBtn);
+
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
+    });
+
+    it('catches navigation redirect exception in PullSheetRedirectScreen without throwing', () => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: 'ev-err-redirect' });
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      (useRouter as jest.Mock).mockReturnValue({
+        replace: () => {
+          throw new Error('Navigation router unmounted');
+        },
+      });
+
+      expect(() => {
+        render(<PullSheetScreen />);
+      }).not.toThrow();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[PullSheetRedirectScreen] Navigation redirect error:',
+        expect.any(Error)
+      );
+
+      consoleSpy.mockRestore();
     });
   });
 });

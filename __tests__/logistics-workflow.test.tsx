@@ -78,15 +78,29 @@ const mockPush = jest.fn();
 const mockBack = jest.fn();
 let mockSearchParamId = 'job-alpha-701';
 
-jest.mock('expo-router', () => ({
-  useRouter: () => ({
-    push: mockPush,
-    back: mockBack,
-  }),
-  useLocalSearchParams: () => ({
-    id: mockSearchParamId,
-  }),
-}));
+jest.mock('expo-router', () => {
+  const React = require('react');
+  return {
+    useRouter: () => ({
+      push: mockPush,
+      back: mockBack,
+      canGoBack: () => true,
+      replace: jest.fn(),
+    }),
+    useLocalSearchParams: () => ({
+      id: mockSearchParamId,
+    }),
+    useFocusEffect: jest.fn((effect) => {
+      React.useEffect(() => {
+        const cleanup = effect();
+        return () => {
+          if (typeof cleanup === 'function') cleanup();
+        };
+      }, [effect]);
+    }),
+    useIsFocused: jest.fn(() => true),
+  };
+});
 
 // ============================================================================
 // TEST FIXTURES & DATASET
@@ -456,7 +470,8 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       const { findByTestId, getByText } = render(<LogisticsJobDetailScreen />);
 
       const playBtn = await findByTestId('play-job-btn');
-      expect(getByText('Play')).toBeTruthy();
+      expect(getByText('Start')).toBeTruthy();
+      expect(playBtn.props.accessibilityLabel).toBe('Start tracking');
 
       await act(async () => {
         fireEvent.press(playBtn);

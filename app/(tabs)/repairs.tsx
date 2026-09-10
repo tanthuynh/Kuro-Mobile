@@ -213,7 +213,7 @@ export default function RepairsScreen() {
           {
             paddingHorizontal: spacing.base,
             paddingTop: spacing.xs,
-            paddingBottom: spacing.sm,
+            paddingBottom: 18,
             backgroundColor: colors.background,
           },
         ]}
@@ -239,6 +239,7 @@ const styles = StyleSheet.create({
   },
   bottomActionPane: {
     paddingTop: 8,
+    paddingBottom: 18,
   },
   metricsContainer: {
     marginBottom: 6,

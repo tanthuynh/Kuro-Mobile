@@ -118,7 +118,7 @@ describe('Harmonized EventCard Component', () => {
   };
 
   it('renders 2-row structure with event number, title, and status pill', () => {
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId, queryByTestId } = render(
       <EventCard
         event={sampleEvent}
         clientName="LiveNation Global"
@@ -127,8 +127,8 @@ describe('Harmonized EventCard Component', () => {
       />
     );
 
-    // Row 1: Event # and Title
-    expect(getByText('#5050')).toBeTruthy();
+    // Row 1: Event Number and Title
+    expect(getByText('[5050]')).toBeTruthy();
     expect(getByText('Apex Music Arena')).toBeTruthy();
 
     // Row 1: Type Pill and Status Pill
@@ -141,27 +141,19 @@ describe('Harmonized EventCard Component', () => {
     expect(getByText('LiveNation Global')).toBeTruthy();
     expect(getByText('2 Quote Line Items')).toBeTruthy();
 
-    // Quick Action Buttons
-    expect(getByTestId('card-pullsheet-btn-ev-test-harmonize')).toBeTruthy();
-    expect(getByTestId('card-scan-btn-ev-test-harmonize')).toBeTruthy();
+    // Quick Action Buttons are removed
+    expect(queryByTestId('card-pullsheet-btn-ev-test-harmonize')).toBeNull();
+    expect(queryByTestId('card-scan-btn-ev-test-harmonize')).toBeNull();
   });
 
-  it('navigates to pull sheet and continuous scanner from action buttons', () => {
-    const onPullsheet = jest.fn();
-    const onScanner = jest.fn();
-
+  it('navigates to unified event details screen when pressing card', () => {
     const { getByTestId } = render(
       <EventCard
         event={sampleEvent}
-        onOpenPullsheet={onPullsheet}
-        onOpenScanner={onScanner}
       />
     );
 
-    fireEvent.press(getByTestId('card-pullsheet-btn-ev-test-harmonize'));
-    expect(onPullsheet).toHaveBeenCalledTimes(1);
-
-    fireEvent.press(getByTestId('card-scan-btn-ev-test-harmonize'));
-    expect(onScanner).toHaveBeenCalledTimes(1);
+    fireEvent.press(getByTestId('event-card-ev-test-harmonize'));
+    expect(mockPush).toHaveBeenCalledWith('/events/ev-test-harmonize');
   });
 });

@@ -75,6 +75,10 @@ import {
   updateRepairTicketStatus as updateRepairTicketStatusService,
   uploadRepairDamagePhoto,
   deleteRepairAttachment,
+  isOnline,
+  saveRepairDraft,
+  getRepairDraft,
+  clearRepairDraft,
   type UpdateRepairTicketFieldsInput,
 } from '@/services/repair-service';
 import { fetchEquipment } from '@/services/equipment-service';
@@ -108,6 +112,7 @@ import type {
   TenantSupplier,
   TenantOwner,
   TenantCrewMember,
+  RepairDraft,
 } from '@/types/repair';
 
 export interface RepairDetailViewProps {
@@ -292,8 +297,12 @@ export default function RepairTicketDetailScreen({
       return;
     }
 
-    pendingUpdatesRef.current = {};
-    if (isMountedRef.current) setHasPendingMutations(false);
+    if (!isOnline()) {
+      if (isMountedRef.current) {
+        setActionError('Network connection required. Please reconnect before saving changes.');
+      }
+      return;
+    }
 
     try {
       const author = {
@@ -302,9 +311,20 @@ export default function RepairTicketDetailScreen({
         email: userRef.current?.email,
       };
       await updateRepairTicketFieldsService(ticketId, toFlush, author, tenantId);
+
+      // Successfully saved - remove flushed keys from pendingUpdatesRef while keeping new concurrent edits
+      for (const key of Object.keys(toFlush) as (keyof UpdateRepairTicketFieldsInput)[]) {
+        if (pendingUpdatesRef.current[key] === toFlush[key]) {
+          delete pendingUpdatesRef.current[key];
+        }
+      }
+      if (isMountedRef.current) {
+        setHasPendingMutations(Object.keys(pendingUpdatesRef.current).length > 0);
+      }
     } catch (err: any) {
       console.error('[RepairDetail] Pooled mutation save error:', err);
       if (isMountedRef.current) {
+        setHasPendingMutations(true);
         setActionError(err?.message || 'Failed to save pending changes');
       }
     }
@@ -340,8 +360,7 @@ export default function RepairTicketDetailScreen({
         saveDebounceTimerRef.current = null;
       }
       const toFlush = { ...pendingUpdatesRef.current };
-      if (Object.keys(toFlush).length > 0 && ticketId && tenantId) {
-        pendingUpdatesRef.current = {};
+      if (Object.keys(toFlush).length > 0 && ticketId && tenantId && isOnline()) {
         const author = {
           id: userRef.current?.id || 'unknown',
           name: userRef.current?.name || userRef.current?.email || 'Technician',
@@ -429,6 +448,106 @@ export default function RepairTicketDetailScreen({
       setRepairPeriodEnd(ticket.repairPeriodEnd || null);
     }
   }, [isNewMode, ticket?.id, user?.name, user?.email]);
+
+  // Draft restoration on mount in Create Mode
+  const draftLoadedRef = useRef(false);
+  useEffect(() => {
+    if (!isNewMode || !tenantId || draftLoadedRef.current) return;
+    draftLoadedRef.current = true;
+
+    getRepairDraft(tenantId)
+      .then((draft) => {
+        if (draft && !localParams.name && !propParams?.name) {
+          if (draft.equipmentName) setEquipmentName(draft.equipmentName);
+          if (draft.serialNumber) setSerialNumber(draft.serialNumber);
+          if (draft.barcode) setBarcode(draft.barcode);
+          if (draft.category) setCategory(draft.category);
+          if (draft.location) setLocation(draft.location);
+          if (draft.equipmentId) setEquipmentId(draft.equipmentId);
+          if (draft.owner) setOwner(draft.owner);
+          if (draft.supplierId) setSupplierId(draft.supplierId);
+          if (draft.requestedBy) setRequestedBy(draft.requestedBy);
+          if (draft.priority) setPriority(draft.priority);
+          if (draft.condition) setCondition(draft.condition);
+          if (draft.status) setStatus(draft.status);
+          if (draft.faultDescription) setFaultDescription(draft.faultDescription);
+          if (draft.internalNotes) setInternalNotes(draft.internalNotes);
+          if (draft.internalReference) setInternalReference(draft.internalReference);
+          if (draft.repairPeriodStart) setRepairPeriodStart(draft.repairPeriodStart);
+          if (draft.repairPeriodEnd) setRepairPeriodEnd(draft.repairPeriodEnd);
+          if (Array.isArray(draft.stagedPhotos) && draft.stagedPhotos.length > 0) {
+            setNewModePhotos(draft.stagedPhotos);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('[RepairDetail] Draft restore warning:', err);
+      });
+  }, [isNewMode, tenantId, localParams.name, propParams?.name]);
+
+  // Auto-save draft in Create Mode
+  useEffect(() => {
+    if (!isNewMode || !tenantId) return;
+    if (
+      !equipmentName &&
+      !faultDescription &&
+      !serialNumber &&
+      !barcode &&
+      newModePhotos.length === 0
+    ) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      saveRepairDraft(tenantId, {
+        tenantId,
+        equipmentName,
+        serialNumber,
+        barcode,
+        category,
+        location,
+        equipmentId,
+        owner,
+        supplierId,
+        requestedBy,
+        priority,
+        condition,
+        status,
+        faultDescription,
+        internalNotes,
+        internalReference,
+        repairPeriodStart,
+        repairPeriodEnd,
+        stagedPhotos: newModePhotos,
+        lastModified: Date.now(),
+      }).catch((err) => {
+        console.warn('[RepairDetail] Auto-save draft error:', err);
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [
+    isNewMode,
+    tenantId,
+    equipmentName,
+    serialNumber,
+    barcode,
+    category,
+    location,
+    equipmentId,
+    owner,
+    supplierId,
+    requestedBy,
+    priority,
+    condition,
+    status,
+    faultDescription,
+    internalNotes,
+    internalReference,
+    repairPeriodStart,
+    repairPeriodEnd,
+    newModePhotos,
+  ]);
 
   // Serial suggestions derived from selected equipment item
   const serialSuggestions = useMemo(() => {
@@ -598,10 +717,17 @@ export default function RepairTicketDetailScreen({
   };
 
   // Status Change (Row 1 Strip)
+  // Status Change (Row 1 Strip)
   const handleStatusChange = async (newStatus: RepairStatus) => {
     if (isNewMode) {
       setStatus(newStatus);
       HapticService.scanSuccess().catch(() => {});
+      return;
+    }
+
+    if (!isOnline()) {
+      setActionError('Network connection required. Please reconnect before updating status.');
+      HapticService.scanError().catch(() => {});
       return;
     }
 
@@ -644,6 +770,14 @@ export default function RepairTicketDetailScreen({
 
   // Create Ticket Submit (New Mode)
   const handleCreateTicketSubmit = async () => {
+    if (isSubmittingNew) return;
+
+    if (!isOnline()) {
+      setActionError('Network connection required. Please connect to the internet before creating a repair ticket.');
+      HapticService.scanError().catch(() => {});
+      return;
+    }
+
     if (!equipmentName.trim()) {
       setActionError('Equipment name or identifier is required');
       HapticService.scanError().catch(() => {});
@@ -665,17 +799,41 @@ export default function RepairTicketDetailScreen({
       setIsSubmittingNew(true);
       setActionError(null);
 
-      const attachmentsPayload: RepairAttachment[] = newModePhotos.map((p) => ({
-        id: p.id,
-        type: 'Photo',
-        url: p.url || p.uri || '',
-        fileName: p.fileName || 'damage_image.jpg',
-        uploadedAt: new Date().toISOString(),
-      }));
+      // Pre-allocate ticket ID for storage path and backend command alignment
+      const provisionalTicketId = `t-${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+      // Sequentially upload staged photos to Firebase Storage.
+      // If ANY upload fails, halt immediately and preserve form state.
+      const attachmentsPayload: RepairAttachment[] = [];
+      for (let i = 0; i < newModePhotos.length; i++) {
+        const p = newModePhotos[i];
+        if (p.url && (p.url.startsWith('http://') || p.url.startsWith('https://'))) {
+          attachmentsPayload.push({
+            id: p.id || `att_${Date.now()}_${i}`,
+            type: 'Photo',
+            url: p.url,
+            fileName: p.fileName || `damage_photo_${i + 1}.jpg`,
+            uploadedAt: new Date().toISOString(),
+          });
+        } else {
+          const fileUri = p.uri || p.url;
+          if (fileUri) {
+            const fileName = p.fileName || `damage_${Date.now()}_${i}.jpg`;
+            const uploadRes = await uploadRepairDamagePhoto(
+              tenantId,
+              provisionalTicketId,
+              fileUri,
+              fileName
+            );
+            attachmentsPayload.push(uploadRes.attachment);
+          }
+        }
+      }
 
       const newId = await createRepairTicket(
         tenantId,
         {
+          id: provisionalTicketId,
           equipment: {
             id: equipmentId || null,
             name: equipmentName.trim(),
@@ -700,9 +858,11 @@ export default function RepairTicketDetailScreen({
           initialNote: faultDescription.trim() || undefined,
           attachments: attachmentsPayload,
         },
-        user ? { id: user.id, name: user.name, email: user.email } : undefined
+        user ? { id: user.id, name: user.name, email: user.email, tenantId } : undefined
       );
 
+      // Confirm persistence before clearing draft and navigating away
+      await clearRepairDraft(tenantId);
       await HapticService.scanSuccess();
 
       if (router.canGoBack()) {

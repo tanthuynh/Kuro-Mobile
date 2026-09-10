@@ -94,7 +94,7 @@ export const Input = forwardRef<TextInput, InputProps>(
           {leftIcon ? <View style={styles.leftIconContainer}>{leftIcon}</View> : null}
 
           <TextInput
-            ref={ref}
+            ref={ref as any}
             testID={testID}
             editable={editable}
             placeholderTextColor={colors.mutedForeground}

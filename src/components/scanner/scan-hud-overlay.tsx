@@ -14,6 +14,7 @@ import {
   Package,
 } from 'lucide-react-native';
 import { useTheme } from '@/context/theme-context';
+import { platformShadow } from '@/lib/shadows';
 import type { ScanEvaluationResult } from '@/types/scanner';
 
 export interface ScanHudOverlayProps {
@@ -89,6 +90,14 @@ export const ScanHudOverlay: React.FC<ScanHudOverlayProps> = ({
           borderColor: '#EF4444',
           textColor: '#FFFFFF',
           title: 'Gear Not On Job Pull Sheet',
+          icon: <AlertCircle size={20} color="#F87171" />,
+        };
+      case 'INVALID_TRANSITION':
+        return {
+          bgColor: '#7F1D1D',
+          borderColor: '#EF4444',
+          textColor: '#FFFFFF',
+          title: 'Action Rejected',
           icon: <AlertCircle size={20} color="#F87171" />,
         };
       case 'UNKNOWN_CODE':
@@ -167,11 +176,13 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1.5,
     zIndex: 100,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 10,
+    ...platformShadow({
+      color: '#000',
+      offsetY: 4,
+      opacity: 0.35,
+      radius: 8,
+      elevation: 10,
+    }),
   },
   hudLeft: {
     flexDirection: 'row',

@@ -10,23 +10,40 @@ jest.mock('uuid', () => ({
 
 
 // Mock expo-router
-jest.mock('expo-router', () => ({
-  useRouter: () => ({
+jest.mock('expo-router', () => {
+  const React = require('react');
+  const mockRouter = {
     push: jest.fn(),
     replace: jest.fn(),
     back: jest.fn(),
-  }),
-  useSegments: () => ['(tabs)'],
-  usePathname: () => '/',
-  Link: ({ children }) => children,
-  Slot: ({ children }) => children,
-  Stack: Object.assign(({ children }) => children, {
-    Screen: () => null,
-  }),
-  Tabs: Object.assign(({ children }) => children, {
-    Screen: () => null,
-  }),
-}));
+    canGoBack: jest.fn(() => true),
+  };
+  return {
+    useRouter: () => mockRouter,
+    useSegments: () => ['(tabs)'],
+    usePathname: () => '/',
+    useLocalSearchParams: () => ({}),
+    useGlobalSearchParams: () => ({}),
+    useIsFocused: jest.fn(() => true),
+    useFocusEffect: jest.fn((effect) => {
+      React.useEffect(() => {
+        const cleanup = effect();
+        return () => {
+          if (typeof cleanup === 'function') cleanup();
+        };
+      }, [effect]);
+    }),
+    Link: ({ children }) => children,
+    Slot: ({ children }) => children,
+    Stack: Object.assign(({ children }) => children, {
+      Screen: () => null,
+    }),
+    Tabs: Object.assign(({ children }) => children, {
+      Screen: () => null,
+    }),
+    _mockRouter: mockRouter,
+  };
+});
 
 // Mock expo-splash-screen
 jest.mock('expo-splash-screen', () => ({
@@ -68,9 +85,12 @@ jest.mock('firebase/auth', () => ({
   sendPasswordResetEmail: jest.fn(),
 }));
 
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})),
-  collection: jest.fn((_db, name) => ({ type: 'collection', name })),
+jest.mock('firebase/firestore', () => {
+  const mockDb = {};
+  return {
+    initializeFirestore: jest.fn(() => mockDb),
+    getFirestore: jest.fn(() => mockDb),
+    collection: jest.fn((_db, name) => ({ type: 'collection', name })),
   doc: jest.fn((_db, coll, id) => ({ type: 'doc', coll, id, idVal: id || 'mock-id' })),
   getDoc: jest.fn(),
   getDocs: jest.fn(),
@@ -100,7 +120,8 @@ jest.mock('firebase/firestore', () => ({
       _nanoseconds: (ms % 1000) * 1000000,
     }),
   },
-}));
+};
+});
 
 jest.mock('firebase/database', () => ({
   getDatabase: jest.fn(() => ({})),
@@ -134,9 +155,17 @@ jest.mock('firebase/functions', () => ({
 // Mock expo-camera
 jest.mock('expo-camera', () => {
   const React = require('react');
+  const requestPermissionMock = jest.fn().mockResolvedValue({ granted: true, canAskAgain: true, status: 'granted' });
+  const getPermissionMock = jest.fn().mockResolvedValue({ granted: true, canAskAgain: true, status: 'granted' });
   return {
     CameraView: ({ children, ...props }) => React.createElement('CameraView', props, children),
-    useCameraPermissions: () => [{ granted: true, canAskAgain: true }, jest.fn().mockResolvedValue({ granted: true })],
+    useCameraPermissions: () => [
+      { granted: true, canAskAgain: true, status: 'granted' },
+      requestPermissionMock,
+      getPermissionMock,
+    ],
+    getCameraPermissionsAsync: getPermissionMock,
+    requestCameraPermissionsAsync: requestPermissionMock,
   };
 });
 
@@ -172,6 +201,20 @@ jest.mock('expo-haptics', () => ({
     Medium: 'medium',
     Heavy: 'heavy',
   },
+}));
+
+// Mock expo-audio
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: jest.fn(() => ({
+    play: jest.fn(),
+    pause: jest.fn(),
+    release: jest.fn(),
+    volume: 1.0,
+    addListener: jest.fn(() => ({ remove: jest.fn() })),
+    removeListener: jest.fn(),
+  })),
+  setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
+  setIsAudioActiveAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
 // Mock expo-av

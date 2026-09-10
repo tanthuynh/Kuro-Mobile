@@ -66,6 +66,7 @@ jest.mock('expo-router', () => ({
     back: mockBack,
   }),
   useLocalSearchParams: () => mockSearchParams,
+  useIsFocused: () => true,
 }));
 
 describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () => {

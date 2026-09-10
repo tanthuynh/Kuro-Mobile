@@ -96,6 +96,7 @@ export function mapFirestoreLogisticsDoc(docSnap: any): LogisticsEntry {
     id,
     tenantId: String(data?.tenantId || ''),
     vehicleId: data?.vehicleId !== undefined ? data.vehicleId : null,
+    vehicleName: data?.vehicleName ? String(data.vehicleName) : undefined,
     driverName: data?.driverName ? String(data.driverName) : undefined,
     assigneeId: data?.assigneeId !== undefined ? data.assigneeId : null,
     eventName: data?.eventName ? String(data.eventName) : '',
@@ -334,6 +335,29 @@ export async function fetchVehicleById(
   }
 }
 
+/**
+ * Formats a user-friendly vehicle display string (e.g. "Van 04 (NSW-KURO1)", "Van 04", or "NSW-KURO1").
+ *
+ * @param vehicle Vehicle document or partial vehicle object.
+ * @param fallback Optional fallback string (typically vehicleId) if vehicle is null.
+ * @returns Formatted human-readable vehicle name string.
+ */
+export function formatVehicleDisplayName(
+  vehicle?: Partial<Vehicle> | null,
+  fallback?: string | null
+): string {
+  if (!vehicle) return fallback || '';
+  if (vehicle.name) {
+    return vehicle.rego && !vehicle.name.includes(vehicle.rego)
+      ? `${vehicle.name} (${vehicle.rego})`
+      : vehicle.name;
+  }
+  if (vehicle.rego) {
+    return vehicle.rego;
+  }
+  return fallback || vehicle.id || '';
+}
+
 // ============================================================================
 // 4. MUTATIONS & ACTIONS
 // ============================================================================
@@ -449,15 +473,22 @@ export async function appendLogisticsNote(
   });
 }
 
+export interface UpdateJobLocationOptions {
+  skipHistory?: boolean;
+  isTrackingActive?: boolean;
+}
+
 /**
  * Syncs the driver's real-time GPS coordinates and tracking state to Firestore.
  *
  * @param entryId Target logistics document ID.
  * @param location Latest DriverLocation payload.
+ * @param options Optional flags to control history subcollection writes and tracking flag.
  */
 export async function updateJobLocation(
   entryId: string,
-  location: DriverLocation
+  location: DriverLocation,
+  options?: UpdateJobLocationOptions
 ): Promise<void> {
   if (!entryId || !entryId.trim()) {
     throw new Error('Logistics entry ID is required to update location');
@@ -488,24 +519,28 @@ export async function updateJobLocation(
   if (location.driverId) payloadLocation.driverId = location.driverId;
   if (location.driverName) payloadLocation.driverName = location.driverName;
 
-  await updateDoc(docRef, {
+  const updatePayload: Record<string, any> = {
     currentLocation: payloadLocation,
     lastLocationUpdate: serverTimestamp(),
-    isTrackingActive: true,
+    isTrackingActive: options?.isTrackingActive !== undefined ? options.isTrackingActive : true,
     trackingJobId: entryId,
     updatedAt: serverTimestamp(),
-  });
+  };
 
-  // Breadcrumb tracking: Add location to history subcollection
-  try {
-    const historyRef = collection(docRef, 'location_history');
-    const historyDocRef = doc(historyRef, String(payloadLocation.timestamp));
-    await setDoc(historyDocRef, {
-      ...payloadLocation,
-      savedAt: serverTimestamp(),
-    });
-  } catch (err) {
-    console.error('Failed to log location history breadcrumb', err);
+  await updateDoc(docRef, updatePayload);
+
+  // Breadcrumb tracking: Add location to history subcollection if not suppressed by movement policy
+  if (!options?.skipHistory) {
+    try {
+      const historyRef = collection(docRef, 'location_history');
+      const historyDocRef = doc(historyRef, String(payloadLocation.timestamp));
+      await setDoc(historyDocRef, {
+        ...payloadLocation,
+        savedAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error('Failed to log location history breadcrumb', err);
+    }
   }
 }
 

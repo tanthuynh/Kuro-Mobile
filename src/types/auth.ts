@@ -155,6 +155,18 @@ export interface PresenceState {
 }
 
 /**
+ * Result returned by profile hydration.
+ */
+export interface UserProfileResult {
+  success: boolean;
+  profile?: UserProfile;
+  isTransient?: boolean;
+  isRevoked?: boolean;
+  reason?: LogoutReason;
+  error?: string;
+}
+
+/**
  * Internal Auth Context State.
  */
 export interface AuthState {
@@ -165,6 +177,8 @@ export interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   isRestoringSession: boolean;
+  isOfflineSession: boolean;
+  pendingRedirectUrl: string | null;
   error: string | null;
   logoutNotice: LogoutNotice | null;
 }
@@ -180,6 +194,8 @@ export interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isRestoringSession: boolean;
+  isOfflineSession: boolean;
+  pendingRedirectUrl: string | null;
   error: string | null;
   logoutNotice: LogoutNotice | null;
   
@@ -189,6 +205,7 @@ export interface AuthContextType {
   signOut: (reason?: LogoutReason) => Promise<void>;
   refreshProfile: () => Promise<void>;
   sendPasswordReset: (email: string, authTenantId?: string | null) => Promise<{ success: boolean; error?: string }>;
+  setPendingRedirectUrl: (url: string | null) => void;
   clearError: () => void;
   clearLogoutNotice: () => void;
 }

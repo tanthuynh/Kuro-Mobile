@@ -21,7 +21,7 @@ export type BadgeVariant =
 
 export interface BadgeProps {
   variant?: BadgeVariant;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   icon?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -134,6 +134,16 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const variantStyle = getVariantStyles();
 
+  const mergedTextStyle: StyleProp<TextStyle> = [
+    styles.badgeText,
+    {
+      fontSize: typography.fontSize.sm,
+      lineHeight: typography.lineHeight.sm,
+    },
+    variantStyle.text,
+    textStyle,
+  ];
+
   return (
     <View
       testID={testID}
@@ -150,26 +160,114 @@ export const Badge: React.FC<BadgeProps> = ({
       ]}
     >
       {icon ? <View style={styles.iconContainer}>{icon}</View> : null}
-      {typeof children === 'string' ? (
-        <Text
-          style={[
-            styles.badgeText,
-            {
-              fontSize: typography.fontSize.sm,
-              lineHeight: typography.lineHeight.sm,
-            },
-            variantStyle.text,
-            textStyle,
-          ]}
-        >
-          {children}
-        </Text>
-      ) : (
-        children
-      )}
+      {renderBadgeContent(children, mergedTextStyle)}
     </View>
   );
 };
+
+function isPrimitiveText(node: React.ReactNode): boolean {
+  return typeof node === 'string' || typeof node === 'number';
+}
+
+function isPrimitiveOrEmpty(node: React.ReactNode): boolean {
+  if (node == null || typeof node === 'boolean') {
+    return true;
+  }
+  if (isPrimitiveText(node)) {
+    return true;
+  }
+  if (Array.isArray(node)) {
+    return node.every(isPrimitiveOrEmpty);
+  }
+  return false;
+}
+
+function hasAnyTextContent(node: React.ReactNode): boolean {
+  if (isPrimitiveText(node)) {
+    return true;
+  }
+  if (Array.isArray(node)) {
+    return node.some(hasAnyTextContent);
+  }
+  return false;
+}
+
+function renderBadgeContent(
+  children: React.ReactNode,
+  textStyle: StyleProp<TextStyle>
+): React.ReactNode {
+  if (children == null || typeof children === 'boolean') {
+    return null;
+  }
+
+  if (isPrimitiveText(children)) {
+    return <Text style={textStyle}>{children}</Text>;
+  }
+
+  if (Array.isArray(children)) {
+    if (isPrimitiveOrEmpty(children)) {
+      if (!hasAnyTextContent(children)) {
+        return null;
+      }
+      return <Text style={textStyle}>{children}</Text>;
+    }
+
+    // Mixed array of React elements and text primitives:
+    // Group consecutive primitives into <Text> blocks while preserving custom React elements
+    const result: React.ReactNode[] = [];
+    let textBuffer: React.ReactNode[] = [];
+
+    const flushText = () => {
+      if (textBuffer.length > 0) {
+        result.push(
+          <Text key={`badge-text-${result.length}`} style={textStyle}>
+            {textBuffer.length === 1 ? textBuffer[0] : [...textBuffer]}
+          </Text>
+        );
+        textBuffer = [];
+      }
+    };
+
+    const processNodes = (nodes: React.ReactNode[]) => {
+      nodes.forEach((node) => {
+        if (node == null || typeof node === 'boolean') {
+          return;
+        }
+        if (isPrimitiveText(node)) {
+          textBuffer.push(node);
+        } else if (Array.isArray(node)) {
+          if (isPrimitiveOrEmpty(node)) {
+            textBuffer.push(node);
+          } else {
+            flushText();
+            processNodes(node);
+          }
+        } else {
+          flushText();
+          const elementKey =
+            React.isValidElement(node) && node.key != null
+              ? node.key
+              : `badge-el-${result.length}`;
+          result.push(
+            React.isValidElement(node)
+              ? React.cloneElement(node, { key: elementKey })
+              : node
+          );
+        }
+      });
+    };
+
+    processNodes(children);
+    flushText();
+    return result;
+  }
+
+  if (React.isValidElement(children)) {
+    return children;
+  }
+
+  return children;
+}
 
 const styles = StyleSheet.create({
   badge: {

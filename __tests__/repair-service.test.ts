@@ -820,7 +820,7 @@ describe('repair-service', () => {
       expect(result.attachment.url).toBe('https://firebasestorage.googleapis.com/download/damage.jpg');
       expect(mockStorage.ref).toHaveBeenCalledWith(
         expect.anything(),
-        expect.stringContaining('tenants/tenant-alpha/repairs/t-100/attachments/')
+        expect.stringContaining('tenants/tenant-alpha/entity_documents/repair-t-100/')
       );
     });
 

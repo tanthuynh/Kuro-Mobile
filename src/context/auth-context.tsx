@@ -15,7 +15,11 @@ import React, {
   useMemo,
   type ReactNode,
 } from 'react';
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  onIdTokenChanged,
+  type User as FirebaseUser,
+} from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../lib/firebase';
 import {
@@ -51,6 +55,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [role, setRole] = useState<Role | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRestoringSession, setIsRestoringSession] = useState<boolean>(true);
+  const [isOfflineSession, setIsOfflineSession] = useState<boolean>(false);
+  const [pendingRedirectUrl, setPendingRedirectUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [logoutNotice, setLogoutNotice] = useState<LogoutNotice | null>(null);
 
@@ -59,6 +65,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     userRef.current = user;
   }, [user]);
+
+  // Track recent hydration to avoid duplicate Firestore reads on sign in
+  const lastHydratedRef = useRef<{ uid: string; timestamp: number } | null>(null);
 
   /**
    * Action: Step 1 Tenant Lookup
@@ -90,7 +99,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const result = await signInWithTenant(email, password, tenantIdToUse);
 
       if (result.success && result.user) {
+        lastHydratedRef.current = { uid: result.user.uid, timestamp: Date.now() };
         setUser(result.user);
+        setIsOfflineSession(false);
         setLogoutNotice(null);
         await AsyncStorage.removeItem(STORAGE_KEYS.LOGOUT_NOTICE);
       } else {
@@ -104,7 +115,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   /**
-   * Action: Complete Sign Out with reason tracking
+   * Action: Complete Sign Out with coordinated reason tracking
    */
   const handleSignOut = useCallback(async (reason: LogoutReason = 'manual'): Promise<void> => {
     setIsLoading(true);
@@ -118,6 +129,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setFirebaseUser(null);
       setTenant(null);
       setRole(null);
+      setIsOfflineSession(false);
+      setPendingRedirectUrl(null);
     } finally {
       setIsLoading(false);
     }
@@ -212,40 +225,74 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
 
-  // 2. Firebase Auth State Observer
+  // 2. Firebase Auth State & ID Token Observer
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+    const handleAuthObserver = async (fbUser: FirebaseUser | null) => {
       setFirebaseUser(fbUser);
 
       if (fbUser) {
-        // User is authenticated with Firebase
+        // Check if this user was freshly hydrated by signInWithTenant
+        const isFreshlyHydrated =
+          lastHydratedRef.current &&
+          lastHydratedRef.current.uid === fbUser.uid &&
+          Date.now() - lastHydratedRef.current.timestamp < 4000;
+
+        if (isFreshlyHydrated && userRef.current) {
+          setIsOfflineSession(false);
+          setIsLoading(false);
+          return;
+        }
+
         const result = await getUserProfile(fbUser.uid, fbUser.email || undefined);
 
         if (result.success && result.profile) {
           setUser(result.profile);
+          setIsOfflineSession(false);
           await AsyncStorage.setItem(
             STORAGE_KEYS.USER_PROFILE,
             JSON.stringify(result.profile)
           );
+        } else if (result.isTransient) {
+          // Transient network issue: preserve cached profile if already available
+          console.warn('[AuthContext] Transient network issue during profile check, preserving session:', result.error);
+          setIsOfflineSession(true);
+          if (!userRef.current) {
+            setError('Network connection issue. Reconnecting...');
+          }
         } else {
-          // If profile does not exist in Firestore, sign out
-          console.error('[AuthContext] Failed to load user profile for authenticated UID:', result.error);
-          await handleSignOut('profile_error');
+          // Confirmed revoked, inactive, cancelled tenant, or deleted profile
+          console.error('[AuthContext] Confirmed auth/profile failure, signing out:', result.error);
+          await handleSignOut(result.reason || 'profile_error');
         }
       } else {
         // User is unauthenticated
         setUser(null);
+        setTenant(null);
+        setRole(null);
+        setIsOfflineSession(false);
         await AsyncStorage.multiRemove([
           STORAGE_KEYS.USER_PROFILE,
           STORAGE_KEYS.AUTH_TENANT_ID,
           STORAGE_KEYS.SESSION_ID,
+          STORAGE_KEYS.TENANT_LOOKUP,
         ]);
       }
 
       setIsLoading(false);
+    };
+
+    const unsubscribeAuthState = onAuthStateChanged(auth, handleAuthObserver);
+    const unsubscribeTokenState = onIdTokenChanged(auth, async (fbUser) => {
+      if (!fbUser && userRef.current) {
+        // Token was revoked or expired
+        await handleAuthObserver(null);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuthState();
+      unsubscribeTokenState();
+    };
   }, [handleSignOut]);
 
   // 3. RTDB Presence Management (Active Session, Connection, Admin Signals)
@@ -278,6 +325,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading: isLoading || isRestoringSession,
       isAuthenticated: !!user && !!firebaseUser,
       isRestoringSession,
+      isOfflineSession,
+      pendingRedirectUrl,
       error,
       logoutNotice,
       lookupTenant,
@@ -285,6 +334,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       signOut: handleSignOut,
       refreshProfile,
       sendPasswordReset,
+      setPendingRedirectUrl,
       clearError,
       clearLogoutNotice,
     }),
@@ -295,6 +345,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       role,
       isLoading,
       isRestoringSession,
+      isOfflineSession,
+      pendingRedirectUrl,
       error,
       logoutNotice,
       lookupTenant,
@@ -302,6 +354,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       handleSignOut,
       refreshProfile,
       sendPasswordReset,
+      setPendingRedirectUrl,
       clearError,
       clearLogoutNotice,
     ]

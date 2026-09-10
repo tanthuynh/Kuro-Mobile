@@ -7,7 +7,7 @@
 
 import type { PullsheetItem } from '@/types/pull-sheet';
 import type { Equipment } from '@/types/equipment';
-import type { ScanEvaluationResult } from '@/types/scanner';
+import type { ScanEvaluationResult, ScanTargetStatus } from '@/types/scanner';
 
 /**
  * Evaluates a scanned barcode or manual code input against the active pull sheet
@@ -16,7 +16,8 @@ import type { ScanEvaluationResult } from '@/types/scanner';
 export function evaluatePullsheetScan(
   scannedCode: string,
   pullsheetItems: PullsheetItem[],
-  equipmentLookup: Map<string, Equipment> | Record<string, Equipment> | Equipment[]
+  equipmentLookup: Map<string, Equipment> | Record<string, Equipment> | Equipment[],
+  targetStatus: ScanTargetStatus = 'prepped_scanned'
 ): ScanEvaluationResult {
   const cleanCode = (scannedCode || '').trim();
   if (!cleanCode) {
@@ -96,6 +97,60 @@ export function evaluatePullsheetScan(
 
   // Step 2: Handle Match on Pull Sheet
   if (matchedItem) {
+    if (targetStatus === 'deprepped') {
+      const isCurrentlyPrepped =
+        matchedItem.status === 'prepped_scanned' ||
+        (matchedItem.scannedQuantity !== undefined && matchedItem.scannedQuantity > 0);
+
+      if (!isCurrentlyPrepped) {
+        return {
+          type: 'INVALID_TRANSITION',
+          item: matchedItem,
+          equipment: matchedEquipment,
+          targetStatus: 'deprepped',
+          message: `Cannot deprep: "${matchedItem.description}" is not currently prepped`,
+        };
+      }
+
+      return {
+        type: 'SUCCESS',
+        item: matchedItem,
+        equipment: matchedEquipment,
+        targetStatus: 'deprepped',
+        newScannedCount: 0,
+        message: `Deprepped: ${matchedItem.description}`,
+      };
+    }
+
+    if (targetStatus === 'confirmed') {
+      const isAlreadyConfirmed = matchedItem.status === 'confirmed';
+      return {
+        type: 'SUCCESS',
+        item: matchedItem,
+        equipment: matchedEquipment,
+        targetStatus: 'confirmed',
+        warningOnly: isAlreadyConfirmed,
+        message: isAlreadyConfirmed
+          ? `Already confirmed: ${matchedItem.description}`
+          : `Confirmed: ${matchedItem.description}`,
+      };
+    }
+
+    if (targetStatus === 'returned') {
+      const wasUnprepped = matchedItem.status !== 'prepped_scanned' && matchedItem.status !== 'dispatched';
+      return {
+        type: 'SUCCESS',
+        item: matchedItem,
+        equipment: matchedEquipment,
+        targetStatus: 'returned',
+        warningOnly: wasUnprepped,
+        message: wasUnprepped
+          ? `Warning: Unprepped item marked Returned: ${matchedItem.description}`
+          : `Returned: ${matchedItem.description}`,
+      };
+    }
+
+    // Default: 'prepped_scanned'
     const targetQty = Math.max(1, matchedItem.quantity || 1);
     const currentScanned =
       matchedItem.scannedQuantity !== undefined
@@ -104,13 +159,15 @@ export function evaluatePullsheetScan(
         ? targetQty
         : 0;
 
-    if (currentScanned >= targetQty && matchedItem.status === 'prepped_scanned') {
+    if (currentScanned >= targetQty) {
       return {
         type: 'ALREADY_COMPLETED',
         item: matchedItem,
         equipment: matchedEquipment,
+        targetStatus: 'prepped_scanned',
         newScannedCount: currentScanned,
         isFullyPrepped: true,
+        warningOnly: true,
         message: `${matchedItem.description} is already fully prepped (${currentScanned}/${targetQty})`,
       };
     }
@@ -122,6 +179,7 @@ export function evaluatePullsheetScan(
       type: 'SUCCESS',
       item: matchedItem,
       equipment: matchedEquipment,
+      targetStatus: 'prepped_scanned',
       newScannedCount,
       isFullyPrepped,
       message: isFullyPrepped

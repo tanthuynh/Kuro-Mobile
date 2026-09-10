@@ -25,7 +25,13 @@ SplashScreen.preventAutoHideAsync().catch(() => {
  * Monitors authentication state and enforces route access boundaries.
  */
 function RouteGuard({ isFontsReady }: { isFontsReady: boolean }) {
-  const { isAuthenticated, isLoading, isRestoringSession } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    isRestoringSession,
+    pendingRedirectUrl,
+    setPendingRedirectUrl,
+  } = useAuth();
   const { isDark, colors } = useTheme();
   const segments = useSegments();
   const router = useRouter();
@@ -39,16 +45,29 @@ function RouteGuard({ isFontsReady }: { isFontsReady: boolean }) {
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!isAuthenticated && !inAuthGroup) {
+      // Capture attempted deep link path if unauthenticated outside auth group
+      if (segments.length > 0) {
+        const fullPath = `/${segments.join('/')}`;
+        if (fullPath !== '/' && fullPath !== '/(tabs)') {
+          setPendingRedirectUrl(fullPath);
+        }
+      }
       // Redirect unauthenticated user to login
       router.replace('/(auth)/login');
     } else if (isAuthenticated && inAuthGroup) {
-      // Redirect authenticated user to tabs
-      router.replace('/(tabs)');
+      // Redirect authenticated user to pending deep link target or tabs
+      if (pendingRedirectUrl) {
+        const target = pendingRedirectUrl;
+        setPendingRedirectUrl(null);
+        router.replace(target as any);
+      } else {
+        router.replace('/(tabs)');
+      }
     }
 
     // Hide native splash screen once initial routing and fonts are resolved
     SplashScreen.hideAsync().catch(() => {});
-  }, [isAuthenticated, isReady, segments, router]);
+  }, [isAuthenticated, isReady, segments, router, pendingRedirectUrl, setPendingRedirectUrl]);
 
   if (!isReady) {
     return (

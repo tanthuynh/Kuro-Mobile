@@ -1,11 +1,11 @@
 /**
  * app/(tabs)/scanner.tsx
- * Continuous Barcode & QR Code Equipment Scanner Screen in Kuro Mobile.
- * Operates in Standalone Fleet Lookup mode or Job Pull Sheet Prep mode
- * with real-time HUD feedback, audio beeps, tactile haptics, and live reconciliation.
+ * Cleaned up Barcode & QR Scanner Screen.
+ * Primary scanning is now integrated directly into the Event Pull Sheet (/events/[id]).
+ * This screen provides quick fleet lookups and seamless redirection to the active pull sheet.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,42 +13,30 @@ import {
   ScrollView,
   Pressable,
   Modal,
-  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  QrCode,
   Barcode,
-  Zap,
-  ZapOff,
-  Search,
-  CheckCircle2,
   FileSpreadsheet,
-  X,
-  RotateCcw,
-  Sparkles,
-  AlertCircle,
-  Package,
-  Wrench,
+  CheckCircle2,
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
-import { useScanner, type RecentScanRecord } from '@/context/scanner-context';
+import { useConsistentBack } from '@/hooks/use-consistent-back';
+import { useScanner } from '@/context/scanner-context';
 import { useSingleEvent } from '@/hooks/use-events';
 import { ScreenHeader } from '@/components/layout/screen-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { EmptyState } from '@/components/ui/empty-state';
-import { ModalSheet } from '@/components/ui/modal-sheet';
 import { CameraViewfinder } from '@/components/scanner/camera-viewfinder';
 import { ScanHudOverlay } from '@/components/scanner/scan-hud-overlay';
 import { ManualCodeInput } from '@/components/scanner/manual-code-input';
 
 export default function ScannerScreen() {
   const insets = useSafeAreaInsets();
-  const { colors, typography, spacing, layout } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
   const { eventId: routeEventId } = useLocalSearchParams<{ eventId?: string }>();
 
@@ -67,6 +55,8 @@ export default function ScannerScreen() {
     clearRecentScans,
     processScan,
     isProcessing,
+    isCompletionModalVisible,
+    dismissCompletionModal,
   } = useScanner();
 
   // If navigated with ?eventId=..., bind to active job
@@ -77,7 +67,6 @@ export default function ScannerScreen() {
   }, [routeEventId, activeEventId, setActiveEventId]);
 
   const { event: activeEvent } = useSingleEvent(activeEventId || '');
-  const [inspectedItem, setInspectedItem] = useState<RecentScanRecord | null>(null);
 
   const handleScanCode = (code: string) => {
     processScan(code);
@@ -87,13 +76,18 @@ export default function ScannerScreen() {
     setActiveEventId(null);
   };
 
-  const handleBack = () => {
-    if (activeEventId) {
-      router.replace(`/pullsheet/${activeEventId}` as any);
-    } else {
-      router.replace('/(tabs)' as any);
+  const onBeforeBack = useCallback(() => {
+    if (isCompletionModalVisible) {
+      dismissCompletionModal();
+      return true;
     }
-  };
+    return false;
+  }, [isCompletionModalVisible, dismissCompletionModal]);
+
+  const { handleBack } = useConsistentBack({
+    fallbackRoute: activeEventId ? `/events/${activeEventId}` : '/(tabs)',
+    onBeforeBack,
+  });
 
   return (
     <View
@@ -105,7 +99,7 @@ export default function ScannerScreen() {
       ]}
       testID="continuous-scanner-screen"
     >
-      {/* Repairs-Styled Top Header */}
+      {/* Top Header */}
       <ScreenHeader
         title={activeEvent?.eventName || 'Equipment Scanner'}
         idBadge={activeEvent?.eventNumber ? `[${activeEvent.eventNumber}]` : '[SCAN]'}
@@ -162,7 +156,7 @@ export default function ScannerScreen() {
                 variant="secondary"
                 size="sm"
                 icon={<FileSpreadsheet size={13} color={colors.secondaryForeground} />}
-                onPress={() => router.push(`/pullsheet/${activeEventId}`)}
+                onPress={() => router.push(`/events/${activeEventId}` as any)}
                 testID="scanner-view-pullsheet-btn"
                 style={{ marginRight: 6 }}
               >
@@ -180,7 +174,44 @@ export default function ScannerScreen() {
               </Pressable>
             </View>
           </View>
-        ) : null}
+        ) : (
+          <View
+            style={[
+              styles.noJobBanner,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <View style={{ flex: 1, marginRight: 8 }}>
+              <Text
+                style={[
+                  styles.jobBannerTitle,
+                  { color: colors.foreground, fontSize: typography.fontSize.sm },
+                ]}
+              >
+                No Active Event Selected
+              </Text>
+              <Text
+                style={[
+                  styles.jobBannerSub,
+                  { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
+                ]}
+              >
+                Equipment scanning is integrated directly into each Event Pull Sheet.
+              </Text>
+            </View>
+            <Button
+              variant="outline"
+              size="sm"
+              onPress={() => router.replace('/(tabs)')}
+              testID="scanner-select-event-btn"
+            >
+              Select Event
+            </Button>
+          </View>
+        )}
 
         {/* Viewfinder Component */}
         <CameraViewfinder
@@ -241,154 +272,139 @@ export default function ScannerScreen() {
             const isWarning = scan.resultType === 'ALREADY_COMPLETED';
 
             return (
-              <Pressable
+              <Card
                 key={scan.id}
-                onPress={() => setInspectedItem(scan)}
                 testID={`recent-scan-item-${scan.id}`}
+                style={[
+                  styles.scanItemCard,
+                  {
+                    borderLeftColor: isSuccess
+                      ? colors.status.online
+                      : isWarning
+                      ? colors.status.degraded
+                      : colors.destructive,
+                    borderLeftWidth: 3,
+                  },
+                ]}
               >
-                <Card
-                  style={[
-                    styles.scanItemCard,
-                    {
-                      borderLeftColor: isSuccess
-                        ? colors.status.online
-                        : isWarning
-                        ? colors.status.degraded
-                        : colors.destructive,
-                      borderLeftWidth: 3,
-                    },
-                  ]}
-                >
-                  <CardContent style={{ paddingTop: spacing.sm, paddingBottom: spacing.sm }}>
-                    <View style={styles.scanItemHeader}>
-                      <Text
-                        numberOfLines={1}
-                        style={[
-                          styles.scanItemName,
-                          { color: colors.cardForeground, fontSize: typography.fontSize.sm },
-                        ]}
-                      >
-                        {scan.name}
-                      </Text>
-                      <Badge variant={isSuccess ? 'success' : isWarning ? 'warning' : 'destructive'}>
-                        {scan.resultType}
-                      </Badge>
-                    </View>
+                <CardContent style={{ paddingTop: spacing.sm, paddingBottom: spacing.sm }}>
+                  <View style={styles.scanItemHeader}>
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.scanItemName,
+                        { color: colors.cardForeground, fontSize: typography.fontSize.sm },
+                      ]}
+                    >
+                      {scan.name}
+                    </Text>
+                    <Badge variant={isSuccess ? 'success' : isWarning ? 'warning' : 'destructive'}>
+                      {scan.resultType}
+                    </Badge>
+                  </View>
 
-                    <View style={styles.scanItemMetaRow}>
-                      <Text style={[styles.codeBadge, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                        {scan.code}
-                      </Text>
-                      {scan.location ? (
-                        <>
-                          <Text style={[styles.metaDot, { color: colors.border }]}>•</Text>
-                          <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                            {scan.location}
-                          </Text>
-                        </>
-                      ) : null}
-                      <Text style={[styles.metaDot, { color: colors.border }]}>•</Text>
-                      <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                        {scan.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </Text>
-                    </View>
-                  </CardContent>
-                </Card>
-              </Pressable>
+                  <View style={styles.scanItemMetaRow}>
+                    <Text style={[styles.codeBadge, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                      {scan.code}
+                    </Text>
+                    {scan.location ? (
+                      <>
+                        <Text style={[styles.metaDot, { color: colors.border }]}>•</Text>
+                        <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                          {scan.location}
+                        </Text>
+                      </>
+                    ) : null}
+                    <Text style={[styles.metaDot, { color: colors.border }]}>•</Text>
+                    <Text style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                      {scan.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </Text>
+                  </View>
+                </CardContent>
+              </Card>
             );
           })
         )}
       </ScrollView>
 
-      {/* Item Detail Inspection Modal Sheet */}
-      <ModalSheet
-        visible={Boolean(inspectedItem)}
-        onClose={() => setInspectedItem(null)}
-        title="Asset Inspection"
-        testID="scanner-detail-modal"
+      {/* 100% Pull Sheet Completion Celebration Modal */}
+      <Modal
+        visible={isCompletionModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={dismissCompletionModal}
+        testID="pullsheet-completion-celebration-modal"
       >
-        {inspectedItem ? (
-          <View style={styles.modalBody}>
-            <Text style={[styles.detailItemName, { color: colors.foreground, fontSize: typography.fontSize.xl }]}>
-              {inspectedItem.name}
+        <View style={styles.celebrationOverlay}>
+          <View
+            style={[
+              styles.celebrationCard,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.brandGreenScale.green4,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.celebrationIconWrap,
+                { backgroundColor: colors.brandGreenScale.green2 },
+              ]}
+            >
+              <CheckCircle2 size={44} color={colors.status.online} />
+            </View>
+
+            <Text
+              style={[
+                styles.celebrationTitle,
+                { color: colors.foreground, fontSize: typography.fontSize.xl },
+              ]}
+            >
+              Pull Sheet 100% Complete!
             </Text>
 
-            <View style={styles.detailChipsRow}>
-              <Badge variant="brand">{inspectedItem.category || 'Equipment'}</Badge>
-              <Badge variant={inspectedItem.resultType === 'SUCCESS' ? 'success' : 'warning'}>
-                {inspectedItem.status}
-              </Badge>
-            </View>
+            <Text
+              style={[
+                styles.celebrationSub,
+                { color: colors.mutedForeground, fontSize: typography.fontSize.base },
+              ]}
+            >
+              All line items for {activeEvent?.eventName || `Job #${activeEventId}`} have been successfully prepped and scanned.
+            </Text>
 
-            <View style={[styles.specGrid, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <View style={styles.specRow}>
-                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                  Scanned Code
-                </Text>
-                <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-                  {inspectedItem.code}
-                </Text>
-              </View>
-
-              {inspectedItem.location ? (
-                <View style={styles.specRow}>
-                  <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                    Warehouse Location
-                  </Text>
-                  <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-                    {inspectedItem.location}
-                  </Text>
-                </View>
+            <View style={styles.celebrationActions}>
+              {activeEventId ? (
+                <Button
+                  variant="primary"
+                  size="default"
+                  icon={<FileSpreadsheet size={16} color={colors.primaryForeground} />}
+                  onPress={() => {
+                    dismissCompletionModal();
+                    router.replace(`/pullsheet/${activeEventId}` as any);
+                  }}
+                  testID="celebration-view-pullsheet-btn"
+                  style={{ width: '100%', marginBottom: 10 }}
+                >
+                  View Pull Sheet
+                </Button>
               ) : null}
-
-              <View style={styles.specRow}>
-                <Text style={[styles.specLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                  Scan Timestamp
-                </Text>
-                <Text style={[styles.specValue, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-                  {inspectedItem.timestamp.toLocaleString()}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.modalActionRow}>
-              <Button
-                variant="destructive"
-                size="default"
-                icon={<Wrench size={16} color="#FFFFFF" />}
-                style={{ flex: 1 }}
-                onPress={() => {
-                  const item = inspectedItem;
-                  setInspectedItem(null);
-                  router.push({
-                    pathname: '/repair/new',
-                    params: {
-                      name: item.name,
-                      barcode: item.code,
-                      serialNumber: item.code,
-                      category: item.category || 'Equipment',
-                      location: item.location || '',
-                    },
-                  });
-                }}
-                testID="scanner-report-fault-btn"
-              >
-                Report Fault
-              </Button>
 
               <Button
                 variant="outline"
                 size="default"
-                style={{ flex: 1 }}
-                onPress={() => setInspectedItem(null)}
-                testID="scanner-close-inspection-btn"
+                onPress={() => {
+                  dismissCompletionModal();
+                  router.replace('/(tabs)' as any);
+                }}
+                testID="celebration-return-events-btn"
+                style={{ width: '100%' }}
               >
-                Close
+                Return to Events
               </Button>
             </View>
           </View>
-        ) : null}
-      </ModalSheet>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -397,17 +413,54 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  celebrationOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  celebrationCard: {
+    width: '100%',
+    maxWidth: 380,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1.5,
+  },
+  celebrationIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  celebrationTitle: {
+    fontFamily: 'Calibri',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  celebrationSub: {
+    fontFamily: 'Calibri',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  celebrationActions: {
+    width: '100%',
+  },
   scrollContent: {
     paddingBottom: 40,
   },
   jobBanner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
     borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
     marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   jobBannerLeft: {
     flex: 1,
@@ -415,15 +468,11 @@ const styles = StyleSheet.create({
   },
   jobBannerTitle: {
     fontFamily: 'Calibri',
-    fontSize: 14,
     fontWeight: '700',
-    lineHeight: 20,
+    marginBottom: 2,
   },
   jobBannerSub: {
     fontFamily: 'Calibri',
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 2,
   },
   jobBannerActions: {
     flexDirection: 'row',
@@ -431,9 +480,16 @@ const styles = StyleSheet.create({
   },
   exitJobBtn: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    minHeight: 48,
-    justifyContent: 'center',
+    paddingVertical: 6,
+  },
+  noJobBanner: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   manualCard: {
     marginTop: 12,
@@ -441,39 +497,33 @@ const styles = StyleSheet.create({
   },
   manualTitle: {
     fontFamily: 'Calibri',
-    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 24,
   },
   recentHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 10,
+    marginTop: 8,
   },
   sectionTitle: {
     fontFamily: 'Calibri',
-    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 24,
   },
   clearBtnText: {
     fontFamily: 'Calibri',
-    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 18,
   },
   emptyScans: {
-    borderRadius: 8,
     borderWidth: 1,
-    padding: 20,
+    borderRadius: 8,
+    borderStyle: 'dashed',
+    padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   emptyScansText: {
     fontFamily: 'Calibri',
-    fontSize: 13,
-    lineHeight: 18,
     textAlign: 'center',
   },
   scanItemCard: {
@@ -481,15 +531,13 @@ const styles = StyleSheet.create({
   },
   scanItemHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 4,
   },
   scanItemName: {
     fontFamily: 'Calibri',
-    fontSize: 14,
     fontWeight: '700',
-    lineHeight: 20,
     flex: 1,
     marginRight: 8,
   },
@@ -499,81 +547,12 @@ const styles = StyleSheet.create({
   },
   codeBadge: {
     fontFamily: 'Calibri',
-    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 18,
   },
   metaDot: {
     marginHorizontal: 6,
   },
   metaText: {
     fontFamily: 'Calibri',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderTopWidth: 1,
-    padding: 20,
-    maxHeight: '85%',
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontFamily: 'Calibri',
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 24,
-  },
-  modalBody: {},
-  detailItemName: {
-    fontFamily: 'Calibri',
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 26,
-    marginBottom: 8,
-  },
-  detailChipsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
-  },
-  specGrid: {
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 12,
-    marginBottom: 20,
-    gap: 8,
-  },
-  specRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  specLabel: {
-    fontFamily: 'Calibri',
-    fontSize: 13,
-    fontWeight: '500',
-    lineHeight: 18,
-  },
-  specValue: {
-    fontFamily: 'Calibri',
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 20,
-  },
-  modalActionRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 4,
   },
 });

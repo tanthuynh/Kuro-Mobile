@@ -285,4 +285,36 @@ describe('Milestone 4: Logistics Feed Screen Component Tests', () => {
     expect(await findByTestId('job-live-tracking-pill-job-alpha-01')).toBeTruthy();
     expect(queryByTestId('job-live-tracking-pill-job-beta-02')).toBeNull();
   });
+
+  it('resolves vehicle database code to actual vehicle name and enables searching by vehicle', async () => {
+    const jobWithCode: LogisticsEntry = {
+      ...mockLogisticsJobs[0],
+      id: 'job-code-test',
+      eventName: 'Electric Arena Sound System',
+      vehicleId: 'veh-mercedes-sprinter-01',
+    };
+
+    jest.spyOn(logisticsService, 'subscribeToLogistics').mockImplementation((_tenantId, onUpdate) => {
+      onUpdate([jobWithCode]);
+      return () => {};
+    });
+
+    jest.spyOn(logisticsService, 'fetchVehicleById').mockResolvedValue({
+      id: 'veh-mercedes-sprinter-01',
+      name: 'Mercedes Sprinter',
+      rego: 'NSW-SP99',
+    });
+
+    const { findByText, getByTestId } = render(<LogisticsFeedScreen />);
+
+    // Should display human-readable vehicle name "Mercedes Sprinter (NSW-SP99)", NOT "veh-mercedes-sprinter-01"
+    expect(await findByText('Mercedes Sprinter (NSW-SP99)')).toBeTruthy();
+
+    // Verify search keyword matches the resolved vehicle name
+    const searchInput = getByTestId('logistics-search-input');
+    await act(async () => {
+      fireEvent.changeText(searchInput, 'Sprinter');
+    });
+    expect(await findByText('Electric Arena Sound System')).toBeTruthy();
+  });
 });

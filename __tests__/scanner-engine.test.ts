@@ -144,6 +144,74 @@ describe('scanner-engine', () => {
       const res = evaluatePullsheetScan('BAR-LA-K2-001', mockPullsheetItems, eqMap);
       expect(res.type).toBe('SUCCESS');
     });
+
+    it('evaluates Confirmed target status and warns if already confirmed', () => {
+      // First scan as confirmed on a pending item
+      const pendingItems: PullsheetItem[] = [
+        {
+          ...mockPullsheetItems[0],
+          status: 'pending',
+        },
+      ];
+      const res1 = evaluatePullsheetScan('BAR-LA-K2-001', pendingItems, mockEquipmentList, 'confirmed');
+      expect(res1.type).toBe('SUCCESS');
+      expect(res1.targetStatus).toBe('confirmed');
+      expect(res1.warningOnly).toBe(false);
+
+      // Second scan on item that is already confirmed
+      const confirmedItems: PullsheetItem[] = [
+        {
+          ...mockPullsheetItems[0],
+          status: 'confirmed',
+        },
+      ];
+      const res2 = evaluatePullsheetScan('BAR-LA-K2-001', confirmedItems, mockEquipmentList, 'confirmed');
+      expect(res2.type).toBe('SUCCESS');
+      expect(res2.warningOnly).toBe(true);
+      expect(res2.message).toContain('Already confirmed');
+    });
+
+    it('evaluates Returned target status and warns if item was un-prepped', () => {
+      // Un-prepped item
+      const res1 = evaluatePullsheetScan('BAR-LA-K2-001', mockPullsheetItems, mockEquipmentList, 'returned');
+      expect(res1.type).toBe('SUCCESS');
+      expect(res1.targetStatus).toBe('returned');
+      expect(res1.warningOnly).toBe(true);
+      expect(res1.message).toContain('Warning: Unprepped item marked Returned');
+
+      // Prepped item
+      const preppedItems: PullsheetItem[] = [
+        {
+          ...mockPullsheetItems[0],
+          status: 'prepped_scanned',
+        },
+      ];
+      const res2 = evaluatePullsheetScan('BAR-LA-K2-001', preppedItems, mockEquipmentList, 'returned');
+      expect(res2.type).toBe('SUCCESS');
+      expect(res2.warningOnly).toBe(false);
+      expect(res2.message).toContain('Returned');
+    });
+
+    it('evaluates Deprep target status: rejects un-prepped items and succeeds for prepped items', () => {
+      // Un-prepped item: strictly rejected with INVALID_TRANSITION
+      const res1 = evaluatePullsheetScan('BAR-LA-K2-001', mockPullsheetItems, mockEquipmentList, 'deprepped');
+      expect(res1.type).toBe('INVALID_TRANSITION');
+      expect(res1.message).toContain('Cannot deprep: "L-Acoustics K2 Line Array" is not currently prepped');
+
+      // Prepped item: succeeds and resets count
+      const preppedItems: PullsheetItem[] = [
+        {
+          ...mockPullsheetItems[0],
+          scannedQuantity: 2,
+          status: 'prepped_scanned',
+        },
+      ];
+      const res2 = evaluatePullsheetScan('BAR-LA-K2-001', preppedItems, mockEquipmentList, 'deprepped');
+      expect(res2.type).toBe('SUCCESS');
+      expect(res2.targetStatus).toBe('deprepped');
+      expect(res2.newScannedCount).toBe(0);
+      expect(res2.message).toContain('Deprepped');
+    });
   });
 
   describe('createScanThrottle', () => {

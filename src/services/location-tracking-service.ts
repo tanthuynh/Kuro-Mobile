@@ -1,14 +1,27 @@
 /**
  * src/services/location-tracking-service.ts
- * Background GPS Tracking Service for Kuro Mobile Logistics.
+ * Hardened Background GPS Tracking Service for Kuro Mobile Logistics.
  *
  * Utilizes Expo Location and TaskManager to record driver GPS coordinates
  * in the foreground and background while a logistics job is active, syncing
  * live coordinates to Firestore `logistics/{jobId}`.
+ *
+ * Hardening features:
+ * - Session generation & monotonic timestamp checks to eliminate stale / out-of-order writes.
+ * - In-flight write barrier preventing post-stop tracking state resurrection in Firestore.
+ * - Movement (>= 30m) and Heartbeat (5 min) write throttling to suppress stationary jitter.
+ * - History breadcrumb movement threshold (>= 50m) preserving route fidelity without DB flood.
+ * - Lifecycle synchronization & mutex locking against duplicate concurrent start/stop calls.
+ * - Auth observer (onAuthStateChanged) for automatic tracking teardown on logout / account switch.
+ * - AppState listener for permission loss detection upon foregrounding.
+ * - Explicit sync status (syncing, synced, offline_failed, permission_denied).
  */
 
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
+import { AppState, type AppStateStatus } from 'react-native';
+import { onAuthStateChanged, type Auth } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { updateJobLocation, stopJobTracking } from './logistics-service';
 import type { DriverLocation } from '@/types/logistics';
 
@@ -17,6 +30,10 @@ import type { DriverLocation } from '@/types/logistics';
 // ============================================================================
 
 export const LOCATION_TASK_NAME = 'KURO_MOBILE_LOGISTICS_GPS_TRACKING';
+
+export const MOVEMENT_THRESHOLD_METERS = 30;
+export const HEARTBEAT_THRESHOLD_MS = 300000; // 5 minutes (300,000 ms)
+export const HISTORY_MOVEMENT_THRESHOLD_METERS = 50;
 
 export interface TrackingOptions {
   timeInterval?: number;
@@ -41,6 +58,14 @@ export interface TrackingState {
   lastKnownLocation: DriverLocation | null;
 }
 
+export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'offline_failed' | 'permission_denied';
+
+export interface SyncStatusInfo {
+  status: SyncStatus;
+  lastSyncTime: number | null;
+  lastError: string | null;
+}
+
 // ============================================================================
 // IN-MEMORY SINGLETON STATE
 // ============================================================================
@@ -57,16 +82,117 @@ let currentDriverInfo: { id?: string; name?: string } = {};
 type LocationListener = (location: DriverLocation) => void;
 const listeners = new Set<LocationListener>();
 
+type SyncStatusListener = (info: SyncStatusInfo) => void;
+const syncStatusListeners = new Set<SyncStatusListener>();
+
+let currentSyncStatus: SyncStatusInfo = {
+  status: 'idle',
+  lastSyncTime: null,
+  lastError: null,
+};
+
+// Concurrency & generation guards
+let currentSessionId: string | null = null;
+let sessionGeneration = 0;
+let lastProcessedTimestamp = 0;
+let lastParentWriteLocation: { latitude: number; longitude: number; timestamp: number } | null = null;
+let lastHistoryWriteLocation: { latitude: number; longitude: number; timestamp: number } | null = null;
+let inFlightWritePromise: Promise<void> | null = null;
+
+// Mutex lock to sequence rapid concurrent start/stop actions
+let isLifecycleMutating = false;
+let lifecycleUnlockQueue: (() => void)[] = [];
+
+async function acquireLifecycleLock(): Promise<void> {
+  while (isLifecycleMutating) {
+    await new Promise<void>((resolve) => {
+      lifecycleUnlockQueue.push(resolve);
+    });
+  }
+  isLifecycleMutating = true;
+}
+
+function releaseLifecycleLock(): void {
+  isLifecycleMutating = false;
+  if (lifecycleUnlockQueue.length > 0) {
+    const next = lifecycleUnlockQueue.shift();
+    if (next) next();
+  }
+}
+
 // ============================================================================
-// BACKGROUND TASK DEFINITION
+// GEOMETRIC & DISTANCE HELPERS
+// ============================================================================
+
+/**
+ * Calculates the great-circle distance between two geographic coordinates
+ * in meters using the Haversine formula.
+ */
+export function calculateHaversineDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  if (lat1 === lat2 && lon1 === lon2) return 0;
+  const R = 6371000; // Earth's mean radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// ============================================================================
+// SYNC STATUS MANAGEMENT
+// ============================================================================
+
+export function getSyncStatus(): SyncStatusInfo {
+  return { ...currentSyncStatus };
+}
+
+export function addSyncStatusListener(listener: SyncStatusListener): () => void {
+  syncStatusListeners.add(listener);
+  return () => {
+    syncStatusListeners.delete(listener);
+  };
+}
+
+function setSyncStatus(status: SyncStatus, error: string | null = null): void {
+  currentSyncStatus = {
+    status,
+    lastSyncTime: status === 'synced' ? Date.now() : currentSyncStatus.lastSyncTime,
+    lastError: error,
+  };
+  syncStatusListeners.forEach((listener) => {
+    try {
+      listener(currentSyncStatus);
+    } catch (err) {
+      console.error('[LocationTrackingService] SyncStatusListener error:', err);
+    }
+  });
+}
+
+// ============================================================================
+// BACKGROUND TASK DEFINITION & UPDATE PIPELINE
 // ============================================================================
 
 /**
  * Handle incoming location updates from Expo Location (foreground or background).
- * Formats coordinates and updates in-memory state, invokes listeners, and writes to Firestore.
+ * Formats coordinates, applies accuracy/monotonicity/movement filters, updates in-memory state,
+ * and writes to Firestore according to throttling policies.
+ *
+ * @param locationObj Native Expo LocationObject
+ * @param forceWrite Optional boolean to bypass movement throttling (e.g. initial fix on start)
  */
 export async function handleLocationUpdate(
-  locationObj: Location.LocationObject
+  locationObj: Location.LocationObject,
+  forceWrite: boolean = false
 ): Promise<DriverLocation | null> {
   if (!locationObj || !locationObj.coords) {
     return null;
@@ -74,7 +200,7 @@ export async function handleLocationUpdate(
 
   const { coords, timestamp } = locationObj;
 
-  // Validate coordinates: latitude and longitude must be valid finite numbers within geographic bounds
+  // 1. Validate coordinates: latitude and longitude must be valid finite numbers within geographic bounds
   if (
     typeof coords.latitude !== 'number' ||
     typeof coords.longitude !== 'number' ||
@@ -88,8 +214,7 @@ export async function handleLocationUpdate(
     return null;
   }
 
-  // Accuracy Filter: Discard any location ping where accuracy > 50 meters or invalid (< 0, non-finite, non-number)
-  // to prevent GPS jumps and save DB writes
+  // 2. Accuracy Filter: Discard any location ping where accuracy > 50 meters or invalid (< 0, non-finite, non-number)
   if (
     coords.accuracy !== null &&
     coords.accuracy !== undefined &&
@@ -101,6 +226,15 @@ export async function handleLocationUpdate(
     return null;
   }
 
+  const validTimestamp = typeof timestamp === 'number' && timestamp > 0 ? timestamp : Date.now();
+
+  // 3. Monotonic Timestamp Guard: Discard stale or out-of-order callbacks
+  const isTimescaleMismatch = lastProcessedTimestamp > 1_000_000_000_000 && validTimestamp < 1_000_000_000;
+  if (!isTimescaleMismatch && lastProcessedTimestamp > 0 && validTimestamp < lastProcessedTimestamp) {
+    return null;
+  }
+  lastProcessedTimestamp = validTimestamp;
+
   const formattedLocation: DriverLocation = {
     latitude: coords.latitude,
     longitude: coords.longitude,
@@ -108,15 +242,16 @@ export async function handleLocationUpdate(
     accuracy: coords.accuracy ?? null,
     speed: coords.speed ?? null,
     heading: coords.heading ?? null,
-    timestamp: typeof timestamp === 'number' && timestamp > 0 ? timestamp : Date.now(),
+    timestamp: validTimestamp,
     driverId: currentDriverInfo.id,
     driverName: currentDriverInfo.name,
     jobId: trackingState.activeJobId || undefined,
   };
 
+  // Always update in-memory lastKnownLocation for local speedometer/HUD
   trackingState.lastKnownLocation = formattedLocation;
 
-  // Notify registered in-memory listeners (for UI, HUDs, etc.)
+  // Notify registered in-memory listeners
   listeners.forEach((listener) => {
     try {
       listener(formattedLocation);
@@ -125,19 +260,101 @@ export async function handleLocationUpdate(
     }
   });
 
-  // Write to Firestore if an active job is being tracked
-  if (trackingState.activeJobId) {
-    try {
-      await updateJobLocation(trackingState.activeJobId, formattedLocation);
-    } catch (syncErr) {
-      console.error('[LocationTrackingService] Failed to sync GPS coordinates to Firestore:', syncErr);
+  // 4. Session Validation Guard: Check that tracking is actively running
+  const targetJobId = trackingState.activeJobId;
+  const callbackSessionGen = sessionGeneration;
+  const callbackSessionId = currentSessionId;
+
+  if (
+    !trackingState.isTracking ||
+    !targetJobId ||
+    !callbackSessionId ||
+    callbackSessionGen !== sessionGeneration
+  ) {
+    return formattedLocation;
+  }
+
+  // 5. Throttling & Movement Policy Evaluation
+  let shouldUpdateParent = Boolean(forceWrite) || !lastParentWriteLocation;
+  let shouldWriteHistory = Boolean(forceWrite) || !lastHistoryWriteLocation;
+
+  if (!shouldUpdateParent && lastParentWriteLocation) {
+    const displacement = calculateHaversineDistance(
+      lastParentWriteLocation.latitude,
+      lastParentWriteLocation.longitude,
+      formattedLocation.latitude,
+      formattedLocation.longitude
+    );
+    const elapsed = formattedLocation.timestamp - lastParentWriteLocation.timestamp;
+
+    // Write parent if vehicle moved >= 30m OR stationary heartbeat expired (>= 5 min)
+    if (displacement >= MOVEMENT_THRESHOLD_METERS || elapsed >= HEARTBEAT_THRESHOLD_MS) {
+      shouldUpdateParent = true;
     }
   }
+
+  if (shouldUpdateParent && !shouldWriteHistory && lastHistoryWriteLocation) {
+    const historyDisplacement = calculateHaversineDistance(
+      lastHistoryWriteLocation.latitude,
+      lastHistoryWriteLocation.longitude,
+      formattedLocation.latitude,
+      formattedLocation.longitude
+    );
+
+    // Write history breadcrumb only if vehicle moved >= 50m
+    if (historyDisplacement >= HISTORY_MOVEMENT_THRESHOLD_METERS) {
+      shouldWriteHistory = true;
+    }
+  }
+
+  // If stationary suppression applies, return early without database writes
+  if (!shouldUpdateParent) {
+    return formattedLocation;
+  }
+
+  // 6. Firestore Synchronization with Session Barrier
+  const writePromise = (async () => {
+    try {
+      setSyncStatus('syncing');
+
+      if (!shouldWriteHistory) {
+        await updateJobLocation(targetJobId, formattedLocation, {
+          skipHistory: true,
+          isTrackingActive: true,
+        });
+      } else {
+        await updateJobLocation(targetJobId, formattedLocation);
+      }
+
+      // Confirm session remained valid while the write was in flight across the network
+      if (currentSessionId === callbackSessionId && sessionGeneration === callbackSessionGen) {
+        lastParentWriteLocation = {
+          latitude: formattedLocation.latitude,
+          longitude: formattedLocation.longitude,
+          timestamp: formattedLocation.timestamp,
+        };
+        if (shouldWriteHistory) {
+          lastHistoryWriteLocation = {
+            latitude: formattedLocation.latitude,
+            longitude: formattedLocation.longitude,
+            timestamp: formattedLocation.timestamp,
+          };
+        }
+        setSyncStatus('synced');
+      }
+    } catch (syncErr: any) {
+      console.error('[LocationTrackingService] Failed to sync GPS coordinates to Firestore:', syncErr);
+      setSyncStatus('offline_failed', syncErr?.message || 'Network disconnected or Firestore write failed');
+    }
+  })();
+
+  inFlightWritePromise = writePromise;
+  await writePromise;
 
   return formattedLocation;
 }
 
-// Define the global headless background task required by Expo TaskManager
+// Global headless background task required by Expo TaskManager
 try {
   TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }: { data?: any; error?: any }) => {
     if (error) {
@@ -224,29 +441,47 @@ export async function startTrackingJob(
     return false;
   }
 
-  // Idempotency: If already tracking this exact job, return true immediately
-  if (trackingState.isTracking && trackingState.activeJobId === jobId) {
-    return true;
-  }
-
-  // If tracking a different job, cleanly stop the previous job tracking first
-  if (trackingState.isTracking && trackingState.activeJobId && trackingState.activeJobId !== jobId) {
-    await stopTrackingJob(trackingState.activeJobId);
-  }
-
-  // Update driver metadata if provided
-  if (options?.driverId || options?.driverName) {
-    currentDriverInfo = {
-      id: options.driverId ?? currentDriverInfo.id,
-      name: options.driverName ?? currentDriverInfo.name,
-    };
-  }
-
+  await acquireLifecycleLock();
   try {
+    // Idempotency: If already tracking this exact job with active session, return true immediately
+    if (trackingState.isTracking && trackingState.activeJobId === jobId && currentSessionId) {
+      return true;
+    }
+
+    // If tracking a different job, cleanly stop the previous job tracking first
+    if (trackingState.isTracking && trackingState.activeJobId && trackingState.activeJobId !== jobId) {
+      const prevJobId = trackingState.activeJobId;
+      currentSessionId = null;
+      sessionGeneration++;
+      if (inFlightWritePromise) {
+        try {
+          await inFlightWritePromise;
+        } catch {}
+        inFlightWritePromise = null;
+      }
+      try {
+        await stopJobTracking(prevJobId);
+      } catch (err) {
+        console.error(`[LocationTrackingService] Error stopping previous job ${prevJobId}:`, err);
+      }
+    }
+
+    // Update driver metadata if provided
+    if (options?.driverId || options?.driverName) {
+      currentDriverInfo = {
+        id: options.driverId ?? currentDriverInfo.id,
+        name: options.driverName ?? currentDriverInfo.name,
+      };
+    } else if (!currentDriverInfo.id && auth?.currentUser?.uid) {
+      currentDriverInfo.id = auth.currentUser.uid;
+      currentDriverInfo.name = auth.currentUser.displayName || auth.currentUser.email || undefined;
+    }
+
     // Check/Request permissions
     const perms = await requestLocationPermissions();
     if (!perms.foreground) {
       console.warn('[LocationTrackingService] Foreground location permission denied. Tracking cannot start.');
+      setSyncStatus('permission_denied', 'Foreground location permission denied');
       return false;
     }
 
@@ -273,10 +508,17 @@ export async function startTrackingJob(
       });
     }
 
-    // Update in-memory state
+    // Initialize fresh session token and reset throttling markers
+    sessionGeneration++;
+    currentSessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    lastProcessedTimestamp = 0;
+    lastParentWriteLocation = null;
+    lastHistoryWriteLocation = null;
+
     trackingState.isTracking = true;
     trackingState.activeJobId = jobId;
     trackingState.activeTenantId = tenantId;
+    setSyncStatus('syncing');
 
     // Immediately fetch initial position to sync to Firestore without waiting for first interval
     let initialUpdated: DriverLocation | null = null;
@@ -285,7 +527,7 @@ export async function startTrackingJob(
         accuracy: options?.accuracy ?? Location.Accuracy.High,
       });
       if (initialPos) {
-        initialUpdated = await handleLocationUpdate(initialPos);
+        initialUpdated = await handleLocationUpdate(initialPos, true); // Force initial position write
       }
     } catch (posErr) {
       console.warn('[LocationTrackingService] Failed to retrieve initial GPS fix:', posErr);
@@ -296,7 +538,7 @@ export async function startTrackingJob(
       try {
         const lastPos = await Location.getLastKnownPositionAsync();
         if (lastPos) {
-          await handleLocationUpdate(lastPos);
+          await handleLocationUpdate(lastPos, true); // Force initial position write
         }
       } catch (lastErr) {
         console.warn('[LocationTrackingService] Failed to retrieve last known GPS position:', lastErr);
@@ -309,49 +551,188 @@ export async function startTrackingJob(
     trackingState.isTracking = false;
     trackingState.activeJobId = null;
     trackingState.activeTenantId = null;
+    currentSessionId = null;
+    sessionGeneration++;
+    setSyncStatus('idle');
     return false;
+  } finally {
+    releaseLifecycleLock();
   }
 }
 
 /**
  * Stops background GPS tracking and marks the job's tracking inactive in Firestore.
  * Idempotent: Can be called safely even when tracking is not active.
+ * Guarantees in-flight writes settle before deactivating Firestore state.
  *
  * @param jobId Optional job ID. Defaults to the currently active job ID.
  */
 export async function stopTrackingJob(jobId?: string): Promise<void> {
-  const targetJobId = jobId || trackingState.activeJobId;
+  await acquireLifecycleLock();
+  try {
+    const targetJobId = jobId || trackingState.activeJobId;
+
+    // 1. Invalidate current session token immediately
+    currentSessionId = null;
+    sessionGeneration++;
+
+    // 2. Await in-flight write promise to settle so it does not overwrite the stop
+    if (inFlightWritePromise) {
+      try {
+        await inFlightWritePromise;
+      } catch {}
+      inFlightWritePromise = null;
+    }
+
+    // 3. Stop native location updates in Expo Location module
+    try {
+      let hasStarted = false;
+      try {
+        hasStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
+      } catch {
+        hasStarted = false;
+      }
+
+      if (hasStarted) {
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+      }
+    } catch (err) {
+      console.warn('[LocationTrackingService] Error stopping location updates:', err);
+    }
+
+    // 4. Deactivate tracking on Firestore job document
+    if (targetJobId) {
+      try {
+        await stopJobTracking(targetJobId);
+      } catch (err) {
+        console.error(`[LocationTrackingService] Error stopping Firestore tracking for job ${targetJobId}:`, err);
+      }
+    }
+
+    // 5. Clear in-memory active tracking state
+    trackingState.isTracking = false;
+    trackingState.activeJobId = null;
+    trackingState.activeTenantId = null;
+    lastParentWriteLocation = null;
+    lastHistoryWriteLocation = null;
+    lastProcessedTimestamp = 0;
+    setSyncStatus('idle');
+  } finally {
+    releaseLifecycleLock();
+  }
+}
+
+// ============================================================================
+// LIFECYCLE OBSERVERS (AUTH & APP STATE)
+// ============================================================================
+
+let authUnsubscribe: (() => void) | null = null;
+let currentObservedUid: string | null = null;
+
+/**
+ * Attaches an auth observer to immediately tear down tracking upon logout or account switch.
+ */
+export function initTrackingAuthObserver(
+  customAuth?: any,
+  customOnAuthStateChanged?: any
+): void {
+  const authToUse = customAuth || auth;
+  if (!authToUse) return;
+
+  if (authUnsubscribe) {
+    try {
+      authUnsubscribe();
+    } catch {}
+    authUnsubscribe = null;
+  }
 
   try {
-    // Check if background task updates are running
-    let hasStarted = false;
-    try {
-      hasStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
-    } catch {
-      hasStarted = false;
-    }
+    currentObservedUid = authToUse.currentUser?.uid || null;
+  } catch {}
 
-    if (hasStarted) {
-      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-    }
-  } catch (err) {
-    console.warn('[LocationTrackingService] Error stopping location updates:', err);
-  }
+  const authListenerFn =
+    customOnAuthStateChanged ||
+    (typeof onAuthStateChanged === 'function' ? onAuthStateChanged : undefined);
 
-  // Deactivate tracking on Firestore job document
-  if (targetJobId) {
+  if (authListenerFn) {
     try {
-      await stopJobTracking(targetJobId);
+      authUnsubscribe = authListenerFn(authToUse, async (user: any) => {
+        const newUid = user?.uid || null;
+        if (newUid !== currentObservedUid) {
+          currentObservedUid = newUid;
+          if (!newUid || (currentDriverInfo.id && currentDriverInfo.id !== newUid)) {
+            // User signed out or account switched: immediately halt tracking and teardown
+            if (isTrackingActive()) {
+              await stopTrackingJob();
+            }
+          }
+        }
+      });
     } catch (err) {
-      console.error(`[LocationTrackingService] Error stopping Firestore tracking for job ${targetJobId}:`, err);
+      console.warn('[LocationTrackingService] Could not attach onAuthStateChanged observer:', err);
     }
   }
-
-  // Clear in-memory active tracking state
-  trackingState.isTracking = false;
-  trackingState.activeJobId = null;
-  trackingState.activeTenantId = null;
 }
+
+/**
+ * Stops the auth state change listener.
+ */
+export function stopTrackingAuthObserver(): void {
+  if (authUnsubscribe) {
+    try {
+      authUnsubscribe();
+    } catch {}
+    authUnsubscribe = null;
+  }
+}
+
+let appStateSubscription: any = null;
+
+/**
+ * Attaches an AppState observer to verify location permissions upon returning to the foreground.
+ */
+export function initTrackingAppStateObserver(): void {
+  if (appStateSubscription) return;
+  try {
+    if (typeof AppState?.addEventListener === 'function') {
+      appStateSubscription = AppState.addEventListener('change', async (nextState: AppStateStatus) => {
+        if (nextState === 'active' && trackingState.isTracking) {
+          try {
+            const fg = await Location.getForegroundPermissionsAsync();
+            if (fg && !fg.granted) {
+              console.warn('[LocationTrackingService] Permission revoked while backgrounded. Halting tracking.');
+              await stopTrackingJob();
+              setSyncStatus('permission_denied', 'Permission revoked');
+            }
+          } catch {}
+        }
+      });
+    }
+  } catch {}
+}
+
+/**
+ * Stops the AppState observer.
+ */
+export function stopTrackingAppStateObserver(): void {
+  if (appStateSubscription) {
+    try {
+      if (typeof appStateSubscription.remove === 'function') {
+        appStateSubscription.remove();
+      }
+    } catch {}
+    appStateSubscription = null;
+  }
+}
+
+// Auto-initialize observers
+try {
+  initTrackingAuthObserver();
+} catch {}
+
+try {
+  initTrackingAppStateObserver();
+} catch {}
 
 // ============================================================================
 // GETTERS & UTILITIES
@@ -417,6 +798,31 @@ export function addLocationListener(listener: LocationListener): () => void {
  * Strictly for test environment isolation.
  */
 export function _resetTrackingStateForTesting(): void {
+  // Release any pending lock waiters so promises do not hang
+  while (lifecycleUnlockQueue.length > 0) {
+    const waiter = lifecycleUnlockQueue.shift();
+    if (waiter) waiter();
+  }
+  isLifecycleMutating = false;
+
+  // Clean up observers if active
+  if (authUnsubscribe) {
+    try {
+      authUnsubscribe();
+    } catch {}
+    authUnsubscribe = null;
+  }
+  currentObservedUid = null;
+
+  if (appStateSubscription) {
+    try {
+      if (typeof appStateSubscription.remove === 'function') {
+        appStateSubscription.remove();
+      }
+    } catch {}
+    appStateSubscription = null;
+  }
+
   trackingState = {
     isTracking: false,
     activeJobId: null,
@@ -424,5 +830,17 @@ export function _resetTrackingStateForTesting(): void {
     lastKnownLocation: null,
   };
   currentDriverInfo = {};
+  currentSessionId = null;
+  sessionGeneration = 0;
+  lastProcessedTimestamp = 0;
+  lastParentWriteLocation = null;
+  lastHistoryWriteLocation = null;
+  inFlightWritePromise = null;
   listeners.clear();
+  syncStatusListeners.clear();
+  currentSyncStatus = {
+    status: 'idle',
+    lastSyncTime: null,
+    lastError: null,
+  };
 }

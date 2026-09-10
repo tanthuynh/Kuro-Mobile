@@ -196,7 +196,6 @@ export const PullSheetStatusSheet: React.FC<PullSheetStatusSheetProps> = ({
             testID={`select-status-option-${statusKey}`}
           >
             <View style={styles.optionLeft}>
-              <View style={[styles.statusDot, { backgroundColor: config.color }]} />
               <Text
                 style={[
                   styles.optionLabel,

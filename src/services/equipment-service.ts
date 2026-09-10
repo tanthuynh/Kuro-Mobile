@@ -4,73 +4,19 @@
  * Synchronizes tenant equipment catalog and provides client-side multi-field querying.
  */
 
+import type { Unsubscribe } from 'firebase/firestore';
+import type { Equipment } from '@/types/equipment';
 import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  getDocs,
-  type Unsubscribe,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { Equipment, SerialNumber } from '@/types/equipment';
+  subscribeSharedEquipment,
+  refreshSharedEquipment,
+  mapEquipmentDoc,
+} from './equipment-cache';
 
 /**
  * Maps a raw Firestore document into a strongly typed Equipment object.
  */
 export function mapFirestoreEquipmentDoc(docSnap: any): Equipment {
-  const data = docSnap.data ? docSnap.data() : docSnap;
-
-  const serialNumbers: SerialNumber[] = Array.isArray(data.serialNumbers)
-    ? data.serialNumbers.map((sn: any, idx: number) => ({
-        id: sn.id || `sn-${idx}`,
-        serial: sn.serial || '',
-        status: sn.status || 'Available',
-        currentLocation: sn.currentLocation,
-        notes: sn.notes,
-      }))
-    : [];
-
-  return {
-    id: docSnap.id || data.id,
-    tenantId: data.tenantId,
-    name: data.name || 'Unnamed Equipment',
-    manufacturer: data.manufacturer,
-    model: data.model,
-    category: data.category || 'General',
-    categoryId: data.categoryId,
-    barcode: data.barcode,
-    assetNumber: data.assetNumber,
-    segAssetNumber: data.segAssetNumber,
-    serialNumber: data.serialNumber,
-    serialNumbers,
-    knownLocation: data.knownLocation,
-    venue: data.venue,
-    quantity: typeof data.quantity === 'number' ? data.quantity : 1,
-    consumedQuantity: typeof data.consumedQuantity === 'number' ? data.consumedQuantity : 0,
-    quantityDispatched: typeof data.quantityDispatched === 'number' ? data.quantityDispatched : 0,
-    quantityReturned: typeof data.quantityReturned === 'number' ? data.quantityReturned : 0,
-    price: data.price,
-    subrental_costs: data.subrental_costs,
-    maxDiscount: data.maxDiscount,
-    powerW: data.powerW,
-    weight: data.weight,
-    weightWithContents: data.weightWithContents,
-    height: data.height,
-    width: data.width,
-    length: data.length,
-    input: data.input,
-    output: data.output,
-    channels: data.channels,
-    caseType: data.caseType,
-    itemClass: data.itemClass,
-    equipmentType: data.equipmentType,
-    serialisation: data.serialisation,
-    notes: data.notes,
-    archived: data.archived === true,
-    manualUrl: data.manualUrl,
-    contents: data.contents,
-  };
+  return mapEquipmentDoc(docSnap);
 }
 
 /**
@@ -78,65 +24,39 @@ export function mapFirestoreEquipmentDoc(docSnap: any): Equipment {
  */
 export function subscribeEquipment(
   tenantId: string,
-  onData: (items: Equipment[]) => void,
-  onError?: (err: Error) => void
+  onData: (items: Equipment[], lookupMap?: Map<string, Equipment>) => void,
+  onError?: (err: Error) => void,
+  options?: { uid?: string; queryScope?: string }
 ): Unsubscribe {
   if (!tenantId) {
-    onData([]);
+    onData([], new Map());
     return () => {};
   }
 
-  try {
-    const q = query(
-      collection(db, 'equipment'),
-      where('tenantId', '==', tenantId)
-    );
-
-    return onSnapshot(
-      q,
-      (snapshot) => {
-        const equipment: Equipment[] = [];
-        snapshot.forEach((docSnap) => {
-          const item = mapFirestoreEquipmentDoc(docSnap);
-          if (item.tenantId === tenantId && !item.archived) {
-            equipment.push(item);
-          }
-        });
-        onData(equipment);
+  return subscribeSharedEquipment(
+    tenantId,
+    {
+      onData: (items, lookupMap) => {
+        onData(items, lookupMap);
       },
-      (err) => {
+      onError: (err) => {
         console.error('[equipmentService] subscribeEquipment error:', err);
         if (onError) onError(err);
-      }
-    );
-  } catch (err: any) {
-    console.error('[equipmentService] Failed to establish equipment listener:', err);
-    if (onError) onError(err);
-    return () => {};
-  }
+      },
+    },
+    options
+  );
 }
 
 /**
  * Fetches tenant equipment once without maintaining a live listener.
  */
-export async function fetchEquipment(tenantId: string): Promise<Equipment[]> {
+export async function fetchEquipment(
+  tenantId: string,
+  options?: { uid?: string; queryScope?: string }
+): Promise<Equipment[]> {
   if (!tenantId) return [];
-
-  const q = query(
-    collection(db, 'equipment'),
-    where('tenantId', '==', tenantId)
-  );
-
-  const snapshot = await getDocs(q);
-  const equipment: Equipment[] = [];
-  snapshot.forEach((docSnap) => {
-    const item = mapFirestoreEquipmentDoc(docSnap);
-    if (item.tenantId === tenantId && !item.archived) {
-      equipment.push(item);
-    }
-  });
-
-  return equipment;
+  return refreshSharedEquipment(tenantId, options);
 }
 
 /**
@@ -165,7 +85,7 @@ export function searchEquipment(
 
     // 2. Availability Filter Match
     if (cleanAvail && cleanAvail !== 'all') {
-      const totalQty = item.quantity || 1;
+      const totalQty = typeof item.quantity === 'number' ? item.quantity : 1;
       const consumed = item.consumedQuantity || 0;
       const availableQty = Math.max(0, totalQty - consumed);
 
@@ -200,7 +120,7 @@ export function searchEquipment(
     if (item.category && item.category.toLowerCase().includes(cleanQuery)) return true;
 
     // Serial numbers array
-    if (item.serialNumbers?.some((sn) => sn.serial.toLowerCase().includes(cleanQuery))) {
+    if (item.serialNumbers?.some((sn) => sn && sn.serial && sn.serial.toLowerCase().includes(cleanQuery))) {
       return true;
     }
 

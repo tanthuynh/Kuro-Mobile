@@ -8,6 +8,7 @@ import {
   type TextStyle,
 } from 'react-native';
 import { useTheme } from '@/context/theme-context';
+import { platformShadow } from '@/lib/shadows';
 
 export interface CardProps {
   children?: React.ReactNode;
@@ -132,11 +133,13 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...platformShadow({
+      color: '#000000',
+      offsetY: 2,
+      opacity: 0.05,
+      radius: 4,
+      elevation: 2,
+    }),
     marginVertical: 6,
   },
   header: {

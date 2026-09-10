@@ -65,7 +65,7 @@ describe('LogisticsJobCard Component Tests', () => {
       <LogisticsJobCard job={baseJob} />
     );
 
-    expect(getByText('[#101]')).toBeTruthy();
+    expect(getByText('[101]')).toBeTruthy();
     expect(getByText('Sydney Symphony Gala')).toBeTruthy();
 
     const badge = getByTestId('job-status-badge-job-1001');
@@ -105,11 +105,11 @@ describe('LogisticsJobCard Component Tests', () => {
     );
 
     const checkCalibri = (textNode: any) => {
-      const flat = StyleSheet.flatten<TextStyle>(textNode.props.style);
+      const flat = StyleSheet.flatten<TextStyle>(textNode.props.style)!;
       expect(flat.fontFamily).toBe('Calibri');
     };
 
-    checkCalibri(getByText('[#101]'));
+    checkCalibri(getByText('[101]'));
     checkCalibri(getByText('Sydney Symphony Gala'));
     checkCalibri(getByText('In Transit'));
     checkCalibri(getByText('Sydney Opera House, Bennelong Point'));
@@ -131,7 +131,7 @@ describe('LogisticsJobCard Component Tests', () => {
       );
 
       const statusText = getByText('In Progress');
-      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style);
+      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style)!;
       expect(textStyle.color).toBe('#8B5CF6');
     });
 
@@ -146,7 +146,7 @@ describe('LogisticsJobCard Component Tests', () => {
       );
 
       const statusText = getByText('Scheduled');
-      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style);
+      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style)!;
       expect(textStyle.color).toBe('#3B82F6');
     });
 
@@ -161,7 +161,7 @@ describe('LogisticsJobCard Component Tests', () => {
       );
 
       const statusText = getByText('Pending');
-      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style);
+      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style)!;
       expect(textStyle.color).toBe('#F59E0B');
     });
 
@@ -176,7 +176,7 @@ describe('LogisticsJobCard Component Tests', () => {
       );
 
       const statusText = getByText('Completed');
-      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style);
+      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style)!;
       expect(textStyle.color).toBe('#10B981');
     });
 
@@ -191,7 +191,7 @@ describe('LogisticsJobCard Component Tests', () => {
       );
 
       const statusText = getByText('Cancelled');
-      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style);
+      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style)!;
       expect(textStyle.color).toBe('#EF4444');
     });
 
@@ -206,7 +206,7 @@ describe('LogisticsJobCard Component Tests', () => {
       );
 
       const statusText = getByText('On Hold');
-      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style);
+      const textStyle = StyleSheet.flatten<TextStyle>(statusText.props.style)!;
       expect(textStyle.color).toBeTruthy();
     });
   });
@@ -226,7 +226,7 @@ describe('LogisticsJobCard Component Tests', () => {
       expect(getByText('Unassigned')).toBeTruthy();
     });
 
-    it('falls back to truncated ID format [#1001] when eventNumber is missing', () => {
+    it('falls back to truncated ID format [JOB-10] when eventNumber is missing', () => {
       const noEventNumJob: LogisticsEntry = {
         ...baseJob,
         eventNumber: undefined,
@@ -236,7 +236,7 @@ describe('LogisticsJobCard Component Tests', () => {
         <LogisticsJobCard job={noEventNumJob} />
       );
 
-      expect(getByText('[#JOB-10]')).toBeTruthy();
+      expect(getByText('[JOB-10]')).toBeTruthy();
     });
 
     it('handles missing location and missing destinations gracefully', () => {

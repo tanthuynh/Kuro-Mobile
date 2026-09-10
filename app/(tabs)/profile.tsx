@@ -32,6 +32,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { db, rtdb, auth } from '@/lib/firebase';
+import packageJson from '@/../package.json';
 
 /**
  * Crew / User Avatar renderer supporting:
@@ -466,7 +467,7 @@ export default function ProfileScreen() {
           {
             paddingHorizontal: spacing.base,
             paddingTop: spacing.xs,
-            paddingBottom: spacing.sm,
+            paddingBottom: 18,
             backgroundColor: colors.background,
           },
         ]}
@@ -479,7 +480,7 @@ export default function ProfileScreen() {
               { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
             ]}
           >
-            Kuro RMS Mobile • Build 1.0.0 (Release)
+            {`Kuro RMS Mobile • Build ${packageJson.version || '0.1.1'} (Release)`}
           </Text>
         </View>
 
@@ -598,6 +599,7 @@ const styles = StyleSheet.create({
   },
   bottomActionPane: {
     paddingTop: 8,
+    paddingBottom: 18,
   },
   versionFooter: {
     marginBottom: 10,

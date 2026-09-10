@@ -49,14 +49,29 @@ jest.mock('@/context/auth-context', () => ({
 
 // Mock Router
 const mockBack = jest.fn();
-jest.mock('expo-router', () => ({
-  useRouter: () => ({
-    back: mockBack,
-  }),
-  useLocalSearchParams: () => ({
-    id: 'job-alpha-101',
-  }),
-}));
+jest.mock('expo-router', () => {
+  const React = require('react');
+  return {
+    useRouter: () => ({
+      back: mockBack,
+      canGoBack: () => true,
+      replace: jest.fn(),
+      push: jest.fn(),
+    }),
+    useLocalSearchParams: () => ({
+      id: 'job-alpha-101',
+    }),
+    useFocusEffect: jest.fn((effect) => {
+      React.useEffect(() => {
+        const cleanup = effect();
+        return () => {
+          if (typeof cleanup === 'function') cleanup();
+        };
+      }, [effect]);
+    }),
+    useIsFocused: jest.fn(() => true),
+  };
+});
 
 const mockSingleJob: LogisticsEntry = {
   id: 'job-alpha-101',
@@ -174,9 +189,11 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
       .spyOn(logisticsService, 'updateLogisticsStatus')
       .mockResolvedValueOnce(undefined);
 
-    const { findByTestId } = render(<LogisticsJobDetailScreen />);
+    const { findByTestId, getByText } = render(<LogisticsJobDetailScreen />);
 
     const playBtn = await findByTestId('play-job-btn');
+    expect(getByText('Start')).toBeTruthy();
+    expect(playBtn.props.accessibilityLabel).toBe('Start tracking');
     await act(async () => {
       fireEvent.press(playBtn);
     });
@@ -319,6 +336,7 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     expect(getByTestId('job-notes-modal')).toBeTruthy();
 
     const noteInput = getByTestId('logistics-note-input');
+    expect(noteInput.props.placeholder).toBe('');
     fireEvent.changeText(noteInput, 'Gate 3 access code is 5678.');
 
     const submitBtn = getByTestId('submit-notes-btn');
@@ -332,6 +350,26 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
       'Sam Fisher',
       'tenant-omega'
     );
+  });
+
+  it('verifies route activation button displays "Start" and LogisticsNotesModal has empty placeholder', async () => {
+    const { findByTestId, getByText, queryByText } = render(<LogisticsJobDetailScreen />);
+
+    // Route activation button displays "Start" rather than "Play"
+    const startBtn = await findByTestId('play-job-btn');
+    expect(startBtn).toBeTruthy();
+    expect(getByText('Start')).toBeTruthy();
+    expect(queryByText('Play')).toBeNull();
+    expect(startBtn.props.accessibilityLabel).toBe('Start tracking');
+
+    // Open notes modal and verify empty placeholder
+    const addNoteBtn = await findByTestId('add-note-btn');
+    await act(async () => {
+      fireEvent.press(addNoteBtn);
+    });
+
+    const noteInput = await findByTestId('logistics-note-input');
+    expect(noteInput.props.placeholder).toBe('');
   });
 });
 

@@ -3,7 +3,7 @@
  * Real-Time Production Events Feed in Kuro Mobile.
  * Features 5 interactive status metric cards, real-time search filtering,
  * 30-day forward rolling window filtering, FlatList with pull-to-refresh,
- * and direct navigation to Event Details, Pull Sheets, and continuous barcode scanner.
+ * and direct navigation to the unified Event Details screen.
  */
 
 import React from 'react';

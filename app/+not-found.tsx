@@ -29,7 +29,7 @@ export default function NotFoundScreen() {
         </Text>
         <Link href="/(tabs)" asChild>
           <Button variant="primary" size="default" fullWidth>
-            {"Return to Today's Jobs"}
+            Return to Events
           </Button>
         </Link>
       </View>
