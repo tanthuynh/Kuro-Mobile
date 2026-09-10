@@ -38,6 +38,8 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
   const scannedQty = item.scannedQuantity;
   const isPrepped = item.status === 'prepped_scanned';
 
+  const hasPressAction = Boolean(onPress || (onAdvanceStatus && isActionable));
+
   const handleRowPress = () => {
     if (onPress) onPress(item);
     else if (onAdvanceStatus && isActionable) onAdvanceStatus(item.id);
@@ -79,13 +81,13 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
   return (
     <Pressable
       testID={testID || `pullsheet-item-row-${item.id}`}
-      onPress={handleRowPress}
+      onPress={hasPressAction ? handleRowPress : undefined}
       onLongPress={handleLongPress}
       delayLongPress={350}
       style={({ pressed }) => [
         styles.container,
         {
-          backgroundColor: pressed ? colors.surface : colors.card,
+          backgroundColor: hasPressAction && pressed ? colors.surface : colors.card,
           borderColor: isPrepped ? 'rgba(16, 185, 129, 0.3)' : colors.border,
           borderRadius: layout.borderRadius.md,
           paddingLeft: isSubItem ? spacing.xl : spacing.md,

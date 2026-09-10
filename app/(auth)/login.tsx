@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Logo, GoogleIcon } from '@/components/icons';
 import type { TenantLookupResult } from '@/types/auth';
+import { getCachedTenantLookup, clearCachedTenantLookup } from '@/services/auth-service';
 
 const REMEMBER_ME_KEY = '@kuro_remembered_email';
 
@@ -77,6 +78,15 @@ export default function LoginScreen() {
     setIsSubmitting(true);
 
     try {
+      // Fast-path: Check if matching tenant lookup is already cached locally
+      const cachedLookup = await getCachedTenantLookup(trimmedEmail);
+      if (cachedLookup) {
+        setResolvedTenant(cachedLookup);
+        setStep(2);
+        setIsSubmitting(false);
+        return;
+      }
+
       const lookupResult = await lookupTenant(trimmedEmail);
 
       if (!lookupResult.success) {
@@ -108,6 +118,13 @@ export default function LoginScreen() {
       const result = await signIn(email.trim().toLowerCase(), password, resolvedTenant?.authTenantId);
 
       if (!result.success) {
+        // If sign in failed with tenant configuration/mismatch error, invalidate cached lookup and return to step 1
+        const errStr = (result.error || '').toLowerCase();
+        if (errStr.includes('organization') || errStr.includes('tenant') || errStr.includes('auth/invalid-tenant-id')) {
+          await clearCachedTenantLookup();
+          setResolvedTenant(null);
+          setStep(1);
+        }
         setErrorMessage(result.error || 'Invalid email or password.');
         setIsSubmitting(false);
         return;

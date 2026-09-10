@@ -10,6 +10,7 @@ import {
   doc,
   query,
   where,
+  limit,
   onSnapshot,
   getDocs,
   getDoc,
@@ -18,6 +19,29 @@ import {
 import { db } from '@/lib/firebase';
 import type { Event } from '@/types/events';
 import { parseFirestoreDate } from '@/lib/date-utils';
+
+export const DEFAULT_EVENTS_QUERY_LIMIT = 150;
+export const DEFAULT_HISTORICAL_WINDOW_DAYS = 60;
+
+/**
+ * Determines whether an event should be retained under the operational rolling window.
+ * Excludes historical completed or cancelled events whose finish date is older than the window (default 60 days).
+ * Date-less inquiries and active/upcoming events are always retained.
+ */
+export function isEventWithinOperationalWindow(
+  event: Event,
+  windowDays: number = DEFAULT_HISTORICAL_WINDOW_DAYS
+): boolean {
+  if (event.archived) return false;
+  const isHistorical = event.eventStatusId === 'Completed' || event.eventStatusId === 'Cancelled';
+  if (!isHistorical) return true;
+
+  const eventEnd = event.finishTime || event.eventFinishDate || event.startTime || event.eventStartDate;
+  if (!eventEnd) return true;
+
+  const cutoffTime = Date.now() - windowDays * 24 * 60 * 60 * 1000;
+  return eventEnd.getTime() >= cutoffTime;
+}
 
 /**
  * Maps a raw Firestore document snapshot into a type-safe Event object.
@@ -58,11 +82,14 @@ export function mapFirestoreEventDoc(docSnap: any): Event {
 
 /**
  * Subscribes to live real-time updates for all non-archived events belonging to the tenant.
+ * Safely bounds initial document downloads with a configurable limit (default: 150)
+ * and excludes historical completed/cancelled events older than the 60-day operational rolling window.
  */
 export function subscribeTenantEvents(
   tenantId: string,
   onData: (events: Event[]) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
+  options?: { limitCount?: number; windowDays?: number }
 ): Unsubscribe {
   if (!tenantId) {
     onData([]);
@@ -70,10 +97,13 @@ export function subscribeTenantEvents(
   }
 
   try {
+    const docLimit = options?.limitCount ?? DEFAULT_EVENTS_QUERY_LIMIT;
+    const windowDays = options?.windowDays ?? DEFAULT_HISTORICAL_WINDOW_DAYS;
     const q = query(
       collection(db, 'events'),
       where('tenantId', '==', tenantId),
-      where('archived', '==', false)
+      where('archived', '==', false),
+      limit(docLimit)
     );
 
     return onSnapshot(
@@ -82,7 +112,7 @@ export function subscribeTenantEvents(
         const events: Event[] = [];
         snapshot.forEach((docSnap) => {
           const event = mapFirestoreEventDoc(docSnap);
-          if (event.tenantId === tenantId && !event.archived) {
+          if (event.tenantId === tenantId && isEventWithinOperationalWindow(event, windowDays)) {
             events.push(event);
           }
         });
@@ -148,21 +178,29 @@ export function subscribeSingleEvent(
 
 /**
  * Fetches tenant events once without maintaining a listener.
+ * Safely bounds document downloads with a configurable limit (default: 150)
+ * and excludes historical completed/cancelled events older than the 60-day operational rolling window.
  */
-export async function fetchTenantEvents(tenantId: string): Promise<Event[]> {
+export async function fetchTenantEvents(
+  tenantId: string,
+  options?: { limitCount?: number; windowDays?: number }
+): Promise<Event[]> {
   if (!tenantId) return [];
 
+  const docLimit = options?.limitCount ?? DEFAULT_EVENTS_QUERY_LIMIT;
+  const windowDays = options?.windowDays ?? DEFAULT_HISTORICAL_WINDOW_DAYS;
   const q = query(
     collection(db, 'events'),
     where('tenantId', '==', tenantId),
-    where('archived', '==', false)
+    where('archived', '==', false),
+    limit(docLimit)
   );
 
   const snapshot = await getDocs(q);
   const events: Event[] = [];
   snapshot.forEach((docSnap) => {
     const event = mapFirestoreEventDoc(docSnap);
-    if (event.tenantId === tenantId) {
+    if (event.tenantId === tenantId && isEventWithinOperationalWindow(event, windowDays)) {
       events.push(event);
     }
   });

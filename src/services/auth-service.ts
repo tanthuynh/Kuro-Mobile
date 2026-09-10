@@ -81,6 +81,7 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
             tenantName: data.tenantName || (isSuperAdmin ? 'System Administration' : data.tenantSlug || 'Amia Studios'),
             tenantSlug: data.tenantSlug || (isSuperAdmin ? 'admin' : ''),
             isSuperAdmin,
+            email: normalizedEmail,
           };
           await AsyncStorage.setItem(STORAGE_KEYS.TENANT_LOOKUP, JSON.stringify(result));
           return result;
@@ -162,6 +163,7 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
         tenantName: 'System Administration',
         tenantSlug: 'admin',
         isSuperAdmin: true,
+        email: normalizedEmail,
       };
       await AsyncStorage.setItem(STORAGE_KEYS.TENANT_LOOKUP, JSON.stringify(result));
       return result;
@@ -210,6 +212,7 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
       tenantName: tenantData.company || (tenantData as any).name || tenantData.slug || userData.tenantName || 'Amia Studios',
       tenantSlug: tenantData.slug || '',
       isSuperAdmin: false,
+      email: normalizedEmail,
     };
 
     await AsyncStorage.setItem(STORAGE_KEYS.TENANT_LOOKUP, JSON.stringify(result));
@@ -233,6 +236,34 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
       error: error.message || 'An error occurred during account lookup. Please try again.',
     };
   }
+}
+
+/**
+ * Retrieves a cached tenant lookup from AsyncStorage if it matches the normalized email.
+ */
+export async function getCachedTenantLookup(email: string): Promise<TenantLookupResult | null> {
+  try {
+    if (!email || !email.trim()) return null;
+    const normalized = email.toLowerCase().trim();
+    const raw = await AsyncStorage.getItem(STORAGE_KEYS.TENANT_LOOKUP);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (cached && cached.email === normalized && cached.success) {
+      return cached as TenantLookupResult;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Clears the cached tenant lookup from AsyncStorage.
+ */
+export async function clearCachedTenantLookup(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEYS.TENANT_LOOKUP);
+  } catch {}
 }
 
 /**
@@ -388,7 +419,20 @@ export async function getUserProfile(
       rawUser.roleId === '4TJ6V4j41ekGJ7f0HGnp' ||
       accessRights.includes('Super Administrator');
 
-    // 2. Resolve Role and Access Rights
+    // 2. Concurrently Resolve Role and Tenant Information via Promise.all
+    const rolePromise = (!isSuperAdmin && rawUser.roleId)
+      ? getDoc(doc(db, 'roles', rawUser.roleId)).catch((roleErr: any) => {
+          console.warn(`[authService] Could not fetch role doc for profile hydration (${roleErr?.code || 'unknown'}): ${roleErr?.message || ''}`);
+          return null;
+        })
+      : Promise.resolve(null);
+
+    const tenantPromise = (!isSuperAdmin && rawUser.tenantId)
+      ? getDoc(doc(db, 'tenants', rawUser.tenantId))
+      : Promise.resolve(null);
+
+    const [roleSnap, tenantSnap] = await Promise.all([rolePromise, tenantPromise]);
+
     if (isSuperAdmin) {
       roleName = 'Super Administrator';
       accessRights = Array.from(new Set([...accessRights, 'Super Administrator']));
@@ -407,21 +451,16 @@ export async function getUserProfile(
         'forms',
       ];
     } else if (rawUser.roleId) {
-      try {
-        const roleSnap = await getDoc(doc(db, 'roles', rawUser.roleId));
-        if (roleSnap.exists()) {
-          const roleData = roleSnap.data() as Partial<Role>;
-          roleName = roleData.name || roleName;
-          accessRights = roleData.accessRights || accessRights;
-        } else if (rawUser.tenantId && rawUser.roleId === `admin-role_${rawUser.tenantId}`) {
-          roleName = 'Administrator';
-          accessRights = Array.from(new Set([...accessRights, 'Settings']));
-        } else if (rawUser.tenantId && rawUser.roleId === `client-role_${rawUser.tenantId}`) {
-          roleName = 'Client';
-          accessRights = [];
-        }
-      } catch (roleErr: any) {
-        console.warn(`[authService] Could not fetch role doc for profile hydration (${roleErr?.code || 'unknown'}): ${roleErr?.message || ''}`);
+      if (roleSnap && roleSnap.exists()) {
+        const roleData = roleSnap.data() as Partial<Role>;
+        roleName = roleData.name || roleName;
+        accessRights = roleData.accessRights || accessRights;
+      } else if (rawUser.tenantId && rawUser.roleId === `admin-role_${rawUser.tenantId}`) {
+        roleName = 'Administrator';
+        accessRights = Array.from(new Set([...accessRights, 'Settings']));
+      } else if (rawUser.tenantId && rawUser.roleId === `client-role_${rawUser.tenantId}`) {
+        roleName = 'Client';
+        accessRights = [];
       }
     }
 
@@ -430,8 +469,7 @@ export async function getUserProfile(
     let tenantSlug = '';
 
     if (!isSuperAdmin && rawUser.tenantId) {
-      const tenantSnap = await getDoc(doc(db, 'tenants', rawUser.tenantId));
-      if (!tenantSnap.exists()) {
+      if (!tenantSnap || !tenantSnap.exists()) {
         return {
           success: false,
           isRevoked: true,

@@ -124,7 +124,9 @@ export function usePullSheet(eventId: string): UsePullSheetResult {
     );
 
     return () => {
-      unsubscribe();
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
     };
   }, [eventId, tenantId]);
 

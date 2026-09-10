@@ -12,6 +12,8 @@ import {
   sendTenantPasswordReset,
   createLogoutNotice,
   STORAGE_KEYS,
+  getCachedTenantLookup,
+  clearCachedTenantLookup,
 } from '../src/services/auth-service';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth, db } from '../src/lib/firebase';
@@ -217,6 +219,189 @@ describe('Kuro Mobile Multi-Tenant Authentication Engine', () => {
       expect(cachedProfile).toBeNull();
       expect(cachedTenant).toBeNull();
       expect(auth.tenantId).toBeNull();
+    });
+  });
+
+  describe('getUserProfile (Concurrent Profile Hydration)', () => {
+    it('concurrently fetches role and tenant documents via Promise.all', async () => {
+      const callLog: string[] = [];
+
+      (firestore.doc as jest.Mock).mockImplementation((_db: any, collectionName: string, docId: string) => {
+        return { collectionName, docId };
+      });
+
+      (firestore.getDoc as jest.Mock).mockImplementation(async (ref: any) => {
+        if (ref?.collectionName === 'users') {
+          callLog.push(`users:${ref.docId}`);
+          return {
+            exists: () => true,
+            id: mockUid,
+            data: () => ({
+              email: mockEmail,
+              status: 'Active',
+              tenantId: mockTenantId,
+              roleId: 'role-tech',
+              firstName: 'Tan',
+              lastName: 'Amia',
+            }),
+          };
+        }
+        if (ref?.collectionName === 'roles') {
+          callLog.push(`roles:${ref.docId}`);
+          await new Promise((r) => setTimeout(r, 10));
+          return {
+            exists: () => true,
+            data: () => ({
+              name: 'Audio Lead',
+              accessRights: ['events.view', 'equipment.scan'],
+            }),
+          };
+        }
+        if (ref?.collectionName === 'tenants') {
+          callLog.push(`tenants:${ref.docId}`);
+          await new Promise((r) => setTimeout(r, 10));
+          return {
+            exists: () => true,
+            data: () => ({
+              company: 'Amia Studios',
+              slug: 'amia',
+              billingStatus: 'Active',
+              enabledModules: ['events', 'inventory'],
+            }),
+          };
+        }
+        return { exists: () => false };
+      });
+
+      const result = await getUserProfile(mockUid, mockEmail);
+
+      expect(result.success).toBe(true);
+      expect(result.profile?.role).toBe('Audio Lead');
+      expect(result.profile?.tenantName).toBe('Amia Studios');
+      expect(result.profile?.accessRights).toEqual(['events.view', 'equipment.scan']);
+      expect(callLog).toEqual([`users:${mockUid}`, 'roles:role-tech', `tenants:${mockTenantId}`]);
+    });
+
+    it('gracefully tolerates role fetch rejection while preserving tenant resolution', async () => {
+      (firestore.doc as jest.Mock).mockImplementation((_db: any, collectionName: string, docId: string) => ({
+        collectionName,
+        docId,
+      }));
+
+      (firestore.getDoc as jest.Mock).mockImplementation(async (ref: any) => {
+        if (ref?.collectionName === 'users') {
+          return {
+            exists: () => true,
+            id: mockUid,
+            data: () => ({
+              email: mockEmail,
+              status: 'Active',
+              tenantId: mockTenantId,
+              roleId: 'role-missing',
+              role: 'Fallback Role',
+            }),
+          };
+        }
+        if (ref?.collectionName === 'roles') {
+          throw new Error('Network error reading role doc');
+        }
+        if (ref?.collectionName === 'tenants') {
+          return {
+            exists: () => true,
+            data: () => ({
+              company: 'Amia Studios',
+              billingStatus: 'Active',
+            }),
+          };
+        }
+        return { exists: () => false };
+      });
+
+      const result = await getUserProfile(mockUid, mockEmail);
+      expect(result.success).toBe(true);
+      expect(result.profile?.role).toBe('Fallback Role');
+      expect(result.profile?.tenantName).toBe('Amia Studios');
+    });
+
+    it('fails with profile_error if tenant document is missing', async () => {
+      (firestore.doc as jest.Mock).mockImplementation((_db: any, collectionName: string, docId: string) => ({
+        collectionName,
+        docId,
+      }));
+
+      (firestore.getDoc as jest.Mock).mockImplementation(async (ref: any) => {
+        if (ref?.collectionName === 'users') {
+          return {
+            exists: () => true,
+            id: mockUid,
+            data: () => ({
+              email: mockEmail,
+              status: 'Active',
+              tenantId: mockTenantId,
+            }),
+          };
+        }
+        if (ref?.collectionName === 'tenants') {
+          return { exists: () => false };
+        }
+        return { exists: () => false };
+      });
+
+      const result = await getUserProfile(mockUid, mockEmail);
+      expect(result.success).toBe(false);
+      expect(result.isRevoked).toBe(true);
+      expect(result.reason).toBe('profile_error');
+      expect(result.error).toContain('Organization not found');
+    });
+  });
+
+  describe('Cached Tenant Lookup Fast-Path', () => {
+    it('returns null when no tenant lookup is cached', async () => {
+      const cached = await getCachedTenantLookup(mockEmail);
+      expect(cached).toBeNull();
+    });
+
+    it('returns cached result when normalized email matches', async () => {
+      const lookupPayload = {
+        success: true,
+        tenantId: mockTenantId,
+        tenantName: 'Amia Studios',
+        authTenantId: mockAuthTenantId,
+        email: mockEmail.toLowerCase(),
+      };
+      await AsyncStorage.setItem(STORAGE_KEYS.TENANT_LOOKUP, JSON.stringify(lookupPayload));
+
+      const result = await getCachedTenantLookup('  Tan@AmiaStudios.com ');
+      expect(result).not.toBeNull();
+      expect(result?.tenantId).toBe(mockTenantId);
+      expect(result?.tenantName).toBe('Amia Studios');
+      expect(result?.authTenantId).toBe(mockAuthTenantId);
+    });
+
+    it('returns null when cached lookup email does not match requested email', async () => {
+      const lookupPayload = {
+        success: true,
+        tenantId: mockTenantId,
+        tenantName: 'Amia Studios',
+        authTenantId: mockAuthTenantId,
+        email: 'other@amiastudios.com',
+      };
+      await AsyncStorage.setItem(STORAGE_KEYS.TENANT_LOOKUP, JSON.stringify(lookupPayload));
+
+      const result = await getCachedTenantLookup(mockEmail);
+      expect(result).toBeNull();
+    });
+
+    it('clears cached tenant lookup on demand', async () => {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.TENANT_LOOKUP,
+        JSON.stringify({ success: true, tenantId: 't-1', email: mockEmail })
+      );
+
+      await clearCachedTenantLookup();
+
+      const item = await AsyncStorage.getItem(STORAGE_KEYS.TENANT_LOOKUP);
+      expect(item).toBeNull();
     });
   });
 });

@@ -26,6 +26,8 @@ export interface EventCardProps {
   typeName?: string;
   typeColor?: string;
   onPress?: () => void;
+  onOpenPullsheet?: () => void;
+  onOpenScanner?: () => void;
   testID?: string;
 }
 

@@ -41,7 +41,66 @@ import packageJson from '@/../package.json';
  * 3. Base64 raster data URIs (data:image/png;base64,...)
  * 4. Fallback Initials with brand/extracted accent color
  */
-function CrewAvatar({
+/**
+ * Safely decodes an SVG data URI (percent-encoded, base64, charset-prefixed, or raw XML with % symbols).
+ * Returns decoded SVG XML string or null if invalid, without throwing URIError.
+ */
+export function parseSvgDataUri(avatarUrl?: string | null): string | null {
+  if (!avatarUrl || typeof avatarUrl !== 'string') return null;
+  const trimmed = avatarUrl.trim();
+  if (!trimmed.toLowerCase().startsWith('data:image/svg+xml')) return null;
+
+  try {
+    const commaIndex = trimmed.indexOf(',');
+    const meta = commaIndex !== -1 ? trimmed.slice(0, commaIndex).toLowerCase() : '';
+    const rawPart = commaIndex !== -1 ? trimmed.slice(commaIndex + 1) : '';
+
+    if (!rawPart) return null;
+
+    let content = rawPart;
+    if (meta.includes(';base64')) {
+      try {
+        if (typeof atob === 'function') {
+          content = atob(rawPart);
+        } else if (typeof Buffer !== 'undefined') {
+          content = Buffer.from(rawPart, 'base64').toString('utf8');
+        } else if (typeof global !== 'undefined' && typeof (global as any).atob === 'function') {
+          content = (global as any).atob(rawPart);
+        }
+      } catch {
+        return null;
+      }
+    } else {
+      // Safely decode percent-encoded SVG data URIs.
+      // Lone '%' not followed by two hex digits (e.g. width="100%" or raw unencoded XML) cause
+      // decodeURIComponent to throw `URIError: Malformed decodeURI input`.
+      // We sanitize unescaped '%' into '%25' so decodeURIComponent succeeds safely.
+      try {
+        content = decodeURIComponent(rawPart);
+      } catch {
+        try {
+          const sanitized = rawPart.replace(/%(?![0-9a-fA-F]{2})/g, '%25');
+          content = decodeURIComponent(sanitized);
+        } catch {
+          try {
+            content = decodeURI(rawPart);
+          } catch {
+            content = rawPart;
+          }
+        }
+      }
+    }
+
+    if (content && content.includes('<svg')) {
+      return content;
+    }
+  } catch {
+    // Gracefully fall back to operator initials without throwing or logging noisy warnings
+  }
+  return null;
+}
+
+export function CrewAvatar({
   avatarUrl,
   name,
   size = 68,
@@ -61,34 +120,7 @@ function CrewAvatar({
     return n.slice(0, 2).toUpperCase();
   };
 
-  const parsedSvgXml = useMemo(() => {
-    if (!avatarUrl || typeof avatarUrl !== 'string') return null;
-    const trimmed = avatarUrl.trim();
-    if (!trimmed.toLowerCase().startsWith('data:image/svg+xml')) return null;
-
-    try {
-      let content = trimmed;
-      if (content.toLowerCase().includes(';base64,')) {
-        const base64Content = content.split(/;base64,/i)[1];
-        if (typeof atob !== 'undefined') {
-          content = atob(base64Content);
-        } else if (typeof Buffer !== 'undefined') {
-          content = Buffer.from(base64Content, 'base64').toString('utf8');
-        }
-      } else {
-        // Strip data URI prefix and decode URL entities
-        const rawPart = content.replace(/^data:image\/svg\+xml;?(utf8)?,?/i, '');
-        content = decodeURIComponent(rawPart);
-      }
-
-      if (content.includes('<svg')) {
-        return content;
-      }
-    } catch (e) {
-      console.warn('[CrewAvatar] SVG decode error:', e);
-    }
-    return null;
-  }, [avatarUrl]);
+  const parsedSvgXml = useMemo(() => parseSvgDataUri(avatarUrl), [avatarUrl]);
 
   // Case 1: In-App SVG Avatar
   if (parsedSvgXml) {
@@ -328,7 +360,7 @@ export default function ProfileScreen() {
                   style={[
                     styles.onlineStatusText,
                     {
-                      color: !isManualOffline ? colors.status.online : colors.mutedForeground,
+                      color: colors.mutedForeground,
                       fontSize: typography.fontSize.sm,
                     },
                   ]}
@@ -338,8 +370,8 @@ export default function ProfileScreen() {
                 <Switch
                   value={!isManualOffline}
                   onValueChange={toggleOnlineStatus}
-                  trackColor={{ false: colors.border, true: colors.primary }}
-                  thumbColor="#FFFFFF"
+                  trackColor={{ false: colors.border, true: colors.border }}
+                  thumbColor={!isManualOffline ? colors.brandGreen : colors.mutedForeground}
                   style={
                     Platform.OS === 'ios'
                       ? { transform: [{ scaleX: 0.75 }, { scaleY: 0.75 }] }
@@ -480,7 +512,7 @@ export default function ProfileScreen() {
               { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
             ]}
           >
-            {`Kuro RMS Mobile • Build ${packageJson.version || '0.1.1'} (Release)`}
+            {`Kuro RMS Mobile • Build ${packageJson.version || '0.1.2'} (Release)`}
           </Text>
         </View>
 

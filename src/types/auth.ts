@@ -104,6 +104,7 @@ export interface TenantLookupResult {
   tenantSlug?: string;             // Slug identifier
   isSuperAdmin?: boolean;          // True if user belongs to project-level root auth
   error?: string;
+  email?: string;                  // Normalized email bound to cached lookup
 }
 
 /**

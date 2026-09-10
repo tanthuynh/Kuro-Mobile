@@ -11,7 +11,9 @@ import { EventScheduleCard } from '@/components/events/event-schedule-card';
 import { EventCard } from '@/components/events/event-card';
 import { useEvents, useSingleEvent } from '@/hooks/use-events';
 import * as eventService from '@/services/event-service';
+import * as pullSheetService from '@/services/pull-sheet-service';
 import type { Event } from '@/types/events';
+import type { Pullsheet } from '@/types/pull-sheet';
 
 // Mock theme context
 jest.mock('@/context/theme-context', () => {
@@ -83,6 +85,30 @@ const sampleEvent: Event = {
   ],
 };
 
+const samplePullsheet: Pullsheet = {
+  id: 'ev-101',
+  eventId: 'ev-101',
+  tenantId: 'tenant-abc',
+  items: [
+    {
+      id: 'sec-1',
+      description: 'Main Stage Audio Rig',
+      type: 'section-header',
+      quantity: 0,
+      status: 'none',
+    },
+    {
+      id: 'item-1',
+      description: 'L-Acoustics K2 Enclosure',
+      quantity: 16,
+      scannedQuantity: 8,
+      type: 'item',
+      status: 'confirmed',
+      sectionId: 'sec-1',
+    },
+  ],
+};
+
 describe('Milestone 2: Events Feed & Details', () => {
   describe('EventFilterTabs', () => {
     it('renders all 4 tabs with correct count badges', () => {
@@ -143,9 +169,7 @@ describe('Milestone 2: Events Feed & Details', () => {
   });
 
   describe('EventCard', () => {
-    it('renders event details, number badge, status, and button actions', () => {
-      const onOpenPullsheet = jest.fn();
-      const onOpenScanner = jest.fn();
+    it('renders event details, number badge, and status', () => {
       const onPress = jest.fn();
 
       const { getByText, getByTestId } = render(
@@ -153,25 +177,16 @@ describe('Milestone 2: Events Feed & Details', () => {
           event={sampleEvent}
           clientName="LiveNation APAC"
           venueName="Sydney Showground"
-          onOpenPullsheet={onOpenPullsheet}
-          onOpenScanner={onOpenScanner}
           onPress={onPress}
         />
       );
 
-      expect(getByText('#1042')).toBeTruthy();
+      expect(getByText('[1042]')).toBeTruthy();
       expect(getByText('Neon Horizon Music Festival')).toBeTruthy();
       expect(getByText('Confirmed')).toBeTruthy();
       expect(getByText('LiveNation APAC')).toBeTruthy();
       expect(getByText('Sydney Showground')).toBeTruthy();
       expect(getByText('1 Quote Line Items')).toBeTruthy();
-
-      // Button actions
-      fireEvent.press(getByTestId('card-pullsheet-btn-ev-101'));
-      expect(onOpenPullsheet).toHaveBeenCalled();
-
-      fireEvent.press(getByTestId('card-scan-btn-ev-101'));
-      expect(onOpenScanner).toHaveBeenCalled();
 
       fireEvent.press(getByTestId('event-card-ev-101'));
       expect(onPress).toHaveBeenCalled();
@@ -465,24 +480,6 @@ describe('Milestone 2: Events Feed & Details', () => {
       expect(getByText('Production Festival Show 0')).toBeTruthy();
     });
 
-    it('navigates to Pull Sheet and Continuous Scanner from event card buttons', () => {
-      jest.spyOn(eventService, 'subscribeTenantEvents').mockImplementation((tenantId, onData) => {
-        onData(mockEventsList);
-        return jest.fn();
-      });
-
-      const EventsFeedScreen = require('../app/(tabs)/index').default;
-      const { getByTestId } = render(<EventsFeedScreen />);
-
-      fireEvent.press(getByTestId('card-pullsheet-btn-ev-1'));
-      expect(mockRouterPush).toHaveBeenCalledWith('/pullsheet/ev-1');
-
-      fireEvent.press(getByTestId('card-scan-btn-ev-1'));
-      expect(mockRouterPush).toHaveBeenCalledWith({
-        pathname: '/(tabs)/scanner',
-        params: { eventId: 'ev-1' },
-      });
-    });
 
     it('triggers refresh when pull-to-refresh is activated on FlatList', async () => {
       const mockFetch = jest.spyOn(eventService, 'fetchTenantEvents').mockResolvedValue(mockEventsList);
@@ -526,9 +523,14 @@ describe('Milestone 2: Events Feed & Details', () => {
         onData(sampleEvent);
         return jest.fn();
       });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((_id, _tenantId, onData) => {
+        onData(samplePullsheet);
+        return jest.fn();
+      });
     });
 
-    it('renders combined Client & Venue card and Open in Maps button', () => {
+    it('renders combined Client & Venue card and equipment pull sheet overview', () => {
       const EventDetailsScreen = require('../app/events/[id]').default;
       const { getByTestId, getByText, queryByTestId, queryByText } = render(<EventDetailsScreen />);
 
@@ -540,8 +542,9 @@ describe('Milestone 2: Events Feed & Details', () => {
       expect(getByText('VENUE')).toBeTruthy();
       expect(getByText('Sydney Showground Hall 5')).toBeTruthy();
 
-      // Open in Maps button exists
-      expect(getByTestId('open-maps-btn')).toBeTruthy();
+      // Planning and Event schedule windows exist
+      expect(getByText('PLANNING')).toBeTruthy();
+      expect(getByText('EVENT')).toBeTruthy();
 
       // Production Lead, Call, and Email buttons are removed
       expect(queryByText(/Production Lead/i)).toBeNull();
@@ -551,26 +554,89 @@ describe('Milestone 2: Events Feed & Details', () => {
       // Warehouse operations top CTA card and inline bottom button are removed
       expect(queryByText('Warehouse Operations')).toBeNull();
       expect(queryByTestId('open-pullsheet-bottom-btn')).toBeNull();
+
+      // Equipment section and progress card exist
+      expect(getByText('Equipment Pull Sheet')).toBeTruthy();
+      expect(getByTestId('pullsheet-progress-card')).toBeTruthy();
     });
 
-    it('renders persistent bottom action bar with Pull Sheet and Scan Gear buttons', () => {
+    it('renders start scanning button and expands scanner when event is Confirmed', () => {
       const EventDetailsScreen = require('../app/events/[id]').default;
-      const { getByTestId } = render(<EventDetailsScreen />);
+      const { getByTestId, getByText, queryByTestId } = render(<EventDetailsScreen />);
 
-      const pullsheetBtn = getByTestId('event-details-pullsheet-btn');
-      const scanBtn = getByTestId('event-details-scan-btn');
+      expect(getByText('Equipment Pull Sheet')).toBeTruthy();
+      expect(getByTestId('pullsheet-progress-card')).toBeTruthy();
+      expect(getByTestId('start-scanning-btn')).toBeTruthy();
+      expect(getByText('Start Scanning')).toBeTruthy();
 
-      expect(pullsheetBtn).toBeTruthy();
-      expect(scanBtn).toBeTruthy();
+      // Tap start scanning expands bottom scanner
+      fireEvent.press(getByTestId('start-scanning-btn'));
+      expect(getByTestId('scanner-expandable-sheet')).toBeTruthy();
+      expect(getByTestId('close-scanner-btn')).toBeTruthy();
 
-      fireEvent.press(pullsheetBtn);
-      expect(mockRouterPush).toHaveBeenCalledWith('/pullsheet/ev-101');
+      // Close scanner
+      fireEvent.press(getByTestId('close-scanner-btn'));
+      expect(queryByTestId('scanner-expandable-sheet')).toBeNull();
+      expect(getByTestId('start-scanning-btn')).toBeTruthy();
+    });
 
-      fireEvent.press(scanBtn);
-      expect(mockRouterPush).toHaveBeenCalledWith({
-        pathname: '/(tabs)/scanner',
-        params: { eventId: 'ev-101' },
+    it('does not render start scanning button when event is Inquiry or Pending (R1)', () => {
+      // 1. Inquiry Event
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData({
+          ...sampleEvent,
+          eventStatusId: 'Inquiry',
+        });
+        return jest.fn();
       });
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { queryByTestId, rerender } = render(<EventDetailsScreen />);
+
+      expect(queryByTestId('start-scanning-btn')).toBeNull();
+      expect(queryByTestId('scanner-expandable-sheet')).toBeNull();
+
+      // 2. Pending Event
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData({
+          ...sampleEvent,
+          eventStatusId: 'Pending',
+        });
+        return jest.fn();
+      });
+
+      rerender(<EventDetailsScreen />);
+      expect(queryByTestId('start-scanning-btn')).toBeNull();
+      expect(queryByTestId('scanner-expandable-sheet')).toBeNull();
+    });
+
+    it('does not scan or advance item status when clicking an item row or badge', () => {
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest.spyOn(pullSheetService, 'updatePullsheetItemStatus');
+      const updateScannedCountSpy = jest.spyOn(pullSheetService, 'updatePullsheetItemScannedCount');
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId, getByText } = render(<EventDetailsScreen />);
+
+      const itemRow = getByTestId('pullsheet-item-row-item-1');
+      expect(itemRow).toBeTruthy();
+
+      // Click on item row
+      fireEvent.press(itemRow);
+
+      // Click on description text
+      fireEvent.press(getByText('L-Acoustics K2 Enclosure'));
+
+      // Click on status badge
+      fireEvent.press(getByTestId('pullsheet-status-badge-confirmed'));
+
+      // None of the scan or status update operations should be invoked
+      expect(updateStatusSpy).not.toHaveBeenCalled();
+      expect(updateScannedCountSpy).not.toHaveBeenCalled();
     });
   });
 });

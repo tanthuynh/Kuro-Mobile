@@ -1,6 +1,6 @@
 {
   "name": "kuro-mobile",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -15,7 +15,7 @@
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "expo": "~57.0.20",
+    "expo": "~57.0.21",
     "expo-asset": "~57.0.8",
     "expo-audio": "~57.0.4",
     "expo-camera": "~57.0.3",
@@ -25,7 +25,7 @@
     "expo-image-picker": "~57.0.16",
     "expo-linking": "~57.0.4",
     "expo-location": "~57.0.16",
-    "expo-router": "~57.0.19",
+    "expo-router": "~57.0.20",
     "expo-splash-screen": "~57.0.5",
     "expo-status-bar": "~57.0.1",
     "expo-task-manager": "~57.0.16",

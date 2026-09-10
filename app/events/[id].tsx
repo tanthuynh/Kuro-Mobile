@@ -114,7 +114,6 @@ export default function EventDetailsScreen() {
     searchQuery,
     setSearchQuery,
     updateStatus,
-    advanceStatus,
     rollbackStatus,
     bulkConfirm,
   } = usePullSheet(eventId);
@@ -631,7 +630,6 @@ export default function EventDetailsScreen() {
                 <PullSheetItemRow
                   key={item.id}
                   item={item}
-                  onAdvanceStatus={(itemId) => advanceStatus(itemId)}
                   onLongPress={(it) => setActiveStatusItem(it)}
                 />
               ))}

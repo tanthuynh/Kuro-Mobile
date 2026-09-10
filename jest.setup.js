@@ -224,7 +224,7 @@ jest.mock('expo-av', () => ({
       createAsync: jest.fn().mockResolvedValue({ sound: { playAsync: jest.fn(), unloadAsync: jest.fn() } }),
     },
   },
-}));
+}), { virtual: true });
 
 // Mock expo-location
 jest.mock('expo-location', () => ({
