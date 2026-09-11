@@ -16,6 +16,8 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
+  Linking,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
@@ -43,6 +45,7 @@ import {
   addLocationListener,
   addSyncStatusListener,
   getSyncStatus,
+  checkLocationPermissions,
   type SyncStatusInfo,
 } from '@/services/location-tracking-service';
 import { fetchVehicleById, formatVehicleDisplayName } from '@/services/logistics-service';
@@ -53,6 +56,7 @@ import { Button } from '@/components/ui/button';
 import { QuickStatusSelector } from '@/components/repair/quick-status-selector';
 import { LogisticsDestinationCard } from '@/components/logistics/LogisticsDestinationCard';
 import { LogisticsNotesModal } from '@/components/logistics/LogisticsNotesModal';
+import { BackgroundLocationDisclosureModal } from '@/components/logistics/BackgroundLocationDisclosureModal';
 import { useConsistentBack } from '@/hooks/use-consistent-back';
 import { isJobActive, isJobCompleted, isJobScheduled } from '@/lib/logistics-engine';
 import type { LogisticsStatus } from '@/types/logistics';
@@ -85,6 +89,8 @@ export default function LogisticsJobDetailScreen() {
     return isTrackingActive() && getActiveTrackingJobId() === jobId;
   });
   const [syncStatus, setSyncStatus] = useState<SyncStatusInfo>(() => getSyncStatus());
+  const [showLocationDisclosure, setShowLocationDisclosure] = useState(false);
+  const [pendingTrackingAction, setPendingTrackingAction] = useState<(() => Promise<void>) | null>(null);
 
   // Listen to device tracking and sync status updates
   useEffect(() => {
@@ -135,27 +141,64 @@ export default function LogisticsJobDetailScreen() {
     };
   }, [job?.vehicleId, tenantId]);
 
-  // Play Action: Starts GPS tracking and updates status to 'In Progress'
-  const handlePlay = async () => {
+  // Core execution helper for starting GPS tracking with permission recovery alert
+  const executeStartTracking = async (onSuccessStatus?: string) => {
     if (!job) return;
     try {
       setIsStartingTracking(true);
       setActionError(null);
 
-      // 1. Start background/foreground GPS tracking
-      await startTrackingJob(job.id, tenantId, {
+      const trackingStarted = await startTrackingJob(job.id, tenantId, {
         driverId: user?.id || user?.uid,
         driverName: user?.name || user?.email,
       });
 
-      // 2. Update status to In Progress
-      await updateStatus('In Progress', 'Driver started route and initiated GPS tracking');
+      if (!trackingStarted) {
+        Alert.alert(
+          'Location Permission Required',
+          'Location access is required to record route telemetry and dispatch ETA updates. Please enable location permissions in Settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Open Settings',
+              onPress: () => {
+                if (typeof Linking.openSettings === 'function') {
+                  Linking.openSettings().catch(() => {});
+                }
+              },
+            },
+          ]
+        );
+        setActionError('Location permission was denied. Enable location in Settings to start tracking.');
+        return;
+      }
+
+      if (onSuccessStatus) {
+        await updateStatus(onSuccessStatus, `Status updated to ${onSuccessStatus} via Quick Status`);
+      } else {
+        await updateStatus('In Progress', 'Driver started route and initiated GPS tracking');
+      }
     } catch (err: any) {
-      console.error('[LogisticsDetail] Play error:', err);
+      console.error('[LogisticsDetail] Tracking activation error:', err);
       setActionError(err?.message || 'Failed to start GPS tracking and activate job');
     } finally {
       setIsStartingTracking(false);
     }
+  };
+
+  // Play Action: Starts GPS tracking and updates status to 'In Progress'
+  const handlePlay = async () => {
+    if (!job) return;
+    setIsStartingTracking(true);
+    setActionError(null);
+    const perms = await checkLocationPermissions();
+    if (!perms.foreground || !perms.background) {
+      setIsStartingTracking(false);
+      setPendingTrackingAction(() => () => executeStartTracking());
+      setShowLocationDisclosure(true);
+      return;
+    }
+    await executeStartTracking();
   };
 
   // Pause Action: Stops GPS tracking and leaves job status unchanged
@@ -205,21 +248,41 @@ export default function LogisticsJobDetailScreen() {
       // If transitioning to completed or cancelled, stop tracking
       if (isJobCompleted(newStatus) || newStatus.toLowerCase() === 'cancelled' || newStatus.toLowerCase() === 'cancel') {
         await stopTrackingJob(job.id);
+        await updateStatus(newStatus, `Status updated to ${newStatus} via Quick Status`);
       } else if (isJobActive(newStatus) && !job.isTrackingActive) {
-        // If transitioning to active status and tracking is off, start tracking
-        await startTrackingJob(job.id, tenantId, {
-          driverId: user?.id || user?.uid,
-          driverName: user?.name || user?.email,
-        });
+        // If transitioning to active status and tracking is off, check permissions and start tracking
+        const perms = await checkLocationPermissions();
+        if (!perms.foreground || !perms.background) {
+          setPendingTrackingAction(() => () => executeStartTracking(newStatus));
+          setShowLocationDisclosure(true);
+          return;
+        }
+        await executeStartTracking(newStatus);
+      } else {
+        await updateStatus(newStatus, `Status updated to ${newStatus} via Quick Status`);
       }
-
-      await updateStatus(newStatus, `Status updated to ${newStatus} via Quick Status`);
     } catch (err: any) {
       console.error('[LogisticsDetail] Quick status error:', err);
       setActionError(err?.message || `Failed to update status to ${newStatus}`);
     } finally {
       setIsUpdatingStatus(false);
     }
+  };
+
+  const handleDisclosureAccept = async () => {
+    setShowLocationDisclosure(false);
+    if (pendingTrackingAction) {
+      const action = pendingTrackingAction;
+      setPendingTrackingAction(null);
+      await action();
+    } else {
+      await executeStartTracking();
+    }
+  };
+
+  const handleDisclosureDecline = () => {
+    setShowLocationDisclosure(false);
+    setPendingTrackingAction(null);
   };
 
   // Notes Modal Submit Handler (adds internal note via logistics hook)
@@ -534,6 +597,14 @@ export default function LogisticsJobDetailScreen() {
         onSubmit={handleNotesModalSubmit}
         authorName={user?.name || user?.email || 'Driver'}
         testID="job-notes-modal"
+      />
+
+      {/* Background Location Disclosure Modal (Google Play & Apple Policy Compliance) */}
+      <BackgroundLocationDisclosureModal
+        visible={showLocationDisclosure}
+        onAccept={handleDisclosureAccept}
+        onDecline={handleDisclosureDecline}
+        testID="job-bg-location-disclosure-modal"
       />
     </View>
   );

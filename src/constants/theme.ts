@@ -55,7 +55,7 @@ export const darkColors: ThemeColors = {
   popover: '#1A1A1A',
   popoverForeground: '#E6E6E6',
   muted: '#1F471F',
-  mutedForeground: '#666666',
+  mutedForeground: '#8A8A8A', // WCAG AA compliant (>= 4.5:1 contrast against #141414)
   border: '#303030',
   input: '#303030',
   ring: '#CBD5E1',

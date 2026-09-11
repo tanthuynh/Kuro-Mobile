@@ -14,6 +14,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '@/context/theme-context';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import { ScannerProvider } from '@/context/scanner-context';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 // Prevent splash screen from auto-hiding before auth state and fonts are determined
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -117,15 +118,17 @@ export default function RootLayout() {
   const isFontsReady = fontsLoaded || !!fontError;
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <ScannerProvider>
-            <RouteGuard isFontsReady={isFontsReady} />
-          </ScannerProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ScannerProvider>
+              <RouteGuard isFontsReady={isFontsReady} />
+            </ScannerProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 

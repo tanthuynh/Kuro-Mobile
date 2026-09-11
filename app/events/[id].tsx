@@ -6,7 +6,7 @@
  * and expandable in-sheet continuous camera scanner with 4-way status selection.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -58,6 +58,10 @@ import { PullSheetSectionHeader } from '@/components/pull-sheets/pull-sheet-sect
 import { PullSheetItemRow } from '@/components/pull-sheets/pull-sheet-item-row';
 import { PullSheetStatusSheet } from '@/components/pull-sheets/pull-sheet-status-sheet';
 import { formatStageTime } from '@/lib/date-utils';
+import {
+  normalizePullsheetStatus,
+  getPreviousPullsheetStatus,
+} from '@/lib/pull-sheet-engine';
 import type { EventStatus } from '@/types/events';
 import type { PullsheetItem } from '@/types/pull-sheet';
 import type { ScanTargetStatus } from '@/types/scanner';
@@ -215,6 +219,43 @@ export default function EventDetailsScreen() {
       setIsBulkConfirming(false);
     }
   };
+
+  const handleSwipeRight = useCallback(
+    async (item: PullsheetItem) => {
+      const targetStatus = currentTargetStatus;
+      const targetQty = Math.max(1, item.quantity || 1);
+      const newScannedQty =
+        targetStatus === 'prepped_scanned'
+          ? targetQty
+          : targetStatus === 'confirmed' || targetStatus === 'deprepped'
+          ? 0
+          : item.scannedQuantity && item.scannedQuantity > 0
+          ? item.scannedQuantity
+          : targetQty;
+      await updateStatus(item.id, targetStatus, { scannedQuantity: newScannedQty });
+    },
+    [currentTargetStatus, updateStatus]
+  );
+
+  const handleSwipeLeft = useCallback(
+    async (item: PullsheetItem) => {
+      const currentStatus = normalizePullsheetStatus(item.status);
+      // Strict floor at confirmed: do not revert if confirmed, pending, or none
+      if (currentStatus === 'confirmed' || currentStatus === 'pending' || currentStatus === 'none') {
+        return;
+      }
+      const prevStatus = getPreviousPullsheetStatus(currentStatus);
+      const targetQty = Math.max(1, item.quantity || 1);
+      const newScannedQty =
+        currentStatus === 'prepped_scanned'
+          ? 0
+          : prevStatus === 'prepped_scanned'
+          ? targetQty
+          : item.scannedQuantity;
+      await updateStatus(item.id, prevStatus, { scannedQuantity: newScannedQty });
+    },
+    [updateStatus]
+  );
 
   const currentActiveItem = useMemo(() => {
     if (!activeStatusItem) return null;
@@ -631,6 +672,10 @@ export default function EventDetailsScreen() {
                   key={item.id}
                   item={item}
                   onLongPress={(it) => setActiveStatusItem(it)}
+                  isScannerOpen={isScannerOpen}
+                  currentTargetStatus={currentTargetStatus}
+                  onSwipeRight={handleSwipeRight}
+                  onSwipeLeft={handleSwipeLeft}
                 />
               ))}
             </View>

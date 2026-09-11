@@ -269,6 +269,48 @@ describe('Milestone 3: Pull Sheet Management UI', () => {
       });
       expect(result.current.searchQuery).toBe('Rigging');
     });
+
+    it('rollbackStatus restores target quantity when rolling back from dispatched to prepped_scanned', async () => {
+      const dispatchedPullsheet = {
+        ...samplePullsheet,
+        items: [
+          {
+            id: 'item-disp-1',
+            description: 'L-Acoustics K2 Line Array',
+            quantity: 16,
+            scannedQuantity: 0,
+            type: 'item' as const,
+            status: 'dispatched' as const,
+          },
+        ],
+      };
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((eventId, tenantId, onUpdate) => {
+        onUpdate(dispatchedPullsheet);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest
+        .spyOn(pullSheetService, 'updatePullsheetItemStatus')
+        .mockResolvedValue({ success: true });
+
+      const { result } = renderHook(() => usePullSheet('ev-101'));
+
+      let rollbackSuccess = false;
+      await act(async () => {
+        rollbackSuccess = await result.current.rollbackStatus('item-disp-1');
+      });
+
+      expect(rollbackSuccess).toBe(true);
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'ev-101',
+        'tenant-abc',
+        'item-disp-1',
+        'prepped_scanned',
+        { uid: 'user-123' },
+        { scannedQuantity: 16 }
+      );
+    });
   });
 
   describe('PullSheetItemRow Notes', () => {

@@ -52,7 +52,11 @@ export interface UsePullSheetResult {
   setSearchQuery: (query: string) => void;
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
-  updateStatus: (itemId: string, newStatus: PullsheetItemStatus) => Promise<boolean>;
+  updateStatus: (
+    itemId: string,
+    newStatus: PullsheetItemStatus,
+    options?: { scannedQuantity?: number }
+  ) => Promise<boolean>;
   advanceStatus: (itemId: string) => Promise<boolean>;
   rollbackStatus: (itemId: string) => Promise<boolean>;
   incrementScannedCount: (itemId: string, barcode?: string) => Promise<boolean>;
@@ -335,7 +339,11 @@ export function usePullSheet(eventId: string): UsePullSheetResult {
 
   // Update item status with optimistic UI and selective rollback
   const updateStatus = useCallback(
-    async (itemId: string, newStatus: PullsheetItemStatus): Promise<boolean> => {
+    async (
+      itemId: string,
+      newStatus: PullsheetItemStatus,
+      options?: { scannedQuantity?: number }
+    ): Promise<boolean> => {
       if (!eventId || !tenantId) return false;
 
       // Online Guard: offline mutations blocked immediately
@@ -370,6 +378,10 @@ export function usePullSheet(eventId: string): UsePullSheetResult {
             return {
               ...it,
               status: isActionablePullsheetItem(it) ? newStatus : 'none',
+              scannedQuantity:
+                options?.scannedQuantity !== undefined
+                  ? options.scannedQuantity
+                  : it.scannedQuantity,
               statusUpdatedAt: new Date(),
               statusUpdatedBy: currentUserId,
             };
@@ -384,7 +396,10 @@ export function usePullSheet(eventId: string): UsePullSheetResult {
         tenantId,
         itemId,
         newStatus,
-        { uid: currentUserId }
+        { uid: currentUserId },
+        options?.scannedQuantity !== undefined
+          ? { scannedQuantity: options.scannedQuantity }
+          : undefined
       );
 
       if (result.success) {
@@ -431,7 +446,14 @@ export function usePullSheet(eventId: string): UsePullSheetResult {
 
       const currentStatus = normalizePullsheetStatus(item.status);
       const prevStatus = getPreviousPullsheetStatus(currentStatus);
-      return updateStatus(itemId, prevStatus);
+      const targetQty = Math.max(1, item.quantity || 1);
+      const newScannedQty =
+        currentStatus === 'prepped_scanned'
+          ? 0
+          : prevStatus === 'prepped_scanned'
+          ? targetQty
+          : item.scannedQuantity;
+      return updateStatus(itemId, prevStatus, { scannedQuantity: newScannedQty });
     },
     [items, updateStatus]
   );

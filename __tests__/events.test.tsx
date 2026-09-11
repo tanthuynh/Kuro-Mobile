@@ -12,6 +12,7 @@ import { EventCard } from '@/components/events/event-card';
 import { useEvents, useSingleEvent } from '@/hooks/use-events';
 import * as eventService from '@/services/event-service';
 import * as pullSheetService from '@/services/pull-sheet-service';
+import * as Haptics from 'expo-haptics';
 import type { Event } from '@/types/events';
 import type { Pullsheet } from '@/types/pull-sheet';
 
@@ -637,6 +638,401 @@ describe('Milestone 2: Events Feed & Details', () => {
       // None of the scan or status update operations should be invoked
       expect(updateStatusSpy).not.toHaveBeenCalled();
       expect(updateScannedCountSpy).not.toHaveBeenCalled();
+    });
+
+    it('disables swiping in non-scanner mode and does not trigger status mutation', () => {
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest.spyOn(pullSheetService, 'updatePullsheetItemStatus');
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId, queryByTestId } = render(<EventDetailsScreen />);
+
+      // Scanner is closed
+      expect(queryByTestId('scanner-expandable-sheet')).toBeNull();
+
+      // Swipe row should not have reveal plate
+      expect(queryByTestId('pullsheet-reveal-plate-item-1')).toBeNull();
+
+      const swipeRow = getByTestId('pullsheet-swipe-row-item-1');
+      // Simulate horizontal drag
+      fireEvent(swipeRow, 'responderMove', { nativeEvent: { dx: 150, dy: 0 } });
+      fireEvent(swipeRow, 'responderRelease', { nativeEvent: { dx: 150, dy: 0 } });
+
+      expect(updateStatusSpy).not.toHaveBeenCalled();
+    });
+
+    it('swipes right past threshold in scanner mode to apply target status with full quantity fulfillment and haptics', async () => {
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest
+        .spyOn(pullSheetService, 'updatePullsheetItemStatus')
+        .mockResolvedValue({ success: true });
+      const hapticsSpy = jest.spyOn(Haptics, 'impactAsync');
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId, queryByTestId } = render(<EventDetailsScreen />);
+
+      // Start scanning mode
+      fireEvent.press(getByTestId('start-scanning-btn'));
+      expect(getByTestId('scanner-expandable-sheet')).toBeTruthy();
+
+      // Reveal plate exists in scanner mode
+      expect(getByTestId('pullsheet-reveal-plate-item-1')).toBeTruthy();
+      expect(getByTestId('pullsheet-reveal-right-item-1')).toBeTruthy();
+
+      const swipeRow = getByTestId('pullsheet-swipe-row-item-1');
+
+      // Swipe right past threshold (dx = 150 > 120)
+      await act(async () => {
+        fireEvent(swipeRow, 'responderMove', { nativeEvent: { dx: 150, dy: 0 } });
+        fireEvent(swipeRow, 'responderRelease', { nativeEvent: { dx: 150, dy: 0 } });
+      });
+
+      // Triggers haptic feedback
+      expect(hapticsSpy).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Medium);
+
+      // Updates status to prepped_scanned with full quantity (16)
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'ev-101',
+        'tenant-abc',
+        'item-1',
+        'prepped_scanned',
+        { uid: 'user-123' },
+        { scannedQuantity: 16 }
+      );
+    });
+
+    it('swipes left past threshold in scanner mode to revert status and resets scannedQuantity to 0', async () => {
+      // Pullsheet with prepped item
+      const preppedPullsheet: Pullsheet = {
+        ...samplePullsheet,
+        items: [
+          {
+            id: 'item-1',
+            description: 'L-Acoustics K2 Enclosure',
+            quantity: 16,
+            scannedQuantity: 16,
+            type: 'item',
+            status: 'prepped_scanned',
+          },
+        ],
+      };
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((_id, _tenantId, onData) => {
+        onData(preppedPullsheet);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest
+        .spyOn(pullSheetService, 'updatePullsheetItemStatus')
+        .mockResolvedValue({ success: true });
+      const hapticsSpy = jest.spyOn(Haptics, 'impactAsync');
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId } = render(<EventDetailsScreen />);
+
+      // Start scanning mode
+      fireEvent.press(getByTestId('start-scanning-btn'));
+
+      const swipeRow = getByTestId('pullsheet-swipe-row-item-1');
+
+      // Swipe left past threshold (dx = -150 < -120)
+      await act(async () => {
+        fireEvent(swipeRow, 'responderMove', { nativeEvent: { dx: -150, dy: 0 } });
+        fireEvent(swipeRow, 'responderRelease', { nativeEvent: { dx: -150, dy: 0 } });
+      });
+
+      expect(hapticsSpy).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Medium);
+
+      // Reverts prepped_scanned -> confirmed with scannedQuantity reset to 0
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'ev-101',
+        'tenant-abc',
+        'item-1',
+        'confirmed',
+        { uid: 'user-123' },
+        { scannedQuantity: 0 }
+      );
+    });
+
+    it('swipes left on an item already at confirmed status does not demote it to pending or none', async () => {
+      // Pullsheet with confirmed item
+      const confirmedPullsheet: Pullsheet = {
+        ...samplePullsheet,
+        items: [
+          {
+            id: 'item-1',
+            description: 'L-Acoustics K2 Enclosure',
+            quantity: 16,
+            scannedQuantity: 8,
+            type: 'item',
+            status: 'confirmed',
+          },
+        ],
+      };
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((_id, _tenantId, onData) => {
+        onData(confirmedPullsheet);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest
+        .spyOn(pullSheetService, 'updatePullsheetItemStatus')
+        .mockClear();
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId } = render(<EventDetailsScreen />);
+
+      // Start scanning mode
+      fireEvent.press(getByTestId('start-scanning-btn'));
+
+      const swipeRow = getByTestId('pullsheet-swipe-row-item-1');
+
+      // Swipe left past threshold on item already at confirmed status
+      await act(async () => {
+        fireEvent(swipeRow, 'responderMove', { nativeEvent: { dx: -150, dy: 0 } });
+        fireEvent(swipeRow, 'responderRelease', { nativeEvent: { dx: -150, dy: 0 } });
+      });
+
+      // Strict floor at confirmed: no status mutation should occur
+      expect(updateStatusSpy).not.toHaveBeenCalled();
+    });
+
+    it('swipes right with confirmed target status to confirm item and resets scannedQuantity to 0', async () => {
+      const preppedPullsheet: Pullsheet = {
+        ...samplePullsheet,
+        items: [
+          {
+            id: 'item-1',
+            description: 'L-Acoustics K2 Enclosure',
+            quantity: 16,
+            scannedQuantity: 16,
+            type: 'item',
+            status: 'prepped_scanned',
+          },
+        ],
+      };
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((_id, _tenantId, onData) => {
+        onData(preppedPullsheet);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest
+        .spyOn(pullSheetService, 'updatePullsheetItemStatus')
+        .mockResolvedValue({ success: true });
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId } = render(<EventDetailsScreen />);
+
+      // Start scanning mode
+      fireEvent.press(getByTestId('start-scanning-btn'));
+
+      // Open status selector and select 'confirmed'
+      fireEvent.press(getByTestId('scanner-status-selector-btn'));
+      fireEvent.press(getByTestId('status-option-confirmed'));
+
+      const swipeRow = getByTestId('pullsheet-swipe-row-item-1');
+
+      await act(async () => {
+        fireEvent(swipeRow, 'responderMove', { nativeEvent: { dx: 150, dy: 0 } });
+        fireEvent(swipeRow, 'responderRelease', { nativeEvent: { dx: 150, dy: 0 } });
+      });
+
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'ev-101',
+        'tenant-abc',
+        'item-1',
+        'confirmed',
+        { uid: 'user-123' },
+        { scannedQuantity: 0 }
+      );
+    });
+
+    it('swipes right with deprepped target status to deprep item and resets scannedQuantity to 0', async () => {
+      const preppedPullsheet: Pullsheet = {
+        ...samplePullsheet,
+        items: [
+          {
+            id: 'item-1',
+            description: 'L-Acoustics K2 Enclosure',
+            quantity: 16,
+            scannedQuantity: 16,
+            type: 'item',
+            status: 'prepped_scanned',
+          },
+        ],
+      };
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((_id, _tenantId, onData) => {
+        onData(preppedPullsheet);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest
+        .spyOn(pullSheetService, 'updatePullsheetItemStatus')
+        .mockResolvedValue({ success: true });
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId } = render(<EventDetailsScreen />);
+
+      // Start scanning mode
+      fireEvent.press(getByTestId('start-scanning-btn'));
+
+      // Open status selector and select 'deprepped'
+      fireEvent.press(getByTestId('scanner-status-selector-btn'));
+      fireEvent.press(getByTestId('status-option-deprepped'));
+
+      const swipeRow = getByTestId('pullsheet-swipe-row-item-1');
+
+      await act(async () => {
+        fireEvent(swipeRow, 'responderMove', { nativeEvent: { dx: 150, dy: 0 } });
+        fireEvent(swipeRow, 'responderRelease', { nativeEvent: { dx: 150, dy: 0 } });
+      });
+
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'ev-101',
+        'tenant-abc',
+        'item-1',
+        'deprepped',
+        { uid: 'user-123' },
+        { scannedQuantity: 0 }
+      );
+    });
+
+    it('swipes right with returned target status to return item and fulfills full quantity when scannedQuantity is 0', async () => {
+      const confirmedPullsheet: Pullsheet = {
+        ...samplePullsheet,
+        items: [
+          {
+            id: 'item-1',
+            description: 'L-Acoustics K2 Enclosure',
+            quantity: 16,
+            scannedQuantity: 0,
+            type: 'item',
+            status: 'confirmed',
+          },
+        ],
+      };
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((_id, _tenantId, onData) => {
+        onData(confirmedPullsheet);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest
+        .spyOn(pullSheetService, 'updatePullsheetItemStatus')
+        .mockResolvedValue({ success: true });
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId } = render(<EventDetailsScreen />);
+
+      // Start scanning mode
+      fireEvent.press(getByTestId('start-scanning-btn'));
+
+      // Open status selector and select 'returned'
+      fireEvent.press(getByTestId('scanner-status-selector-btn'));
+      fireEvent.press(getByTestId('status-option-returned'));
+
+      const swipeRow = getByTestId('pullsheet-swipe-row-item-1');
+
+      await act(async () => {
+        fireEvent(swipeRow, 'responderMove', { nativeEvent: { dx: 150, dy: 0 } });
+        fireEvent(swipeRow, 'responderRelease', { nativeEvent: { dx: 150, dy: 0 } });
+      });
+
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'ev-101',
+        'tenant-abc',
+        'item-1',
+        'returned',
+        { uid: 'user-123' },
+        { scannedQuantity: 16 }
+      );
+    });
+
+    it('swipes left on a dispatched item to revert to prepped_scanned and restores full quantity', async () => {
+      const dispatchedPullsheet: Pullsheet = {
+        ...samplePullsheet,
+        items: [
+          {
+            id: 'item-1',
+            description: 'L-Acoustics K2 Enclosure',
+            quantity: 16,
+            scannedQuantity: 0,
+            type: 'item',
+            status: 'dispatched',
+          },
+        ],
+      };
+
+      jest.spyOn(eventService, 'subscribeSingleEvent').mockImplementation((_id, _tenantId, onData) => {
+        onData(sampleEvent);
+        return jest.fn();
+      });
+
+      jest.spyOn(pullSheetService, 'subscribePullsheet').mockImplementation((_id, _tenantId, onData) => {
+        onData(dispatchedPullsheet);
+        return jest.fn();
+      });
+
+      const updateStatusSpy = jest
+        .spyOn(pullSheetService, 'updatePullsheetItemStatus')
+        .mockResolvedValue({ success: true });
+
+      const EventDetailsScreen = require('../app/events/[id]').default;
+      const { getByTestId } = render(<EventDetailsScreen />);
+
+      // Start scanning mode
+      fireEvent.press(getByTestId('start-scanning-btn'));
+
+      const swipeRow = getByTestId('pullsheet-swipe-row-item-1');
+
+      await act(async () => {
+        fireEvent(swipeRow, 'responderMove', { nativeEvent: { dx: -150, dy: 0 } });
+        fireEvent(swipeRow, 'responderRelease', { nativeEvent: { dx: -150, dy: 0 } });
+      });
+
+      expect(updateStatusSpy).toHaveBeenCalledWith(
+        'ev-101',
+        'tenant-abc',
+        'item-1',
+        'prepped_scanned',
+        { uid: 'user-123' },
+        { scannedQuantity: 16 }
+      );
     });
   });
 });

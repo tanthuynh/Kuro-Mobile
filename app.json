@@ -16,6 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.amiastudios.kuromobile",
+      "buildNumber": "1",
       "infoPlist": {
         "UIBackgroundModes": [
           "location",
@@ -23,7 +24,8 @@
         ],
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Kuro Mobile tracks your location during active logistics jobs to provide dispatchers with real-time ETA and status updates.",
         "NSLocationWhenInUseUsageDescription": "Kuro Mobile uses your location to show nearby stops and provide accurate route navigation.",
-        "NSCameraUsageDescription": "Kuro Mobile uses your camera to scan equipment barcodes and QR codes for warehouse pull sheets."
+        "NSCameraUsageDescription": "Kuro Mobile uses your camera to scan equipment barcodes and QR codes for warehouse pull sheets.",
+        "NSPhotoLibraryUsageDescription": "Kuro Mobile uses your photo library to attach damage photos and documentation to equipment repair tickets."
       }
     },
     "android": {
@@ -32,6 +34,7 @@
         "backgroundColor": "#141414"
       },
       "package": "com.amiastudios.kuromobile",
+      "versionCode": 1,
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION",
@@ -39,6 +42,9 @@
         "ACCESS_BACKGROUND_LOCATION",
         "FOREGROUND_SERVICE",
         "FOREGROUND_SERVICE_LOCATION"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -52,6 +58,14 @@
         "expo-camera",
         {
           "cameraPermission": "Kuro Mobile uses your camera to scan equipment barcodes and QR codes for warehouse pull sheets."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Kuro Mobile uses your camera to capture equipment damage photos for repair tickets.",
+          "photosPermission": "Kuro Mobile uses your photo library to attach damage evidence and manuals to repair tickets.",
+          "microphonePermission": false
         }
       ],
       [
@@ -70,7 +84,9 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Kuro Mobile tracks your location during active logistics jobs to provide dispatchers with real-time ETA and status updates."
+          "locationAlwaysAndWhenInUsePermission": "Kuro Mobile tracks your location during active logistics jobs to provide dispatchers with real-time ETA and status updates.",
+          "locationWhenInUsePermission": "Kuro Mobile uses your location to show nearby stops and provide accurate route navigation.",
+          "isIosBackgroundLocationEnabled": true
         }
       ]
     ],

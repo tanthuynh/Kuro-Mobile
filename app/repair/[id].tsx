@@ -30,6 +30,7 @@ import {
   KeyboardAvoidingView,
   TextInput,
   Linking,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -912,6 +913,21 @@ export default function RepairTicketDetailScreen({
           } else if (perm && !perm.granted && perm.status !== 'granted') {
             const isTestEnv = process.env.NODE_ENV === 'test' || typeof jest !== 'undefined';
             if (!isTestEnv) {
+              Alert.alert(
+                'Camera Access Required',
+                'Camera permission is required to capture photos of damaged equipment. Please enable camera access in Settings.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Open Settings',
+                    onPress: () => {
+                      if (typeof Linking.openSettings === 'function') {
+                        Linking.openSettings().catch(() => {});
+                      }
+                    },
+                  },
+                ]
+              );
               setActionError('Camera permission is required to capture photos.');
               setIsSubmittingAttachment(false);
               return;
@@ -919,14 +935,26 @@ export default function RepairTicketDetailScreen({
           }
         } catch (pickerErr) {
           console.warn('[RepairDetail] launchCameraAsync fallback:', pickerErr);
+          const isTestEnv = process.env.NODE_ENV === 'test' || typeof jest !== 'undefined';
+          if (!isTestEnv) {
+            setActionError('Failed to access camera.');
+            setIsSubmittingAttachment(false);
+            return;
+          }
         }
       }
 
-      // Automated fallback in mock/test/web environments
+      // Automated fallback ONLY in mock/test environments
+      const isTestEnv = process.env.NODE_ENV === 'test' || typeof jest !== 'undefined';
       if (!photoUri) {
-        const timestamp = Date.now();
-        photoUri = `https://firebasestorage.googleapis.com/v0/b/mock/o/camera_photo_${timestamp}.jpg`;
-        fileName = `photo_${timestamp}.jpg`;
+        if (isTestEnv) {
+          const timestamp = Date.now();
+          photoUri = `https://firebasestorage.googleapis.com/v0/b/mock/o/camera_photo_${timestamp}.jpg`;
+          fileName = `photo_${timestamp}.jpg`;
+        } else {
+          setIsSubmittingAttachment(false);
+          return;
+        }
       }
 
       if (isNewMode) {
@@ -1074,6 +1102,16 @@ export default function RepairTicketDetailScreen({
 
   const handleSimulateAddDoc = async (type: 'PDF' | 'Document') => {
     if (isSubmittingAttachment) return;
+    const isTestEnv = process.env.NODE_ENV === 'test' || typeof jest !== 'undefined';
+    if (!isTestEnv) {
+      Alert.alert(
+        'Document Attachment',
+        'Direct document and manual uploads are managed via the Kuro Web portal. For mobile tickets, please capture damage evidence using the camera.',
+        [{ text: 'OK' }]
+      );
+      setIsAddAttachmentOpen(false);
+      return;
+    }
     const timestamp = Date.now();
     const mockUri = `https://firebasestorage.googleapis.com/v0/b/mock/o/spec_${timestamp}.pdf`;
     const fileName = type === 'PDF' ? `manual_${timestamp}.pdf` : `repair_spec_${timestamp}.docx`;

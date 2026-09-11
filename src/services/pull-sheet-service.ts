@@ -449,14 +449,30 @@ export async function updatePullsheetItemStatus(
   itemId: string,
   newStatus: PullsheetItemStatus,
   user: { uid: string },
-  existingOperationId?: string
+  optionsOrOpId?: string | { existingOperationId?: string; scannedQuantity?: number },
+  legacyScannedQuantity?: number
 ): Promise<CommandExecutionResult> {
+  let existingOperationId: string | undefined;
+  let scannedQuantity: number | undefined;
+
+  if (typeof optionsOrOpId === 'string') {
+    existingOperationId = optionsOrOpId;
+    scannedQuantity = legacyScannedQuantity;
+  } else if (optionsOrOpId && typeof optionsOrOpId === 'object') {
+    existingOperationId = optionsOrOpId.existingOperationId;
+    scannedQuantity = optionsOrOpId.scannedQuantity;
+  }
+
   return executePullsheetCommand(
     'update_status',
     eventId,
     tenantId,
     user,
-    { itemId, newStatus },
+    {
+      itemId,
+      newStatus,
+      ...(typeof scannedQuantity === 'number' ? { scannedCount: scannedQuantity } : {}),
+    },
     existingOperationId
   );
 }

@@ -41,6 +41,13 @@ function getDevApiBaseUrl(): string {
     const host = debuggerHost.split(':')[0]; // Extract IP without port
     return `http://${host}:3000`;
   }
+
+  if (typeof __DEV__ !== 'undefined' && !__DEV__ && process.env.NODE_ENV !== 'test') {
+    console.warn(
+      '[Config] EXPO_PUBLIC_API_BASE_URL is not set in a standalone release build. Backend commands targeting API endpoints may fail.'
+    );
+  }
+
   return 'http://localhost:3000';
 }
 
@@ -48,10 +55,13 @@ export const API_CONFIG = {
   baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || getDevApiBaseUrl(),
 } as const;
 
+const resolvedAppVersion = Constants.expoConfig?.version || '0.1.2';
+
 export const APP_CONFIG = {
   name: 'Kuro Mobile',
-  version: '1.0.0',
-  copyright: '© 2026 KURO version 1.0.0',
+  version: resolvedAppVersion,
+  copyright: `© ${new Date().getFullYear()} KURO version ${resolvedAppVersion}`,
   minTouchTarget: 48,
 } as const;
+
 

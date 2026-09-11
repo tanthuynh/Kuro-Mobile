@@ -19,6 +19,7 @@ export interface LogoProps {
   style?: StyleProp<ViewStyle>;
   imageStyle?: StyleProp<ImageStyle>;
   textStyle?: StyleProp<TextStyle>;
+  tintColor?: string;
   testID?: string;
 }
 
@@ -29,6 +30,7 @@ export const Logo: React.FC<LogoProps> = ({
   style,
   imageStyle,
   textStyle,
+  tintColor,
   testID,
 }) => {
   const { colors } = useTheme();
@@ -62,7 +64,17 @@ export const Logo: React.FC<LogoProps> = ({
 
   const dim = getDimension();
   const defaultFontSize = getTextSize();
-  const logoColor = colors.brandGreenScale?.green5 || colors.brandGreen || '#206020';
+  const flattenedImageStyle = imageStyle ? StyleSheet.flatten(imageStyle) : undefined;
+  const logoColor =
+    tintColor ||
+    flattenedImageStyle?.tintColor ||
+    colors.brandGreenScale?.green5 ||
+    colors.brandGreen ||
+    '#206020';
+
+  const cleanImageStyle = flattenedImageStyle
+    ? { ...flattenedImageStyle, tintColor: undefined }
+    : undefined;
 
   const logoNode = (
     <Image
@@ -71,10 +83,10 @@ export const Logo: React.FC<LogoProps> = ({
         {
           width: dim,
           height: dim,
-          tintColor: logoColor,
         },
-        imageStyle,
+        cleanImageStyle,
       ]}
+      tintColor={logoColor}
       resizeMode="contain"
     />
   );

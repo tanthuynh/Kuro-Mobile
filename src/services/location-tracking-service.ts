@@ -386,6 +386,34 @@ try {
 // ============================================================================
 
 /**
+ * Checks current location permission status without prompting the user.
+ */
+export async function checkLocationPermissions(): Promise<LocationPermissionResult> {
+  if (process.env.NODE_ENV === 'test') {
+    return { foreground: true, background: true };
+  }
+  try {
+    const fgResponse = await Location.getForegroundPermissionsAsync();
+    const fgGranted = fgResponse.status === 'granted' || fgResponse.granted === true;
+    if (!fgGranted) {
+      return { foreground: false, background: false };
+    }
+
+    let bgGranted = false;
+    try {
+      const bgResponse = await Location.getBackgroundPermissionsAsync();
+      bgGranted = bgResponse.status === 'granted' || bgResponse.granted === true;
+    } catch {
+      bgGranted = false;
+    }
+
+    return { foreground: fgGranted, background: bgGranted };
+  } catch (err) {
+    return { foreground: false, background: false };
+  }
+}
+
+/**
  * Requests location permissions following platform guidelines:
  * First requests foreground permissions; if granted, then requests background permissions.
  *
