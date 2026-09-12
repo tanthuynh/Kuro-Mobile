@@ -19,7 +19,14 @@ import {
   addLocationListener,
   handleLocationUpdate,
   requestLocationPermissions,
+  verifyTrackingPrerequisites,
+  getLastTrackingFailureReason,
+  isAccuracyPrecise,
+  getSyncStatus,
+  flushLocationBuffer,
+  getLocationBufferCount,
   _resetTrackingStateForTesting,
+  TrackingFailureReason,
 } from '../location-tracking-service';
 
 // Spy on logistics service methods
@@ -926,6 +933,258 @@ describe('Location Tracking Service (Milestone 3)', () => {
       await startTrackingJob('job-driver-test', 'tenant-1');
       expect(getLastKnownLocation()?.driverId).toBe('driver-777');
       expect(getLastKnownLocation()?.driverName).toBe('Alex Rivera');
+    });
+  });
+
+  // ==========================================================================
+  // 6. REQUIREMENT R1: PREREQUISITE GATING & TYPED FAILURE REPORTING
+  // ==========================================================================
+  describe('Requirement R1: Prerequisite Gating & Typed Failure Reporting', () => {
+    it('verifies isAccuracyPrecise correctly validates precise vs approximate accuracy', () => {
+      // Null / undefined falls back to true for backward compatibility
+      expect(isAccuracyPrecise(null)).toBe(true);
+      expect(isAccuracyPrecise(undefined)).toBe(true);
+
+      // Fine / Full precise permissions
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, accuracy: 'fine' } as any)).toBe(true);
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, android: { accuracy: 'fine' } } as any)).toBe(true);
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, ios: { accuracy: 'full' } } as any)).toBe(true);
+
+      // Coarse / Approximate / Reduced permissions must be rejected
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, accuracy: 'coarse' } as any)).toBe(false);
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, accuracy: 'approximate' } as any)).toBe(false);
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, accuracy: 'reduced' } as any)).toBe(false);
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, android: { accuracy: 'coarse' } } as any)).toBe(false);
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, android: { accuracy: 'none' } } as any)).toBe(false);
+      expect(isAccuracyPrecise({ status: 'granted', granted: true, ios: { accuracy: 'reduced' } } as any)).toBe(false);
+    });
+
+    it('rejects startTrackingJob with services_disabled when device GPS is disabled globally', async () => {
+      (Location.hasServicesEnabledAsync as jest.Mock).mockResolvedValueOnce(false);
+
+      const success = await startTrackingJob('job-gps-off', 'tenant-alpha');
+      expect(success).toBe(false);
+      expect(isTrackingActive()).toBe(false);
+      expect(getLastTrackingFailureReason()).toBe('services_disabled');
+      expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejects startTrackingJob with permission_denied when foreground permission is not granted', async () => {
+      (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+        status: 'denied',
+        granted: false,
+        canAskAgain: true,
+        expires: 'never',
+      });
+
+      const success = await startTrackingJob('job-fg-denied', 'tenant-alpha');
+      expect(success).toBe(false);
+      expect(isTrackingActive()).toBe(false);
+      expect(getLastTrackingFailureReason()).toBe('permission_denied');
+      expect(getSyncStatus().status).toBe('permission_denied');
+      expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejects startTrackingJob with permission_denied when background permission is explicitly denied', async () => {
+      (Location.requestBackgroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+        status: 'denied',
+        granted: false,
+        canAskAgain: true,
+        expires: 'never',
+      });
+
+      const success = await startTrackingJob('job-bg-denied', 'tenant-alpha');
+      expect(success).toBe(false);
+      expect(isTrackingActive()).toBe(false);
+      expect(getLastTrackingFailureReason()).toBe('permission_denied');
+      expect(getSyncStatus().status).toBe('permission_denied');
+      expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejects startTrackingJob with approximate_only when foreground accuracy is coarse', async () => {
+      (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+        status: 'granted',
+        granted: true,
+        canAskAgain: true,
+        expires: 'never',
+        android: { accuracy: 'coarse' },
+      });
+
+      const success = await startTrackingJob('job-coarse-fg', 'tenant-alpha');
+      expect(success).toBe(false);
+      expect(isTrackingActive()).toBe(false);
+      expect(getLastTrackingFailureReason()).toBe('approximate_only');
+      expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejects startTrackingJob with approximate_only when background accuracy is reduced on iOS', async () => {
+      (Location.requestBackgroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+        status: 'granted',
+        granted: true,
+        canAskAgain: true,
+        expires: 'never',
+        ios: { accuracy: 'reduced' },
+      });
+
+      const success = await startTrackingJob('job-reduced-bg', 'tenant-alpha');
+      expect(success).toBe(false);
+      expect(isTrackingActive()).toBe(false);
+      expect(getLastTrackingFailureReason()).toBe('approximate_only');
+      expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
+    });
+
+    it('successfully starts tracking and clears failure reason when all gating checks pass', async () => {
+      (Location.hasServicesEnabledAsync as jest.Mock).mockResolvedValueOnce(true);
+      (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+        status: 'granted',
+        granted: true,
+        canAskAgain: true,
+        expires: 'never',
+        accuracy: 'fine',
+        android: { accuracy: 'fine' },
+      });
+      (Location.requestBackgroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+        status: 'granted',
+        granted: true,
+        canAskAgain: true,
+        expires: 'never',
+        accuracy: 'fine',
+        android: { accuracy: 'fine' },
+      });
+
+      const success = await startTrackingJob('job-happy-gating', 'tenant-alpha');
+      expect(success).toBe(true);
+      expect(isTrackingActive()).toBe(true);
+      expect(getLastTrackingFailureReason()).toBeNull();
+      expect(Location.startLocationUpdatesAsync).toHaveBeenCalled();
+    });
+
+    it('sets internal_error failure reason when startTrackingJob is called with blank jobId or tenantId', async () => {
+      const res1 = await startTrackingJob('', 'tenant-alpha');
+      expect(res1).toBe(false);
+      expect(getLastTrackingFailureReason()).toBe('internal_error');
+
+      const res2 = await startTrackingJob('job-test', '   ');
+      expect(res2).toBe(false);
+      expect(getLastTrackingFailureReason()).toBe('internal_error');
+    });
+
+    it('clears lastTrackingFailureReason on reset for testing', async () => {
+      (Location.hasServicesEnabledAsync as jest.Mock).mockResolvedValueOnce(false);
+      await startTrackingJob('job-fail-reset', 'tenant-alpha');
+      expect(getLastTrackingFailureReason()).toBe('services_disabled');
+
+      _resetTrackingStateForTesting();
+      expect(getLastTrackingFailureReason()).toBeNull();
+    });
+  });
+
+  // ==========================================================================
+  // 7. REQUIREMENT R4: OFFLINE BUFFERING & OPPORTUNISTIC AUTO-RETRY
+  // ==========================================================================
+  describe('Requirement R4: Offline Buffering & Opportunistic Auto-Retry', () => {
+    it('opportunistically flushes offline buffer during location update and transitions to synced', async () => {
+      await startTrackingJob('job-buffer-flush-test', 'tenant-alpha');
+
+      // 1. First write fails with network offline error and buffers the coordinate
+      (LogisticsService.updateJobLocation as jest.Mock).mockRejectedValueOnce(
+        new Error('Network connection offline')
+      );
+      await handleLocationUpdate({
+        coords: { latitude: -33.8688, longitude: 151.2093, altitude: 0, accuracy: 5, speed: 0, heading: 0, altitudeAccuracy: null },
+        timestamp: 1756285400000,
+      });
+
+      expect(getSyncStatus().status).toBe('offline_failed');
+      expect(getLocationBufferCount()).toBe(1);
+
+      // 2. Next location update succeeds and triggers opportunistic flush
+      (LogisticsService.updateJobLocation as jest.Mock).mockResolvedValue(undefined);
+      await handleLocationUpdate({
+        coords: { latitude: -33.8600, longitude: 151.2093, altitude: 0, accuracy: 5, speed: 12, heading: 0, altitudeAccuracy: null },
+        timestamp: 1756285500000,
+      });
+
+      // Status must transition to synced and buffer must be flushed
+      expect(getSyncStatus().status).toBe('synced');
+      expect(getLocationBufferCount()).toBe(0);
+    });
+
+    it('flushLocationBuffer transitions to synced when buffer is empty during active tracking', async () => {
+      await startTrackingJob('job-empty-flush-test', 'tenant-alpha');
+      expect(isTrackingActive()).toBe(true);
+
+      // Explicitly invoke flushLocationBuffer with empty buffer
+      await flushLocationBuffer('job-empty-flush-test');
+      expect(getSyncStatus().status).toBe('synced');
+    });
+  });
+
+  // ==========================================================================
+  // 8. REQUIREMENT R5: CONCURRENT JOB PROTECTION & TEARDOWN
+  // ==========================================================================
+  describe('Requirement R5: Concurrent Job Protection & Teardown', () => {
+    it('seamlessly transitions from Job A to Job B without deadlock', async () => {
+      const jobA = 'job-concurrent-A';
+      const jobB = 'job-concurrent-B';
+      const tenantId = 'tenant-fleet';
+
+      // Start Job A
+      const startA = await startTrackingJob(jobA, tenantId);
+      expect(startA).toBe(true);
+      expect(getActiveTrackingJobId()).toBe(jobA);
+
+      // Start Job B while Job A is active
+      const startB = await startTrackingJob(jobB, tenantId);
+      expect(startB).toBe(true);
+      expect(LogisticsService.stopJobTracking).toHaveBeenCalledWith(jobA);
+      expect(getActiveTrackingJobId()).toBe(jobB);
+    });
+
+    it('clears in-memory locationBuffer when switching jobs to preserve isolation', async () => {
+      const jobA = 'job-iso-A';
+      const jobB = 'job-iso-B';
+      const tenantId = 'tenant-fleet';
+
+      await startTrackingJob(jobA, tenantId);
+
+      // Simulate network offline write for Job A so coordinate is buffered
+      (LogisticsService.updateJobLocation as jest.Mock).mockRejectedValueOnce(new Error('Offline'));
+      await handleLocationUpdate({
+        coords: { latitude: -33.8688, longitude: 151.2093, altitude: 0, accuracy: 5, speed: 0, heading: 0, altitudeAccuracy: null },
+        timestamp: 1756285600000,
+      });
+      expect(getLocationBufferCount()).toBe(1);
+
+      // Switching to Job B must flush/clear Job A's buffer
+      (LogisticsService.updateJobLocation as jest.Mock).mockResolvedValue(undefined);
+      await startTrackingJob(jobB, tenantId);
+
+      expect(getActiveTrackingJobId()).toBe(jobB);
+      expect(getLocationBufferCount()).toBe(0);
+    });
+
+    it('propagates error when stopping Job A fails and resets active tracking state', async () => {
+      const jobA = 'job-err-A';
+      const jobB = 'job-err-B';
+      const tenantId = 'tenant-fleet';
+
+      await startTrackingJob(jobA, tenantId);
+      expect(getActiveTrackingJobId()).toBe(jobA);
+
+      // Mock stopJobTracking to reject
+      (LogisticsService.stopJobTracking as jest.Mock).mockRejectedValueOnce(
+        new Error('Firestore permission denied on stop')
+      );
+
+      // Starting Job B should reject with the propagated error
+      await expect(startTrackingJob(jobB, tenantId)).rejects.toThrow(
+        'Firestore permission denied on stop'
+      );
+
+      // State must be cleanly deactivated, not corrupted into Job B
+      expect(isTrackingActive()).toBe(false);
+      expect(getActiveTrackingJobId()).toBeNull();
     });
   });
 });

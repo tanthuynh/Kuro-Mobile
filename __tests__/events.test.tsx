@@ -52,7 +52,8 @@ jest.mock('@/context/auth-context', () => ({
 }));
 
 jest.mock('@/hooks/use-tickets', () => ({
-  useTenantOwners: () => ({ owners: [], loading: false, error: null }),
+  useTenantOwners: () => ({ owners: [], loading: false, error: null, refresh: jest.fn() }),
+  useTenantCrew: () => ({ crew: [], loading: false, error: null, refresh: jest.fn() }),
 }));
 
 const sampleEvent: Event = {
@@ -170,13 +171,13 @@ describe('Milestone 2: Events Feed & Details', () => {
   });
 
   describe('EventCard', () => {
-    it('renders event details, number badge, and status', () => {
+    it('renders event details, number badge, and status across 3 rows without quote lines count', () => {
       const onPress = jest.fn();
 
-      const { getByText, getByTestId } = render(
+      const { getByText, queryByText, getByTestId } = render(
         <EventCard
           event={sampleEvent}
-          clientName="LiveNation APAC"
+          assigneeName="Alex Vance"
           venueName="Sydney Showground"
           onPress={onPress}
         />
@@ -185,12 +186,51 @@ describe('Milestone 2: Events Feed & Details', () => {
       expect(getByText('[1042]')).toBeTruthy();
       expect(getByText('Neon Horizon Music Festival')).toBeTruthy();
       expect(getByText('Confirmed')).toBeTruthy();
-      expect(getByText('LiveNation APAC')).toBeTruthy();
       expect(getByText('Sydney Showground')).toBeTruthy();
-      expect(getByText('1 Quote Line Items')).toBeTruthy();
+      expect(getByText('Alex Vance')).toBeTruthy();
+      expect(queryByText(/Quote Line Items/i)).toBeNull();
 
       fireEvent.press(getByTestId('event-card-ev-101'));
       expect(onPress).toHaveBeenCalled();
+    });
+
+    it('suppresses raw UUIDs and alphanumeric link codes for venue and assignee', () => {
+      const rawIdEvent: Event = {
+        ...sampleEvent,
+        id: 'ev-raw-1',
+        venueId: 'e8a93e32-5201-447a-9a99-4d6b67e00002',
+        assigneeId: 'Fcx9Vj59jbDh96uB34FA',
+      };
+
+      const { queryByText } = render(
+        <EventCard event={rawIdEvent} />
+      );
+
+      // Raw UUID and link code must NEVER be displayed to the user
+      expect(queryByText('e8a93e32-5201-447a-9a99-4d6b67e00002')).toBeNull();
+      expect(queryByText('Fcx9Vj59jbDh96uB34FA')).toBeNull();
+    });
+
+    it('renders resolved human values when passed as venueName and assigneeName props', () => {
+      const rawIdEvent: Event = {
+        ...sampleEvent,
+        id: 'ev-raw-2',
+        venueId: 'e8a93e32-5201-447a-9a99-4d6b67e00002',
+        assigneeId: 'Fcx9Vj59jbDh96uB34FA',
+      };
+
+      const { getByText, queryByText } = render(
+        <EventCard
+          event={rawIdEvent}
+          venueName="Gala Grand Ballroom"
+          assigneeName="Sarah Jenkins"
+        />
+      );
+
+      expect(getByText('Gala Grand Ballroom')).toBeTruthy();
+      expect(getByText('Sarah Jenkins')).toBeTruthy();
+      expect(queryByText('e8a93e32-5201-447a-9a99-4d6b67e00002')).toBeNull();
+      expect(queryByText('Fcx9Vj59jbDh96uB34FA')).toBeNull();
     });
   });
 

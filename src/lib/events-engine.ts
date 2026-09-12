@@ -101,17 +101,31 @@ export function filterEvents(
         (event.eventNumber.toString().includes(trimmedSearch) ||
           event.eventNumber.toString().includes(cleanSearchNoHash) ||
           `#${event.eventNumber}`.toLowerCase().includes(trimmedSearch));
-      const clientMatch = event.clientId?.toLowerCase().includes(trimmedSearch);
-      const venueMatch = event.venueId?.toLowerCase().includes(trimmedSearch);
+      const clientMatch =
+        event.clientId?.toLowerCase().includes(trimmedSearch) ||
+        event.clientName?.toLowerCase().includes(trimmedSearch);
+      const venueMatch =
+        event.venueId?.toLowerCase().includes(trimmedSearch) ||
+        event.venueName?.toLowerCase().includes(trimmedSearch);
+      const assigneeMatch =
+        event.assigneeId?.toLowerCase().includes(trimmedSearch) ||
+        event.assigneeName?.toLowerCase().includes(trimmedSearch);
+      const typeMatch =
+        event.typeName?.toLowerCase().includes(trimmedSearch);
       const notesMatch = event.notes?.toLowerCase().includes(trimmedSearch);
 
-      if (!nameMatch && !numberMatch && !clientMatch && !venueMatch && !notesMatch) {
+      if (!nameMatch && !numberMatch && !clientMatch && !venueMatch && !assigneeMatch && !typeMatch && !notesMatch) {
         // Multi-term search across all text fields
         const combinedText = [
           event.eventName || '',
           event.eventNumber !== null && event.eventNumber !== undefined ? `#${event.eventNumber} ${event.eventNumber}` : '',
           event.clientId || '',
+          event.clientName || '',
           event.venueId || '',
+          event.venueName || '',
+          event.assigneeId || '',
+          event.assigneeName || '',
+          event.typeName || '',
           event.notes || '',
         ].join(' ').toLowerCase();
 
@@ -182,4 +196,31 @@ export function computeEventMetrics(
     confirmed,
     completed,
   };
+}
+
+/**
+ * Detects whether a string is a raw database ID, UUID, or system link code rather than a human-readable display name.
+ */
+export function isRawIdentifier(val?: string | null): boolean {
+  if (!val || typeof val !== 'string') return true;
+  const trimmed = val.trim();
+  if (!trimmed) return true;
+
+  // 1. UUID format: 8-4-4-4-12 hex (e.g. e8a93e32-5201-447a-9a99-4d6b67e00002)
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+    return true;
+  }
+
+  // 2. Typical system prefixes with ID suffix (e.g. user-123, usr-1, venue-1, cl-101)
+  if (/^(user|usr|venue|client|cl|eq|ev|job|ticket)[-_][0-9a-zA-Z_-]+$/i.test(trimmed)) {
+    return true;
+  }
+
+  // 3. Firestore / Firebase auto-generated document IDs and Auth UIDs:
+  // Typically 16-36 alphanumeric characters with no spaces and containing mixed letters/numbers
+  if (trimmed.length >= 16 && !trimmed.includes(' ') && /[0-9]/.test(trimmed) && /[a-zA-Z]/.test(trimmed)) {
+    return true;
+  }
+
+  return false;
 }

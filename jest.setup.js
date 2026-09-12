@@ -90,6 +90,42 @@ jest.mock('firebase/firestore', () => {
   return {
     initializeFirestore: jest.fn(() => mockDb),
     getFirestore: jest.fn(() => mockDb),
+    setLogLevel: jest.fn(),
+    persistentLocalCache: jest.fn((settings) => ({
+      kind: 'persistent',
+      tabManager: settings?.tabManager,
+      cacheSizeBytes: settings?.cacheSizeBytes,
+    })),
+    persistentMultipleTabManager: jest.fn(() => ({
+      kind: 'PersistentMultipleTab',
+    })),
+    persistentSingleTabManager: jest.fn((settings) => ({
+      kind: 'persistentSingleTab',
+      forceOwnership: settings?.forceOwnership,
+    })),
+    memoryLocalCache: jest.fn((settings) => ({
+      kind: 'memory',
+      garbageCollector: settings?.garbageCollector,
+    })),
+    writeBatch: jest.fn((_db) => {
+      const batch = {
+        _operations: [],
+        set: jest.fn((docRef, data, options) => {
+          batch._operations.push({ type: 'set', docRef, data, options });
+          return batch;
+        }),
+        update: jest.fn((docRef, ...args) => {
+          batch._operations.push({ type: 'update', docRef, args });
+          return batch;
+        }),
+        delete: jest.fn((docRef) => {
+          batch._operations.push({ type: 'delete', docRef });
+          return batch;
+        }),
+        commit: jest.fn().mockResolvedValue(undefined),
+      };
+      return batch;
+    }),
     collection: jest.fn((_db, name) => ({ type: 'collection', name })),
   doc: jest.fn((_db, coll, id) => ({ type: 'doc', coll, id, idVal: id || 'mock-id' })),
   getDoc: jest.fn(),
@@ -228,29 +264,58 @@ jest.mock('expo-av', () => ({
 
 // Mock expo-location
 jest.mock('expo-location', () => ({
+  hasServicesEnabledAsync: jest.fn().mockResolvedValue(true),
   requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({
     status: 'granted',
     granted: true,
     canAskAgain: true,
     expires: 'never',
+    accuracy: 'fine',
+    android: {
+      accuracy: 'fine',
+    },
+    ios: {
+      accuracy: 'full',
+    },
   }),
   requestBackgroundPermissionsAsync: jest.fn().mockResolvedValue({
     status: 'granted',
     granted: true,
     canAskAgain: true,
     expires: 'never',
+    accuracy: 'fine',
+    android: {
+      accuracy: 'fine',
+    },
+    ios: {
+      accuracy: 'full',
+    },
   }),
   getForegroundPermissionsAsync: jest.fn().mockResolvedValue({
     status: 'granted',
     granted: true,
     canAskAgain: true,
     expires: 'never',
+    accuracy: 'fine',
+    android: {
+      accuracy: 'fine',
+    },
+    ios: {
+      accuracy: 'full',
+    },
   }),
   getBackgroundPermissionsAsync: jest.fn().mockResolvedValue({
     status: 'granted',
     granted: true,
     canAskAgain: true,
     expires: 'never',
+    accuracy: 'fine',
+    android: {
+      accuracy: 'fine',
+    },
+    ios: {
+      accuracy: 'full',
+    },
   }),
   getCurrentPositionAsync: jest.fn().mockResolvedValue({
     coords: {

@@ -17,12 +17,14 @@ import {
 import { useTheme } from '@/context/theme-context';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatEventDateRange } from '@/lib/date-utils';
+import { isRawIdentifier } from '@/lib/events-engine';
 import type { Event, EventStatus } from '@/types/events';
 
 export interface EventCardProps {
   event: Event;
   clientName?: string;
   venueName?: string;
+  assigneeName?: string;
   typeName?: string;
   typeColor?: string;
   onPress?: () => void;
@@ -35,6 +37,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   event,
   clientName,
   venueName,
+  assigneeName,
   typeName = 'Production',
   typeColor = '#60A5FA',
   onPress,
@@ -83,13 +86,26 @@ export const EventCard: React.FC<EventCardProps> = ({
       ? `[${event.id.substring(0, 6).toUpperCase()}]`
       : '';
 
-  const quoteCount = event.equipmentItems?.length || 0;
+  const rawVenue =
+    (venueName && !isRawIdentifier(venueName) ? venueName : null) ||
+    ((event as any).venueName && !isRawIdentifier((event as any).venueName) ? (event as any).venueName : null) ||
+    (event.venueId && !isRawIdentifier(event.venueId) ? event.venueId : null);
+  const displayVenue = rawVenue || '';
+
+  const rawAssignee =
+    (assigneeName && !isRawIdentifier(assigneeName) ? assigneeName : null) ||
+    ((event as any).assigneeName && !isRawIdentifier((event as any).assigneeName) ? (event as any).assigneeName : null) ||
+    ((event as any).assignee?.name && !isRawIdentifier((event as any).assignee?.name) ? (event as any).assignee?.name : null) ||
+    (typeof (event as any).assignee === 'string' && !isRawIdentifier((event as any).assignee) ? (event as any).assignee : null) ||
+    (clientName && !isRawIdentifier(clientName) ? clientName : null) ||
+    (event.assigneeId && !isRawIdentifier(event.assigneeId) ? event.assigneeId : null);
+  const displayAssignee = rawAssignee || '';
 
   return (
     <Pressable onPress={handleCardPress} testID={testID || `event-card-${event.id}`}>
       <Card style={styles.card}>
         <CardContent style={styles.content}>
-          {/* Top Row: Event # + Name + Date (Left) & Status Badge Pill (Right) */}
+          {/* Top Row: Event # + Name (Left) & Status Badge Pill (Right) */}
           <View style={styles.topRow}>
             <View style={styles.eventTitleContainer}>
               {eventNumDisplay ? (
@@ -106,17 +122,6 @@ export const EventCard: React.FC<EventCardProps> = ({
               >
                 {event.eventName}
               </Text>
-              {displayDate ? (
-                <View style={styles.dateContainer}>
-                  <CalendarDays size={14} color={colors.mutedForeground} />
-                  <Text
-                    style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
-                    numberOfLines={1}
-                  >
-                    {displayDate}
-                  </Text>
-                </View>
-              ) : null}
             </View>
 
             <View style={styles.statusContainer}>
@@ -145,7 +150,7 @@ export const EventCard: React.FC<EventCardProps> = ({
             </View>
           </View>
 
-          {/* Second Row: Type Badge + Venue + Items | Right: Client */}
+          {/* Second Row: Type Badge on the very left, left of the date */}
           <View style={styles.secondRow}>
             <View style={styles.leftMetaGroup}>
               {typeName ? (
@@ -164,49 +169,52 @@ export const EventCard: React.FC<EventCardProps> = ({
                 </View>
               ) : null}
 
-              {venueName || event.venueId ? (
+              {displayDate ? (
+                <View style={styles.dateContainer}>
+                  <CalendarDays size={14} color={colors.mutedForeground} />
+                  <Text
+                    style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
+                    numberOfLines={1}
+                  >
+                    {displayDate}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </View>
+
+          {/* Third Row: Venue (Left) & Assignee (Right) */}
+          {(displayVenue || displayAssignee) ? (
+            <View style={styles.thirdRow}>
+              {displayVenue ? (
                 <View style={styles.metaItem}>
                   <MapPin size={14} color={colors.mutedForeground} />
                   <Text
                     style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
                     numberOfLines={1}
                   >
-                    {venueName || 'Venue Assigned'}
+                    {displayVenue}
                   </Text>
                 </View>
-              ) : null}
+              ) : (
+                <View />
+              )}
 
-              {quoteCount > 0 ? (
-                <>
-                  {venueName || event.venueId ? (
-                    <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
-                  ) : null}
-                  <View style={styles.metaItem}>
+              {displayAssignee ? (
+                <View style={styles.rightMetaGroup}>
+                  <View style={styles.personItem}>
+                    <User size={14} color={colors.mutedForeground} />
                     <Text
-                      style={[styles.quoteCountText, { color: colors.primary, fontSize: typography.fontSize.sm }]}
+                      style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
                       numberOfLines={1}
                     >
-                      {quoteCount} Quote Line Items
+                      {displayAssignee}
                     </Text>
                   </View>
-                </>
+                </View>
               ) : null}
             </View>
-
-            {clientName || event.clientId ? (
-              <View style={styles.rightMetaGroup}>
-                <View style={styles.personItem}>
-                  <User size={14} color={colors.mutedForeground} />
-                  <Text
-                    style={[styles.personText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
-                    numberOfLines={1}
-                  >
-                    {clientName || 'Client Assigned'}
-                  </Text>
-                </View>
-              </View>
-            ) : null}
-          </View>
+          ) : null}
         </CardContent>
       </Card>
     </Pressable>
@@ -249,8 +257,7 @@ const styles = StyleSheet.create({
   dateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    marginLeft: 8,
+    gap: 4,
     flexShrink: 0,
   },
   statusContainer: {
@@ -293,10 +300,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  thirdRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   leftMetaGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     flexShrink: 1,
   },
   metaItem: {
@@ -310,16 +322,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     lineHeight: 18,
-  },
-  quoteCountText: {
-    fontFamily: 'Calibri',
-    fontSize: 13,
-    fontWeight: '500',
-    lineHeight: 18,
-  },
-  separatorDot: {
-    fontFamily: 'Calibri',
-    fontSize: 13,
   },
   rightMetaGroup: {
     flexDirection: 'row',

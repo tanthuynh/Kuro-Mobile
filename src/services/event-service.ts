@@ -17,7 +17,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Event } from '@/types/events';
+import type { Event, EventType } from '@/types/events';
 import { parseFirestoreDate } from '@/lib/date-utils';
 
 export const DEFAULT_EVENTS_QUERY_LIMIT = 150;
@@ -54,11 +54,15 @@ export function mapFirestoreEventDoc(docSnap: any): Event {
     eventName: data.eventName || 'Untitled Event',
     eventNumber: data.eventNumber !== undefined ? data.eventNumber : null,
     clientId: data.clientId || '',
+    clientName: data.clientName || (typeof data.client === 'string' ? data.client : null) || null,
     eventStatusId: data.eventStatusId || 'Inquiry',
     eventTypeId: data.eventTypeId || '',
+    typeName: data.typeName || data.eventTypeName || (typeof data.eventType === 'string' ? data.eventType : null) || null,
     venueId: data.venueId || null,
+    venueName: data.venueName || (typeof data.venue === 'string' ? data.venue : null) || null,
     departmentId: data.departmentId,
     assigneeId: data.assigneeId || '',
+    assigneeName: data.assigneeName || data.assignee?.name || (typeof data.assignee === 'string' ? data.assignee : null) || null,
     billingStatus: data.billingStatus || null,
     billingTerms: data.billingTerms || null,
     startTime: parseFirestoreDate(data.startTime),
@@ -223,4 +227,42 @@ export async function fetchSingleEvent(eventId: string, tenantId: string): Promi
   if (event.tenantId !== tenantId) return null;
 
   return event;
+}
+
+/**
+ * Fetches all event types belonging to the tenant from Firestore `event-types`.
+ */
+export async function fetchTenantEventTypes(tenantId: string): Promise<EventType[]> {
+  if (!tenantId || !tenantId.trim()) return [];
+
+  try {
+    const q = query(
+      collection(db, 'event-types'),
+      where('tenantId', '==', tenantId)
+    );
+
+    const snapshot = await getDocs(q);
+    const types: EventType[] = [];
+
+    if (snapshot && typeof (snapshot as any).forEach === 'function') {
+      snapshot.forEach((docSnap) => {
+        const data = docSnap && typeof docSnap.data === 'function' ? docSnap.data() : (docSnap as any)?.data || docSnap || {};
+        if (data.tenantId && data.tenantId !== tenantId) return;
+        types.push({
+          id: docSnap.id || data.id,
+          name: data.name || data.title || 'Production',
+          colour: data.colour || data.color || '#60A5FA',
+          order: data.order ?? 0,
+          tenantId: data.tenantId,
+          isDefault: data.isDefault === true,
+        });
+      });
+    }
+
+    types.sort((a, b) => (a.order || 0) - (b.order || 0));
+    return types;
+  } catch (err) {
+    console.warn('[eventService] fetchTenantEventTypes error:', err);
+    return [];
+  }
 }

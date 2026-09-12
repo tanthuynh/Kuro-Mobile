@@ -133,6 +133,12 @@ jest.mock('@/hooks/use-tickets', () => ({
   useTenantOwners: () => ({
     owners: [{ id: 'client-1', name: 'Acme Client' }],
     loading: false,
+    refresh: jest.fn(),
+  }),
+  useTenantCrew: () => ({
+    crew: [{ id: 'crew-1', name: 'Alex Crew' }],
+    loading: false,
+    refresh: jest.fn(),
   }),
 }));
 

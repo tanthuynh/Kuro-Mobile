@@ -25,6 +25,7 @@ import {
   fetchTenantSuppliers,
   fetchTenantOwners,
   fetchTenantCrewMembers,
+  removeUndefinedFields,
 } from '@/services/repair-service';
 import * as firestore from 'firebase/firestore';
 import * as rtdb from 'firebase/database';
@@ -535,6 +536,120 @@ describe('repair-service', () => {
       await expect(
         createRepairTicket('tenant-1', { equipment: { name: '' } })
       ).rejects.toThrow('Equipment name is required');
+    });
+
+    it('SVC-CRT-04: removeUndefinedFields recursively removes undefined values and preserves FieldValues and Dates', () => {
+      const mockFieldValue = { _methodName: 'serverTimestamp' };
+      const now = new Date();
+      const input = {
+        name: 'Projector',
+        serialNumber: undefined,
+        deep: {
+          valid: 123,
+          invalid: undefined,
+          array: [1, undefined, { a: 'ok', b: undefined }],
+        },
+        ts: mockFieldValue,
+        date: now,
+      };
+
+      const result = removeUndefinedFields(input);
+      expect(result.serialNumber).toBeUndefined();
+      expect('serialNumber' in result).toBe(false);
+      expect(result.deep.valid).toBe(123);
+      expect('invalid' in result.deep).toBe(false);
+      expect(result.deep.array).toEqual([1, { a: 'ok' }]);
+      expect(result.ts).toBe(mockFieldValue);
+      expect(result.date).toBe(now);
+    });
+
+    it('SVC-CRT-05: createRepairTicket strips undefined fields from payload and nested objects preventing Firestore setDoc errors', async () => {
+      mockFirestore.doc.mockReturnValue({ id: 'ticket-clean-test' });
+      mockFirestore.getDocs.mockResolvedValue({
+        empty: false,
+        docs: [{ data: () => ({ repairNumber: 2000 }) }],
+      });
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({ tenantId: 'tenant-alpha' }),
+      });
+
+      await createRepairTicket(
+        'tenant-alpha',
+        {
+          equipment: {
+            id: 'eq-200',
+            name: 'LED Panel',
+            serialNumber: null,
+            barcode: undefined as any,
+          },
+          status: 'Reported',
+          priority: 'Medium',
+          assignee: {
+            id: 'u-123',
+            name: 'Sam Tech',
+            email: undefined as any,
+          },
+          supplierId: undefined as any,
+          repairPeriodStart: undefined as any,
+          repairPeriodEnd: undefined as any,
+          initialNote: 'Faulty power supply',
+        },
+        {
+          id: 'user-tech-2',
+          name: 'Sam Tech',
+          email: undefined,
+          avatarUrl: undefined,
+        }
+      );
+
+      expect(mockFirestore.setDoc).toHaveBeenCalled();
+
+      // Deeply verify no undefined values exist anywhere in ANY setDoc call (entity doc or ticket doc)
+      const checkNoUndefined = (obj: any, path: string = ''): void => {
+        if (!obj || typeof obj !== 'object') return;
+        if (obj._methodName || obj.constructor?.name?.includes('FieldValue') || obj instanceof Date) return;
+        for (const [k, v] of Object.entries(obj)) {
+          const currentPath = path ? `${path}.${k}` : k;
+          expect(v).not.toBeUndefined();
+          if (typeof v === 'object' && v !== null) {
+            checkNoUndefined(v, currentPath);
+          }
+        }
+      };
+
+      for (const call of mockFirestore.setDoc.mock.calls) {
+        checkNoUndefined(call[1]);
+      }
+
+      const ticketPayload = mockFirestore.setDoc.mock.calls[mockFirestore.setDoc.mock.calls.length - 1][1];
+      expect(ticketPayload.repairNumber).toBe(2001);
+      expect(ticketPayload.notes[0].user.name).toBe('Sam Tech');
+      expect(ticketPayload.notes[0].user.email).toBeUndefined();
+      expect('email' in ticketPayload.notes[0].user).toBe(false);
+      expect('avatarUrl' in ticketPayload.notes[0].user).toBe(false);
+    });
+
+    it('SVC-CRT-06: generateRepairNumber seamlessly falls back to unindexed ticket scan when composite index is missing', async () => {
+      const indexError = new Error(
+        'The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/kurorms/firestore/indexes?create_composite=...'
+      );
+      (indexError as any).code = 'failed-precondition';
+
+      // First query (indexed) throws missing index error
+      // Second query (unindexed fallback) returns tickets with maximum repairNumber 1088
+      mockFirestore.getDocs
+        .mockRejectedValueOnce(indexError)
+        .mockResolvedValueOnce({
+          forEach: (cb: (doc: any) => void) => {
+            cb({ data: () => ({ repairNumber: 1085 }) });
+            cb({ data: () => ({ repairNumber: 1088 }) });
+            cb({ data: () => ({ repairNumber: 1050 }) });
+          },
+        });
+
+      const nextNum = await generateRepairNumber('tenant-alpha');
+      expect(nextNum).toBe(1089);
     });
   });
 

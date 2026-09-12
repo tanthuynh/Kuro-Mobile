@@ -56,7 +56,6 @@ import { Button } from '@/components/ui/button';
 import { QuickStatusSelector } from '@/components/repair/quick-status-selector';
 import { LogisticsDestinationCard } from '@/components/logistics/LogisticsDestinationCard';
 import { LogisticsNotesModal } from '@/components/logistics/LogisticsNotesModal';
-import { BackgroundLocationDisclosureModal } from '@/components/logistics/BackgroundLocationDisclosureModal';
 import { useConsistentBack } from '@/hooks/use-consistent-back';
 import { isJobActive, isJobCompleted, isJobScheduled } from '@/lib/logistics-engine';
 import type { LogisticsStatus } from '@/types/logistics';
@@ -89,8 +88,6 @@ export default function LogisticsJobDetailScreen() {
     return isTrackingActive() && getActiveTrackingJobId() === jobId;
   });
   const [syncStatus, setSyncStatus] = useState<SyncStatusInfo>(() => getSyncStatus());
-  const [showLocationDisclosure, setShowLocationDisclosure] = useState(false);
-  const [pendingTrackingAction, setPendingTrackingAction] = useState<(() => Promise<void>) | null>(null);
 
   // Listen to device tracking and sync status updates
   useEffect(() => {
@@ -189,15 +186,6 @@ export default function LogisticsJobDetailScreen() {
   // Play Action: Starts GPS tracking and updates status to 'In Progress'
   const handlePlay = async () => {
     if (!job) return;
-    setIsStartingTracking(true);
-    setActionError(null);
-    const perms = await checkLocationPermissions();
-    if (!perms.foreground || !perms.background) {
-      setIsStartingTracking(false);
-      setPendingTrackingAction(() => () => executeStartTracking());
-      setShowLocationDisclosure(true);
-      return;
-    }
     await executeStartTracking();
   };
 
@@ -250,13 +238,7 @@ export default function LogisticsJobDetailScreen() {
         await stopTrackingJob(job.id);
         await updateStatus(newStatus, `Status updated to ${newStatus} via Quick Status`);
       } else if (isJobActive(newStatus) && !job.isTrackingActive) {
-        // If transitioning to active status and tracking is off, check permissions and start tracking
-        const perms = await checkLocationPermissions();
-        if (!perms.foreground || !perms.background) {
-          setPendingTrackingAction(() => () => executeStartTracking(newStatus));
-          setShowLocationDisclosure(true);
-          return;
-        }
+        // If transitioning to active status and tracking is off, start tracking
         await executeStartTracking(newStatus);
       } else {
         await updateStatus(newStatus, `Status updated to ${newStatus} via Quick Status`);
@@ -267,22 +249,6 @@ export default function LogisticsJobDetailScreen() {
     } finally {
       setIsUpdatingStatus(false);
     }
-  };
-
-  const handleDisclosureAccept = async () => {
-    setShowLocationDisclosure(false);
-    if (pendingTrackingAction) {
-      const action = pendingTrackingAction;
-      setPendingTrackingAction(null);
-      await action();
-    } else {
-      await executeStartTracking();
-    }
-  };
-
-  const handleDisclosureDecline = () => {
-    setShowLocationDisclosure(false);
-    setPendingTrackingAction(null);
   };
 
   // Notes Modal Submit Handler (adds internal note via logistics hook)
@@ -376,6 +342,9 @@ export default function LogisticsJobDetailScreen() {
   const isTracking = !isPermissionDenied && (isDeviceTracking || isDocTrackingActive);
   const isCompleted = isJobCompleted(job.status);
 
+  const userId = user?.id || (user as any)?.uid;
+  const isAssignedDriver = Boolean(userId && (userId === job.assigneeId || userId === job.driverId));
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]} testID="logistics-detail-screen">
       {/* Top Header */}
@@ -436,53 +405,46 @@ export default function LogisticsJobDetailScreen() {
           </View>
         ) : null}
 
-        {/* 3-Button Control Row (Play, Pause, Finish) */}
+        {/* Tracking Controls Card */}
         <Card style={styles.card} testID="job-controls-card">
-          <CardContent style={styles.controlButtonsRow}>
-            {/* Start Button */}
-            <Button
-              variant="primary"
-              size="default"
-              icon={<Play size={16} color={colors.primaryForeground} />}
-              onPress={handlePlay}
-              loading={isStartingTracking}
-              disabled={isStartingTracking}
-              style={styles.controlBtn}
-              testID="play-job-btn"
-              accessibilityLabel="Start tracking"
-            >
-              Start
-            </Button>
+          <CardContent style={{ padding: 14, gap: 12 }}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
+                TRACKING
+              </Text>
+            </View>
 
-            {/* Pause Button */}
-            <Button
-              variant="outline"
-              size="default"
-              icon={<Pause size={16} color={colors.foreground} />}
-              onPress={handlePause}
-              loading={isPausingTracking}
-              disabled={isPausingTracking || !isTracking}
-              style={styles.controlBtn}
-              testID="pause-job-btn"
-              accessibilityLabel="Pause tracking"
-            >
-              Pause
-            </Button>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {/* Start/Pause Toggle Button */}
+              <Button
+                variant={isTracking ? 'outline' : 'primary'}
+                size="default"
+                icon={isTracking ? <Pause size={16} color={colors.foreground} /> : <Play size={16} color={colors.primaryForeground} />}
+                onPress={isTracking ? handlePause : handlePlay}
+                loading={isTracking ? isPausingTracking : isStartingTracking}
+                disabled={(isTracking ? isPausingTracking : isStartingTracking) || !isAssignedDriver}
+                style={styles.controlBtn}
+                testID={isTracking ? 'pause-job-btn' : 'play-job-btn'}
+                accessibilityLabel={isTracking ? 'Pause tracking' : 'Start tracking'}
+              >
+                {isTracking ? 'Pause' : 'Start'}
+              </Button>
 
-            {/* Finish Button */}
-            <Button
-              variant="primary"
-              size="default"
-              icon={<CheckCircle2 size={16} color={colors.primaryForeground} />}
-              onPress={handleFinish}
-              loading={isCompleting}
-              disabled={isCompleting || isCompleted}
-              style={[styles.controlBtn, { backgroundColor: colors.status.online }]}
-              testID="finish-job-btn"
-              accessibilityLabel="Finish and complete job"
-            >
-              Finish
-            </Button>
+              {/* Finish Button */}
+              <Button
+                variant="primary"
+                size="default"
+                icon={<CheckCircle2 size={16} color={colors.primaryForeground} />}
+                onPress={handleFinish}
+                loading={isCompleting}
+                disabled={isCompleting || isCompleted || !isAssignedDriver}
+                style={[styles.controlBtn, { backgroundColor: colors.status.online }]}
+                testID="finish-job-btn"
+                accessibilityLabel="Finish and complete job"
+              >
+                Finish
+              </Button>
+            </View>
           </CardContent>
         </Card>
 
@@ -599,13 +561,6 @@ export default function LogisticsJobDetailScreen() {
         testID="job-notes-modal"
       />
 
-      {/* Background Location Disclosure Modal (Google Play & Apple Policy Compliance) */}
-      <BackgroundLocationDisclosureModal
-        visible={showLocationDisclosure}
-        onAccept={handleDisclosureAccept}
-        onDecline={handleDisclosureDecline}
-        testID="job-bg-location-disclosure-modal"
-      />
     </View>
   );
 }

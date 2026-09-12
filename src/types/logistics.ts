@@ -125,6 +125,7 @@ export interface LogisticsEntry {
   vehicleId?: string | null;
   vehicleName?: string;
   driverName?: string;
+  driverId?: string | null;
   assigneeId?: string | null;
   eventName?: string;
   eventNumber?: number | null;
@@ -145,6 +146,9 @@ export interface LogisticsEntry {
   lastLocationUpdate?: string | number | any;
   isTrackingActive?: boolean;
   trackingJobId?: string;
+
+  // Offline sync metadata
+  hasPendingWrites?: boolean;
 }
 
 /**

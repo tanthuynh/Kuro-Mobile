@@ -15,8 +15,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   initializeFirestore,
   getFirestore,
+  setLogLevel,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  persistentSingleTabManager,
+  memoryLocalCache,
   type Firestore,
   type FirestoreSettings,
+  type FirestoreLocalCache,
 } from 'firebase/firestore';
 import { getDatabase, type Database } from 'firebase/database';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
@@ -63,6 +69,34 @@ export const auth: Auth = authInstance;
 export type FirestoreSettingsInput = number | string | Partial<FirestoreSettings>;
 
 /**
+ * Defensive factory for Firestore localCache configuration.
+ * Configures persistent local cache with multi-tab synchronization.
+ * If persistent cache fails or is unsupported in the current runtime (e.g. Node/SSR/restricted storage),
+ * gracefully falls back to memoryLocalCache or undefined.
+ */
+export function buildDefaultLocalCache(): FirestoreLocalCache | undefined {
+  try {
+    return persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+    });
+  } catch (error: any) {
+    console.warn(
+      '[Firebase] Failed to initialize persistentLocalCache; falling back to memoryLocalCache:',
+      error
+    );
+    try {
+      return memoryLocalCache();
+    } catch (memError: any) {
+      console.warn(
+        '[Firebase] memoryLocalCache also failed, proceeding without localCache:',
+        memError
+      );
+      return undefined;
+    }
+  }
+}
+
+/**
  * Helper to compute FirestoreSettings with long-polling transport.
  * Supports:
  *  - Optional timeout interval (between 5 and 30 seconds per Firestore SDK limits)
@@ -75,11 +109,16 @@ export type FirestoreSettingsInput = number | string | Partial<FirestoreSettings
 export function buildFirestoreSettings(
   optionsOrTimeout?: FirestoreSettingsInput
 ): FirestoreSettings {
-  // If undefined, null, or empty, return clean default long-polling settings
+  // If undefined, null, or empty, return clean default long-polling settings with persistent cache
   if (optionsOrTimeout === undefined || optionsOrTimeout === null) {
-    return {
+    const settings: FirestoreSettings = {
       experimentalForceLongPolling: true,
     };
+    const defaultCache = buildDefaultLocalCache();
+    if (defaultCache) {
+      settings.localCache = defaultCache;
+    }
+    return settings;
   }
 
   // If a number was passed
@@ -92,6 +131,10 @@ export function buildFirestoreSettings(
       settings.experimentalLongPollingOptions = {
         timeoutSeconds: clamped,
       };
+    }
+    const defaultCache = buildDefaultLocalCache();
+    if (defaultCache) {
+      settings.localCache = defaultCache;
     }
     return settings;
   }
@@ -107,6 +150,10 @@ export function buildFirestoreSettings(
       settings.experimentalLongPollingOptions = {
         timeoutSeconds: clamped,
       };
+    }
+    const defaultCache = buildDefaultLocalCache();
+    if (defaultCache) {
+      settings.localCache = defaultCache;
     }
     return settings;
   }
@@ -128,11 +175,18 @@ export function buildFirestoreSettings(
     };
 
     // Firebase JS SDK throws if both localCache and cacheSizeBytes are set.
-    // localCache takes precedence per Firestore v11 deprecation policy.
-    if (localCache) {
+    // 1. If localCache is explicitly provided, it takes precedence.
+    // 2. If legacy cacheSizeBytes is provided without localCache, preserve cacheSizeBytes and omit default localCache.
+    // 3. Otherwise, configure default persistent local cache.
+    if (localCache !== undefined) {
       settings.localCache = localCache;
     } else if (cacheSizeBytes !== undefined) {
       settings.cacheSizeBytes = cacheSizeBytes;
+    } else {
+      const defaultCache = buildDefaultLocalCache();
+      if (defaultCache) {
+        settings.localCache = defaultCache;
+      }
     }
 
     // Firebase JS SDK throws if both experimentalForceLongPolling and experimentalAutoDetectLongPolling are enabled.
@@ -186,9 +240,14 @@ export function buildFirestoreSettings(
     return settings;
   }
 
-  return {
+  const fallbackSettings: FirestoreSettings = {
     experimentalForceLongPolling: true,
   };
+  const defaultCache = buildDefaultLocalCache();
+  if (defaultCache) {
+    fallbackSettings.localCache = defaultCache;
+  }
+  return fallbackSettings;
 }
 
 const envTimeout = process.env.EXPO_PUBLIC_FIRESTORE_LONG_POLLING_TIMEOUT_SECONDS
@@ -204,14 +263,45 @@ export const FIRESTORE_SETTINGS: FirestoreSettings = buildFirestoreSettings(envT
 
 /**
  * Cloud Firestore modular database instance.
- * Guarded against "already initialized" errors during Fast Refresh and hot reload cycles.
+ * Guarded against "already initialized" errors during Fast Refresh and hot reload cycles,
+ * with multi-tier fallback to in-memory cache or standard settings if persistent cache fails.
  */
 let dbInstance: Firestore;
 try {
   dbInstance = initializeFirestore(app, FIRESTORE_SETTINGS);
 } catch (error: any) {
-  // If already initialized during hot reload or testing, retrieve existing instance
-  dbInstance = getFirestore(app);
+  try {
+    // 1. If already initialized during hot reload or testing, retrieve existing instance
+    dbInstance = getFirestore(app);
+  } catch (getDbError: any) {
+    // 2. If getFirestore failed, initializeFirestore crashed on first run (e.g., persistent cache unsupported)
+    console.warn(
+      '[Firebase] initializeFirestore failed with persistent cache; attempting fallback to memory cache:',
+      error
+    );
+    try {
+      dbInstance = initializeFirestore(app, {
+        ...FIRESTORE_SETTINGS,
+        localCache: memoryLocalCache(),
+      });
+    } catch (fallbackError: any) {
+      console.warn(
+        '[Firebase] initializeFirestore failed with memory cache; initializing without localCache:',
+        fallbackError
+      );
+      dbInstance = initializeFirestore(app, {
+        ...FIRESTORE_SETTINGS,
+        localCache: undefined,
+      });
+    }
+  }
+}
+
+// Suppress non-fatal WebChannel connection / stream transport warnings in React Native
+try {
+  setLogLevel('error');
+} catch {
+  // Ignore in mock or restricted environments
 }
 
 export const db: Firestore = dbInstance;
@@ -241,4 +331,5 @@ export default {
   FIREBASE_CONFIG,
   FIRESTORE_SETTINGS,
   buildFirestoreSettings,
+  buildDefaultLocalCache,
 };

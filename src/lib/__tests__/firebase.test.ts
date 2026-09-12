@@ -16,13 +16,18 @@ import {
   FIREBASE_CONFIG,
   FIRESTORE_SETTINGS,
   buildFirestoreSettings,
+  buildDefaultLocalCache,
 } from '../firebase';
 import firebaseDefaultExport from '../firebase';
 
 describe('src/lib/firebase.ts initialization and network transport', () => {
-  it('R1: exports FIRESTORE_SETTINGS with experimentalForceLongPolling enabled for React Native', () => {
+  it('R1: exports FIRESTORE_SETTINGS with experimentalForceLongPolling and persistent localCache enabled for React Native', () => {
     expect(FIRESTORE_SETTINGS).toBeDefined();
     expect(FIRESTORE_SETTINGS.experimentalForceLongPolling).toBe(true);
+    expect(FIRESTORE_SETTINGS.localCache).toBeDefined();
+    expect((FIRESTORE_SETTINGS.localCache as any).kind).toBe('persistent');
+    expect((FIRESTORE_SETTINGS.localCache as any).tabManager).toBeDefined();
+    expect((FIRESTORE_SETTINGS.localCache as any).tabManager.kind).toBe('PersistentMultipleTab');
   });
 
   it('R1: exports a valid db instance initialized with Firestore settings', () => {
@@ -30,12 +35,19 @@ describe('src/lib/firebase.ts initialization and network transport', () => {
     expect(firebaseDefaultExport.db).toBe(db);
     expect(firebaseDefaultExport.FIRESTORE_SETTINGS).toEqual(FIRESTORE_SETTINGS);
     expect(firebaseDefaultExport.buildFirestoreSettings).toBe(buildFirestoreSettings);
+    expect(firebaseDefaultExport.buildDefaultLocalCache).toBe(buildDefaultLocalCache);
   });
 
   it('R1: buildFirestoreSettings creates default long-polling configuration when timeout is omitted', () => {
     const settings = buildFirestoreSettings();
     expect(settings).toEqual({
       experimentalForceLongPolling: true,
+      localCache: expect.objectContaining({
+        kind: 'persistent',
+        tabManager: expect.objectContaining({
+          kind: 'PersistentMultipleTab',
+        }),
+      }),
     });
     expect(settings.experimentalLongPollingOptions).toBeUndefined();
   });
@@ -46,6 +58,12 @@ describe('src/lib/firebase.ts initialization and network transport', () => {
     expect(settings25).toEqual({
       experimentalForceLongPolling: true,
       experimentalLongPollingOptions: { timeoutSeconds: 25 },
+      localCache: expect.objectContaining({
+        kind: 'persistent',
+        tabManager: expect.objectContaining({
+          kind: 'PersistentMultipleTab',
+        }),
+      }),
     });
 
     // Below minimum (4s -> clamped to 5s)
@@ -90,6 +108,12 @@ describe('src/lib/firebase.ts initialization and network transport', () => {
       ssl: false,
       ignoreUndefinedProperties: true,
       experimentalForceLongPolling: true,
+      localCache: expect.objectContaining({
+        kind: 'persistent',
+        tabManager: expect.objectContaining({
+          kind: 'PersistentMultipleTab',
+        }),
+      }),
     });
 
     // Custom object with out-of-range timeout
@@ -124,7 +148,15 @@ describe('src/lib/firebase.ts initialization and network transport', () => {
 
     // Array sanitization: arrays should never contaminate settings with indexed keys
     const arrayInput = buildFirestoreSettings(['invalid', 123] as any);
-    expect(arrayInput).toEqual({ experimentalForceLongPolling: true });
+    expect(arrayInput).toEqual({
+      experimentalForceLongPolling: true,
+      localCache: expect.objectContaining({
+        kind: 'persistent',
+        tabManager: expect.objectContaining({
+          kind: 'PersistentMultipleTab',
+        }),
+      }),
+    });
     expect((arrayInput as any)['0']).toBeUndefined();
 
     // Nested string timeoutSeconds in experimentalLongPollingOptions
@@ -146,6 +178,13 @@ describe('src/lib/firebase.ts initialization and network transport', () => {
     });
     expect(cacheSanitized.localCache).toEqual({ kind: 'memory' });
     expect(cacheSanitized.cacheSizeBytes).toBeUndefined();
+
+    // When legacy cacheSizeBytes is provided without localCache, do not inject default localCache
+    const legacyCacheOnly = buildFirestoreSettings({
+      cacheSizeBytes: 2097152,
+    });
+    expect(legacyCacheOnly.cacheSizeBytes).toBe(2097152);
+    expect(legacyCacheOnly.localCache).toBeUndefined();
   });
 
   it('R1: respects EXPO_PUBLIC_FIRESTORE_LONG_POLLING_TIMEOUT_SECONDS when reloading module', () => {
@@ -160,6 +199,12 @@ describe('src/lib/firebase.ts initialization and network transport', () => {
     expect(reloadedFirebase!.FIRESTORE_SETTINGS).toEqual({
       experimentalForceLongPolling: true,
       experimentalLongPollingOptions: { timeoutSeconds: 25.5 },
+      localCache: expect.objectContaining({
+        kind: 'persistent',
+        tabManager: expect.objectContaining({
+          kind: 'PersistentMultipleTab',
+        }),
+      }),
     });
 
     if (originalEnv !== undefined) {
@@ -221,6 +266,9 @@ describe('src/lib/firebase.ts initialization and network transport', () => {
       expect.anything(),
       expect.objectContaining({
         experimentalForceLongPolling: true,
+        localCache: expect.objectContaining({
+          kind: 'persistent',
+        }),
       })
     );
     expect(reloadedFirebase!.db).toBe(freshDb);
@@ -248,6 +296,86 @@ describe('src/lib/firebase.ts initialization and network transport', () => {
 
     mockInitializeAuth.mockRestore();
     mockGetAuth.mockRestore();
+  });
+
+  describe('Firestore localCache and error resilience', () => {
+    it('buildDefaultLocalCache creates persistent cache with multi-tab manager', () => {
+      const cache = buildDefaultLocalCache();
+      expect(cache).toBeDefined();
+      expect((cache as any).kind).toBe('persistent');
+      expect((cache as any).tabManager?.kind).toBe('PersistentMultipleTab');
+    });
+
+    it('buildDefaultLocalCache defensively falls back to memoryLocalCache when persistentLocalCache throws', () => {
+      (firestoreModule.persistentLocalCache as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('IndexedDB is not supported');
+      });
+
+      const cache = buildDefaultLocalCache();
+      expect(cache).toEqual(expect.objectContaining({ kind: 'memory' }));
+    });
+
+    it('buildDefaultLocalCache returns undefined when both persistent and memory cache throw', () => {
+      (firestoreModule.persistentLocalCache as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('IndexedDB failure');
+      });
+      (firestoreModule.memoryLocalCache as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('Memory allocation failure');
+      });
+
+      const cache = buildDefaultLocalCache();
+      expect(cache).toBeUndefined();
+    });
+
+    it('gracefully falls back to memory cache if initializeFirestore throws on fresh init and getFirestore fails', () => {
+      const memoryFallbackDb = { _isMemoryFallback: true };
+      const spyInit = jest.spyOn(firestoreModule, 'initializeFirestore');
+      spyInit.mockClear();
+      spyInit
+        .mockImplementationOnce(() => {
+          throw new Error('Persistent storage unavailable');
+        })
+        .mockReturnValueOnce(memoryFallbackDb as any);
+
+      const spyGet = jest.spyOn(firestoreModule, 'getFirestore');
+      spyGet.mockClear();
+      spyGet.mockImplementationOnce(() => {
+        throw new Error('No Firestore instance has been initialized');
+      });
+
+      let reloadedFirebase: typeof import('../firebase');
+      jest.isolateModules(() => {
+        reloadedFirebase = require('../firebase');
+      });
+
+      expect(spyInit).toHaveBeenCalledTimes(2);
+      expect(spyInit).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          localCache: expect.objectContaining({ kind: 'memory' }),
+        })
+      );
+      expect(reloadedFirebase!.db).toBe(memoryFallbackDb);
+
+      spyInit.mockRestore();
+      spyGet.mockRestore();
+    });
+
+    it('verifies writeBatch mock functionality in Jest environment', async () => {
+      const batch = firestoreModule.writeBatch(db);
+      expect(batch).toBeDefined();
+      expect(typeof batch.set).toBe('function');
+      expect(typeof batch.update).toBe('function');
+      expect(typeof batch.delete).toBe('function');
+      expect(typeof batch.commit).toBe('function');
+
+      const dummyDoc = firestoreModule.doc(db, 'logistics', 'job-123');
+      batch.set(dummyDoc, { status: 'in_progress' })
+        .update(dummyDoc, { updatedAt: '2026-09-11' })
+        .delete(dummyDoc);
+
+      await expect(batch.commit()).resolves.toBeUndefined();
+    });
   });
 });
 

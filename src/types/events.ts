@@ -77,11 +77,15 @@ export interface Event {
   eventName: string;
   eventNumber?: number | null;
   clientId: string;
+  clientName?: string | null;
   eventStatusId: EventStatus;
   eventTypeId: string;
+  typeName?: string | null;
   venueId?: string | null;
+  venueName?: string | null;
   departmentId?: string;
   assigneeId: string;
+  assigneeName?: string | null;
   billingStatus?: string | null;
   billingTerms?: string | null;
   

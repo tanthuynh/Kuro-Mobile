@@ -512,7 +512,7 @@ export default function ProfileScreen() {
               { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
             ]}
           >
-            {`Kuro RMS Mobile • Build ${packageJson.version || '0.1.2'} (Release)`}
+            {`Kuro RMS Mobile • Build ${packageJson.version || '0.1.3'} (Release)`}
           </Text>
         </View>
 
@@ -528,18 +528,6 @@ export default function ProfileScreen() {
         >
           Sign Out of Account
         </Button>
-
-        {/* Enterprise Account & Data Policy Notice */}
-        <View style={styles.enterprisePolicyNotice}>
-          <Text
-            style={[
-              styles.enterprisePolicyText,
-              { color: colors.mutedForeground, fontSize: typography.fontSize.xs },
-            ]}
-          >
-            Kuro Mobile user accounts are provisioned and managed by your organization administrator. For account modifications or data deletion requests, contact your administrator or access the Kuro Web ERP portal.
-          </Text>
-        </View>
       </View>
     </View>
   );
@@ -653,16 +641,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Calibri',
     fontSize: 13,
     lineHeight: 18,
-    textAlign: 'center',
-  },
-  enterprisePolicyNotice: {
-    marginTop: 10,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-  },
-  enterprisePolicyText: {
-    fontFamily: 'Calibri',
-    lineHeight: 16,
     textAlign: 'center',
   },
 });

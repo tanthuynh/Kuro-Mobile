@@ -77,10 +77,10 @@ describe('Repair Workflow Hardening & Concurrency Test Suite', () => {
   });
 
   // ==========================================================================
-  // SUITE 1: STRICT ONLINE ENFORCEMENT (NO OFFLINE MUTATION QUEUE)
+  // SUITE 1: OFFLINE MUTATION QUEUING & STORAGE GUARDRAILS (M1 / R1)
   // ==========================================================================
-  describe('Strict Online Enforcement', () => {
-    it('HRD-ONL-01: createRepairTicket throws immediately when offline without saving to mutation queue', async () => {
+  describe('Offline Mutation Queuing & Storage Guardrails', () => {
+    it('HRD-ONL-01: createRepairTicket succeeds optimistically when offline (queueing in Firestore)', async () => {
       setNetworkOnlineState(false);
       expect(isOnline()).toBe(false);
 
@@ -88,17 +88,36 @@ describe('Repair Workflow Hardening & Concurrency Test Suite', () => {
         equipment: { name: 'Yamaha QL5 Console' },
       };
 
-      await expect(createRepairTicket(tenantId, input, currentUser)).rejects.toThrow(
-        /Network connection required/i
+      const ticketId = await createRepairTicket(tenantId, input, currentUser);
+
+      expect(ticketId).toBeTruthy();
+      expect(mockFirestore.setDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'doc' }),
+        expect.objectContaining({
+          tenantId,
+          equipment: expect.objectContaining({ name: 'Yamaha QL5 Console' }),
+          status: 'Reported',
+        })
       );
 
-      // Verify no pending operations were queued in AsyncStorage
+      // Verify no pending operations remained stuck in AsyncStorage
       const pending = await getPendingRepairOperations(tenantId, userId);
       expect(pending).toHaveLength(0);
     });
 
-    it('HRD-ONL-02: updateRepairTicketStatus rejects immediately when offline', async () => {
+    it('HRD-ONL-02: updateRepairTicketStatus succeeds optimistically when offline (queueing in Firestore)', async () => {
       setNetworkOnlineState(false);
+      expect(isOnline()).toBe(false);
+
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          tenantId,
+          status: 'Reported',
+          condition: 'Available to Use',
+        }),
+      });
+
       const result = await updateRepairTicketStatus(
         'ticket-101',
         'Under Repair',
@@ -106,12 +125,27 @@ describe('Repair Workflow Hardening & Concurrency Test Suite', () => {
         tenantId
       );
 
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/Network connection required/i);
+      expect(result.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'doc' }),
+        expect.objectContaining({
+          status: 'Under Repair',
+        })
+      );
     });
 
-    it('HRD-ONL-03: updateRepairTicketFields rejects immediately when offline', async () => {
+    it('HRD-ONL-03: updateRepairTicketFields succeeds optimistically when offline (queueing in Firestore)', async () => {
       setNetworkOnlineState(false);
+      expect(isOnline()).toBe(false);
+
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          tenantId,
+          priority: 'Low',
+        }),
+      });
+
       const result = await updateRepairTicketFields(
         'ticket-101',
         { priority: 'High' },
@@ -119,19 +153,56 @@ describe('Repair Workflow Hardening & Concurrency Test Suite', () => {
         tenantId
       );
 
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/Network connection required/i);
+      expect(result.success).toBe(true);
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'doc' }),
+        expect.objectContaining({
+          priority: 'High',
+        })
+      );
     });
 
-    it('HRD-ONL-04: appendRepairNote throws immediately when offline', async () => {
+    it('HRD-ONL-04: appendRepairNote succeeds optimistically when offline (queueing in Firestore)', async () => {
       setNetworkOnlineState(false);
-      await expect(
-        appendRepairNote('ticket-101', 'Replaced capacitor C4', { id: userId, name: 'Jane Tech' }, tenantId)
-      ).rejects.toThrow(/Network connection required/i);
+      expect(isOnline()).toBe(false);
+
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          tenantId,
+          notes: [],
+        }),
+      });
+
+      const note = await appendRepairNote(
+        'ticket-101',
+        'Replaced capacitor C4',
+        { id: userId, name: 'Jane Tech' },
+        tenantId
+      );
+
+      expect(note).toBeDefined();
+      expect(note.content).toBe('Replaced capacitor C4');
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'doc' }),
+        expect.objectContaining({
+          notes: expect.anything(),
+        })
+      );
+      expect(mockFirestore.setDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'doc' }),
+        expect.objectContaining({
+          content: 'Replaced capacitor C4',
+          entityId: 'repair-ticket-101',
+          tenantId,
+        })
+      );
     });
 
-    it('HRD-ONL-05: uploadRepairDamagePhoto throws immediately when offline', async () => {
+    it('HRD-ONL-05: uploadRepairDamagePhoto throws immediately when offline (Firebase Storage guarded)', async () => {
       setNetworkOnlineState(false);
+      expect(isOnline()).toBe(false);
+
       await expect(
         uploadRepairDamagePhoto(tenantId, 'ticket-101', 'file:///local/damage.jpg')
       ).rejects.toThrow(/Network connection required/i);

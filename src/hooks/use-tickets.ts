@@ -215,7 +215,12 @@ export function useTickets() {
         const res = await createRepairTicket(tenantId, {
           ...input,
           requestedBy: input.requestedBy || user?.name || user?.email || 'Field Tech',
-          assignee: input.assignee || (user ? { id: user.id, name: user.name, email: user.email } : null),
+          assignee: input.assignee || (user ? {
+            id: user.id,
+            name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Field Tech',
+            ...(user.email ? { email: user.email } : {}),
+            ...(user.avatarUrl ? { avatarUrl: user.avatarUrl } : {}),
+          } : null),
         });
         await refreshPendingOps();
         return res;

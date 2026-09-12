@@ -117,29 +117,32 @@ describe('Harmonized EventCard Component', () => {
     ],
   };
 
-  it('renders 2-row structure with event number, title, and status pill', () => {
-    const { getByText, getByTestId, queryByTestId } = render(
+  it('renders 3-row structure with event number, title, status pill, type pill, date, venue, and assignee', () => {
+    const { getByText, getByTestId, queryByTestId, queryByText } = render(
       <EventCard
         event={sampleEvent}
-        clientName="LiveNation Global"
+        assigneeName="Alex Vance"
         venueName="Arena Dock 1"
         typeName="Audio"
       />
     );
 
-    // Row 1: Event Number and Title
+    // Row 1: Event Number, Title, and Status Pill
     expect(getByText('[5050]')).toBeTruthy();
     expect(getByText('Apex Music Arena')).toBeTruthy();
-
-    // Row 1: Type Pill and Status Pill
-    expect(getByText('Audio')).toBeTruthy();
     expect(getByText('Confirmed')).toBeTruthy();
     expect(getByTestId('event-status-badge-ev-test-harmonize')).toBeTruthy();
 
-    // Row 2: Metadata
+    // Row 2: Type Pill and Date
+    expect(getByText('Audio')).toBeTruthy();
+    expect(getByText('10 - 11 Sep 2026')).toBeTruthy();
+
+    // Row 3: Venue (left) and Assignee (right)
     expect(getByText('Arena Dock 1')).toBeTruthy();
-    expect(getByText('LiveNation Global')).toBeTruthy();
-    expect(getByText('2 Quote Line Items')).toBeTruthy();
+    expect(getByText('Alex Vance')).toBeTruthy();
+
+    // Quote lines count removed
+    expect(queryByText(/Quote Line Items/i)).toBeNull();
 
     // Quick Action Buttons are removed
     expect(queryByTestId('card-pullsheet-btn-ev-test-harmonize')).toBeNull();

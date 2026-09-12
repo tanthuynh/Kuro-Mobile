@@ -188,6 +188,9 @@ export interface RepairTicket {
   logisticsOrder?: string[];
   createdAt?: string | any; // Normalized ISO 8601 string or Timestamp
   updatedAt?: string | any; // Normalized ISO 8601 string or Timestamp
+
+  // Offline sync metadata
+  hasPendingWrites?: boolean;
 }
 
 /**
@@ -339,6 +342,7 @@ export interface TenantOwner {
   phone?: string;
   website?: string;
   fullAddress?: string;
+  contactId?: string;
 }
 
 /**
@@ -347,6 +351,7 @@ export interface TenantOwner {
 export interface TenantCrewMember {
   id: string;
   name: string;
+  uid?: string;
   firstName?: string;
   lastName?: string;
   email?: string;

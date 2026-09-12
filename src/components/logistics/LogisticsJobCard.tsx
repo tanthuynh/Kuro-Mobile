@@ -24,6 +24,7 @@ import {
   Navigation,
   Radio,
   UserCheck,
+  CloudUpload,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
@@ -136,7 +137,7 @@ export function LogisticsJobCard({
         accessibilityLabel={`Logistics job ${jobNumDisplay} ${titleDisplay}, status ${job.status}`}
       >
         <CardContent style={styles.content}>
-          {/* Top Row: [Job/Event ID] + Name/Title + Date (Left) & Tinted Status Badge (Right) */}
+          {/* Top Row: [Job/Event ID] + Name/Title (Left) & Tinted Status Badge (Right) */}
           <View style={styles.topRow}>
             <View style={styles.jobTitleContainer}>
               <Text style={[styles.jobIdText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
@@ -151,26 +152,18 @@ export function LogisticsJobCard({
               >
                 {titleDisplay}
               </Text>
-              {scheduleDisplay ? (
-                <>
-                  <Text style={[styles.separatorDot, { color: colors.border, marginHorizontal: 6 }]}>•</Text>
-                  <View style={styles.dateMetaItem}>
-                    <Calendar size={13} color={colors.mutedForeground} />
-                    <Text
-                      style={[
-                        styles.dateText,
-                        { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginLeft: 4 },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {scheduleDisplay}
-                    </Text>
-                  </View>
-                </>
-              ) : null}
             </View>
 
             <View style={styles.statusContainer}>
+              {job.hasPendingWrites ? (
+                <View
+                  testID={`job-pending-sync-${job.id}`}
+                  accessibilityRole="image"
+                  accessibilityLabel="Changes pending sync"
+                >
+                  <CloudUpload size={16} color="#F59E0B" />
+                </View>
+              ) : null}
               <View
                 style={[
                   styles.statusBadge,
@@ -196,9 +189,25 @@ export function LogisticsJobCard({
             </View>
           </View>
 
-          {/* Second Row: Left Meta (Location, Stops, Live GPS) | Right Meta (Driver, Vehicle) */}
+          {/* Second Row: Left Meta (Date, Location, Stops, Live GPS) | Right Meta (Driver, Vehicle) */}
           <View style={styles.secondRow}>
             <View style={styles.leftMetaGroup}>
+              {scheduleDisplay ? (
+                <View style={styles.metaItem}>
+                  <Calendar size={14} color={colors.mutedForeground} />
+                  <Text
+                    style={[styles.metaText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}
+                    numberOfLines={1}
+                  >
+                    {scheduleDisplay}
+                  </Text>
+                </View>
+              ) : null}
+
+              {scheduleDisplay && job.location ? (
+                <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
+              ) : null}
+
               {job.location ? (
                 <View style={styles.metaItem}>
                   <MapPin size={14} color={colors.mutedForeground} />
@@ -211,7 +220,7 @@ export function LogisticsJobCard({
                 </View>
               ) : null}
 
-              {job.location && destinationCount > 0 ? (
+              {(scheduleDisplay || job.location) && destinationCount > 0 ? (
                 <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
               ) : null}
 
@@ -224,7 +233,7 @@ export function LogisticsJobCard({
                 </View>
               ) : null}
 
-              {(job.location || destinationCount > 0) && isTracking ? (
+              {(scheduleDisplay || job.location || destinationCount > 0) && isTracking ? (
                 <Text style={[styles.separatorDot, { color: colors.border }]}>•</Text>
               ) : null}
 
@@ -330,6 +339,9 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     flexShrink: 0,
   },
   statusBadge: {

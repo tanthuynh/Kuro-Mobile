@@ -6,7 +6,7 @@
  * and direct navigation to the unified Event Details screen.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/context/theme-context';
-import { useEvents } from '@/hooks/use-events';
+import { useEvents, useTenantEventTypes } from '@/hooks/use-events';
+import { useTenantOwners, useTenantCrew } from '@/hooks/use-tickets';
+import { isRawIdentifier } from '@/lib/events-engine';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/ui/empty-state';
 import { EventCard } from '@/components/events/event-card';
@@ -47,6 +49,72 @@ export default function HomeScreen() {
     setSearchQuery,
     refresh,
   } = useEvents();
+
+  const { owners, refresh: refreshOwners } = useTenantOwners();
+  const { crew, refresh: refreshCrew } = useTenantCrew();
+  const { eventTypes, refresh: refreshTypes } = useTenantEventTypes();
+
+  const venuesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const o of owners) {
+      if (o.id) {
+        map.set(o.id.toLowerCase(), o.name);
+      }
+      if ((o as any).contactId) {
+        map.set((o as any).contactId.toLowerCase(), o.name);
+      }
+      if (o.name) {
+        map.set(o.name.toLowerCase(), o.name);
+      }
+    }
+    return map;
+  }, [owners]);
+
+  const crewMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of crew) {
+      if (c.id) {
+        map.set(c.id.toLowerCase(), c.name);
+      }
+      if ((c as any).uid) {
+        map.set((c as any).uid.toLowerCase(), c.name);
+      }
+      if (c.name) {
+        map.set(c.name.toLowerCase(), c.name);
+      }
+    }
+    return map;
+  }, [crew]);
+
+  const typesMap = useMemo(() => {
+    const map = new Map<string, { name: string; color: string }>();
+    for (const t of eventTypes) {
+      if (t.id) {
+        map.set(t.id.toLowerCase(), { name: t.name, color: t.colour || '#60A5FA' });
+      }
+      if (t.name) {
+        map.set(t.name.toLowerCase(), { name: t.name, color: t.colour || '#60A5FA' });
+      }
+    }
+    return map;
+  }, [eventTypes]);
+
+  const handleRefresh = useCallback(async () => {
+    const promises: Promise<any>[] = [refresh()];
+    try {
+      const p1 = refreshOwners?.();
+      if (p1 && typeof p1.catch === 'function') promises.push(p1.catch(() => {}));
+    } catch (_) {}
+    try {
+      const p2 = refreshCrew?.();
+      if (p2 && typeof p2.catch === 'function') promises.push(p2.catch(() => {}));
+    } catch (_) {}
+    try {
+      const p3 = refreshTypes?.();
+      if (p3 && typeof p3.catch === 'function') promises.push(p3.catch(() => {}));
+    } catch (_) {}
+    await Promise.all(promises);
+  }, [refresh, refreshOwners, refreshCrew, refreshTypes]);
 
   const handleEventPress = (event: Event) => {
     router.push(`/events/${event.id}`);
@@ -167,18 +235,36 @@ export default function HomeScreen() {
         <FlatList
           data={filteredEvents}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <EventCard
-              event={item}
-              onPress={() => handleEventPress(item)}
-              testID={`feed-event-${item.id}`}
-            />
-          )}
+          renderItem={({ item }) => {
+            const rawVenue = (item.venueName || item.venueId || '').trim();
+            const venueName = rawVenue
+              ? venuesMap.get(rawVenue.toLowerCase()) || (isRawIdentifier(rawVenue) ? '' : rawVenue)
+              : '';
+
+            const rawAssignee = (item.assigneeName || item.assigneeId || '').trim();
+            const assigneeName = rawAssignee
+              ? crewMap.get(rawAssignee.toLowerCase()) || venuesMap.get(rawAssignee.toLowerCase()) || (isRawIdentifier(rawAssignee) ? '' : rawAssignee)
+              : '';
+
+            const typeInfo = item.eventTypeId ? typesMap.get(item.eventTypeId.toLowerCase()) : undefined;
+
+            return (
+              <EventCard
+                event={item}
+                venueName={venueName}
+                assigneeName={assigneeName}
+                typeName={typeInfo?.name}
+                typeColor={typeInfo?.color}
+                onPress={() => handleEventPress(item)}
+                testID={`feed-event-${item.id}`}
+              />
+            );
+          }}
           contentContainerStyle={[styles.listContent, { padding: spacing.base }]}
           refreshControl={
             <RefreshControl
               refreshing={loading}
-              onRefresh={refresh}
+              onRefresh={handleRefresh}
               tintColor={colors.primary}
               colors={[colors.primary]}
             />

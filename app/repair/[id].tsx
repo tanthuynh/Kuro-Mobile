@@ -76,7 +76,6 @@ import {
   updateRepairTicketStatus as updateRepairTicketStatusService,
   uploadRepairDamagePhoto,
   deleteRepairAttachment,
-  isOnline,
   saveRepairDraft,
   getRepairDraft,
   clearRepairDraft,
@@ -210,7 +209,6 @@ export default function RepairTicketDetailScreen({
   const [repairPeriodEnd, setRepairPeriodEnd] = useState<string | null>(null);
 
   // Initial note / fault description (New mode)
-  const [faultDescription, setFaultDescription] = useState('');
 
   // Attachments in new mode
   const [newModePhotos, setNewModePhotos] = useState<Array<{ id: string; url: string; uri?: string; fileName?: string }>>([]);
@@ -298,13 +296,6 @@ export default function RepairTicketDetailScreen({
       return;
     }
 
-    if (!isOnline()) {
-      if (isMountedRef.current) {
-        setActionError('Network connection required. Please reconnect before saving changes.');
-      }
-      return;
-    }
-
     try {
       const author = {
         id: userRef.current?.id || 'unknown',
@@ -361,7 +352,7 @@ export default function RepairTicketDetailScreen({
         saveDebounceTimerRef.current = null;
       }
       const toFlush = { ...pendingUpdatesRef.current };
-      if (Object.keys(toFlush).length > 0 && ticketId && tenantId && isOnline()) {
+      if (Object.keys(toFlush).length > 0 && ticketId && tenantId) {
         const author = {
           id: userRef.current?.id || 'unknown',
           name: userRef.current?.name || userRef.current?.email || 'Technician',
@@ -471,7 +462,6 @@ export default function RepairTicketDetailScreen({
           if (draft.priority) setPriority(draft.priority);
           if (draft.condition) setCondition(draft.condition);
           if (draft.status) setStatus(draft.status);
-          if (draft.faultDescription) setFaultDescription(draft.faultDescription);
           if (draft.internalNotes) setInternalNotes(draft.internalNotes);
           if (draft.internalReference) setInternalReference(draft.internalReference);
           if (draft.repairPeriodStart) setRepairPeriodStart(draft.repairPeriodStart);
@@ -491,7 +481,6 @@ export default function RepairTicketDetailScreen({
     if (!isNewMode || !tenantId) return;
     if (
       !equipmentName &&
-      !faultDescription &&
       !serialNumber &&
       !barcode &&
       newModePhotos.length === 0
@@ -514,7 +503,6 @@ export default function RepairTicketDetailScreen({
         priority,
         condition,
         status,
-        faultDescription,
         internalNotes,
         internalReference,
         repairPeriodStart,
@@ -542,7 +530,6 @@ export default function RepairTicketDetailScreen({
     priority,
     condition,
     status,
-    faultDescription,
     internalNotes,
     internalReference,
     repairPeriodStart,
@@ -726,12 +713,6 @@ export default function RepairTicketDetailScreen({
       return;
     }
 
-    if (!isOnline()) {
-      setActionError('Network connection required. Please reconnect before updating status.');
-      HapticService.scanError().catch(() => {});
-      return;
-    }
-
     try {
       setIsUpdatingStatus(true);
       setActionError(null);
@@ -773,20 +754,8 @@ export default function RepairTicketDetailScreen({
   const handleCreateTicketSubmit = async () => {
     if (isSubmittingNew) return;
 
-    if (!isOnline()) {
-      setActionError('Network connection required. Please connect to the internet before creating a repair ticket.');
-      HapticService.scanError().catch(() => {});
-      return;
-    }
-
     if (!equipmentName.trim()) {
       setActionError('Equipment name or identifier is required');
-      HapticService.scanError().catch(() => {});
-      return;
-    }
-
-    if (!faultDescription.trim()) {
-      setActionError('Please provide a fault description / damage notes');
       HapticService.scanError().catch(() => {});
       return;
     }
@@ -853,13 +822,27 @@ export default function RepairTicketDetailScreen({
           supplierId: supplierId.trim() || null,
           internalNotes: internalNotes.trim() || internalReference.trim() || '',
           internalReference: internalReference.trim() || internalNotes.trim() || null,
-          repairPeriodStart,
-          repairPeriodEnd,
-          assignee: user ? { id: user.id, name: user.name, email: user.email } : null,
-          initialNote: faultDescription.trim() || undefined,
+          repairPeriodStart: repairPeriodStart || null,
+          repairPeriodEnd: repairPeriodEnd || null,
+          assignee: user
+            ? {
+                id: user.id,
+                name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Technician',
+                ...(user.email ? { email: user.email } : {}),
+                ...(user.avatarUrl ? { avatarUrl: user.avatarUrl } : {}),
+              }
+            : null,
           attachments: attachmentsPayload,
         },
-        user ? { id: user.id, name: user.name, email: user.email, tenantId } : undefined
+        user
+          ? {
+              id: user.id,
+              name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Technician',
+              ...(user.email ? { email: user.email } : {}),
+              ...(user.avatarUrl ? { avatarUrl: user.avatarUrl } : {}),
+              tenantId,
+            }
+          : undefined
       );
 
       // Confirm persistence before clearing draft and navigating away
@@ -1801,34 +1784,7 @@ export default function RepairTicketDetailScreen({
           </CardContent>
         </Card>
 
-        {/* Initial Fault Description Note (When in New Mode) */}
-        {isNewMode ? (
-          <Card style={styles.card} testID="fault-details-card">
-            <CardContent style={styles.stripCardContent}>
-              <View style={styles.sectionHeaderRow}>
-                <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
-                  FAULT DESCRIPTION & NOTES *
-                </Text>
-              </View>
-              <TextInput
-                value={faultDescription}
-                onChangeText={(val) => {
-                  setFaultDescription(val);
-                  if (actionError) setActionError(null);
-                }}
-                placeholder="Describe fault, damage symptoms, or reason for repair..."
-                placeholderTextColor={colors.mutedForeground}
-                multiline
-                numberOfLines={4}
-                style={[
-                  styles.textAreaInput,
-                  { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground },
-                ]}
-                testID="input-fault-description"
-              />
-            </CardContent>
-          </Card>
-        ) : null}
+
 
         {/* Images & Documents Card */}
         <Card style={styles.card} testID="ticket-notes-attachments-card">
@@ -1922,64 +1878,7 @@ export default function RepairTicketDetailScreen({
               </View>
             ) : null}
 
-            {/* Notes Section (Cleaned up from Technician Notes) */}
-            {!isNewMode ? (
-              <View style={[styles.sectionBlock, { marginTop: 14 }]}>
-                <View style={styles.sectionSubHeaderRow}>
-                  <Text style={[styles.sectionSubtitle, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-                    Notes ({totalNotesCount})
-                  </Text>
-                </View>
 
-                {!ticket?.notes || ticket.notes.length === 0 ? (
-                  <View style={[styles.emptySectionBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <Text style={[styles.emptySectionText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                      No notes recorded yet. Tap "Add Note" below to record notes.
-                    </Text>
-                  </View>
-                ) : (
-                  <View style={styles.notesList}>
-                    {ticket.notes.map((note, index) => (
-                      <Pressable
-                        key={note.id || `note-${index}`}
-                        onPress={() => {
-                          setEditingNote(note);
-                          setEditedNoteContent(note.content);
-                        }}
-                        style={({ pressed }) => [
-                          styles.noteCard,
-                          { backgroundColor: colors.surface, borderColor: colors.border },
-                          pressed && { opacity: 0.85 },
-                        ]}
-                        testID={`note-item-${index}`}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Edit note by ${note.user?.name || 'Technician'}`}
-                      >
-                        <View style={styles.noteHeader}>
-                          <View style={styles.noteAuthorGroup}>
-                            <User size={12} color={colors.mutedForeground} />
-                            <Text style={[styles.noteAuthor, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                              {note.user?.name || 'Technician'}
-                            </Text>
-                          </View>
-                          <Text style={[styles.noteTimestamp, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                            {formatTimeAgo(note.timestamp)}
-                          </Text>
-                        </View>
-                        <Text style={[styles.noteContentText, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
-                          {note.content}
-                        </Text>
-                        <View style={styles.noteFooter}>
-                          <Text style={[styles.noteEditHint, { color: colors.primary, fontSize: typography.fontSize.sm }]}>
-                            Tap to edit / delete
-                          </Text>
-                        </View>
-                      </Pressable>
-                    ))}
-                  </View>
-                )}
-              </View>
-            ) : null}
           </CardContent>
         </Card>
 
@@ -2044,19 +1943,7 @@ export default function RepairTicketDetailScreen({
           </Button>
         ) : (
           <>
-            <Button
-              variant="outline"
-              size="default"
-              icon={<FileText size={16} color={colors.primary} />}
-              onPress={() => {
-                setNewNoteText('');
-                setIsAddNoteOpen(true);
-              }}
-              style={styles.bottomBarButton}
-              testID="detail-add-note-btn"
-            >
-              Add Note
-            </Button>
+
 
             <Button
               variant="primary"
@@ -2151,123 +2038,7 @@ export default function RepairTicketDetailScreen({
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* Add Note Modal */}
-      <Modal
-        visible={isAddNoteOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsAddNoteOpen(false)}
-        testID="add-note-modal"
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.modalOverlay}
-        >
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsAddNoteOpen(false)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-                Add Note
-              </Text>
-              <Pressable onPress={() => setIsAddNoteOpen(false)} hitSlop={8}>
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <TextInput
-                value={newNoteText}
-                onChangeText={setNewNoteText}
-                placeholder="Enter notes..."
-                placeholderTextColor={colors.mutedForeground}
-                multiline
-                numberOfLines={4}
-                style={[
-                  styles.textAreaInput,
-                  { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground },
-                ]}
-                testID="add-note-input"
-              />
-              <View style={styles.modalFooterRow}>
-                <Button variant="outline" size="default" onPress={() => setIsAddNoteOpen(false)} style={{ flex: 1 }}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="default"
-                  onPress={handleCreateNote}
-                  loading={isSubmittingNote}
-                  disabled={!newNoteText.trim() || isSubmittingNote}
-                  style={{ flex: 2 }}
-                  testID="submit-add-note-btn"
-                >
-                  Add Note
-                </Button>
-              </View>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
 
-      {/* Edit Note Modal */}
-      <Modal
-        visible={!!editingNote}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setEditingNote(null)}
-        testID="edit-note-modal"
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.modalOverlay}
-        >
-          <Pressable style={styles.modalBackdrop} onPress={() => setEditingNote(null)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-                Edit Note
-              </Text>
-              <Pressable onPress={() => setEditingNote(null)} hitSlop={8}>
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <TextInput
-                value={editedNoteContent}
-                onChangeText={setEditedNoteContent}
-                multiline
-                numberOfLines={4}
-                style={[
-                  styles.textAreaInput,
-                  { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground },
-                ]}
-                testID="edit-note-input"
-              />
-              <View style={styles.modalFooterRow}>
-                <Button
-                  variant="destructive"
-                  size="default"
-                  icon={<Trash2 size={15} color="#FFFFFF" />}
-                  onPress={() => editingNote && promptDeleteNote(editingNote)}
-                  testID="delete-note-btn"
-                >
-                  Delete
-                </Button>
-                <Button
-                  variant="primary"
-                  size="default"
-                  onPress={handleSaveEditedNote}
-                  loading={isSavingNote}
-                  disabled={!editedNoteContent.trim() || isSavingNote}
-                  style={{ flex: 1 }}
-                  testID="save-edit-note-btn"
-                >
-                  Save Note
-                </Button>
-              </View>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
 
       {/* Add Attachment Modal */}
       <Modal

@@ -18,6 +18,7 @@ import {
   UserCheck,
   LayoutGrid,
   Activity,
+  CloudUpload,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
@@ -101,6 +102,15 @@ export function RepairTicketCard({
             </View>
 
             <View style={styles.statusContainer}>
+              {ticket.hasPendingWrites ? (
+                <View
+                  testID={`ticket-pending-sync-${ticket.id}`}
+                  accessibilityRole="image"
+                  accessibilityLabel="Changes pending sync"
+                >
+                  <CloudUpload size={16} color="#F59E0B" />
+                </View>
+              ) : null}
               <View
                 style={[
                   styles.statusBadge,
@@ -253,6 +263,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     flexShrink: 0,
   },
   statusBadge: {

@@ -13,8 +13,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ThemeProvider, useTheme } from '@/context/theme-context';
 import { AuthProvider, useAuth } from '@/context/auth-context';
+import { NetworkProvider } from '@/context/network-context';
 import { ScannerProvider } from '@/context/scanner-context';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { GlobalOfflineBanner } from '@/components/layout/global-offline-banner';
 
 // Prevent splash screen from auto-hiding before auth state and fonts are determined
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -81,6 +83,7 @@ function RouteGuard({ isFontsReady }: { isFontsReady: boolean }) {
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
+      <GlobalOfflineBanner />
       <Slot />
     </>
   );
@@ -122,9 +125,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider>
           <AuthProvider>
-            <ScannerProvider>
-              <RouteGuard isFontsReady={isFontsReady} />
-            </ScannerProvider>
+            <NetworkProvider>
+              <ScannerProvider>
+                <RouteGuard isFontsReady={isFontsReady} />
+              </ScannerProvider>
+            </NetworkProvider>
           </AuthProvider>
         </ThemeProvider>
       </SafeAreaProvider>

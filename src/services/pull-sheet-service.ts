@@ -19,6 +19,8 @@ import {
   doc,
   getDoc,
   onSnapshot,
+  updateDoc,
+  serverTimestamp,
   type Unsubscribe,
 } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -273,6 +275,125 @@ export interface CommandExecutionResult {
 }
 
 /**
+ * Direct Firestore fallback mutation when the backend command endpoint is unmounted (404).
+ */
+async function directFirestoreFallback(
+  action: 'increment_scan' | 'update_status' | 'bulk_confirm',
+  eventId: string,
+  tenantId: string,
+  user: { uid: string },
+  details?: Record<string, any>
+): Promise<{ success: boolean; item?: any; error?: string }> {
+  try {
+    const docRef = doc(db, 'pullsheets', eventId);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) {
+      return { success: false, error: 'Pull sheet not found' };
+    }
+    const data = snap.data();
+    if (data.tenantId && data.tenantId !== tenantId) {
+      return { success: false, error: 'Unauthorized: Tenant mismatch' };
+    }
+
+    const currentItems: any[] = Array.isArray(data.items) ? data.items : [];
+    const now = new Date();
+    let targetItem: any = null;
+    let hasChanges = false;
+    let updatedItems: any[] = [];
+
+    switch (action) {
+      case 'update_status': {
+        const { itemId, newStatus, scannedCount } = details || {};
+        updatedItems = currentItems.map((it) => {
+          if (it.id === itemId) {
+            hasChanges = true;
+            targetItem = {
+              ...it,
+              status: isActionablePullsheetItem(it) ? normalizePullsheetStatus(newStatus) : 'none',
+              ...(typeof scannedCount === 'number' ? { scannedQuantity: scannedCount } : {}),
+              statusUpdatedAt: now,
+              statusUpdatedBy: user.uid,
+            };
+            return targetItem;
+          }
+          return it;
+        });
+        if (!hasChanges) {
+          return { success: false, error: `Item with ID "${itemId}" not found on pull sheet` };
+        }
+        break;
+      }
+      case 'increment_scan': {
+        const { itemId, barcode, scannedCount, autoTransitionToPrepped } = details || {};
+        updatedItems = currentItems.map((it) => {
+          if (it.id === itemId) {
+            hasChanges = true;
+            const existingBarcodes: string[] = Array.isArray(it.scannedBarcodes)
+              ? [...it.scannedBarcodes]
+              : [];
+            if (barcode && !existingBarcodes.includes(barcode)) {
+              existingBarcodes.push(barcode);
+            }
+            const targetQty = Math.max(1, it.quantity || 1);
+            const currentScanned = typeof it.scannedQuantity === 'number'
+              ? it.scannedQuantity
+              : it.status === 'prepped_scanned'
+              ? targetQty
+              : 0;
+            const nextCount = typeof scannedCount === 'number' ? scannedCount : currentScanned + 1;
+            const isFullyPrepped = autoTransitionToPrepped ?? nextCount >= targetQty;
+            const nextStatus = isFullyPrepped ? 'prepped_scanned' : it.status;
+            targetItem = {
+              ...it,
+              scannedQuantity: nextCount,
+              scannedBarcodes: existingBarcodes,
+              status: isActionablePullsheetItem(it) ? normalizePullsheetStatus(nextStatus) : 'none',
+              statusUpdatedAt: now,
+              statusUpdatedBy: user.uid,
+            };
+            return targetItem;
+          }
+          return it;
+        });
+        if (!hasChanges) {
+          return { success: false, error: `Item with ID "${itemId}" not found on pull sheet` };
+        }
+        break;
+      }
+      case 'bulk_confirm': {
+        updatedItems = currentItems.map((it) => {
+          const isActionable = isActionablePullsheetItem(it);
+          const status = normalizePullsheetStatus(it.status);
+          if (isActionable && status === 'pending') {
+            hasChanges = true;
+            return {
+              ...it,
+              status: 'confirmed',
+              statusUpdatedAt: now,
+              statusUpdatedBy: user.uid,
+            };
+          }
+          return it;
+        });
+        break;
+      }
+    }
+
+    if (hasChanges) {
+      await updateDoc(docRef, {
+        items: updatedItems,
+        updatedAt: serverTimestamp(),
+        updatedBy: user.uid,
+      });
+    }
+
+    return { success: true, item: targetItem };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Direct Firestore fallback failed' };
+  }
+}
+
+/**
  * Dispatches an authenticated pullsheet mutation command to the backend API.
  * Uses operationId for transaction idempotency and tracks in-flight state durably.
  */
@@ -410,6 +531,25 @@ async function executePullsheetCommand(
         error: data?.error || `Server gateway error (${response.status}). Outcome unknown; please check status or retry.`,
         outcomeUnknown: true,
         operationId,
+      };
+    }
+
+    // If server returned 404 without a domain error, the endpoint is unmounted on the backend server
+    if (response.status === 404 && !data?.error) {
+      console.warn('[pullSheetService] Command route 404 (endpoint not mounted on server). Attempting direct Firestore fallback...');
+      const fallbackResult = await directFirestoreFallback(action, eventId, tenantId, user, details);
+      if (fallbackResult.success) {
+        await clearPendingOperation(tenantId, user.uid, operationId);
+        return {
+          success: true,
+          operationId,
+          item: fallbackResult.item,
+        };
+      }
+      await clearPendingOperation(tenantId, user.uid, operationId);
+      return {
+        success: false,
+        error: fallbackResult.error || 'Server returned status 404',
       };
     }
 

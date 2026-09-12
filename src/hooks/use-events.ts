@@ -12,10 +12,11 @@ import {
   subscribeSingleEvent,
   fetchTenantEvents,
   fetchSingleEvent,
+  fetchTenantEventTypes,
 } from '@/services/event-service';
 import { categorizeEvents } from '@/lib/categorization';
 import { filterEvents, computeEventMetrics, type EventMetrics } from '@/lib/events-engine';
-import type { Event, CategorizedEvents } from '@/types/events';
+import type { Event, EventType, CategorizedEvents } from '@/types/events';
 
 export type EventTabType = 'today' | 'in_progress' | 'upcoming' | 'all';
 
@@ -308,4 +309,61 @@ export function useSingleEvent(eventId: string): UseSingleEventResult {
     error,
     refresh,
   };
+}
+
+export interface UseTenantEventTypesResult {
+  eventTypes: EventType[];
+  loading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+}
+
+/**
+ * Hook to fetch and cache tenant event types for badge labels and colours.
+ */
+export function useTenantEventTypes(): UseTenantEventTypesResult {
+  const { user, tenant } = useAuth();
+  const tenantId = user?.tenantId || tenant?.tenantId || '';
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const currentTenantRef = useRef(tenantId);
+  if (currentTenantRef.current !== tenantId) {
+    currentTenantRef.current = tenantId;
+    setEventTypes([]);
+    setLoading(tenantId ? true : false);
+    setError(null);
+  }
+
+  const fetchTypes = useCallback(async () => {
+    if (!tenantId) {
+      setEventTypes([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await fetchTenantEventTypes(tenantId);
+      if (currentTenantRef.current === tenantId) {
+        setEventTypes(data);
+        setError(null);
+      }
+    } catch (err: any) {
+      if (currentTenantRef.current === tenantId) {
+        console.warn('[useTenantEventTypes] error:', err);
+        setError(err);
+      }
+    } finally {
+      if (currentTenantRef.current === tenantId) {
+        setLoading(false);
+      }
+    }
+  }, [tenantId]);
+
+  useEffect(() => {
+    fetchTypes();
+  }, [fetchTypes]);
+
+  return { eventTypes, loading, error, refresh: fetchTypes };
 }

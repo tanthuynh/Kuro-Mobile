@@ -1092,7 +1092,7 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
       expect(getByText('[EV-STR]')).toBeTruthy();
     });
 
-    it('omits leading separator dot on EventCard when date and venue are missing', () => {
+    it('omits quote lines count and separator dot on EventCard even when equipment items exist', () => {
       const dateUtils = require('@/lib/date-utils');
       const dateSpy = jest.spyOn(dateUtils, 'formatEventDateRange').mockReturnValueOnce('');
 
@@ -1102,12 +1102,12 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
         equipmentItems: [{ id: 'eq-1' }, { id: 'eq-2' }],
       };
 
-      const { getByText, queryByText } = render(
+      const { queryByText } = render(
         <EventCard event={minimalEvent as any} venueName="" />
       );
 
-      expect(getByText('2 Quote Line Items')).toBeTruthy();
-      // Leading separator dot should NOT exist since no preceding metadata exists
+      // Quote lines count and separator dot should NOT exist on EventCard
+      expect(queryByText(/Quote Line Items/i)).toBeNull();
       expect(queryByText('•')).toBeNull();
 
       dateSpy.mockRestore();

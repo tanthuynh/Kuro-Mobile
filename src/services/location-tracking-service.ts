@@ -20,9 +20,10 @@
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { AppState, type AppStateStatus } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { onAuthStateChanged, type Auth } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { updateJobLocation, stopJobTracking } from './logistics-service';
+import { updateJobLocation, stopJobTracking, batchUploadLocationHistory } from './logistics-service';
 import type { DriverLocation } from '@/types/logistics';
 
 // ============================================================================
@@ -34,6 +35,14 @@ export const LOCATION_TASK_NAME = 'KURO_MOBILE_LOGISTICS_GPS_TRACKING';
 export const MOVEMENT_THRESHOLD_METERS = 30;
 export const HEARTBEAT_THRESHOLD_MS = 300000; // 5 minutes (300,000 ms)
 export const HISTORY_MOVEMENT_THRESHOLD_METERS = 50;
+
+export const LOCATION_BUFFER_STORAGE_KEY_PREFIX = '@kuro_location_buffer:';
+
+export function getBufferStorageKey(jobId: string): string {
+  return `${LOCATION_BUFFER_STORAGE_KEY_PREFIX}${jobId}`;
+}
+
+export const getLocationBufferStorageKey = getBufferStorageKey;
 
 export interface TrackingOptions {
   timeInterval?: number;
@@ -50,6 +59,12 @@ export interface LocationPermissionResult {
   foreground: boolean;
   background: boolean;
 }
+
+export type TrackingFailureReason =
+  | 'services_disabled'
+  | 'permission_denied'
+  | 'approximate_only'
+  | 'internal_error';
 
 export interface TrackingState {
   isTracking: boolean;
@@ -77,6 +92,7 @@ let trackingState: TrackingState = {
   lastKnownLocation: null,
 };
 
+let lastTrackingFailureReason: TrackingFailureReason | null = null;
 let currentDriverInfo: { id?: string; name?: string } = {};
 
 type LocationListener = (location: DriverLocation) => void;
@@ -179,6 +195,206 @@ function setSyncStatus(status: SyncStatus, error: string | null = null): void {
 }
 
 // ============================================================================
+// NETWORK CONNECTIVITY & TELEMETRY BUFFERING
+// ============================================================================
+
+let isNetworkExplicitlyOnline = true;
+let locationBuffer: DriverLocation[] = [];
+let isFlushingBuffer = false;
+let activeFlushPromise: Promise<void> | null = null;
+
+/**
+ * Checks if the device has active network connectivity for GPS telemetry sync.
+ */
+export function isOnline(): boolean {
+  if (typeof navigator !== 'undefined' && 'onLine' in navigator && navigator.onLine === false) {
+    return false;
+  }
+  return isNetworkExplicitlyOnline;
+}
+
+/**
+ * Updates the service's internal online state.
+ * When transitioning from offline to online, automatically triggers flushLocationBuffer.
+ */
+export function setNetworkOnlineState(online: boolean): void {
+  const wasOffline = !isOnline();
+  isNetworkExplicitlyOnline = online;
+  const nowOnline = isOnline();
+  if (wasOffline && nowOnline) {
+    flushLocationBuffer().catch((err) => {
+      console.error('[LocationTrackingService] Auto-flush on network reconnection error:', err);
+    });
+  }
+}
+
+/**
+ * Returns the current number of in-memory buffered GPS points.
+ */
+export function getLocationBufferCount(): number {
+  return locationBuffer.length;
+}
+
+/**
+ * Returns whether a buffer flush operation is currently active.
+ */
+export function isLocationBufferFlushing(): boolean {
+  return isFlushingBuffer;
+}
+
+/**
+ * Clears in-memory buffer and purges buffered points from AsyncStorage.
+ */
+export async function clearLocationBuffer(): Promise<void> {
+  locationBuffer = [];
+  const targetJobId = trackingState.activeJobId;
+  if (targetJobId) {
+    try {
+      await AsyncStorage.removeItem(getBufferStorageKey(targetJobId));
+    } catch {}
+  }
+  try {
+    const allKeys = await AsyncStorage.getAllKeys();
+    const bufferKeys = allKeys.filter((key) => key.startsWith(LOCATION_BUFFER_STORAGE_KEY_PREFIX));
+    if (bufferKeys.length > 0) {
+      await AsyncStorage.multiRemove(bufferKeys);
+    }
+  } catch {}
+}
+
+/**
+ * Loads persisted GPS telemetry buffer from AsyncStorage for a job.
+ */
+async function loadPersistedBuffer(jobId: string): Promise<DriverLocation[]> {
+  try {
+    const raw = await AsyncStorage.getItem(getBufferStorageKey(jobId));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('[LocationTrackingService] Failed to load persisted location buffer:', err);
+  }
+  return [];
+}
+
+/**
+ * Persists current in-memory buffer to AsyncStorage for a job.
+ */
+async function persistBuffer(jobId: string, buffer: DriverLocation[]): Promise<void> {
+  try {
+    const key = getBufferStorageKey(jobId);
+    if (buffer.length === 0) {
+      await AsyncStorage.removeItem(key);
+    } else {
+      await AsyncStorage.setItem(key, JSON.stringify(buffer));
+    }
+  } catch (err) {
+    console.warn('[LocationTrackingService] Failed to persist location buffer:', err);
+  }
+}
+
+/**
+ * Appends a location point to the in-memory queue and mirrors to AsyncStorage.
+ * Retains exact original hardware GPS timestamp.
+ */
+async function bufferLocationPoint(location: DriverLocation): Promise<void> {
+  const exists = locationBuffer.some(
+    (pt) =>
+      pt.timestamp === location.timestamp &&
+      pt.latitude === location.latitude &&
+      pt.longitude === location.longitude
+  );
+  if (!exists) {
+    locationBuffer.push(location);
+    locationBuffer.sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  const targetJobId = location.jobId || trackingState.activeJobId;
+  if (targetJobId) {
+    await persistBuffer(targetJobId, locationBuffer);
+  }
+}
+
+/**
+ * Flushes all locally buffered GPS points to Firestore via batchUploadLocationHistory.
+ * Clears uploaded points from in-memory queue and AsyncStorage upon success.
+ */
+export async function flushLocationBuffer(jobId?: string): Promise<void> {
+  if (!isOnline()) {
+    return;
+  }
+  if (activeFlushPromise) {
+    return activeFlushPromise;
+  }
+
+  const targetJobId =
+    jobId || trackingState.activeJobId || (locationBuffer.length > 0 ? locationBuffer[0].jobId : null);
+  if (!targetJobId) {
+    return;
+  }
+
+  isFlushingBuffer = true;
+  setSyncStatus('syncing');
+
+  const flushPromise = (async () => {
+    try {
+      if (locationBuffer.length === 0) {
+        const persisted = await loadPersistedBuffer(targetJobId);
+        if (persisted.length > 0) {
+          locationBuffer = persisted;
+        } else {
+          // If actively tracking and buffer is empty, state is healthy synced
+          setSyncStatus(trackingState.isTracking ? 'synced' : 'idle');
+          return;
+        }
+      }
+
+      const pointsToUpload = [...locationBuffer];
+      const isCurrentlyActive = trackingState.isTracking && trackingState.activeJobId === targetJobId;
+      if (typeof batchUploadLocationHistory === 'function') {
+        await batchUploadLocationHistory(targetJobId, pointsToUpload);
+      } else {
+        for (const loc of pointsToUpload) {
+          await updateJobLocation(targetJobId, loc);
+        }
+      }
+
+      locationBuffer = locationBuffer.slice(pointsToUpload.length);
+      await persistBuffer(targetJobId, locationBuffer);
+
+      if (pointsToUpload.length > 0) {
+        const latest = pointsToUpload[pointsToUpload.length - 1];
+        lastParentWriteLocation = {
+          latitude: latest.latitude,
+          longitude: latest.longitude,
+          timestamp: latest.timestamp,
+        };
+        lastHistoryWriteLocation = {
+          latitude: latest.latitude,
+          longitude: latest.longitude,
+          timestamp: latest.timestamp,
+        };
+      }
+
+      setSyncStatus('synced');
+    } catch (err: any) {
+      console.error('[LocationTrackingService] Failed to flush location buffer:', err);
+      setSyncStatus('offline_failed', err?.message || 'Failed to flush buffered locations');
+      throw err;
+    } finally {
+      isFlushingBuffer = false;
+      activeFlushPromise = null;
+    }
+  })();
+
+  activeFlushPromise = flushPromise;
+  await flushPromise;
+}
+
+// ============================================================================
 // BACKGROUND TASK DEFINITION & UPDATE PIPELINE
 // ============================================================================
 
@@ -192,7 +408,8 @@ function setSyncStatus(status: SyncStatus, error: string | null = null): void {
  */
 export async function handleLocationUpdate(
   locationObj: Location.LocationObject,
-  forceWrite: boolean = false
+  forceWrite: boolean = false,
+  bufferOnly: boolean = false
 ): Promise<DriverLocation | null> {
   if (!locationObj || !locationObj.coords) {
     return null;
@@ -274,7 +491,26 @@ export async function handleLocationUpdate(
     return formattedLocation;
   }
 
-  // 5. Throttling & Movement Policy Evaluation
+  // 5. Buffer-Only & Offline Connectivity Guard: Buffer coordinates if offline or buffer-only
+  if (bufferOnly || !isOnline()) {
+    await bufferLocationPoint(formattedLocation);
+    lastParentWriteLocation = {
+      latitude: formattedLocation.latitude,
+      longitude: formattedLocation.longitude,
+      timestamp: formattedLocation.timestamp,
+    };
+    lastHistoryWriteLocation = {
+      latitude: formattedLocation.latitude,
+      longitude: formattedLocation.longitude,
+      timestamp: formattedLocation.timestamp,
+    };
+    if (!isOnline()) {
+      setSyncStatus('offline_failed', 'Network disconnected or device offline');
+    }
+    return formattedLocation;
+  }
+
+  // 6. Throttling & Movement Policy Evaluation
   let shouldUpdateParent = Boolean(forceWrite) || !lastParentWriteLocation;
   let shouldWriteHistory = Boolean(forceWrite) || !lastHistoryWriteLocation;
 
@@ -307,12 +543,20 @@ export async function handleLocationUpdate(
     }
   }
 
-  // If stationary suppression applies, return early without database writes
+  // If stationary suppression applies, return early without parent database write,
+  // but opportunistically flush any accumulated offline buffer if online
   if (!shouldUpdateParent) {
+    if (isOnline() && locationBuffer.length > 0 && !isFlushingBuffer) {
+      try {
+        await flushLocationBuffer(targetJobId);
+      } catch (err) {
+        console.warn('[LocationTrackingService] Opportunistic buffer flush error (stationary):', err);
+      }
+    }
     return formattedLocation;
   }
 
-  // 6. Firestore Synchronization with Session Barrier
+  // 7. Firestore Synchronization with Session Barrier
   const writePromise = (async () => {
     try {
       setSyncStatus('syncing');
@@ -341,9 +585,31 @@ export async function handleLocationUpdate(
           };
         }
         setSyncStatus('synced');
+
+        // Opportunistic offline buffer auto-flush when online and buffer has pending points
+        if (isOnline() && locationBuffer.length > 0 && !isFlushingBuffer) {
+          try {
+            await flushLocationBuffer(targetJobId);
+          } catch (err) {
+            console.warn('[LocationTrackingService] Opportunistic buffer flush error:', err);
+          }
+        }
       }
     } catch (syncErr: any) {
       console.error('[LocationTrackingService] Failed to sync GPS coordinates to Firestore:', syncErr);
+      await bufferLocationPoint(formattedLocation);
+      lastParentWriteLocation = {
+        latitude: formattedLocation.latitude,
+        longitude: formattedLocation.longitude,
+        timestamp: formattedLocation.timestamp,
+      };
+      if (shouldWriteHistory) {
+        lastHistoryWriteLocation = {
+          latitude: formattedLocation.latitude,
+          longitude: formattedLocation.longitude,
+          timestamp: formattedLocation.timestamp,
+        };
+      }
       setSyncStatus('offline_failed', syncErr?.message || 'Network disconnected or Firestore write failed');
     }
   })();
@@ -365,13 +631,25 @@ try {
     if (data) {
       const { locations } = data as { locations?: Location.LocationObject[] };
       if (Array.isArray(locations) && locations.length > 0) {
-        // Iterate backwards from newest location to find and process the latest valid ping in the batch
-        for (let i = locations.length - 1; i >= 0; i--) {
-          const location = locations[i];
-          const result = await handleLocationUpdate(location);
-          if (result) {
-            // Latest valid location updated; break to avoid redundant batch writes to Firestore
-            break;
+        const validLocations = locations.filter((loc) => loc && typeof loc === 'object');
+        if (validLocations.length === 0) {
+          return;
+        }
+
+        if (!isOnline()) {
+          // When offline, process and buffer all valid intermediate points in the batch
+          const sortedLocations = [...validLocations].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+          for (const location of sortedLocations) {
+            await handleLocationUpdate(location);
+          }
+        } else {
+          // When online, iterate backwards to sync the latest valid movement ping in the batch
+          for (let i = validLocations.length - 1; i >= 0; i--) {
+            const location = validLocations[i];
+            const result = await handleLocationUpdate(location);
+            if (result) {
+              break;
+            }
           }
         }
       }
@@ -384,6 +662,161 @@ try {
 // ============================================================================
 // PERMISSION MANAGEMENT
 // ============================================================================
+
+/**
+ * Returns the failure reason from the most recent startTrackingJob attempt,
+ * or null if the last attempt succeeded or tracking has not been attempted.
+ */
+export function getLastTrackingFailureReason(): TrackingFailureReason | null {
+  return lastTrackingFailureReason;
+}
+
+/**
+ * Verifies that the granted location permission has Precise (fine / full) accuracy.
+ * Rejects coarse, approximate, or reduced accuracy per Requirement R1.
+ */
+export function isAccuracyPrecise(response: Location.LocationPermissionResponse | null | undefined): boolean {
+  if (!response) return true;
+
+  const rawAccuracy = (response as any).accuracy;
+  const androidAccuracy = response.android?.accuracy;
+  const iosAccuracy = response.ios?.accuracy;
+
+  // Check Android accuracy details: fine is precise; coarse or none is approximate/denied
+  if (androidAccuracy === 'coarse' || androidAccuracy === 'none') {
+    return false;
+  }
+
+  // Check iOS accuracy details: full is precise; reduced is approximate
+  if (iosAccuracy === 'reduced') {
+    return false;
+  }
+
+  // Check generic or custom accuracy string if provided
+  if (typeof rawAccuracy === 'string') {
+    const normalized = rawAccuracy.toLowerCase();
+    if (normalized === 'coarse' || normalized === 'approximate' || normalized === 'reduced') {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Verifies all tracking prerequisites before starting a tracking session:
+ * 1. Device GPS / Location Services enabled globally on the device.
+ * 2. Foreground and background location permissions granted.
+ * 3. Precise location accuracy granted (rejects coarse / approximate / reduced).
+ *
+ * Sets `lastTrackingFailureReason` and logs actionable warnings on failure.
+ *
+ * @returns Promise resolving to true if all prerequisites are satisfied, false otherwise.
+ */
+export async function verifyTrackingPrerequisites(): Promise<boolean> {
+  lastTrackingFailureReason = null;
+
+  // Step 1: Device GPS Check
+  if (typeof Location.hasServicesEnabledAsync === 'function') {
+    try {
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+      if (!servicesEnabled) {
+        lastTrackingFailureReason = 'services_disabled';
+        console.warn('[LocationTrackingService] Device location services (GPS) are disabled.');
+        return false;
+      }
+    } catch (gpsErr) {
+      console.warn('[LocationTrackingService] Error checking hasServicesEnabledAsync:', gpsErr);
+      lastTrackingFailureReason = 'services_disabled';
+      return false;
+    }
+  }
+
+  // Step 2: Foreground Permissions & Accuracy Check
+  let fgResponse: Location.LocationPermissionResponse | null = null;
+  try {
+    if (typeof Location.requestForegroundPermissionsAsync === 'function') {
+      fgResponse = await Location.requestForegroundPermissionsAsync();
+    } else if (typeof Location.getForegroundPermissionsAsync === 'function') {
+      fgResponse = await Location.getForegroundPermissionsAsync();
+    }
+  } catch (fgErr) {
+    console.warn('[LocationTrackingService] Error requesting foreground location permissions:', fgErr);
+  }
+
+  const fgGranted = Boolean(fgResponse && (fgResponse.status === 'granted' || fgResponse.granted === true));
+  if (!fgGranted) {
+    lastTrackingFailureReason = 'permission_denied';
+    setSyncStatus('permission_denied', 'Foreground location permission denied');
+    console.warn('[LocationTrackingService] Foreground location permission denied. Tracking cannot start.');
+    return false;
+  }
+
+  // Fallback check on getForegroundPermissionsAsync if fgResponse omitted accuracy
+  if (
+    !((fgResponse as any)?.accuracy || fgResponse?.android?.accuracy || fgResponse?.ios?.accuracy) &&
+    typeof Location.getForegroundPermissionsAsync === 'function'
+  ) {
+    try {
+      const getFg = await Location.getForegroundPermissionsAsync();
+      if (getFg?.android?.accuracy || getFg?.ios?.accuracy || (getFg as any)?.accuracy) {
+        fgResponse = { ...fgResponse, ...getFg };
+      }
+    } catch {}
+  }
+
+  if (!isAccuracyPrecise(fgResponse)) {
+    lastTrackingFailureReason = 'approximate_only';
+    console.warn('[LocationTrackingService] Approximate location accuracy detected. Precise location is required.');
+    return false;
+  }
+
+  // Step 3: Background Permissions & Accuracy Check
+  let bgResponse: Location.LocationPermissionResponse | null = null;
+  let bgError: any = null;
+  try {
+    if (typeof Location.requestBackgroundPermissionsAsync === 'function') {
+      bgResponse = await Location.requestBackgroundPermissionsAsync();
+    } else if (typeof Location.getBackgroundPermissionsAsync === 'function') {
+      bgResponse = await Location.getBackgroundPermissionsAsync();
+    }
+  } catch (bgErr) {
+    console.warn('[LocationTrackingService] Background permission request failed or not supported:', bgErr);
+    bgError = bgErr;
+  }
+
+  // If background permission was checked and returned a response:
+  if (!bgError) {
+    const bgGranted = Boolean(bgResponse && (bgResponse.status === 'granted' || bgResponse.granted === true));
+    if (!bgGranted) {
+      lastTrackingFailureReason = 'permission_denied';
+      setSyncStatus('permission_denied', 'Background location permission denied');
+      console.warn('[LocationTrackingService] Background location permission denied. Tracking cannot start.');
+      return false;
+    }
+
+    // Fallback check on getBackgroundPermissionsAsync if bgResponse omitted accuracy
+    if (
+      !((bgResponse as any)?.accuracy || bgResponse?.android?.accuracy || bgResponse?.ios?.accuracy) &&
+      typeof Location.getBackgroundPermissionsAsync === 'function'
+    ) {
+      try {
+        const getBg = (await Location.getBackgroundPermissionsAsync()) as any;
+        if (getBg?.android?.accuracy || getBg?.ios?.accuracy || getBg?.accuracy) {
+          bgResponse = { ...bgResponse, ...getBg };
+        }
+      } catch {}
+    }
+
+    if (!isAccuracyPrecise(bgResponse)) {
+      lastTrackingFailureReason = 'approximate_only';
+      console.warn('[LocationTrackingService] Approximate location accuracy detected in background permissions. Precise location is required.');
+      return false;
+    }
+  }
+
+  return true;
+}
 
 /**
  * Checks current location permission status without prompting the user.
@@ -464,8 +897,11 @@ export async function startTrackingJob(
   tenantId: string,
   options?: TrackingOptions
 ): Promise<boolean> {
+  lastTrackingFailureReason = null;
+
   if (!jobId || !jobId.trim() || !tenantId || !tenantId.trim()) {
     console.warn('[LocationTrackingService] startTrackingJob called without valid jobId or tenantId');
+    lastTrackingFailureReason = 'internal_error';
     return false;
   }
 
@@ -476,21 +912,59 @@ export async function startTrackingJob(
       return true;
     }
 
-    // If tracking a different job, cleanly stop the previous job tracking first
+    // If tracking a different job, cleanly stop the previous job tracking first (R5)
     if (trackingState.isTracking && trackingState.activeJobId && trackingState.activeJobId !== jobId) {
       const prevJobId = trackingState.activeJobId;
+
+      // 1. Invalidate session generation immediately to suppress pending callbacks
       currentSessionId = null;
       sessionGeneration++;
+
+      // 2. Await in-flight write promise to settle
       if (inFlightWritePromise) {
         try {
           await inFlightWritePromise;
         } catch {}
         inFlightWritePromise = null;
       }
+
+      // 3. Await in-flight buffer flush if running
+      if (activeFlushPromise) {
+        try {
+          await activeFlushPromise;
+        } catch {}
+      }
+
+      // 4. Flush previous job's buffered coordinates if online
+      if (
+        isOnline() &&
+        (locationBuffer.length > 0 || (await loadPersistedBuffer(prevJobId)).length > 0)
+      ) {
+        try {
+          await flushLocationBuffer(prevJobId);
+        } catch (flushErr) {
+          console.warn(`[LocationTrackingService] Buffer flush on switching from job ${prevJobId} error:`, flushErr);
+        }
+      }
+
+      // 5. Clear in-memory buffer before starting new job to preserve multi-job buffer isolation
+      locationBuffer = [];
+
+      // 6. Stop previous job tracking in Firestore (do NOT re-acquire lifecycle lock - prevents deadlock)
+      // If stopping Job A throws an error, propagate the error (do NOT silently swallow)
       try {
         await stopJobTracking(prevJobId);
-      } catch (err) {
-        console.error(`[LocationTrackingService] Error stopping previous job ${prevJobId}:`, err);
+      } catch (stopErr: any) {
+        console.error(`[LocationTrackingService] Error stopping previous job ${prevJobId}:`, stopErr);
+        trackingState.isTracking = false;
+        trackingState.activeJobId = null;
+        trackingState.activeTenantId = null;
+        setSyncStatus('idle');
+        const propagatedErr = new Error(
+          stopErr?.message || `Failed to stop tracking previous job ${prevJobId}`
+        );
+        (propagatedErr as any)._isStopError = true;
+        throw propagatedErr;
       }
     }
 
@@ -505,11 +979,9 @@ export async function startTrackingJob(
       currentDriverInfo.name = auth.currentUser.displayName || auth.currentUser.email || undefined;
     }
 
-    // Check/Request permissions
-    const perms = await requestLocationPermissions();
-    if (!perms.foreground) {
-      console.warn('[LocationTrackingService] Foreground location permission denied. Tracking cannot start.');
-      setSyncStatus('permission_denied', 'Foreground location permission denied');
+    // Gating checks: GPS enabled, foreground/background permissions, precise accuracy (R1)
+    const prerequisitesOk = await verifyTrackingPrerequisites();
+    if (!prerequisitesOk) {
       return false;
     }
 
@@ -542,11 +1014,32 @@ export async function startTrackingJob(
     lastProcessedTimestamp = 0;
     lastParentWriteLocation = null;
     lastHistoryWriteLocation = null;
+    locationBuffer = [];
+
+    // Load any persisted buffer for this job from AsyncStorage
+    try {
+      const persisted = await loadPersistedBuffer(jobId);
+      if (persisted.length > 0) {
+        for (const pt of persisted) {
+          if (!locationBuffer.some((b) => b.timestamp === pt.timestamp)) {
+            locationBuffer.push(pt);
+          }
+        }
+        locationBuffer.sort((a, b) => a.timestamp - b.timestamp);
+      }
+    } catch {}
 
     trackingState.isTracking = true;
     trackingState.activeJobId = jobId;
     trackingState.activeTenantId = tenantId;
     setSyncStatus('syncing');
+
+    // If online and we have buffered telemetry, trigger flush
+    if (isOnline() && locationBuffer.length > 0) {
+      flushLocationBuffer(jobId).catch((flushErr) => {
+        console.warn('[LocationTrackingService] Initial buffer flush failed on startTrackingJob:', flushErr);
+      });
+    }
 
     // Immediately fetch initial position to sync to Firestore without waiting for first interval
     let initialUpdated: DriverLocation | null = null;
@@ -574,14 +1067,21 @@ export async function startTrackingJob(
     }
 
     return true;
-  } catch (err) {
+  } catch (err: any) {
     console.error('[LocationTrackingService] Failed to start tracking job:', err);
+    if (!lastTrackingFailureReason) {
+      lastTrackingFailureReason = 'internal_error';
+    }
     trackingState.isTracking = false;
     trackingState.activeJobId = null;
     trackingState.activeTenantId = null;
     currentSessionId = null;
     sessionGeneration++;
     setSyncStatus('idle');
+    // If error occurred during previous job teardown, propagate it directly (R5)
+    if (err?._isStopError) {
+      throw err;
+    }
     return false;
   } finally {
     releaseLifecycleLock();
@@ -612,7 +1112,19 @@ export async function stopTrackingJob(jobId?: string): Promise<void> {
       inFlightWritePromise = null;
     }
 
-    // 3. Stop native location updates in Expo Location module
+    // 3. Flush any remaining buffered telemetry if online
+    if (
+      isOnline() &&
+      (locationBuffer.length > 0 || (targetJobId && (await loadPersistedBuffer(targetJobId)).length > 0))
+    ) {
+      try {
+        await flushLocationBuffer(targetJobId || undefined);
+      } catch (flushErr) {
+        console.warn('[LocationTrackingService] Buffer flush on stopTrackingJob error:', flushErr);
+      }
+    }
+
+    // 4. Stop native location updates in Expo Location module
     try {
       let hasStarted = false;
       try {
@@ -644,6 +1156,7 @@ export async function stopTrackingJob(jobId?: string): Promise<void> {
     lastParentWriteLocation = null;
     lastHistoryWriteLocation = null;
     lastProcessedTimestamp = 0;
+    locationBuffer = [];
     setSyncStatus('idle');
   } finally {
     releaseLifecycleLock();
@@ -858,6 +1371,7 @@ export function _resetTrackingStateForTesting(): void {
     lastKnownLocation: null,
   };
   currentDriverInfo = {};
+  lastTrackingFailureReason = null;
   currentSessionId = null;
   sessionGeneration = 0;
   lastProcessedTimestamp = 0;
@@ -871,4 +1385,8 @@ export function _resetTrackingStateForTesting(): void {
     lastSyncTime: null,
     lastError: null,
   };
+  locationBuffer = [];
+  isFlushingBuffer = false;
+  activeFlushPromise = null;
+  isNetworkExplicitlyOnline = true;
 }
