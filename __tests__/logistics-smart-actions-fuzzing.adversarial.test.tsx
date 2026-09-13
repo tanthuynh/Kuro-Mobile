@@ -362,7 +362,7 @@ describe('Adversarial Fuzzing & Input Security Harness for Smart Actions', () =>
 
     it('CARD-01: Renders destination details, stop badge, address, and contact info', () => {
       const { getByText } = render(
-        <LogisticsDestinationCard destination={sampleDestination} index={0} />
+        <LogisticsDestinationCard destination={sampleDestination} index={1} />
       );
 
       expect(getByText('Stop 1')).toBeTruthy();
@@ -376,7 +376,7 @@ describe('Adversarial Fuzzing & Input Security Harness for Smart Actions', () =>
 
     it('CARD-02: Pressing "Open in Maps" button invokes Linking.openURL with encoded Maps URL', async () => {
       const { getByTestId } = render(
-        <LogisticsDestinationCard destination={sampleDestination} index={0} />
+        <LogisticsDestinationCard destination={sampleDestination} index={1} />
       );
 
       const mapsBtn = getByTestId('open-maps-btn-dest-sydney-opera');
@@ -394,7 +394,7 @@ describe('Adversarial Fuzzing & Input Security Harness for Smart Actions', () =>
 
     it('CARD-03: Pressing "Call Contact" button invokes Linking.openURL with sanitized tel: URI', async () => {
       const { getByTestId } = render(
-        <LogisticsDestinationCard destination={sampleDestination} index={0} />
+        <LogisticsDestinationCard destination={sampleDestination} index={1} />
       );
 
       const phoneBtn = getByTestId('call-contact-btn-dest-sydney-opera');
@@ -439,7 +439,7 @@ describe('Adversarial Fuzzing & Input Security Harness for Smart Actions', () =>
       (Linking.openURL as jest.Mock).mockRejectedValueOnce(new Error('Unable to open URL'));
 
       const { getByTestId } = render(
-        <LogisticsDestinationCard destination={sampleDestination} index={0} />
+        <LogisticsDestinationCard destination={sampleDestination} index={1} />
       );
 
       const mapsBtn = getByTestId('open-maps-btn-dest-sydney-opera');

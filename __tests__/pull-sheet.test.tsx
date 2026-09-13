@@ -157,13 +157,13 @@ describe('Milestone 3: Pull Sheet Management UI', () => {
   });
 
   describe('PullSheetSectionHeader', () => {
-    it('renders section title and item count', () => {
-      const { getByText } = render(
+    it('renders the compact section title', () => {
+      const { getByText, queryByText } = render(
         <PullSheetSectionHeader title="FOH Control Rig" itemCount={5} />
       );
 
       expect(getByText('FOH Control Rig')).toBeTruthy();
-      expect(getByText('5 items')).toBeTruthy();
+      expect(queryByText('5 items')).toBeNull();
     });
   });
 
@@ -374,7 +374,7 @@ describe('Milestone 3: Pull Sheet Management UI', () => {
 
       // Equipment Section
       expect(getByText('Equipment Pull Sheet')).toBeTruthy();
-      expect(getByTestId('pullsheet-progress-card')).toBeTruthy();
+      expect(getByTestId('pullsheet-search-input')).toBeTruthy();
       expect(getByText('Main Stage Audio Rig')).toBeTruthy();
       expect(getByText('L-Acoustics K2 Line Array')).toBeTruthy();
 

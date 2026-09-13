@@ -448,7 +448,7 @@ describe('Adversarial Challenger 2: QuickStatusSelector, Vehicle Resolution & UI
     it('UI-ADV-03: Header tracking status badge displays Idle when inactive and Tracking when active', async () => {
       // Inactive
       const { getByTestId, getByText, unmount } = render(<LogisticsJobDetailScreen />);
-      expect(getByTestId('header-tracking-status-badge')).toBeTruthy();
+      expect(getByTestId('detail-tracking-status-badge')).toBeTruthy();
       expect(getByText('Idle')).toBeTruthy();
       unmount();
 
@@ -463,7 +463,7 @@ describe('Adversarial Challenger 2: QuickStatusSelector, Vehicle Resolution & UI
       });
 
       const { getByTestId: getActiveBadge, getByText: getActiveText } = render(<LogisticsJobDetailScreen />);
-      expect(getActiveBadge('header-tracking-status-badge')).toBeTruthy();
+      expect(getActiveBadge('detail-tracking-status-badge')).toBeTruthy();
       expect(getActiveText('Tracking')).toBeTruthy();
     });
 

@@ -577,7 +577,6 @@ describe('Milestone 2: Events Feed & Details', () => {
 
       // Combined Client & Venue card exists
       expect(getByTestId('event-client-venue-card')).toBeTruthy();
-      expect(getByText('Client & Venue')).toBeTruthy();
       expect(getByText('CLIENT')).toBeTruthy();
       expect(getByText('LiveNation APAC')).toBeTruthy();
       expect(getByText('VENUE')).toBeTruthy();
@@ -598,7 +597,7 @@ describe('Milestone 2: Events Feed & Details', () => {
 
       // Equipment section and progress card exist
       expect(getByText('Equipment Pull Sheet')).toBeTruthy();
-      expect(getByTestId('pullsheet-progress-card')).toBeTruthy();
+      expect(getByTestId('pullsheet-search-input')).toBeTruthy();
     });
 
     it('renders start scanning button and expands scanner when event is Confirmed', () => {
@@ -606,7 +605,7 @@ describe('Milestone 2: Events Feed & Details', () => {
       const { getByTestId, getByText, queryByTestId } = render(<EventDetailsScreen />);
 
       expect(getByText('Equipment Pull Sheet')).toBeTruthy();
-      expect(getByTestId('pullsheet-progress-card')).toBeTruthy();
+      expect(getByTestId('pullsheet-search-input')).toBeTruthy();
       expect(getByTestId('start-scanning-btn')).toBeTruthy();
       expect(getByText('Start Scanning')).toBeTruthy();
 

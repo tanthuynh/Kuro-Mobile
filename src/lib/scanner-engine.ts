@@ -21,7 +21,7 @@ export function getSerializedScanCode(code: string, equipment?: Equipment): stri
   if (equipment.serialisation === 'Yes' && !equipment.serialNumbers?.length) {
     const assetCode = [equipment.assetNumber, equipment.segAssetNumber, equipment.barcode]
       .find((value) => value?.trim().toLowerCase() === normalized)?.trim();
-    if (assetCode) return assetCode;
+    if (assetCode) return (equipment.serialNumber || equipment.assetNumber || equipment.segAssetNumber || assetCode).trim();
   }
   if (equipment.serialisation === 'Yes' || equipment.serialNumbers?.length || equipment.serialNumber) {
     throw new Error('Scan the individual serial number for this equipment.');

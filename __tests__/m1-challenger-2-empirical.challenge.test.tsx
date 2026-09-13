@@ -347,7 +347,7 @@ describe('Milestone 1 — Challenger 2 Empirical Challenge Test Suite', () => {
       // Component triggers gesture feedback, but hook blocks the mutation
       expect(hapticsSpy).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Medium);
       expect(hapticScanErrorSpy).toHaveBeenCalled();
-      expect(pullsheetHook.current.error?.message).toContain('Offline updates are disabled');
+      expect(pullsheetHook.current.error?.message).toContain('Network connection required');
 
       // No Firestore write was performed
       expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
@@ -382,7 +382,7 @@ describe('Milestone 1 — Challenger 2 Empirical Challenge Test Suite', () => {
       });
 
       expect(hapticScanErrorSpy).toHaveBeenCalled();
-      expect(pullsheetHook.current.error?.message).toContain('Offline updates are disabled');
+      expect(pullsheetHook.current.error?.message).toContain('Network connection required');
       expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
     });
 
@@ -477,7 +477,7 @@ describe('Milestone 1 — Challenger 2 Empirical Challenge Test Suite', () => {
       const result = await updateRepairTicketFields(
         'ticket-uncached-02',
         {
-          priority: 'Critical',
+          priority: 'High',
           internalNotes: 'Capacitor blew during sound check',
           internalReference: 'REF-OFFLINE-99',
         },
@@ -489,7 +489,7 @@ describe('Milestone 1 — Challenger 2 Empirical Challenge Test Suite', () => {
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'doc' }),
         expect.objectContaining({
-          priority: 'Critical',
+          priority: 'High',
           internalNotes: 'Capacitor blew during sound check',
           internalReference: 'REF-OFFLINE-99',
           updatedAt: expect.any(Object),
@@ -530,7 +530,7 @@ describe('Milestone 1 — Challenger 2 Empirical Challenge Test Suite', () => {
       );
 
       await expect(
-        updateLogisticsStatus('logistics-uncached-01', 'Delivered', {
+        updateLogisticsStatus('logistics-uncached-01', 'Completed', {
           tenantId,
           updatedBy: 'Driver Dan',
         })
@@ -539,7 +539,7 @@ describe('Milestone 1 — Challenger 2 Empirical Challenge Test Suite', () => {
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'doc' }),
         expect.objectContaining({
-          status: 'Delivered',
+          status: 'Completed',
           isTrackingActive: false,
           updatedBy: 'Driver Dan',
         })
@@ -641,7 +641,7 @@ describe('Milestone 1 — Challenger 2 Empirical Challenge Test Suite', () => {
           updateRepairTicketFields(
             `ticket-stress-fields-${i}`,
             {
-              priority: 'Critical',
+              priority: 'High',
               internalNotes: `Stress field note #${i}`,
               internalReference: `BATCH-${i}`,
             },
@@ -721,7 +721,7 @@ describe('Milestone 1 — Challenger 2 Empirical Challenge Test Suite', () => {
       // 2. Field update
       const res2 = await updateRepairTicketFields(
         ticketId,
-        { priority: 'Deferred', internalNotes: 'Backordered PSU' },
+        { priority: 'Low', internalNotes: 'Backordered PSU' },
         testUser,
         tenantId
       );

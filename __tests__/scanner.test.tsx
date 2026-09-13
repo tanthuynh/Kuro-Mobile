@@ -87,6 +87,13 @@ const samplePullsheet: Pullsheet = {
 
 describe('Milestone 4: Continuous Scanner UI & Workflow', () => {
   describe('CameraViewfinder', () => {
+    it('leaves torch control to the parent when an external toolbar is used', () => {
+      const { queryByTestId, getByTestId } = render(<CameraViewfinder onScan={jest.fn()}
+        torchEnabled onToggleTorch={jest.fn()} showTorchControl={false} />);
+      expect(queryByTestId('torch-toggle-btn')).toBeNull();
+      expect(getByTestId('camera-view-native').props.enableTorch).toBe(true);
+    });
+
     it('renders reticle, torch toggle, and simulated scan trigger', () => {
       const onScan = jest.fn();
       const onToggleTorch = jest.fn();

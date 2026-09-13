@@ -1,0 +1,9 @@
+{
+  "reference": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1",
+  "scope": "src inventory from rg --files, compared by normalized path and SHA256",
+  "baselineFiles": 732,
+  "comparedFiles": 732,
+  "changedOrMissing": [],
+  "added": [],
+  "note": "Comparison performed during Phase 1 against the in-session starting manifest. No web or shared-infrastructure writes were issued. This is source verification, not a deployed-release check."
+}

@@ -36,6 +36,7 @@ export interface CameraViewfinderProps {
   onScan: (code: string) => void;
   torchEnabled?: boolean;
   onToggleTorch?: () => void;
+  showTorchControl?: boolean;
   onResetTorch?: () => void;
   scanMode?: 'barcode' | 'qr';
   onToggleMode?: (mode: 'barcode' | 'qr') => void;
@@ -47,6 +48,7 @@ export const CameraViewfinder: React.FC<CameraViewfinderProps> = ({
   onScan,
   torchEnabled = false,
   onToggleTorch,
+  showTorchControl = true,
   onResetTorch,
   scanMode = 'barcode',
   onToggleMode,
@@ -293,6 +295,21 @@ export const CameraViewfinder: React.FC<CameraViewfinderProps> = ({
           },
         ]}
       />
+
+      {hasCamera && showTorchControl && onToggleTorch ? (
+        <View style={[styles.topControls, { justifyContent: 'flex-end' }]} pointerEvents="box-none">
+          <Pressable
+            testID="torch-toggle-btn"
+            accessibilityRole="button"
+            accessibilityLabel={torchEnabled ? 'Turn flashlight off' : 'Turn flashlight on'}
+            accessibilityState={{ selected: torchEnabled }}
+            onPress={onToggleTorch}
+            style={[styles.torchButton, { backgroundColor: torchEnabled ? colors.primary : 'rgba(0,0,0,0.65)' }]}
+          >
+            {torchEnabled ? <Zap size={22} color="#FFFFFF" /> : <ZapOff size={22} color="#FFFFFF" />}
+          </Pressable>
+        </View>
+      ) : null}
 
       {/* Viewfinder Guidance Label (Bottom) */}
       <View style={styles.bottomPrompt}>

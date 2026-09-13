@@ -21,6 +21,15 @@ beforeEach(() => {
 });
 afterEach(() => jest.restoreAllMocks());
 
+it('does not report an acknowledged save as failed when recovery-state refresh fails', async () => {
+  jest.spyOn(service, 'updatePullsheetItemStatus').mockResolvedValue({ success: true });
+  const { result } = renderHook(() => usePullSheet('event'));
+  await act(async () => {});
+  jest.spyOn(service, 'getPendingOperations').mockRejectedValue(new Error('storage unavailable'));
+  await act(async () => { expect(await result.current.updateStatus('line', 'dispatched')).toBe(true); });
+  expect(result.current.error?.message).toContain('Changes saved');
+});
+
 it('keeps a newer live snapshot when an older command acknowledgement arrives', async () => {
   let finish!: (result: service.CommandExecutionResult) => void;
   jest.spyOn(service, 'updatePullsheetItemScannedCount').mockImplementation(() => new Promise((resolve) => { finish = resolve; }));

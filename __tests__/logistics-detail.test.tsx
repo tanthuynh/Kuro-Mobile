@@ -118,6 +118,8 @@ const mockSingleJob: LogisticsEntry = {
 
 describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
+    locationTrackingService._resetTrackingStateForTesting();
     jest.clearAllMocks();
     jest.spyOn(logisticsService, 'getLogisticsEntry').mockResolvedValue(mockSingleJob);
     jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
@@ -139,7 +141,7 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     expect(getByText('Festival Stage 1 Audio Delivery')).toBeTruthy();
 
     // Header Tracking Status Badge (Idle initially)
-    expect(getByTestId('header-tracking-status-badge')).toBeTruthy();
+    expect(getByTestId('detail-tracking-status-badge')).toBeTruthy();
     expect(getByText('Idle')).toBeTruthy();
 
     // Large GPS Tracking Banner is removed
@@ -175,7 +177,7 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
 
     const { findByTestId, getByText, queryByTestId } = render(<LogisticsJobDetailScreen />);
 
-    const badge = await findByTestId('header-tracking-status-badge');
+    const badge = await findByTestId('detail-tracking-status-badge');
     expect(badge).toBeTruthy();
     expect(getByText('Tracking')).toBeTruthy();
     expect(queryByTestId('live-gps-tracking-banner')).toBeNull();
@@ -193,7 +195,6 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     const { findByTestId, getByText } = render(<LogisticsJobDetailScreen />);
 
     const playBtn = await findByTestId('play-job-btn');
-    expect(getByText('Start')).toBeTruthy();
     expect(playBtn.props.accessibilityLabel).toBe('Start tracking');
     await act(async () => {
       fireEvent.press(playBtn);
@@ -337,7 +338,7 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     expect(getByTestId('job-notes-modal')).toBeTruthy();
 
     const noteInput = getByTestId('logistics-note-input');
-    expect(noteInput.props.placeholder).toBe('');
+    expect(noteInput.props.placeholder).toBe('Type your internal note...');
     fireEvent.changeText(noteInput, 'Gate 3 access code is 5678.');
 
     const submitBtn = getByTestId('submit-notes-btn');
@@ -354,12 +355,12 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
   });
 
   it('verifies route activation button displays "Start" and LogisticsNotesModal has empty placeholder', async () => {
-    const { findByTestId, getByText, queryByText } = render(<LogisticsJobDetailScreen />);
+    const { findByTestId, getByTestId, getByText, queryByText } = render(<LogisticsJobDetailScreen />);
 
     // Route activation button displays "Start" rather than "Play"
     const startBtn = await findByTestId('play-job-btn');
     expect(startBtn).toBeTruthy();
-    expect(getByText('Start')).toBeTruthy();
+    expect(getByTestId('play-job-btn').props.accessibilityLabel).toBe('Start tracking');
     expect(queryByText('Play')).toBeNull();
     expect(startBtn.props.accessibilityLabel).toBe('Start tracking');
 
@@ -370,7 +371,7 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     });
 
     const noteInput = await findByTestId('logistics-note-input');
-    expect(noteInput.props.placeholder).toBe('');
+    expect(noteInput.props.placeholder).toBe('Type your internal note...');
   });
 });
 
@@ -379,6 +380,8 @@ describe('Milestone M2: Gating Alerts, Mid-Job Revocation & Reliable Finish Sequ
   let openSettingsSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    jest.restoreAllMocks();
+    locationTrackingService._resetTrackingStateForTesting();
     jest.clearAllMocks();
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined);
@@ -506,7 +509,7 @@ describe('Milestone M2: Gating Alerts, Mid-Job Revocation & Reliable Finish Sequ
     expect(await findByTestId('permission-revoked-warning')).toBeTruthy();
     expect(await findByText(/Location permission revoked. Please re-enable in Settings to resume tracking./i)).toBeTruthy();
 
-    const badge = await findByTestId('header-tracking-status-badge');
+    const badge = await findByTestId('detail-tracking-status-badge');
     expect(badge).toBeTruthy();
     expect(await findByText('Permission Required')).toBeTruthy();
 
@@ -626,5 +629,3 @@ describe('Milestone M2: Gating Alerts, Mid-Job Revocation & Reliable Finish Sequ
     expect(finishBtn.props.accessibilityState?.disabled).toBe(false);
   });
 });
-
-

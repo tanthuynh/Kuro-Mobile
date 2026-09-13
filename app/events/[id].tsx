@@ -747,6 +747,7 @@ export default function EventDetailsScreen() {
               onScan={(code) => processScan(code, currentTargetStatus)}
               torchEnabled={torchEnabled}
               onToggleTorch={toggleTorch}
+              showTorchControl={false}
               isVisible={isScannerOpen}
             />
 

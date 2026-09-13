@@ -343,7 +343,7 @@ describe('Kuro Mobile Cross-Feature Integration Hardening Suite', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => ({
+        text: async () => JSON.stringify({
           success: true,
           status: 'committed',
           operationId: opId,

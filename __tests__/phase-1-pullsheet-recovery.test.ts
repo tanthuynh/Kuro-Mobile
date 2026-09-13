@@ -159,4 +159,8 @@ it('distinguishes a shared bulk code from an individual serialized code', () => 
   const serialized: any = { serialisation: 'Yes', barcode: 'MODEL', serialNumbers: [{ serial: 'UNIT-01' }] };
   expect(getSerializedScanCode('unit-01', serialized)).toBe('UNIT-01');
   expect(() => getSerializedScanCode('MODEL', serialized)).toThrow('individual serial');
+  const singleAsset: any = { serialisation: 'Yes', serialNumber: 'UNIT-1', barcode: 'TAG-1', assetNumber: 'ASSET-1' };
+  expect(getSerializedScanCode('TAG-1', singleAsset)).toBe('UNIT-1');
+  expect(getSerializedScanCode('ASSET-1', singleAsset)).toBe('UNIT-1');
+  expect(getSerializedScanCode('unit-1', singleAsset)).toBe('UNIT-1');
 });

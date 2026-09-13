@@ -508,7 +508,7 @@ describe('Challenger M2-2: Disclosure Onboarding & Revocation Auto-Resume Empiri
       ).toBeTruthy();
 
       // Header badge must reflect "Permission Required"
-      const badge = await findByTestId('header-tracking-status-badge');
+      const badge = await findByTestId('detail-tracking-status-badge');
       expect(badge).toBeTruthy();
       expect(await findByText('Permission Required')).toBeTruthy();
 

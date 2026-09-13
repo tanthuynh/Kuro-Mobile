@@ -130,6 +130,7 @@ const mockDatasetJobs: LogisticsEntry[] = [
     isTrackingActive: false,
     notes: '2026-08-27 06:00 [Dispatch Coordinator]: Pallet 1 loaded with line-array speakers.',
     destinations: [
+      { id: 'origin', type: 'destination', destinationName: 'Warehouse start', address: 'Warehouse' },
       {
         id: 'dest-stop-1',
         type: 'destination',
@@ -470,7 +471,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       const { findByTestId, getByText } = render(<LogisticsJobDetailScreen />);
 
       const playBtn = await findByTestId('play-job-btn');
-      expect(getByText('Start')).toBeTruthy();
+      expect(playBtn.props.accessibilityLabel).toBe('Start tracking');
       expect(playBtn.props.accessibilityLabel).toBe('Start tracking');
 
       await act(async () => {
@@ -538,7 +539,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       const { findByTestId, getByText, queryByTestId } = render(<LogisticsJobDetailScreen />);
 
-      expect(await findByTestId('header-tracking-status-badge')).toBeTruthy();
+      expect(await findByTestId('detail-tracking-status-badge')).toBeTruthy();
       expect(getByText('Tracking')).toBeTruthy();
       expect(queryByTestId('live-gps-tracking-banner')).toBeNull();
     });
@@ -634,10 +635,10 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
   // ==========================================================================
   describe('Scenario 3: Driver performs 1-tap "Open in Maps" on destination -> triggers Linking.openURL with sanitized Google Maps query URL', () => {
     it('triggers Linking.openURL with properly sanitized, formatted Google Maps search query', async () => {
-      const destination = mockDatasetJobs[0].destinations![0];
+      const destination = mockDatasetJobs[0].destinations![1];
 
       const { getByTestId } = render(
-        <LogisticsDestinationCard destination={destination} index={0} />
+        <LogisticsDestinationCard destination={destination} index={1} />
       );
 
       const mapsBtn = getByTestId(`open-maps-btn-${destination.id}`);
@@ -660,7 +661,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       };
 
       const { getByTestId } = render(
-        <LogisticsDestinationCard destination={destination} index={0} />
+        <LogisticsDestinationCard destination={destination} index={1} />
       );
 
       const mapsBtn = getByTestId('open-maps-btn-dest-multiline');
@@ -682,7 +683,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       };
 
       const { getByTestId } = render(
-        <LogisticsDestinationCard destination={destination} index={0} />
+        <LogisticsDestinationCard destination={destination} index={1} />
       );
 
       const mapsBtn = getByTestId('open-maps-btn-dest-blank');
@@ -695,10 +696,10 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
   // ==========================================================================
   describe('Scenario 4: Driver performs 1-tap "Call Contact" on destination -> triggers Linking.openURL with sanitized tel: URL', () => {
     it('extracts and dials international formatted phone numbers', async () => {
-      const destination = mockDatasetJobs[0].destinations![0]; // Contact: 'Stage Mgr Dave: +61 412 345 678'
+      const destination = mockDatasetJobs[0].destinations![1]; // Contact: 'Stage Mgr Dave: +61 412 345 678'
 
       const { getByTestId } = render(
-        <LogisticsDestinationCard destination={destination} index={0} />
+        <LogisticsDestinationCard destination={destination} index={1} />
       );
 
       const callBtn = getByTestId(`call-contact-btn-${destination.id}`);
@@ -711,7 +712,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
     });
 
     it('extracts and dials Australian domestic landline and mobile phone numbers', async () => {
-      const destination = mockDatasetJobs[0].destinations![1]; // Contact: 'Office: (02) 9876 5432'
+      const destination = mockDatasetJobs[0].destinations![2]; // Contact: 'Office: (02) 9876 5432'
 
       const { getByTestId } = render(
         <LogisticsDestinationCard destination={destination} index={1} />
@@ -736,7 +737,7 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
       };
 
       const { getByTestId } = render(
-        <LogisticsDestinationCard destination={destination} index={0} />
+        <LogisticsDestinationCard destination={destination} index={1} />
       );
 
       const callBtn = getByTestId('call-contact-btn-dest-no-phone');
@@ -864,9 +865,9 @@ describe('Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration',
 
       const { findByTestId, getByTestId, getByText, queryByTestId } = render(<LogisticsJobDetailScreen />);
 
-      expect(await findByTestId('header-tracking-status-badge')).toBeTruthy();
+      expect(await findByTestId('detail-tracking-status-badge')).toBeTruthy();
       expect(getByText('Idle')).toBeTruthy();
-      expect(getByTestId('detail-job-status-badge')).toBeTruthy();
+      expect(getByTestId('header-job-status-badge')).toBeTruthy();
       expect(queryByTestId('live-gps-tracking-banner')).toBeNull();
     });
   });

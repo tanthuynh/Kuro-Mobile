@@ -29,6 +29,19 @@ jest.mock('@/context/theme-context', () => {
 describe('Milestone 4: 1-Tap Smart Actions Tests', () => {
   let openURLSpy: jest.SpyInstance;
 
+  it('preserves the Start row layout while destination rows expose actions', () => {
+    const destination: LogisticsDestination = { id: 'origin', type: 'destination',
+      destinationName: 'Warehouse', address: '1 Warehouse Road', contact: '0412345678' };
+    const { getByText, queryByTestId, rerender } = render(<LogisticsDestinationCard destination={destination} index={0} />);
+    expect(getByText('Start')).toBeTruthy();
+    expect(queryByTestId('open-maps-btn-origin')).toBeNull();
+    expect(queryByTestId('call-contact-btn-origin')).toBeNull();
+    rerender(<LogisticsDestinationCard destination={destination} index={1} />);
+    expect(getByText('Stop 1')).toBeTruthy();
+    expect(queryByTestId('open-maps-btn-origin')).toBeTruthy();
+    expect(queryByTestId('call-contact-btn-origin')).toBeTruthy();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
@@ -44,7 +57,7 @@ describe('Milestone 4: 1-Tap Smart Actions Tests', () => {
     };
 
     const { getByTestId } = render(
-      <LogisticsDestinationCard destination={destination} index={0} />
+      <LogisticsDestinationCard destination={destination} index={1} />
     );
 
     const mapsBtn = getByTestId('open-maps-btn-dest-01');

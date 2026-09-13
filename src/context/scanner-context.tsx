@@ -13,6 +13,7 @@ import React, {
   useMemo,
   useRef,
   useEffect,
+  useLayoutEffect,
 } from 'react';
 import { useAuth } from './auth-context';
 import { useEquipment } from '@/hooks/use-equipment';
@@ -77,7 +78,7 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const tenantId = tenant?.tenantId || user?.tenantId || '';
   const currentUserId = user?.uid || 'anonymous';
 
-  const { equipmentLookupMap, equipment } = useEquipment();
+  const { equipmentLookupMap } = useEquipment();
 
   const scanBusyRef = useRef(false);
   const snapshotRevisionRef = useRef(0);
@@ -109,7 +110,10 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }
 
   const scanScopeRef = useRef({ activeEventId, tenantId, currentUserId });
-  scanScopeRef.current = { activeEventId, tenantId, currentUserId };
+  useLayoutEffect(() => {
+    scanScopeRef.current = { activeEventId, tenantId, currentUserId };
+    return () => { scanScopeRef.current = { activeEventId: null, tenantId: '', currentUserId: '' }; };
+  }, [activeEventId, tenantId, currentUserId]);
 
   const dismissCompletionModal = useCallback(() => {
     setIsCompletionModalVisible(false);
@@ -307,6 +311,9 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
               const newCount = result.newScannedCount || 1;
               const isFullyPrepped = result.isFullyPrepped || false;
 
+              if (result.item.inventoryItemId && !result.equipment) {
+                throw new Error('Equipment details are not available yet. Refresh before scanning this item.');
+              }
               saveResult = await updatePullsheetItemScannedCount(
                 activeEventId,
                 tenantId,

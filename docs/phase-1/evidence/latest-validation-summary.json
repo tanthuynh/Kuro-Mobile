@@ -1,0 +1,174 @@
+{
+  "method": "Latest per-suite results: final-full.json with two fixture-only suite reruns from final-cross-feature.json",
+  "passedSuites": 79,
+  "failedSuites": 11,
+  "passedTests": 1614,
+  "failedTests": 33,
+  "failures": [
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\events.test.tsx",
+      "test": "Milestone 2: Events Feed & Details EventDetailsScreen renders combined Client & Venue card and equipment pull sheet overview",
+      "message": "Error: Unable to find an element with text: Client & Venue"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\events.test.tsx",
+      "test": "Milestone 2: Events Feed & Details EventDetailsScreen renders start scanning button and expands scanner when event is Confirmed",
+      "message": "Error: Unable to find an element with testID: pullsheet-progress-card"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\disclosure-and-revocation.challenger.test.tsx",
+      "test": "Challenger M2-2: Disclosure Onboarding & Revocation Auto-Resume Empirical Suite 2. R3 Mid-Job Revocation & Silent Auto-Resume 2.5: UI renders permission-revoked-warning banner and header badge during suspension",
+      "message": "Error: Unable to find an element with testID: header-tracking-status-badge"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\quickstatus-vehicle-resolution.adversarial.test.tsx",
+      "test": "Adversarial Challenger 2: QuickStatusSelector, Vehicle Resolution & UI Test Suite 3. Logistics Job Detail Screen UI & Lifecycle Synchronization UI-ADV-03: Header tracking status badge displays Idle when inactive and Tracking when active",
+      "message": "Error: Unable to find an element with testID: header-tracking-status-badge"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\continuous-scanning-workflow.stress.test.tsx",
+      "test": "Continuous Camera Scanning Workflow Stress & Integration Suite 2. Scanner Screen UI, HUD Overlays & Manual Entry Fallback toggles torch flashlight in camera viewfinder with haptic tap",
+      "message": "Error: Unable to find an element with testID: torch-toggle-btn"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\scanner.test.tsx",
+      "test": "Milestone 4: Continuous Scanner UI & Workflow CameraViewfinder renders reticle, torch toggle, and simulated scan trigger",
+      "message": "Error: Unable to find an element with testID: torch-toggle-btn"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\pull-sheet.test.tsx",
+      "test": "Milestone 3: Pull Sheet Management UI PullSheetSectionHeader renders section title and item count",
+      "message": "Error: Unable to find an element with text: 5 items"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\pull-sheet.test.tsx",
+      "test": "Milestone 3: Pull Sheet Management UI Unified Event Details & Pull Sheet Screen renders unified event details screen with compact logistics and start scanning button",
+      "message": "Error: Unable to find an element with testID: pullsheet-progress-card"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 2: Driver activates scheduled job -> triggers status transition to \"In Progress\" AND startTrackingJob syncing GPS coordinates to Firestore activates scheduled job via Play button, starts background GPS updates, and writes initial GPS location to Firestore",
+      "message": "Error: Found multiple elements with text: Start"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 2: Driver activates scheduled job -> triggers status transition to \"In Progress\" AND startTrackingJob syncing GPS coordinates to Firestore updates header tracking status badge to Tracking and confirms live GPS banner is removed",
+      "message": "Error: Unable to find an element with testID: header-tracking-status-badge"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 3: Driver performs 1-tap \"Open in Maps\" on destination -> triggers Linking.openURL with sanitized Google Maps query URL triggers Linking.openURL with properly sanitized, formatted Google Maps search query",
+      "message": "Error: Unable to find an element with testID: open-maps-btn-dest-stop-1"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 3: Driver performs 1-tap \"Open in Maps\" on destination -> triggers Linking.openURL with sanitized Google Maps query URL normalizes multi-line address and trailing whitespace for map URL generation",
+      "message": "Error: Unable to find an element with testID: open-maps-btn-dest-multiline"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 3: Driver performs 1-tap \"Open in Maps\" on destination -> triggers Linking.openURL with sanitized Google Maps query URL disables \"Open in Maps\" button when address and venue name are missing",
+      "message": "Error: Unable to find an element with testID: open-maps-btn-dest-blank"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 4: Driver performs 1-tap \"Call Contact\" on destination -> triggers Linking.openURL with sanitized tel: URL extracts and dials international formatted phone numbers",
+      "message": "Error: Unable to find an element with testID: call-contact-btn-dest-stop-1"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 4: Driver performs 1-tap \"Call Contact\" on destination -> triggers Linking.openURL with sanitized tel: URL disables \"Call Contact\" button when contact string has no dialable digits",
+      "message": "Error: Unable to find an element with testID: call-contact-btn-dest-no-phone"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 6: Driver completes job -> triggers status transition to \"Completed\" AND triggers stopTrackingJob deactivating GPS polling renders completed job state with success badge and Idle header tracking status",
+      "message": "Error: Unable to find an element with testID: header-tracking-status-badge"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+      "test": "Milestone 5: Kuro Mobile Logistics & Driver Workflow E2E Integration Scenario 8: Integrated Full-Lifecycle Driver Journey (E2E Master Workflow) executes complete step-by-step driver workflow: Select -> Activate -> GPS Track -> Maps -> Call -> Add Note -> Complete",
+      "message": "Error: Unable to find an element with testID: open-maps-btn-dest-stop-1"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone 4: Logistics Job Detail Screen Component Tests renders bracketed event title, header tracking status badge, stripped job overview, and destinations",
+      "message": "Error: Unable to find an element with testID: header-tracking-status-badge"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone 4: Logistics Job Detail Screen Component Tests renders Tracking badge in header when job tracking is active",
+      "message": "Error: Unable to find an element with testID: header-tracking-status-badge"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone 4: Logistics Job Detail Screen Component Tests play button starts GPS tracking and updates status to \"In Progress\"",
+      "message": "Error: Found multiple elements with text: Start"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone 4: Logistics Job Detail Screen Component Tests renders main add note button at bottom and opens notes modal",
+      "message": "Error: expect(received).toBe(expected) // Object.is equality"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone 4: Logistics Job Detail Screen Component Tests verifies route activation button displays \"Start\" and LogisticsNotesModal has empty placeholder",
+      "message": "Error: Found multiple elements with text: Start"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone M2: Gating Alerts, Mid-Job Revocation & Reliable Finish Sequence R1: shows \"Location Services Disabled\" alert with Open Settings when GPS is off, and leaves status unchanged",
+      "message": "Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone M2: Gating Alerts, Mid-Job Revocation & Reliable Finish Sequence R1: shows \"Precise Location Required\" alert when location accuracy is approximate, and leaves status unchanged",
+      "message": "Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone M2: Gating Alerts, Mid-Job Revocation & Reliable Finish Sequence R1: shows \"Location Permission Required\" alert when permission is denied, and leaves status unchanged",
+      "message": "Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+      "test": "Milestone M2: Gating Alerts, Mid-Job Revocation & Reliable Finish Sequence R3: renders permission-revoked-warning banner with Open Settings link when tracking is suspended",
+      "message": "Error: Unable to find an element with testID: header-tracking-status-badge"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-smart-actions-fuzzing.adversarial.test.tsx",
+      "test": "Adversarial Fuzzing & Input Security Harness for Smart Actions 3. LogisticsDestinationCard 1-Tap UI Trigger Verification CARD-01: Renders destination details, stop badge, address, and contact info",
+      "message": "Error: Unable to find an element with text: Stop 1"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-smart-actions-fuzzing.adversarial.test.tsx",
+      "test": "Adversarial Fuzzing & Input Security Harness for Smart Actions 3. LogisticsDestinationCard 1-Tap UI Trigger Verification CARD-02: Pressing \"Open in Maps\" button invokes Linking.openURL with encoded Maps URL",
+      "message": "Error: Unable to find an element with testID: open-maps-btn-dest-sydney-opera"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-smart-actions-fuzzing.adversarial.test.tsx",
+      "test": "Adversarial Fuzzing & Input Security Harness for Smart Actions 3. LogisticsDestinationCard 1-Tap UI Trigger Verification CARD-03: Pressing \"Call Contact\" button invokes Linking.openURL with sanitized tel: URI",
+      "message": "Error: Unable to find an element with testID: call-contact-btn-dest-sydney-opera"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-smart-actions-fuzzing.adversarial.test.tsx",
+      "test": "Adversarial Fuzzing & Input Security Harness for Smart Actions 3. LogisticsDestinationCard 1-Tap UI Trigger Verification CARD-05: Gracefully catches and logs errors when Linking.openURL rejects",
+      "message": "Error: Unable to find an element with testID: open-maps-btn-dest-sydney-opera"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\logistics-smart-actions.test.tsx",
+      "test": "Milestone 4: 1-Tap Smart Actions Tests 1-tap \"Open in Maps\" triggers Linking.openURL with encoded Google Maps search query",
+      "message": "Error: Unable to find an element with testID: open-maps-btn-dest-01"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\repair-hardening-concurrency.test.ts",
+      "test": "Repair Workflow Hardening & Concurrency Test Suite Partial Failure Handling & Error Propagation HRD-ERR-01: createRepairTicket surfaces equipment update failure without swallowing",
+      "message": "Error: expect(received).rejects.toThrow()"
+    },
+    {
+      "suite": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro Mobile\\kuro-mobile\\__tests__\\repair-hardening-concurrency.test.ts",
+      "test": "Repair Workflow Hardening & Concurrency Test Suite Partial Failure Handling & Error Propagation HRD-ERR-02: createRepairTicket surfaces RTDB availability sync failure without swallowing",
+      "message": "Error: expect(received).rejects.toThrow()"
+    }
+  ]
+}
