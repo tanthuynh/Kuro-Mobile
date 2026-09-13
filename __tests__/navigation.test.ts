@@ -85,6 +85,22 @@ describe('Kuro Mobile Route Guarding & Navigation Hierarchy', () => {
       const tabsElement = UNSAFE_root.children[0];
       expect(tabsElement).toBeTruthy();
     });
+
+    it('configures high-contrast grey tabBarActiveTintColor and tabBarInactiveTintColor with haptics', () => {
+      const Haptics = require('expo-haptics');
+      const TabsLayout = require('../app/(tabs)/_layout').default;
+      const tree = TabsLayout();
+
+      expect(tree.props.screenOptions.tabBarActiveTintColor).toBe('#F5F5F5');
+      expect(tree.props.screenOptions.tabBarInactiveTintColor).toBe('#737373');
+
+      // Verify haptic feedback listener
+      expect(tree.props.screenListeners).toBeDefined();
+      expect(typeof tree.props.screenListeners.tabPress).toBe('function');
+
+      tree.props.screenListeners.tabPress();
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Light);
+    });
   });
 });
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
-import { Animated } from 'react-native';
+import { Animated, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import {
   PullSheetItemRow,
@@ -666,6 +666,30 @@ describe('Mobile Swipe-to-Scan Gesture in Event Scanner Mode', () => {
 
       expect(springSpy).not.toHaveBeenCalled();
       expect(onEnd).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets useNativeDriver to false on web platform to prevent missing RCTAnimation warnings', () => {
+      const originalOS = Platform.OS;
+      try {
+        (Platform as any).OS = 'web';
+        const translateX = new Animated.Value(0);
+        const timingSpy = jest.spyOn(Animated, 'timing').mockImplementation((() => ({
+          start: jest.fn(),
+          stop: jest.fn(),
+          reset: jest.fn(),
+        })) as any);
+
+        createSlideOffSpringAnimation(translateX, 'right', 360);
+
+        expect(timingSpy).toHaveBeenCalledWith(
+          translateX,
+          expect.objectContaining({
+            useNativeDriver: false,
+          })
+        );
+      } finally {
+        (Platform as any).OS = originalOS;
+      }
     });
   });
 });

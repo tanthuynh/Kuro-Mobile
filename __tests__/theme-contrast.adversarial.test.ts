@@ -81,6 +81,16 @@ describe('Theme Contrast & WCAG 2.1 Accessibility Verification', () => {
       const ratio = calculateContrastRatio(darkColors.status.events, darkColors.background);
       expect(ratio).toBeGreaterThanOrEqual(4.5);
     });
+
+    it('verifies active tabBar item on card meets WCAG AAA standard (>= 7:1)', () => {
+      const ratio = calculateContrastRatio(darkColors.tabBar.active, darkColors.card);
+      expect(ratio).toBeGreaterThanOrEqual(7.0);
+    });
+
+    it('verifies passive tabBar item on card meets WCAG AA UI standard (>= 3.0:1)', () => {
+      const ratio = calculateContrastRatio(darkColors.tabBar.inactive, darkColors.card);
+      expect(ratio).toBeGreaterThanOrEqual(3.0);
+    });
   });
 
   describe('Light Mode Contrast Ratios', () => {
@@ -111,6 +121,16 @@ describe('Theme Contrast & WCAG 2.1 Accessibility Verification', () => {
       const ratio = calculateContrastRatio(lightColors.destructiveForeground, lightColors.destructive);
       // #F8FAFC on #EF4444 is approx 3.5
       expect(ratio).toBeGreaterThanOrEqual(3.5);
+    });
+
+    it('verifies active tabBar item on card meets WCAG AAA standard (>= 7:1)', () => {
+      const ratio = calculateContrastRatio(lightColors.tabBar.active, lightColors.card);
+      expect(ratio).toBeGreaterThanOrEqual(7.0);
+    });
+
+    it('verifies passive tabBar item on card meets WCAG AA UI standard (>= 3.0:1)', () => {
+      const ratio = calculateContrastRatio(lightColors.tabBar.inactive, lightColors.card);
+      expect(ratio).toBeGreaterThanOrEqual(3.0);
     });
   });
 

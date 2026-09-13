@@ -4,6 +4,7 @@ import {
   Text,
   Animated,
   StyleSheet,
+  Platform,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
@@ -42,12 +43,12 @@ export const OnlineIndicator: React.FC<OnlineIndicatorProps> = ({
           Animated.timing(pulseAnim, {
             toValue: 1.6,
             duration: 1200,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           Animated.timing(pulseAnim, {
             toValue: 1,
             duration: 1200,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
         ])
       );

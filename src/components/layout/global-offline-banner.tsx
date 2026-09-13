@@ -9,7 +9,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WifiOff } from 'lucide-react-native';
 import { useNetworkStatus } from '@/context/network-context';
@@ -32,7 +32,7 @@ export function GlobalOfflineBanner({
     Animated.timing(opacityAnim, {
       toValue: isOnline ? 0 : 1,
       duration: 200,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, [isOnline, opacityAnim]);
 

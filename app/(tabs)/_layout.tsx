@@ -11,6 +11,7 @@ import { CalendarDays, QrCode, Package, User, Wrench, Truck } from 'lucide-react
 
 import { useTheme } from '@/context/theme-context';
 import { platformShadow } from '@/lib/shadows';
+import * as Haptics from 'expo-haptics';
 
 export default function TabsLayout() {
   const { colors, typography, layout } = useTheme();
@@ -20,10 +21,17 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => {
+          if (Platform.OS !== 'web') {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
+        },
+      }}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
+        tabBarActiveTintColor: colors.tabBar.active,
+        tabBarInactiveTintColor: colors.tabBar.inactive,
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopColor: colors.border,

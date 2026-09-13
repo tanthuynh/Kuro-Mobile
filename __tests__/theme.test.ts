@@ -33,6 +33,13 @@ describe('Kuro Mobile Theme System & Accessibility Tokens', () => {
       expect(darkColors.brandGreenScale.green4).toBeDefined();
       expect(darkColors.brandGreenScale.green5).toBeDefined();
     });
+
+    it('defines tabBar active and inactive tokens with distinct contrast', () => {
+      expect(darkColors.tabBar.active).toBe('#F5F5F5');
+      expect(darkColors.tabBar.inactive).toBe('#737373');
+      expect(lightColors.tabBar.active).toBe('#0F172A');
+      expect(lightColors.tabBar.inactive).toBe('#64748B');
+    });
   });
 
   describe('Mobile Touch Target & Spacing Standards', () => {

@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Platform, LogBox } from 'react-native';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
@@ -17,6 +17,11 @@ import { NetworkProvider } from '@/context/network-context';
 import { ScannerProvider } from '@/context/scanner-context';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { GlobalOfflineBanner } from '@/components/layout/global-offline-banner';
+
+// Ignore non-blocking development advisory warnings
+LogBox.ignoreLogs([
+  "Response.blob() is using React Native's Blob",
+]);
 
 // Prevent splash screen from auto-hiding before auth state and fonts are determined
 SplashScreen.preventAutoHideAsync().catch(() => {

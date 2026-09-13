@@ -274,8 +274,22 @@ export interface CommandExecutionResult {
   reconciliationStatus?: 'completed' | 'pending' | 'failed';
 }
 
+function removeUndefinedFields(obj: any): any {
+  if (obj === null || obj === undefined) return null;
+  if (typeof obj !== 'object') return obj;
+  if (obj instanceof Date) return obj;
+  if (Array.isArray(obj)) return obj.map(removeUndefinedFields);
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = removeUndefinedFields(value);
+    }
+  }
+  return cleaned;
+}
+
 /**
- * Direct Firestore fallback mutation when the backend command endpoint is unmounted (404).
+ * Direct Firestore fallback mutation when the backend command endpoint is unmounted (404) or encounters 5xx.
  */
 async function directFirestoreFallback(
   action: 'increment_scan' | 'update_status' | 'bulk_confirm',
@@ -380,11 +394,14 @@ async function directFirestoreFallback(
     }
 
     if (hasChanges) {
-      await updateDoc(docRef, {
-        items: updatedItems,
-        updatedAt: serverTimestamp(),
-        updatedBy: user.uid,
-      });
+      await updateDoc(
+        docRef,
+        removeUndefinedFields({
+          items: updatedItems,
+          updatedAt: serverTimestamp(),
+          updatedBy: user.uid,
+        })
+      );
     }
 
     return { success: true, item: targetItem };
@@ -474,7 +491,13 @@ async function executePullsheetCommand(
 
     clearTimeout(timeoutId);
 
-    const data = await response.json().catch(() => null);
+    const rawText = await response.text().catch(() => '');
+    let data: any = null;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      // Non-JSON response (e.g. server crash HTML or gateway error)
+    }
 
     // 5. Validated Committed-Result Verification (Not merely HTTP 200)
     if (
@@ -522,13 +545,26 @@ async function executePullsheetCommand(
       };
     }
 
-    // 5xx Server or Gateway Errors, 408 Request Timeout, or 499 Client Closed Request: outcome is unknown (server may have committed before timeout)
+    // 5xx Server or Gateway Errors, 408 Request Timeout, or 499 Client Closed Request
     if (response.status >= 500 || response.status === 408 || response.status === 499) {
+      console.warn(`[pullSheetService] Server returned status ${response.status}. Attempting direct Firestore fallback...`);
+      const fallbackResult = await directFirestoreFallback(action, eventId, tenantId, user, details);
+      if (fallbackResult.success) {
+        await clearPendingOperation(tenantId, user.uid, operationId);
+        return {
+          success: true,
+          operationId,
+          item: fallbackResult.item,
+        };
+      }
+
       pendingRecord.state = 'outcome_unknown';
       await savePendingOperation(pendingRecord);
+
+      const serverErrorMsg = data?.error || (rawText && !rawText.startsWith('<') ? rawText.slice(0, 150) : null);
       return {
         success: false,
-        error: data?.error || `Server gateway error (${response.status}). Outcome unknown; please check status or retry.`,
+        error: serverErrorMsg || fallbackResult.error || `Server gateway error (${response.status}). Outcome unknown; please check status or retry.`,
         outcomeUnknown: true,
         operationId,
       };

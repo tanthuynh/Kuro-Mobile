@@ -44,6 +44,10 @@ export interface ThemeColors {
     dispatch: string;
     repairs: string;
   };
+  tabBar: {
+    active: string;
+    inactive: string;
+  };
 }
 
 export const darkColors: ThemeColors = {
@@ -85,6 +89,10 @@ export const darkColors: ThemeColors = {
     dispatch: '#FACC15', // mapped from warning
     repairs: '#D92929', // mapped from destructive
   },
+  tabBar: {
+    active: '#F5F5F5', // Light grey / near-white for prominent active tab indication
+    inactive: '#737373', // Darker muted grey, meeting WCAG AA (>= 3:1) against card #1F1F1F
+  },
 };
 
 export const lightColors: ThemeColors = {
@@ -125,6 +133,10 @@ export const lightColors: ThemeColors = {
     logistics: '#16A34A', // mapped from success
     dispatch: '#FACC15', // mapped from warning
     repairs: '#EF4444', // mapped from destructive
+  },
+  tabBar: {
+    active: '#0F172A', // Slate dark charcoal for prominent active tab indication on white card
+    inactive: '#64748B', // Medium muted slate grey
   },
 };
 

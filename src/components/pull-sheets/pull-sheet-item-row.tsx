@@ -13,6 +13,7 @@ import {
   Pressable,
   Animated,
   PanResponder,
+  Platform,
 } from 'react-native';
 import {
   Info,
@@ -69,7 +70,7 @@ export function createSlideOffSpringAnimation(
   return Animated.timing(translateX, {
     toValue,
     duration: SWIPE_ANIMATION_CONFIG.timingDuration,
-    useNativeDriver: true,
+    useNativeDriver: Platform.OS !== 'web',
   }).start((result) => {
     callbacks?.onSlideComplete?.(Boolean(result?.finished));
     if (!result?.finished || (callbacks?.isMounted && !callbacks.isMounted())) {
@@ -80,7 +81,7 @@ export function createSlideOffSpringAnimation(
       toValue: 0,
       friction: SWIPE_ANIMATION_CONFIG.springFriction,
       tension: SWIPE_ANIMATION_CONFIG.springTension,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start(() => {
       callbacks?.onEnd?.();
     });
@@ -215,7 +216,7 @@ export const PullSheetItemRow: React.FC<PullSheetItemRowProps> = ({
       toValue: 0,
       friction: SWIPE_ANIMATION_CONFIG.snapBackFriction,
       tension: SWIPE_ANIMATION_CONFIG.snapBackTension,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start(() => {
       if (isMountedRef.current) {
         isAnimatingRef.current = false;
