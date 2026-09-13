@@ -512,7 +512,7 @@ export default function ProfileScreen() {
               { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
             ]}
           >
-            {`Kuro RMS Mobile • Build ${packageJson.version || '0.1.3'} (Release)`}
+            {`Kuro RMS Mobile • Build ${packageJson.version || '0.1.4'} (Release)`}
           </Text>
         </View>
 
