@@ -1,4 +1,4 @@
-/**
+﻿/**
  * app/(tabs)/_layout.tsx
  * Authenticated Bottom Tab Navigation Shell
  */
@@ -7,7 +7,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CalendarDays, QrCode, Package, User, Wrench, Truck } from 'lucide-react-native';
+import { CalendarDays, Truck, Wrench, User } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
 import { platformShadow } from '@/lib/shadows';
@@ -21,6 +21,7 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      initialRouteName="events"
       screenListeners={{
         tabPress: () => {
           if (Platform.OS !== 'web') {
@@ -61,7 +62,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="events"
         options={{
           title: 'Events',
           tabBarLabel: 'Events',
@@ -114,6 +115,12 @@ export default function TabsLayout() {
               strokeWidth={focused ? 2.5 : 2}
             />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen

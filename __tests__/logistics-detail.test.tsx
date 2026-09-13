@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, StyleSheet } from 'react-native';
 import LogisticsJobDetailScreen from '@/../app/logistics/[id]';
 import * as logisticsService from '@/services/logistics-service';
 import * as locationTrackingService from '@/services/location-tracking-service';
@@ -330,6 +330,10 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     // Main add note button at bottom exists
     const addNoteBtn = await findByTestId('add-note-btn');
     expect(addNoteBtn).toBeTruthy();
+    const flatNoteStyle = StyleSheet.flatten(
+      typeof addNoteBtn.props.style === 'function' ? addNoteBtn.props.style({ pressed: false }) : addNoteBtn.props.style
+    );
+    expect(flatNoteStyle.backgroundColor).toBe('#206020');
 
     await act(async () => {
       fireEvent.press(addNoteBtn);

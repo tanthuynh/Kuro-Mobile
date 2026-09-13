@@ -44,7 +44,7 @@ export function RepairTicketCard({
     if (onPress) {
       onPress(ticket);
     } else {
-      router.push(`/repair/${ticket.id}`);
+      router.push(`/repairs/${ticket.id}` as any);
     }
   };
 

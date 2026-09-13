@@ -15,7 +15,7 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import { Linking } from 'react-native';
+import { Linking, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import RepairTicketDetailScreen from '@/../app/repair/[id]';
 import * as repairService from '@/services/repair-service';
@@ -648,6 +648,22 @@ describe('Comprehensive Repair Ticket Details Screen & Mobile Cleave Architectur
       expect(getByTestId('add-attachment-modal')).toBeTruthy();
       expect(getByTestId('add-photo-evidence-btn')).toBeTruthy();
       expect(getByTestId('add-doc-evidence-btn')).toBeTruthy();
+    });
+
+    it('styles both "Add Photo" and "Add Attachment" buttons with brandGreen background', async () => {
+      const { findByTestId } = render(<RepairTicketDetailScreen />);
+      const addPhotoBtn = await findByTestId('detail-add-photo-btn');
+      const addAttBtn = await findByTestId('detail-add-attachment-btn');
+
+      const flatPhotoStyle = StyleSheet.flatten(
+        typeof addPhotoBtn.props.style === 'function' ? addPhotoBtn.props.style({ pressed: false }) : addPhotoBtn.props.style
+      );
+      const flatAttStyle = StyleSheet.flatten(
+        typeof addAttBtn.props.style === 'function' ? addAttBtn.props.style({ pressed: false }) : addAttBtn.props.style
+      );
+
+      expect(flatPhotoStyle.backgroundColor).toBe('#206020');
+      expect(flatAttStyle.backgroundColor).toBe('#206020');
     });
   });
 

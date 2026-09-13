@@ -129,12 +129,12 @@ export function RepairPhotoGallery({
       {/* Bottom Action: Add Photo (Opens Camera) */}
       {editable && onAddPhoto ? (
         <Button
-          variant="outline"
+          variant="primary"
           size="default"
           fullWidth
-          icon={<Camera size={15} color={colors.primary} />}
+          icon={<Camera size={15} color={colors.primaryForeground} />}
           onPress={onAddPhoto}
-          style={styles.bottomAddPhotoBtn}
+          style={[styles.bottomAddPhotoBtn, { backgroundColor: colors.brandGreen }]}
           testID="gallery-add-photo-btn"
         >
           Add Photo

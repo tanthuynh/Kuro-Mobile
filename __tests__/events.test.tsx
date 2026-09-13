@@ -356,7 +356,7 @@ describe('Milestone 2: Events Feed & Details', () => {
         return jest.fn();
       });
 
-      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const EventsFeedScreen = require('../app/(tabs)/events/index').default;
       const { getByTestId, getByText } = render(<EventsFeedScreen />);
 
       expect(getByTestId('metric-card-all')).toBeTruthy();
@@ -377,7 +377,7 @@ describe('Milestone 2: Events Feed & Details', () => {
         return jest.fn();
       });
 
-      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const EventsFeedScreen = require('../app/(tabs)/events/index').default;
       const { getByTestId, queryByText, getByText } = render(<EventsFeedScreen />);
 
       // Filter by Inquiry
@@ -411,7 +411,7 @@ describe('Milestone 2: Events Feed & Details', () => {
         return jest.fn();
       });
 
-      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const EventsFeedScreen = require('../app/(tabs)/events/index').default;
       const { getByTestId, queryByText, getByText } = render(<EventsFeedScreen />);
 
       const searchInput = getByTestId('events-feed-search-input');
@@ -442,7 +442,7 @@ describe('Milestone 2: Events Feed & Details', () => {
         return jest.fn();
       });
 
-      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const EventsFeedScreen = require('../app/(tabs)/events/index').default;
       const { getByTestId, getByText } = render(<EventsFeedScreen />);
 
       const searchInput = getByTestId('events-feed-search-input');
@@ -464,7 +464,7 @@ describe('Milestone 2: Events Feed & Details', () => {
         return jest.fn();
       });
 
-      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const EventsFeedScreen = require('../app/(tabs)/events/index').default;
       const { getByTestId } = render(<EventsFeedScreen />);
 
       fireEvent.press(getByTestId('feed-event-ev-1'));
@@ -491,7 +491,7 @@ describe('Milestone 2: Events Feed & Details', () => {
         return jest.fn();
       });
 
-      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const EventsFeedScreen = require('../app/(tabs)/events/index').default;
       const { getByTestId, queryByText, getByText } = render(<EventsFeedScreen />);
 
       const searchInput = getByTestId('events-feed-search-input');
@@ -529,7 +529,7 @@ describe('Milestone 2: Events Feed & Details', () => {
         return jest.fn();
       });
 
-      const EventsFeedScreen = require('../app/(tabs)/index').default;
+      const EventsFeedScreen = require('../app/(tabs)/events/index').default;
       const { getByTestId } = render(<EventsFeedScreen />);
 
       const flatList = getByTestId('events-flatlist');

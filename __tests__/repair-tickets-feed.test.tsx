@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import RepairsScreen from '@/../app/(tabs)/repairs';
 import * as repairService from '@/services/repair-service';
@@ -242,7 +243,7 @@ describe('Milestone 3: Repair Tickets Feed Screen', () => {
       fireEvent.press(ticketCard);
     });
 
-    expect(mockPush).toHaveBeenCalledWith('/repair/ticket-001');
+    expect(mockPush).toHaveBeenCalledWith('/repairs/ticket-001');
   });
 
   it('navigates to new repair form on "+ Report Fault" press', async () => {
@@ -253,7 +254,16 @@ describe('Milestone 3: Repair Tickets Feed Screen', () => {
       fireEvent.press(newBtn);
     });
 
-    expect(mockPush).toHaveBeenCalledWith('/repair/new');
+    expect(mockPush).toHaveBeenCalledWith('/repairs/new');
+  });
+
+  it('styles "+ Report Equipment Fault" button with brandGreen background', () => {
+    const { getByTestId } = render(<RepairsScreen />);
+    const newBtn = getByTestId('feed-new-repair-btn');
+    const flatStyle = StyleSheet.flatten(
+      typeof newBtn.props.style === 'function' ? newBtn.props.style({ pressed: false }) : newBtn.props.style
+    );
+    expect(flatStyle.backgroundColor).toBe('#206020');
   });
 
   it('renders metric card counts correctly and handles empty search with filter reset', async () => {

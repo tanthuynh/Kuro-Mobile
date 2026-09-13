@@ -34,6 +34,7 @@ jest.mock('expo-router', () => {
       }, [effect]);
     }),
     Link: ({ children }) => children,
+    Redirect: ({ href }) => null,
     Slot: ({ children }) => children,
     Stack: Object.assign(({ children }) => children, {
       Screen: () => null,

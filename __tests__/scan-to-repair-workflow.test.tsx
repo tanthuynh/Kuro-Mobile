@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import NewRepairScreen from '@/../app/repair/new';
 import * as repairService from '@/services/repair-service';
@@ -115,6 +116,10 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
     await findByDisplayValue('Sony FX6 Cinema Camera');
 
     const addPhotoBtn = getByTestId('gallery-add-photo-btn');
+    const flatGalleryPhotoStyle = StyleSheet.flatten(
+      typeof addPhotoBtn.props.style === 'function' ? addPhotoBtn.props.style({ pressed: false }) : addPhotoBtn.props.style
+    );
+    expect(flatGalleryPhotoStyle.backgroundColor).toBe('#206020');
 
     // Add first photo
     await act(async () => {

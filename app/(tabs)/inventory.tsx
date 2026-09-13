@@ -321,7 +321,7 @@ export default function InventoryScreen() {
                   const item = activeItem;
                   setActiveItem(null);
                   router.push({
-                    pathname: '/repair/new',
+                    pathname: '/repairs/new',
                     params: {
                       equipmentId: item.id || '',
                       name: item.name,

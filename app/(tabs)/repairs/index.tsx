@@ -48,11 +48,11 @@ export default function RepairsScreen() {
   } = useTickets();
 
   const handleCreateNew = () => {
-    router.push('/repair/new');
+    router.push('/repairs/new');
   };
 
   const handleTicketPress = (ticket: RepairTicket) => {
-    router.push(`/repair/${ticket.id}`);
+    router.push(`/repairs/${ticket.id}` as any);
   };
 
   const metricCards: Array<{
@@ -224,6 +224,7 @@ export default function RepairsScreen() {
           fullWidth
           icon={<Plus size={18} color={colors.primaryForeground} />}
           onPress={handleCreateNew}
+          style={{ backgroundColor: colors.brandGreen }}
           testID="feed-new-repair-btn"
         >
           Report Equipment Fault

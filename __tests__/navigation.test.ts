@@ -58,10 +58,11 @@ describe('Kuro Mobile Route Guarding & Navigation Hierarchy', () => {
   describe('Bottom Tab Navigation Configuration', () => {
     it('defines exactly 4 visible tabs in order: Events, Logistics, Repairs, Profile', () => {
       const tabConfig = [
-        { name: 'index', title: 'Events', label: 'Events', icon: 'CalendarDays', hidden: false },
+        { name: 'events', title: 'Events', label: 'Events', icon: 'CalendarDays', hidden: false },
         { name: 'logistics', title: 'Logistics', label: 'Logistics', icon: 'Truck', hidden: false },
         { name: 'repairs', title: 'Repairs', label: 'Repairs', icon: 'Wrench', hidden: false },
         { name: 'profile', title: 'Profile', label: 'Profile', icon: 'User', hidden: false },
+        { name: 'index', href: null, hidden: true },
         { name: 'scanner', href: null, hidden: true },
         { name: 'inventory', href: null, hidden: true },
       ];
@@ -69,11 +70,11 @@ describe('Kuro Mobile Route Guarding & Navigation Hierarchy', () => {
       const visibleTabs = tabConfig.filter((tab) => !tab.hidden);
       expect(visibleTabs).toHaveLength(4);
       expect(visibleTabs.map((t) => t.title)).toEqual(['Events', 'Logistics', 'Repairs', 'Profile']);
-      expect(visibleTabs.map((t) => t.name)).toEqual(['index', 'logistics', 'repairs', 'profile']);
+      expect(visibleTabs.map((t) => t.name)).toEqual(['events', 'logistics', 'repairs', 'profile']);
 
       const hiddenTabs = tabConfig.filter((tab) => tab.hidden);
-      expect(hiddenTabs).toHaveLength(2);
-      expect(hiddenTabs.map((t) => t.name)).toEqual(['scanner', 'inventory']);
+      expect(hiddenTabs).toHaveLength(3);
+      expect(hiddenTabs.map((t) => t.name)).toEqual(['index', 'scanner', 'inventory']);
       expect(hiddenTabs.every((t) => t.href === null)).toBe(true);
     });
 
