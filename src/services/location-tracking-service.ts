@@ -94,6 +94,40 @@ let trackingState: TrackingState = {
 
 let lastTrackingFailureReason: TrackingFailureReason | null = null;
 let currentDriverInfo: { id?: string; name?: string } = {};
+let activeTrackingOptions: TrackingOptions | undefined = undefined;
+
+export interface SuspendedTrackingSession {
+  jobId: string;
+  tenantId: string;
+  options?: TrackingOptions;
+}
+
+let suspendedTrackingSession: SuspendedTrackingSession | null = null;
+let isReconcilingAppState = false;
+
+/**
+ * Returns whether an active tracking session is currently suspended due to permission revocation (R3).
+ */
+export function isTrackingSuspended(): boolean {
+  return suspendedTrackingSession !== null;
+}
+
+/**
+ * Returns the job ID of the currently suspended tracking session, or null if not suspended (R3).
+ */
+export function getSuspendedTrackingJobId(): string | null {
+  return suspendedTrackingSession ? suspendedTrackingSession.jobId : null;
+}
+
+/**
+ * Returns suspended tracking session information if tracking was halted due to permission loss.
+ * Preserved for backward compatibility with previous interrupted tracking references.
+ */
+export function getInterruptedTrackingSession(): { jobId: string; tenantId: string } | null {
+  return suspendedTrackingSession
+    ? { jobId: suspendedTrackingSession.jobId, tenantId: suspendedTrackingSession.tenantId }
+    : null;
+}
 
 type LocationListener = (location: DriverLocation) => void;
 const listeners = new Set<LocationListener>();
@@ -773,7 +807,6 @@ export async function verifyTrackingPrerequisites(): Promise<boolean> {
 
   // Step 3: Background Permissions & Accuracy Check
   let bgResponse: Location.LocationPermissionResponse | null = null;
-  let bgError: any = null;
   try {
     if (typeof Location.requestBackgroundPermissionsAsync === 'function') {
       bgResponse = await Location.requestBackgroundPermissionsAsync();
@@ -782,37 +815,43 @@ export async function verifyTrackingPrerequisites(): Promise<boolean> {
     }
   } catch (bgErr) {
     console.warn('[LocationTrackingService] Background permission request failed or not supported:', bgErr);
-    bgError = bgErr;
+    lastTrackingFailureReason = 'permission_denied';
+    setSyncStatus('permission_denied', 'Background location permission check failed or not supported');
+    return false;
   }
 
-  // If background permission was checked and returned a response:
-  if (!bgError) {
-    const bgGranted = Boolean(bgResponse && (bgResponse.status === 'granted' || bgResponse.granted === true));
-    if (!bgGranted) {
-      lastTrackingFailureReason = 'permission_denied';
-      setSyncStatus('permission_denied', 'Background location permission denied');
-      console.warn('[LocationTrackingService] Background location permission denied. Tracking cannot start.');
-      return false;
-    }
+  if (!bgResponse) {
+    lastTrackingFailureReason = 'permission_denied';
+    setSyncStatus('permission_denied', 'Background location permission check failed or not supported');
+    console.warn('[LocationTrackingService] Background location permission check failed. Tracking cannot start.');
+    return false;
+  }
 
-    // Fallback check on getBackgroundPermissionsAsync if bgResponse omitted accuracy
-    if (
-      !((bgResponse as any)?.accuracy || bgResponse?.android?.accuracy || bgResponse?.ios?.accuracy) &&
-      typeof Location.getBackgroundPermissionsAsync === 'function'
-    ) {
-      try {
-        const getBg = (await Location.getBackgroundPermissionsAsync()) as any;
-        if (getBg?.android?.accuracy || getBg?.ios?.accuracy || getBg?.accuracy) {
-          bgResponse = { ...bgResponse, ...getBg };
-        }
-      } catch {}
-    }
+  const bgGranted = Boolean(bgResponse && (bgResponse.status === 'granted' || bgResponse.granted === true));
+  if (!bgGranted) {
+    lastTrackingFailureReason = 'permission_denied';
+    setSyncStatus('permission_denied', 'Background location permission denied');
+    console.warn('[LocationTrackingService] Background location permission denied. Tracking cannot start.');
+    return false;
+  }
 
-    if (!isAccuracyPrecise(bgResponse)) {
-      lastTrackingFailureReason = 'approximate_only';
-      console.warn('[LocationTrackingService] Approximate location accuracy detected in background permissions. Precise location is required.');
-      return false;
-    }
+  // Fallback check on getBackgroundPermissionsAsync if bgResponse omitted accuracy
+  if (
+    !((bgResponse as any)?.accuracy || bgResponse?.android?.accuracy || bgResponse?.ios?.accuracy) &&
+    typeof Location.getBackgroundPermissionsAsync === 'function'
+  ) {
+    try {
+      const getBg = (await Location.getBackgroundPermissionsAsync()) as any;
+      if (getBg?.android?.accuracy || getBg?.ios?.accuracy || getBg?.accuracy) {
+        bgResponse = { ...bgResponse, ...getBg };
+      }
+    } catch {}
+  }
+
+  if (!isAccuracyPrecise(bgResponse)) {
+    lastTrackingFailureReason = 'approximate_only';
+    console.warn('[LocationTrackingService] Approximate location accuracy detected in background permissions. Precise location is required.');
+    return false;
   }
 
   return true;
@@ -954,6 +993,9 @@ export async function startTrackingJob(
       // If stopping Job A throws an error, propagate the error (do NOT silently swallow)
       try {
         await stopJobTracking(prevJobId);
+        trackingState.isTracking = false;
+        trackingState.activeJobId = null;
+        trackingState.activeTenantId = null;
       } catch (stopErr: any) {
         console.error(`[LocationTrackingService] Error stopping previous job ${prevJobId}:`, stopErr);
         trackingState.isTracking = false;
@@ -967,6 +1009,10 @@ export async function startTrackingJob(
         throw propagatedErr;
       }
     }
+
+    // Clear any previous suspended tracking session upon explicit start of tracking
+    suspendedTrackingSession = null;
+    activeTrackingOptions = options;
 
     // Update driver metadata if provided
     if (options?.driverId || options?.driverName) {
@@ -982,6 +1028,27 @@ export async function startTrackingJob(
     // Gating checks: GPS enabled, foreground/background permissions, precise accuracy (R1)
     const prerequisitesOk = await verifyTrackingPrerequisites();
     if (!prerequisitesOk) {
+      trackingState.isTracking = false;
+      trackingState.activeJobId = null;
+      trackingState.activeTenantId = null;
+      currentSessionId = null;
+      sessionGeneration++;
+      if (currentSyncStatus.status !== 'permission_denied') {
+        setSyncStatus('idle');
+      }
+      try {
+        let hasStarted = false;
+        try {
+          hasStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
+        } catch {
+          hasStarted = false;
+        }
+        if (hasStarted) {
+          await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+        }
+      } catch (stopErr) {
+        console.warn('[LocationTrackingService] Error stopping native updates on prerequisite failure:', stopErr);
+      }
       return false;
     }
 
@@ -1094,8 +1161,13 @@ export async function startTrackingJob(
  * Guarantees in-flight writes settle before deactivating Firestore state.
  *
  * @param jobId Optional job ID. Defaults to the currently active job ID.
+ * @param isRevocation If true, preserves interrupted tracking session for auto-resume.
  */
-export async function stopTrackingJob(jobId?: string): Promise<void> {
+export async function stopTrackingJob(jobId?: string, isRevocation: boolean = false): Promise<void> {
+  if (!isRevocation) {
+    suspendedTrackingSession = null;
+    activeTrackingOptions = undefined;
+  }
   await acquireLifecycleLock();
   try {
     const targetJobId = jobId || trackingState.activeJobId;
@@ -1203,6 +1275,8 @@ export function initTrackingAuthObserver(
           currentObservedUid = newUid;
           if (!newUid || (currentDriverInfo.id && currentDriverInfo.id !== newUid)) {
             // User signed out or account switched: immediately halt tracking and teardown
+            suspendedTrackingSession = null;
+            activeTrackingOptions = undefined;
             if (isTrackingActive()) {
               await stopTrackingJob();
             }
@@ -1229,23 +1303,168 @@ export function stopTrackingAuthObserver(): void {
 
 let appStateSubscription: any = null;
 
+export const BG_LOCATION_DISCLOSURE_KEY = '@kuro_bg_location_disclosure_accepted';
+
 /**
- * Attaches an AppState observer to verify location permissions upon returning to the foreground.
+ * Checks whether the user has previously accepted the one-time background location disclosure.
+ */
+export async function hasAcceptedBackgroundLocationDisclosure(): Promise<boolean> {
+  try {
+    const val = await AsyncStorage.getItem(BG_LOCATION_DISCLOSURE_KEY);
+    return val === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Records that the user accepted the one-time background location disclosure.
+ */
+export async function recordBackgroundLocationDisclosureAccepted(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(BG_LOCATION_DISCLOSURE_KEY, 'true');
+  } catch (err) {
+    console.warn('[LocationTrackingService] Failed to persist disclosure acceptance:', err);
+  }
+}
+
+/**
+ * Records that the user declined the one-time background location disclosure.
+ */
+export async function recordBackgroundLocationDisclosureDeclined(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(BG_LOCATION_DISCLOSURE_KEY, 'declined');
+  } catch (err) {
+    console.warn('[LocationTrackingService] Failed to persist disclosure decline:', err);
+  }
+}
+
+/**
+ * Checks whether the user has completed the background location disclosure step (accepted or declined).
+ */
+export async function hasAnsweredBackgroundLocationDisclosure(): Promise<boolean> {
+  try {
+    const val = await AsyncStorage.getItem(BG_LOCATION_DISCLOSURE_KEY);
+    return val !== null && val !== undefined;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Attaches an AppState observer to verify location permissions upon returning to the foreground,
+ * halts native updates when permissions are revoked mid-job, and auto-resumes tracking when restored (R3).
  */
 export function initTrackingAppStateObserver(): void {
   if (appStateSubscription) return;
   try {
     if (typeof AppState?.addEventListener === 'function') {
       appStateSubscription = AppState.addEventListener('change', async (nextState: AppStateStatus) => {
-        if (nextState === 'active' && trackingState.isTracking) {
+        if (nextState === 'active') {
+          if (isReconcilingAppState) return;
+          isReconcilingAppState = true;
           try {
-            const fg = await Location.getForegroundPermissionsAsync();
-            if (fg && !fg.granted) {
-              console.warn('[LocationTrackingService] Permission revoked while backgrounded. Halting tracking.');
-              await stopTrackingJob();
-              setSyncStatus('permission_denied', 'Permission revoked');
+            if (trackingState.isTracking) {
+              // 1. Check permissions and device GPS services
+              let fgGranted = false;
+              let bgGranted = false;
+              let precise = true;
+
+              try {
+                let fg: Location.LocationPermissionResponse | null = null;
+                if (typeof Location.getForegroundPermissionsAsync === 'function') {
+                  fg = await Location.getForegroundPermissionsAsync();
+                } else if (typeof Location.requestForegroundPermissionsAsync === 'function') {
+                  fg = await Location.requestForegroundPermissionsAsync();
+                }
+                fgGranted = Boolean(fg && (fg.status === 'granted' || fg.granted === true));
+                if (fg && !isAccuracyPrecise(fg)) {
+                  precise = false;
+                }
+              } catch {
+                fgGranted = false;
+              }
+
+              try {
+                let bg: Location.LocationPermissionResponse | null = null;
+                if (typeof Location.getBackgroundPermissionsAsync === 'function') {
+                  bg = await Location.getBackgroundPermissionsAsync();
+                } else if (typeof Location.requestBackgroundPermissionsAsync === 'function') {
+                  bg = await Location.requestBackgroundPermissionsAsync();
+                }
+                bgGranted = Boolean(bg && (bg.status === 'granted' || bg.granted === true));
+                if (bg && !isAccuracyPrecise(bg)) {
+                  precise = false;
+                }
+              } catch {
+                bgGranted = false;
+              }
+
+              let servicesEnabled = true;
+              if (typeof Location.hasServicesEnabledAsync === 'function') {
+                try {
+                  servicesEnabled = await Location.hasServicesEnabledAsync();
+                } catch {
+                  servicesEnabled = true;
+                }
+              }
+
+              if (!fgGranted || !bgGranted || !precise || !servicesEnabled) {
+                console.warn('[LocationTrackingService] Permission revoked while backgrounded. Halting tracking.');
+                const prevJobId = trackingState.activeJobId;
+                const prevTenantId = trackingState.activeTenantId;
+                if (prevJobId && prevTenantId) {
+                  suspendedTrackingSession = {
+                    jobId: prevJobId,
+                    tenantId: prevTenantId,
+                    options: {
+                      ...activeTrackingOptions,
+                      driverId: currentDriverInfo.id,
+                      driverName: currentDriverInfo.name,
+                    },
+                  };
+                }
+
+                // Invalidate session token to discard any in-flight GPS callbacks
+                currentSessionId = null;
+                sessionGeneration++;
+
+                // Halt native updates
+                try {
+                  await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+                } catch {
+                  // swallow error if already stopped
+                }
+
+                trackingState.isTracking = false;
+                setSyncStatus('permission_denied', 'Location permission revoked mid-job');
+                return;
+              }
+            } else if (suspendedTrackingSession) {
+              // 2. Auto-resume if permissions and prerequisites are restored (R3)
+              try {
+                const prerequisitesOk = await verifyTrackingPrerequisites();
+                if (prerequisitesOk) {
+                  const sessionToResume = suspendedTrackingSession;
+                  suspendedTrackingSession = null;
+                  const success = await startTrackingJob(
+                    sessionToResume.jobId,
+                    sessionToResume.tenantId,
+                    sessionToResume.options
+                  );
+                  if (!success) {
+                    suspendedTrackingSession = sessionToResume;
+                  } else {
+                    setSyncStatus('synced');
+                  }
+                }
+              } catch (resumeErr) {
+                console.warn('[LocationTrackingService] Error auto-resuming suspended tracking session:', resumeErr);
+              }
             }
-          } catch {}
+          } finally {
+            isReconcilingAppState = false;
+          }
         }
       });
     }
@@ -1389,4 +1608,7 @@ export function _resetTrackingStateForTesting(): void {
   isFlushingBuffer = false;
   activeFlushPromise = null;
   isNetworkExplicitlyOnline = true;
+  suspendedTrackingSession = null;
+  activeTrackingOptions = undefined;
+  isReconcilingAppState = false;
 }

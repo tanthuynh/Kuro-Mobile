@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from 'expo-location';
 import LogisticsFeedScreen from '@/../app/(tabs)/logistics';
 import * as logisticsService from '@/services/logistics-service';
 import type { LogisticsEntry } from '@/types/logistics';
@@ -318,3 +320,105 @@ describe('Milestone 4: Logistics Feed Screen Component Tests', () => {
     expect(await findByText('Electric Arena Sound System')).toBeTruthy();
   });
 });
+
+describe('R2: One-Time Background Location Disclosure Onboarding', () => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+    jest.clearAllMocks();
+    jest.spyOn(logisticsService, 'subscribeToLogistics').mockImplementation((_tenantId, onUpdate) => {
+      onUpdate(mockLogisticsJobs);
+      return () => {};
+    });
+    if (typeof Location.requestBackgroundPermissionsAsync === 'function' && jest.isMockFunction(Location.requestBackgroundPermissionsAsync)) {
+      (Location.requestBackgroundPermissionsAsync as jest.Mock).mockResolvedValue({
+        status: 'granted',
+        granted: true,
+      });
+    } else {
+      jest.spyOn(Location, 'requestBackgroundPermissionsAsync').mockResolvedValue({
+        status: 'granted',
+        granted: true,
+      } as any);
+    }
+  });
+
+  it('displays disclosure modal on first mount when no choice has been recorded in AsyncStorage', async () => {
+    await AsyncStorage.removeItem('@kuro_bg_location_disclosure_accepted');
+
+    const { findByTestId, findByText } = render(<LogisticsFeedScreen />);
+
+    expect(await findByText('Background Location Access')).toBeTruthy();
+    expect(await findByText(/including when the app is closed or not in use/i)).toBeTruthy();
+    const modal = await findByTestId('onboarding-bg-location-disclosure-modal');
+    expect(modal.props.visible).toBe(true);
+  });
+
+  it('persists "@kuro_bg_location_disclosure_accepted" as "true", closes modal, and requests background permissions when accepted', async () => {
+    await AsyncStorage.removeItem('@kuro_bg_location_disclosure_accepted');
+
+    const { findByTestId, queryByText } = render(<LogisticsFeedScreen />);
+    const acceptBtn = await findByTestId('bg-location-accept-btn');
+
+    await act(async () => {
+      fireEvent.press(acceptBtn);
+    });
+
+    const storedValue = await AsyncStorage.getItem('@kuro_bg_location_disclosure_accepted');
+    expect(storedValue).toBe('true');
+    expect(Location.requestBackgroundPermissionsAsync).toHaveBeenCalledTimes(1);
+
+    expect(queryByText('Background Location Access')).toBeNull();
+  });
+
+  it('persists "@kuro_bg_location_disclosure_accepted" as "declined", closes modal, and does NOT request background permissions when declined', async () => {
+    await AsyncStorage.removeItem('@kuro_bg_location_disclosure_accepted');
+
+    const { findByTestId, queryByText } = render(<LogisticsFeedScreen />);
+    const declineBtn = await findByTestId('bg-location-decline-btn');
+
+    await act(async () => {
+      fireEvent.press(declineBtn);
+    });
+
+    const storedValue = await AsyncStorage.getItem('@kuro_bg_location_disclosure_accepted');
+    expect(storedValue).toBe('declined');
+    expect(Location.requestBackgroundPermissionsAsync).not.toHaveBeenCalled();
+
+    expect(queryByText('Background Location Access')).toBeNull();
+  });
+
+  it('does NOT display disclosure modal across app restarts if previously accepted ("true")', async () => {
+    await AsyncStorage.setItem('@kuro_bg_location_disclosure_accepted', 'true');
+
+    const { queryByTestId, queryByText } = render(<LogisticsFeedScreen />);
+
+    // Yield macro-tasks for useEffect to settle
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const modal = queryByTestId('onboarding-bg-location-disclosure-modal');
+    if (modal) {
+      expect(modal.props.visible).toBe(false);
+    }
+    expect(queryByText('Background Location Access')).toBeNull();
+  });
+
+  it('does NOT display disclosure modal across app restarts if previously declined ("declined")', async () => {
+    await AsyncStorage.setItem('@kuro_bg_location_disclosure_accepted', 'declined');
+
+    const { queryByTestId, queryByText } = render(<LogisticsFeedScreen />);
+
+    // Yield macro-tasks for useEffect to settle
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const modal = queryByTestId('onboarding-bg-location-disclosure-modal');
+    if (modal) {
+      expect(modal.props.visible).toBe(false);
+    }
+    expect(queryByText('Background Location Access')).toBeNull();
+  });
+});
+

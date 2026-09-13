@@ -196,7 +196,7 @@ describe('Adversarial GPS & Concurrency Stress Test Suite', () => {
       expect(Location.requestBackgroundPermissionsAsync).not.toHaveBeenCalled();
     });
 
-    it('allows tracking initialization when foreground is granted even if background permission fails', async () => {
+    it('rejects tracking initialization when background permission fails (R1 requirement)', async () => {
       (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({
         status: 'granted',
         granted: true,
@@ -208,9 +208,9 @@ describe('Adversarial GPS & Concurrency Stress Test Suite', () => {
       );
 
       const started = await startTrackingJob('job-bg-unsupported', 'tenant-1');
-      expect(started).toBe(true);
-      expect(isTrackingActive()).toBe(true);
-      expect(Location.startLocationUpdatesAsync).toHaveBeenCalled();
+      expect(started).toBe(false);
+      expect(isTrackingActive()).toBe(false);
+      expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
     });
 
     it('handles native crash/rejection in requestForegroundPermissionsAsync', async () => {

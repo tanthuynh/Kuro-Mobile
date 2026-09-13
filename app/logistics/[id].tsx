@@ -42,10 +42,13 @@ import {
   stopTrackingJob,
   isTrackingActive,
   getActiveTrackingJobId,
+  isTrackingSuspended,
+  getSuspendedTrackingJobId,
   addLocationListener,
   addSyncStatusListener,
   getSyncStatus,
   checkLocationPermissions,
+  getLastTrackingFailureReason,
   type SyncStatusInfo,
 } from '@/services/location-tracking-service';
 import { fetchVehicleById, formatVehicleDisplayName } from '@/services/logistics-service';
@@ -87,12 +90,16 @@ export default function LogisticsJobDetailScreen() {
   const [isDeviceTracking, setIsDeviceTracking] = useState<boolean>(() => {
     return isTrackingActive() && getActiveTrackingJobId() === jobId;
   });
+  const [isSuspended, setIsSuspended] = useState<boolean>(() => {
+    return isTrackingSuspended() && getSuspendedTrackingJobId() === jobId;
+  });
   const [syncStatus, setSyncStatus] = useState<SyncStatusInfo>(() => getSyncStatus());
 
-  // Listen to device tracking and sync status updates
+  // Listen to device tracking, suspended session, and sync status updates
   useEffect(() => {
     const updateTracking = () => {
       setIsDeviceTracking(isTrackingActive() && getActiveTrackingJobId() === jobId);
+      setIsSuspended(isTrackingSuspended() && getSuspendedTrackingJobId() === jobId);
     };
     updateTracking();
 
@@ -151,9 +158,24 @@ export default function LogisticsJobDetailScreen() {
       });
 
       if (!trackingStarted) {
+        const failureReason = getLastTrackingFailureReason();
+        let alertTitle = 'Location Permission Required';
+        let alertMessage =
+          'Location access is required to record route telemetry and dispatch ETA updates. Please enable location permissions in Settings.';
+
+        if (failureReason === 'services_disabled') {
+          alertTitle = 'Location Services Disabled';
+          alertMessage =
+            'Device location services are turned off. Please enable GPS in device Settings to begin route tracking.';
+        } else if (failureReason === 'approximate_only') {
+          alertTitle = 'Precise Location Required';
+          alertMessage =
+            'Kuro Mobile requires precise GPS location to track driver routes and calculate ETAs. Please allow precise location access in Settings.';
+        }
+
         Alert.alert(
-          'Location Permission Required',
-          'Location access is required to record route telemetry and dispatch ETA updates. Please enable location permissions in Settings.',
+          alertTitle,
+          alertMessage,
           [
             { text: 'Cancel', style: 'cancel' },
             {
@@ -166,7 +188,7 @@ export default function LogisticsJobDetailScreen() {
             },
           ]
         );
-        setActionError('Location permission was denied. Enable location in Settings to start tracking.');
+        setActionError(alertMessage);
         return;
       }
 
@@ -206,21 +228,21 @@ export default function LogisticsJobDetailScreen() {
     }
   };
 
-  // Finish Action: Stops GPS tracking and updates status to 'Completed'
+  // Finish Action: Updates status to 'Completed' FIRST, and stops GPS tracking only after confirmation (R6)
   const handleFinish = async () => {
     if (!job) return;
     try {
       setIsCompleting(true);
       setActionError(null);
 
-      // 1. Stop GPS tracking
-      await stopTrackingJob(job.id);
-
-      // 2. Update status to Completed
+      // 1. Update status to Completed first
       await updateStatus('Completed', 'Driver marked job as completed');
+
+      // 2. Stop GPS tracking only after update status succeeds
+      await stopTrackingJob(job.id);
     } catch (err: any) {
       console.error('[LogisticsDetail] Finish error:', err);
-      setActionError(err?.message || 'Failed to complete job');
+      setActionError(err?.message || 'Failed to complete job. GPS tracking remains active — please retry.');
     } finally {
       setIsCompleting(false);
     }
@@ -233,10 +255,10 @@ export default function LogisticsJobDetailScreen() {
       setIsUpdatingStatus(true);
       setActionError(null);
 
-      // If transitioning to completed or cancelled, stop tracking
+      // If transitioning to completed or cancelled, update status first, then stop tracking (R6)
       if (isJobCompleted(newStatus) || newStatus.toLowerCase() === 'cancelled' || newStatus.toLowerCase() === 'cancel') {
-        await stopTrackingJob(job.id);
         await updateStatus(newStatus, `Status updated to ${newStatus} via Quick Status`);
+        await stopTrackingJob(job.id);
       } else if (isJobActive(newStatus) && !job.isTrackingActive) {
         // If transitioning to active status and tracking is off, start tracking
         await executeStartTracking(newStatus);
@@ -338,8 +360,10 @@ export default function LogisticsJobDetailScreen() {
 
   const isDocTrackingActive = Boolean(job.isTrackingActive);
   const isPermissionDenied = syncStatus.status === 'permission_denied';
-  // Never show tracking as active when the required permission is unavailable
-  const isTracking = !isPermissionDenied && (isDeviceTracking || isDocTrackingActive);
+  const isJobInProgress = isJobActive(job.status) || isDocTrackingActive;
+  const showPermissionRevokedWarning = isSuspended || (isPermissionDenied && isJobInProgress);
+  // Never show tracking as active when the required permission is unavailable or suspended
+  const isTracking = !showPermissionRevokedWarning && !isPermissionDenied && (isDeviceTracking || isDocTrackingActive);
   const isCompleted = isJobCompleted(job.status);
 
   const userId = user?.id || (user as any)?.uid;
@@ -356,11 +380,11 @@ export default function LogisticsJobDetailScreen() {
         backAccessibilityLabel="Go back to Logistics Feed"
         rightAction={
           <Badge
-            variant={isPermissionDenied ? 'destructive' : isTracking ? 'brand' : 'secondary'}
+            variant={showPermissionRevokedWarning ? 'destructive' : isTracking ? 'brand' : 'secondary'}
             icon={isTracking ? <Radio size={12} color={colors.primary} /> : undefined}
             testID="header-tracking-status-badge"
           >
-            {isPermissionDenied ? 'Permission Required' : isTracking ? 'Tracking' : 'Idle'}
+            {showPermissionRevokedWarning ? 'Permission Required' : isTracking ? 'Tracking' : 'Idle'}
           </Badge>
         }
       />
@@ -385,13 +409,16 @@ export default function LogisticsJobDetailScreen() {
           </View>
         ) : null}
 
-        {/* Permission revoked warning banner */}
-        {isPermissionDenied ? (
-          <View style={[styles.errorBanner, { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: colors.destructive }]} testID="permission-revoked-warning">
-            <AlertTriangle size={14} color={colors.destructive} />
-            <Text style={[styles.errorBannerText, { color: colors.destructive, fontSize: typography.fontSize.sm }]}>
-              Location permission required: Tracking is halted until permission is re-granted.
+        {/* Permission revoked warning banner (R3) */}
+        {showPermissionRevokedWarning ? (
+          <View testID="permission-revoked-warning" style={styles.warningBanner}>
+            <AlertTriangle size={16} color={colors.destructive} />
+            <Text style={styles.warningText}>
+              Location permission revoked. Please re-enable in Settings to resume tracking.
             </Text>
+            <Pressable onPress={() => Linking.openSettings().catch(() => {})}>
+              <Text style={styles.settingsLink}>Open Settings</Text>
+            </Pressable>
           </View>
         ) : null}
 
@@ -606,6 +633,30 @@ const styles = StyleSheet.create({
   errorBannerText: {
     fontFamily: 'Calibri',
     fontWeight: '600',
+  },
+  warningBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: '#EF4444',
+  },
+  warningText: {
+    flex: 1,
+    fontFamily: 'Calibri',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#EF4444',
+  },
+  settingsLink: {
+    fontFamily: 'Calibri',
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#3B82F6',
+    textDecorationLine: 'underline',
   },
   card: {
     borderRadius: 10,

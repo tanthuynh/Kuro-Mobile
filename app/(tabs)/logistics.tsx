@@ -27,8 +27,14 @@ import { useTheme } from '@/context/theme-context';
 import { useLogistics } from '@/hooks/use-logistics';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/ui/empty-state';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from 'expo-location';
 import { LogisticsJobCard } from '@/components/logistics/LogisticsJobCard';
+import { BackgroundLocationDisclosureModal } from '@/components/logistics/BackgroundLocationDisclosureModal';
+import { BG_LOCATION_DISCLOSURE_KEY } from '@/services/location-tracking-service';
 import type { LogisticsEntry } from '@/types/logistics';
+
+const DISCLOSURE_STORAGE_KEY = BG_LOCATION_DISCLOSURE_KEY || '@kuro_bg_location_disclosure_accepted';
 
 export default function LogisticsFeedScreen() {
   const insets = useSafeAreaInsets();
@@ -46,6 +52,48 @@ export default function LogisticsFeedScreen() {
     setSearchQuery,
     refresh,
   } = useLogistics();
+
+  const [showDisclosure, setShowDisclosure] = React.useState(false);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    const checkDisclosure = async () => {
+      try {
+        const storedValue = await AsyncStorage.getItem(DISCLOSURE_STORAGE_KEY);
+        // Show modal only on initial launch / first install when no preference has been stored
+        if ((storedValue === null || storedValue === undefined) && isMounted) {
+          setShowDisclosure(true);
+        }
+      } catch (err) {
+        console.warn('[LogisticsFeedScreen] Failed to read background location disclosure state:', err);
+      }
+    };
+    checkDisclosure();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleAcceptDisclosure = async () => {
+    setShowDisclosure(false);
+    try {
+      await AsyncStorage.setItem(DISCLOSURE_STORAGE_KEY, 'true');
+      if (typeof Location.requestBackgroundPermissionsAsync === 'function') {
+        await Location.requestBackgroundPermissionsAsync().catch(() => {});
+      }
+    } catch (err) {
+      console.warn('[LogisticsFeedScreen] Failed to persist disclosure acceptance:', err);
+    }
+  };
+
+  const handleDeclineDisclosure = async () => {
+    setShowDisclosure(false);
+    try {
+      await AsyncStorage.setItem(DISCLOSURE_STORAGE_KEY, 'declined');
+    } catch (err) {
+      console.warn('[LogisticsFeedScreen] Failed to persist disclosure decline:', err);
+    }
+  };
 
   const handleJobPress = (job: LogisticsEntry) => {
     router.push(`/logistics/${job.id}` as any);
@@ -211,6 +259,14 @@ export default function LogisticsFeedScreen() {
           testID="logistics-jobs-list"
         />
       )}
+
+      {/* One-Time Background Location Disclosure Modal for Onboarding (R2) */}
+      <BackgroundLocationDisclosureModal
+        visible={showDisclosure}
+        onAccept={handleAcceptDisclosure}
+        onDecline={handleDeclineDisclosure}
+        testID="onboarding-bg-location-disclosure-modal"
+      />
     </View>
   );
 }

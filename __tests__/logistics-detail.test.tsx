@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
+import { Alert, Linking } from 'react-native';
 import LogisticsJobDetailScreen from '@/../app/logistics/[id]';
 import * as logisticsService from '@/services/logistics-service';
 import * as locationTrackingService from '@/services/location-tracking-service';
@@ -372,4 +373,258 @@ describe('Milestone 4: Logistics Job Detail Screen Component Tests', () => {
     expect(noteInput.props.placeholder).toBe('');
   });
 });
+
+describe('Milestone M2: Gating Alerts, Mid-Job Revocation & Reliable Finish Sequence', () => {
+  let alertSpy: jest.SpyInstance;
+  let openSettingsSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined);
+    jest.spyOn(logisticsService, 'getLogisticsEntry').mockResolvedValue(mockSingleJob);
+    jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+      cb(mockSingleJob);
+      return () => {};
+    });
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
+    openSettingsSpy.mockRestore();
+  });
+
+  it('R1: shows "Location Services Disabled" alert with Open Settings when GPS is off, and leaves status unchanged', async () => {
+    jest.spyOn(locationTrackingService, 'startTrackingJob').mockResolvedValueOnce(false);
+    jest.spyOn(locationTrackingService, 'getLastTrackingFailureReason').mockReturnValueOnce('services_disabled');
+    const updateStatusSpy = jest.spyOn(logisticsService, 'updateLogisticsStatus');
+
+    const { findByTestId } = render(<LogisticsJobDetailScreen />);
+    const playBtn = await findByTestId('play-job-btn');
+
+    await act(async () => {
+      fireEvent.press(playBtn);
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Location Services Disabled',
+      'Device location services are turned off. Please enable GPS in device Settings to begin route tracking.',
+      expect.arrayContaining([
+        expect.objectContaining({ text: 'Cancel', style: 'cancel' }),
+        expect.objectContaining({ text: 'Open Settings' }),
+      ])
+    );
+
+    // Verify Open Settings onPress triggers Linking.openSettings
+    const openSettingsBtn = alertSpy.mock.calls[0][2]?.find((b: any) => b.text === 'Open Settings');
+    expect(openSettingsBtn).toBeDefined();
+    openSettingsBtn.onPress();
+    expect(openSettingsSpy).toHaveBeenCalled();
+
+    // Status MUST NOT be updated
+    expect(updateStatusSpy).not.toHaveBeenCalled();
+  });
+
+  it('R1: shows "Precise Location Required" alert when location accuracy is approximate, and leaves status unchanged', async () => {
+    jest.spyOn(locationTrackingService, 'startTrackingJob').mockResolvedValueOnce(false);
+    jest.spyOn(locationTrackingService, 'getLastTrackingFailureReason').mockReturnValueOnce('approximate_only');
+    const updateStatusSpy = jest.spyOn(logisticsService, 'updateLogisticsStatus');
+
+    const { findByTestId } = render(<LogisticsJobDetailScreen />);
+    const playBtn = await findByTestId('play-job-btn');
+
+    await act(async () => {
+      fireEvent.press(playBtn);
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Precise Location Required',
+      'Kuro Mobile requires precise GPS location to track driver routes and calculate ETAs. Please allow precise location access in Settings.',
+      expect.arrayContaining([
+        expect.objectContaining({ text: 'Cancel', style: 'cancel' }),
+        expect.objectContaining({ text: 'Open Settings' }),
+      ])
+    );
+
+    const openSettingsBtn = alertSpy.mock.calls[0][2]?.find((b: any) => b.text === 'Open Settings');
+    expect(openSettingsBtn).toBeDefined();
+    openSettingsBtn.onPress();
+    expect(openSettingsSpy).toHaveBeenCalled();
+
+    expect(updateStatusSpy).not.toHaveBeenCalled();
+  });
+
+  it('R1: shows "Location Permission Required" alert when permission is denied, and leaves status unchanged', async () => {
+    jest.spyOn(locationTrackingService, 'startTrackingJob').mockResolvedValueOnce(false);
+    jest.spyOn(locationTrackingService, 'getLastTrackingFailureReason').mockReturnValueOnce('permission_denied');
+    const updateStatusSpy = jest.spyOn(logisticsService, 'updateLogisticsStatus');
+
+    const { findByTestId } = render(<LogisticsJobDetailScreen />);
+    const playBtn = await findByTestId('play-job-btn');
+
+    await act(async () => {
+      fireEvent.press(playBtn);
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Location Permission Required',
+      'Location access is required to record route telemetry and dispatch ETA updates. Please enable location permissions in Settings.',
+      expect.arrayContaining([
+        expect.objectContaining({ text: 'Cancel', style: 'cancel' }),
+        expect.objectContaining({ text: 'Open Settings' }),
+      ])
+    );
+
+    const openSettingsBtn = alertSpy.mock.calls[0][2]?.find((b: any) => b.text === 'Open Settings');
+    expect(openSettingsBtn).toBeDefined();
+    openSettingsBtn.onPress();
+    expect(openSettingsSpy).toHaveBeenCalled();
+
+    expect(updateStatusSpy).not.toHaveBeenCalled();
+  });
+
+  it('R3: renders permission-revoked-warning banner with Open Settings link when tracking is suspended', async () => {
+    const activeJob: LogisticsEntry = {
+      ...mockSingleJob,
+      status: 'In Progress',
+      isTrackingActive: true,
+    };
+    jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+      cb(activeJob);
+      return () => {};
+    });
+    jest.spyOn(locationTrackingService, 'isTrackingSuspended').mockReturnValue(true);
+    jest.spyOn(locationTrackingService, 'getSuspendedTrackingJobId').mockReturnValue('job-alpha-101');
+    jest.spyOn(locationTrackingService, 'getSyncStatus').mockReturnValue({
+      status: 'permission_denied',
+      lastSyncTime: null,
+      lastError: 'Permission revoked',
+    });
+
+    const { findByTestId, findByText } = render(<LogisticsJobDetailScreen />);
+
+    expect(await findByTestId('permission-revoked-warning')).toBeTruthy();
+    expect(await findByText(/Location permission revoked. Please re-enable in Settings to resume tracking./i)).toBeTruthy();
+
+    const badge = await findByTestId('header-tracking-status-badge');
+    expect(badge).toBeTruthy();
+    expect(await findByText('Permission Required')).toBeTruthy();
+
+    const openSettingsLink = await findByText('Open Settings');
+    await act(async () => {
+      fireEvent.press(openSettingsLink);
+    });
+    expect(openSettingsSpy).toHaveBeenCalled();
+  });
+
+  it('R3: auto-resume clears warning banner and restores tracking badge when permission restored', async () => {
+    const activeJob: LogisticsEntry = {
+      ...mockSingleJob,
+      status: 'In Progress',
+      isTrackingActive: true,
+    };
+    jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+      cb(activeJob);
+      return () => {};
+    });
+
+    let syncListener: ((status: any) => void) | null = null;
+    jest.spyOn(locationTrackingService, 'addSyncStatusListener').mockImplementation((cb) => {
+      syncListener = cb;
+      return () => {};
+    });
+
+    // Start in suspended state
+    jest.spyOn(locationTrackingService, 'isTrackingSuspended').mockReturnValue(true);
+    jest.spyOn(locationTrackingService, 'getSuspendedTrackingJobId').mockReturnValue('job-alpha-101');
+    jest.spyOn(locationTrackingService, 'getSyncStatus').mockReturnValue({
+      status: 'permission_denied',
+      lastSyncTime: null,
+      lastError: 'Permission revoked',
+    });
+
+    const { findByTestId, queryByTestId, findByText } = render(<LogisticsJobDetailScreen />);
+
+    expect(await findByTestId('permission-revoked-warning')).toBeTruthy();
+    expect(await findByText('Permission Required')).toBeTruthy();
+
+    // Now simulate auto-resume: permissions restored, tracking active, syncStatus synced
+    jest.spyOn(locationTrackingService, 'isTrackingSuspended').mockReturnValue(false);
+    jest.spyOn(locationTrackingService, 'getSuspendedTrackingJobId').mockReturnValue(null);
+    jest.spyOn(locationTrackingService, 'isTrackingActive').mockReturnValue(true);
+    jest.spyOn(locationTrackingService, 'getActiveTrackingJobId').mockReturnValue('job-alpha-101');
+
+    await act(async () => {
+      if (syncListener) {
+        syncListener({ status: 'synced', lastSyncTime: Date.now(), lastError: null });
+      }
+    });
+
+    expect(queryByTestId('permission-revoked-warning')).toBeNull();
+    expect(await findByText('Tracking')).toBeTruthy();
+  });
+
+  it('R6: Finish sequence commits updateStatus("Completed") first, then stopTrackingJob second', async () => {
+    const activeJob: LogisticsEntry = {
+      ...mockSingleJob,
+      status: 'In Progress',
+      isTrackingActive: true,
+    };
+    jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+      cb(activeJob);
+      return () => {};
+    });
+
+    const executionOrder: string[] = [];
+    jest.spyOn(logisticsService, 'updateLogisticsStatus').mockImplementation(async () => {
+      executionOrder.push('updateStatus');
+    });
+    jest.spyOn(locationTrackingService, 'stopTrackingJob').mockImplementation(async () => {
+      executionOrder.push('stopTracking');
+    });
+
+    const { findByTestId } = render(<LogisticsJobDetailScreen />);
+    const finishBtn = await findByTestId('finish-job-btn');
+
+    await act(async () => {
+      fireEvent.press(finishBtn);
+    });
+
+    expect(executionOrder).toEqual(['updateStatus', 'stopTracking']);
+  });
+
+  it('R6: Finish sequence retains active tracking and displays error banner when updateStatus throws', async () => {
+    const activeJob: LogisticsEntry = {
+      ...mockSingleJob,
+      status: 'In Progress',
+      isTrackingActive: true,
+    };
+    jest.spyOn(logisticsService, 'subscribeSingleLogisticsEntry').mockImplementation((_jId, _tId, cb) => {
+      cb(activeJob);
+      return () => {};
+    });
+
+    jest.spyOn(logisticsService, 'updateLogisticsStatus').mockRejectedValueOnce(
+      new Error('Firestore write failed: Network unreachable')
+    );
+    const stopTrackingSpy = jest.spyOn(locationTrackingService, 'stopTrackingJob');
+
+    const { findByTestId, findByText } = render(<LogisticsJobDetailScreen />);
+    const finishBtn = await findByTestId('finish-job-btn');
+
+    await act(async () => {
+      fireEvent.press(finishBtn);
+    });
+
+    // stopTrackingJob MUST NOT have been called
+    expect(stopTrackingSpy).not.toHaveBeenCalled();
+
+    // Error banner MUST be visible with the error message
+    expect(await findByText('Firestore write failed: Network unreachable')).toBeTruthy();
+
+    // Finish button must be re-enabled for retry
+    expect(finishBtn.props.accessibilityState?.disabled).toBe(false);
+  });
+});
+
 
