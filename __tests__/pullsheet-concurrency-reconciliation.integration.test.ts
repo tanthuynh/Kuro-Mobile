@@ -118,13 +118,12 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: () =>
-            Promise.resolve({
+          text: () => Promise.resolve(JSON.stringify({
               success: true,
               status: 'committed',
               operationId: JSON.parse(init.body).operationId,
               result: { updatedItem: { id: 'item-1', status: 'confirmed' } },
-            }),
+            })),
         });
       });
 
@@ -635,7 +634,7 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         tenantId: TEST_TENANT,
         userId: TEST_USER_1,
         action: 'increment_scan',
-        payload: { itemId: 'item-spot-1', scannedCount: 3 },
+        payload: { operationId: opId, eventId: TEST_EVENT, tenantId: TEST_TENANT, action: 'increment_scan', itemId: 'item-spot-1', scannedCount: 3 },
         timestamp: Date.now(),
         state: 'outcome_unknown',
       };
@@ -653,14 +652,13 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: () =>
-            Promise.resolve({
+          text: () => Promise.resolve(JSON.stringify({
               success: true,
               status: 'committed',
               operationId: body.operationId,
               alreadyCommitted: true,
               result: { updatedItem: { id: 'item-spot-1', scannedQuantity: 3 } },
-            }),
+            })),
         });
       });
 
@@ -730,14 +728,13 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: () =>
-          Promise.resolve({
+        text: () => Promise.resolve(JSON.stringify({
             success: true,
             status: 'committed',
             operationId: opId,
             reconciliationStatus: 'completed',
             result: { updatedItem: { id: 'item-speaker-1', scannedQuantity: 4 } },
-          }),
+          })),
       });
 
       const reconciliation = await reconcilePendingOperation(TEST_EVENT, TEST_TENANT, TEST_USER_1, opId);
@@ -759,7 +756,7 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         tenantId: TEST_TENANT,
         userId: TEST_USER_1,
         action: 'increment_scan',
-        payload: { itemId: 'item-mic-1', scannedCount: 2 },
+        payload: { operationId: opId, eventId: TEST_EVENT, tenantId: TEST_TENANT, action: 'increment_scan', itemId: 'item-mic-1', scannedCount: 2 },
         timestamp: Date.now(),
         state: 'outcome_unknown',
       };
@@ -773,12 +770,11 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
       global.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () =>
-          Promise.resolve({
+        text: () => Promise.resolve(JSON.stringify({
             success: true,
             status: 'not_found',
             operationId: opId,
-          }),
+          })),
       });
 
       const reconciliation = await reconcilePendingOperation(TEST_EVENT, TEST_TENANT, TEST_USER_1, opId);
@@ -792,12 +788,11 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: () =>
-            Promise.resolve({
+          text: () => Promise.resolve(JSON.stringify({
               success: true,
               status: 'committed',
               operationId: dispatchedBody.operationId,
-            }),
+            })),
         });
       });
 
@@ -814,18 +809,17 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
           return Promise.resolve({
             ok: true,
             status: 200,
-            json: () => Promise.resolve({ success: true, status: 'processing' }),
+            text: () => Promise.resolve(JSON.stringify({ success: true, status: 'processing', operationId: 'op-poll-1' })),
           });
         }
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: () =>
-            Promise.resolve({
+          text: () => Promise.resolve(JSON.stringify({
               success: true,
-              status: 'committed',
+              status: 'committed', operationId: 'op-poll-1',
               reconciliationStatus: 'completed',
-            }),
+            })),
         });
       });
 
@@ -857,12 +851,11 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: () =>
-          Promise.resolve({
+        text: () => Promise.resolve(JSON.stringify({
             success: true,
-            status: 'committed',
+            status: 'committed', operationId: 'op-cold-1',
             reconciliationStatus: 'completed',
-          }),
+          })),
       });
 
       const coldStartResult = await reconcilePendingOperationsOnColdStart(TEST_TENANT, TEST_USER_1);
@@ -879,7 +872,7 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 503,
-        json: () => Promise.resolve({ error: 'Service Unavailable' }),
+        text: () => Promise.resolve(JSON.stringify({ error: 'Service Unavailable' })),
       });
 
       const res = await updatePullsheetItemStatus(
@@ -905,7 +898,7 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 408,
-        json: () => Promise.resolve({ error: 'Request Timeout' }),
+        text: () => Promise.resolve(JSON.stringify({ error: 'Request Timeout' })),
       });
 
       const res = await updatePullsheetItemStatus(
@@ -928,30 +921,30 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
 
     it('R6-DISC-08: Command response returning status: processing retains operation in durable storage and performs bounded polling', async () => {
       let callCount = 0;
-      global.fetch = jest.fn().mockImplementation((url) => {
+      let operationId = '';
+      global.fetch = jest.fn().mockImplementation((url, init) => {
         callCount++;
+        if (init?.body) operationId = JSON.parse(init.body).operationId;
         if (url.includes('/api/pullsheets/command/status')) {
           // Status polling returns committed on second call
           return Promise.resolve({
             ok: true,
             status: 200,
-            json: () =>
-              Promise.resolve({
-                success: true,
+            text: () => Promise.resolve(JSON.stringify({
+                success: true, operationId,
                 status: 'committed',
                 result: { updatedItem: { id: 'item-proc-1', status: 'confirmed' } },
-              }),
+              })),
           });
         }
         // Initial POST returns processing
         return Promise.resolve({
           ok: true,
           status: 202,
-          json: () =>
-            Promise.resolve({
-              success: true,
+          text: () => Promise.resolve(JSON.stringify({
+              success: true, operationId,
               status: 'processing',
-            }),
+            })),
         });
       });
 
@@ -989,12 +982,11 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: () =>
-          Promise.resolve({
+        text: () => Promise.resolve(JSON.stringify({
             success: true,
             status: 'not_found',
             operationId: opId,
-          }),
+          })),
       });
 
       const res = await reconcilePendingOperation(TEST_EVENT, TEST_TENANT, TEST_USER_1, opId);
@@ -1030,12 +1022,11 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: () =>
-          Promise.resolve({
+        text: () => Promise.resolve(JSON.stringify({
             success: true,
             status: 'processing',
             operationId: opId,
-          }),
+          })),
       });
 
       const res = await reconcilePendingOperation(TEST_EVENT, TEST_TENANT, TEST_USER_1, opId, 2);
@@ -1054,7 +1045,7 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 499,
-        json: () => Promise.resolve({ error: 'Client Closed Request' }),
+        text: () => Promise.resolve(JSON.stringify({ error: 'Client Closed Request' })),
       });
 
       const res = await updatePullsheetItemStatus(
@@ -1138,7 +1129,7 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         tenantId: TEST_TENANT,
         userId: TEST_USER_1,
         action: 'update_status',
-        payload: { itemId: 'item-mic-durable', newStatus: 'confirmed' },
+        payload: { operationId: opId, eventId: TEST_EVENT, tenantId: TEST_TENANT, action: 'update_status', itemId: 'item-mic-durable', newStatus: 'confirmed' },
         timestamp: Date.now() - 30000,
         state: 'outcome_unknown',
       };
@@ -1154,12 +1145,11 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: () =>
-            Promise.resolve({
+          text: () => Promise.resolve(JSON.stringify({
               success: true,
               status: 'committed',
               operationId: capturedPayload.operationId,
-            }),
+            })),
         });
       });
 
@@ -1215,7 +1205,7 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         tenantId: TEST_TENANT,
         userId: TEST_USER_1,
         action: 'update_status',
-        payload: { itemId: 'item-ts-1', newStatus: 'confirmed', clientTimestamp: originalTime },
+        payload: { operationId: 'op-timestamp-preserve', eventId: TEST_EVENT, tenantId: TEST_TENANT, action: 'update_status', itemId: 'item-ts-1', newStatus: 'confirmed', clientTimestamp: originalTime },
         timestamp: originalTime,
         state: 'outcome_unknown',
       };
@@ -1226,15 +1216,15 @@ describe('Pull Sheet Concurrency, Idempotency & Network Reconciliation Integrati
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: () =>
-            Promise.resolve({
+          text: () => Promise.resolve(JSON.stringify({
               success: true,
               status: 'committed',
               operationId: capturedPayload.operationId,
-            }),
+            })),
         });
       });
 
+      await AsyncStorage.setItem(`@kuro_pending_operations:${TEST_TENANT}:${TEST_USER_1}`, JSON.stringify([pendingRecord]));
       await retryPendingOperation(pendingRecord, { uid: TEST_USER_1 });
       expect(capturedPayload.clientTimestamp).toBe(originalTime);
     });

@@ -1,0 +1,87 @@
+{
+  "capturedAt": "2026-09-13T13:29:52.3980156+10:00",
+  "command": "npm test -- --runInBand --silent --json --outputFile=<temp>/kuro-phase0-tests.json",
+  "scope": "mocked mobile Jest suite; not emulator/device validation",
+  "passedSuites": 82,
+  "failedSuites": 5,
+  "passedTests": 1603,
+  "failedTests": 15,
+  "failures": [
+    {
+      "suite": "__tests__\\repair-ticket-detail.test.tsx",
+      "name": "Comprehensive Repair Ticket Details Screen & Mobile Cleave Architecture Images, Documents & Notes Terminology & Attachments renders \"Images\", \"Documents\", and \"Notes\" sections cleanly",
+      "message": "Error: Unable to find an element with text: Notes (1)"
+    },
+    {
+      "suite": "__tests__\\repair-ticket-detail.test.tsx",
+      "name": "Comprehensive Repair Ticket Details Screen & Mobile Cleave Architecture Images, Documents & Notes Terminology & Attachments supports adding and editing notes with modal",
+      "message": "Error: Unable to find an element with testID: note-item-0"
+    },
+    {
+      "suite": "__tests__\\repair-ticket-detail.test.tsx",
+      "name": "Comprehensive Repair Ticket Details Screen & Mobile Cleave Architecture Dual Fixed Bottom Action Bar opens Add Note modal and appends note to ticket",
+      "message": "Error: Unable to find an element with testID: detail-add-note-btn"
+    },
+    {
+      "suite": "__tests__\\repair-ticket-detail.test.tsx",
+      "name": "Comprehensive Repair Ticket Details Screen & Mobile Cleave Architecture Open Issues Ledger & Edge Case Stress Tests preserves raw custom strings when creating ticket with custom supplier, owner, and requester",
+      "message": "Error: Unable to find an element with testID: input-fault-description"
+    },
+    {
+      "suite": "__tests__\\scan-to-repair-workflow.test.tsx",
+      "name": "Milestone 2: Scan-to-Repair Workflow validates mandatory fault description before submission",
+      "message": "Error: expect(jest.fn()).not.toHaveBeenCalled()"
+    },
+    {
+      "suite": "__tests__\\scan-to-repair-workflow.test.tsx",
+      "name": "Milestone 2: Scan-to-Repair Workflow submits valid repair ticket with tenant isolation, photos, and navigates back",
+      "message": "Error: Unable to find an element with testID: input-fault-description"
+    },
+    {
+      "suite": "__tests__\\pullsheet-concurrency-reconciliation.integration.test.ts",
+      "name": "Pull Sheet Concurrency, Idempotency & Network Reconciliation Integration Suite 1. Closed Client Firestore Security Rules R1-SEC-02: Mobile service exclusively routes all pull sheet mutations through authenticated POST /api/pullsheets/command",
+      "message": "Error: expect(received).toBe(expected) // Object.is equality"
+    },
+    {
+      "suite": "__tests__\\pullsheet-concurrency-reconciliation.integration.test.ts",
+      "name": "Pull Sheet Concurrency, Idempotency & Network Reconciliation Integration Suite 5. Server-Side Idempotency & Operation Receipts R5-IDEMP-03: Operation transitioning from outcome_unknown to committed is resolved idempotently by retryOperation without double incrementing",
+      "message": "Error: expect(received).toBe(expected) // Object.is equality"
+    },
+    {
+      "suite": "__tests__\\pullsheet-concurrency-reconciliation.integration.test.ts",
+      "name": "Pull Sheet Concurrency, Idempotency & Network Reconciliation Integration Suite 6. In-Flight Disconnection Reconciliation & Durable Storage R6-DISC-03: Reconciles not_found operation and permits explicit retry reusing original operationId",
+      "message": "Error: expect(received).toBe(expected) // Object.is equality"
+    },
+    {
+      "suite": "__tests__\\pullsheet-concurrency-reconciliation.integration.test.ts",
+      "name": "Pull Sheet Concurrency, Idempotency & Network Reconciliation Integration Suite 6. In-Flight Disconnection Reconciliation & Durable Storage R6-DISC-08: Command response returning status: processing retains operation in durable storage and performs bounded polling",
+      "message": "Error: expect(received).toBe(expected) // Object.is equality"
+    },
+    {
+      "suite": "__tests__\\pullsheet-concurrency-reconciliation.integration.test.ts",
+      "name": "Pull Sheet Concurrency, Idempotency & Network Reconciliation Integration Suite 7. Strict Offline Guard & Conflicting Action Prevention R7-OFF-03: retryPendingOperation reuses original operationId and cleans up durable storage on success",
+      "message": "Error: expect(received).toBe(expected) // Object.is equality"
+    },
+    {
+      "suite": "__tests__\\new-repair-workflow.test.tsx",
+      "name": "NewRepairScreen (app/repair/new.tsx) renders new repair screen with auto-filled Requested By and Report Fault header",
+      "message": "Error: Unable to find an element with testID: fault-details-card"
+    },
+    {
+      "suite": "__tests__\\new-repair-workflow.test.tsx",
+      "name": "NewRepairScreen (app/repair/new.tsx) allows filling out equipment, fault description, and submitting new repair ticket",
+      "message": "Error: Unable to find an element with testID: input-fault-description"
+    },
+    {
+      "suite": "__tests__\\repair-hardening-concurrency.test.ts",
+      "name": "Repair Workflow Hardening & Concurrency Test Suite Partial Failure Handling & Error Propagation HRD-ERR-01: createRepairTicket surfaces equipment update failure without swallowing",
+      "message": "Error: expect(received).rejects.toThrow()"
+    },
+    {
+      "suite": "__tests__\\repair-hardening-concurrency.test.ts",
+      "name": "Repair Workflow Hardening & Concurrency Test Suite Partial Failure Handling & Error Propagation HRD-ERR-02: createRepairTicket surfaces RTDB availability sync failure without swallowing",
+      "message": "Error: expect(received).rejects.toThrow()"
+    }
+  ],
+  "typecheckExitCode": 0
+}

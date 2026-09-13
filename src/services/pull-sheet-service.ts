@@ -19,8 +19,6 @@ import {
   doc,
   getDoc,
   onSnapshot,
-  updateDoc,
-  serverTimestamp,
   type Unsubscribe,
 } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -77,6 +75,8 @@ export interface PendingOperationRecord {
   payload: Record<string, any>;
   timestamp: number;
   state: 'in_flight' | 'outcome_unknown' | 'reconciling';
+  committed?: boolean;
+  reconciliationStatus?: 'completed' | 'pending' | 'failed';
 }
 
 function getPendingStorageKey(tenantId: string, userId: string): string {
@@ -87,58 +87,68 @@ function getPendingStorageKey(tenantId: string, userId: string): string {
  * Retrieves durable in-flight operations strictly namespaced by tenant and user.
  * Never shared across different accounts or tenants.
  */
-export async function getPendingOperations(
+const storageWrites = new Map<string, Promise<void>>();
+const pendingListeners = new Map<string, Set<(records: PendingOperationRecord[]) => void>>();
+
+export function subscribePendingOperations(tenantId: string, userId: string,
+  listener: (records: PendingOperationRecord[]) => void): () => void {
+  const key = getPendingStorageKey(tenantId, userId);
+  const listeners = pendingListeners.get(key) || new Set();
+  listeners.add(listener);
+  pendingListeners.set(key, listeners);
+  return () => {
+    listeners.delete(listener);
+    if (!listeners.size) pendingListeners.delete(key);
+  };
+}
+
+async function mutatePendingOperations(
   tenantId: string,
-  userId: string
-): Promise<PendingOperationRecord[]> {
+  userId: string,
+  mutate: (records: PendingOperationRecord[]) => PendingOperationRecord[]
+): Promise<void> {
+  const key = getPendingStorageKey(tenantId, userId);
+  const previous = storageWrites.get(key) || Promise.resolve();
+  const task = previous.catch(() => {}).then(async () => {
+    const records = await readPendingOperations(tenantId, userId);
+    const next = mutate(records);
+    if (next.length) await AsyncStorage.setItem(key, JSON.stringify(next));
+    else await AsyncStorage.removeItem(key);
+    pendingListeners.get(key)?.forEach((listener) => {
+      try { listener(next); } catch { /* A view cannot invalidate a persisted save. */ }
+    });
+  });
+  storageWrites.set(key, task);
+  try { await task; }
+  finally { if (storageWrites.get(key) === task) storageWrites.delete(key); }
+}
+
+async function readPendingOperations(tenantId: string, userId: string): Promise<PendingOperationRecord[]> {
+  const raw = await AsyncStorage.getItem(getPendingStorageKey(tenantId, userId));
+  if (!raw) return [];
+  const parsed: unknown = JSON.parse(raw);
+  if (!Array.isArray(parsed) || parsed.some((op) =>
+    !op || typeof op.operationId !== 'string' || !op.eventId ||
+    op.tenantId !== tenantId || op.userId !== userId || !op.payload
+  )) throw new Error('Pending save records could not be verified. Recovery is required before saving.');
+  return parsed;
+}
+
+export async function getPendingOperations(tenantId: string, userId: string): Promise<PendingOperationRecord[]> {
   if (!tenantId || !userId) return [];
-  try {
-    const raw = await AsyncStorage.getItem(getPendingStorageKey(tenantId, userId));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (err) {
-    console.warn('[pullSheetService] Failed to load pending operations:', err);
-    return [];
-  }
+  await storageWrites.get(getPendingStorageKey(tenantId, userId));
+  return readPendingOperations(tenantId, userId);
 }
 
 async function savePendingOperation(record: PendingOperationRecord): Promise<void> {
-  try {
-    const existing = await getPendingOperations(record.tenantId, record.userId);
-    const filtered = existing.filter((op) => op.operationId !== record.operationId);
-    filtered.push(record);
-    await AsyncStorage.setItem(
-      getPendingStorageKey(record.tenantId, record.userId),
-      JSON.stringify(filtered)
-    );
-  } catch (err) {
-    console.warn('[pullSheetService] Failed to save pending operation:', err);
-  }
+  await mutatePendingOperations(record.tenantId, record.userId, (records) => [
+    ...records.filter((op) => op.operationId !== record.operationId), record,
+  ]);
 }
 
-/**
- * Removes an acknowledged or resolved operation from durable storage.
- */
-export async function clearPendingOperation(
-  tenantId: string,
-  userId: string,
-  operationId: string
-): Promise<void> {
-  try {
-    const existing = await getPendingOperations(tenantId, userId);
-    const updated = existing.filter((op) => op.operationId !== operationId);
-    if (updated.length > 0) {
-      await AsyncStorage.setItem(
-        getPendingStorageKey(tenantId, userId),
-        JSON.stringify(updated)
-      );
-    } else {
-      await AsyncStorage.removeItem(getPendingStorageKey(tenantId, userId));
-    }
-  } catch (err) {
-    console.warn('[pullSheetService] Failed to clear pending operation:', err);
-  }
+export async function clearPendingOperation(tenantId: string, userId: string, operationId: string): Promise<void> {
+  await mutatePendingOperations(tenantId, userId, (records) =>
+    records.filter((op) => op.operationId !== operationId));
 }
 
 // ============================================================================
@@ -274,342 +284,149 @@ export interface CommandExecutionResult {
   reconciliationStatus?: 'completed' | 'pending' | 'failed';
 }
 
-function removeUndefinedFields(obj: any): any {
-  if (obj === null || obj === undefined) return null;
-  if (typeof obj !== 'object') return obj;
-  if (obj instanceof Date) return obj;
-  if (Array.isArray(obj)) return obj.map(removeUndefinedFields);
-  const cleaned: Record<string, any> = {};
-  for (const [key, value] of Object.entries(obj)) {
-    if (value !== undefined) {
-      cleaned[key] = removeUndefinedFields(value);
-    }
-  }
-  return cleaned;
+export const COMMAND_TIMEOUT_MS = 12000;
+
+type CommandDetails = {
+  itemId?: string;
+  barcode?: string;
+  newStatus?: PullsheetItemStatus;
+  scannedCount?: number;
+  autoTransitionToPrepped?: boolean;
+  clientTimestamp?: number;
+};
+
+const activeCommands = new Set<{ tenantId: string; userId: string; eventId: string; itemId?: string }>();
+
+function sameCaller(userId: string, caller: typeof auth.currentUser): boolean {
+  return !!caller && auth.currentUser === caller && caller.uid === userId;
 }
 
-/**
- * Direct Firestore fallback mutation when the backend command endpoint is unmounted (404) or encounters 5xx.
- */
-async function directFirestoreFallback(
-  action: 'increment_scan' | 'update_status' | 'bulk_confirm',
-  eventId: string,
-  tenantId: string,
-  user: { uid: string },
-  details?: Record<string, any>
-): Promise<{ success: boolean; item?: any; error?: string }> {
+async function withDeadline<T>(work: Promise<T>, abort?: () => void): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    const docRef = doc(db, 'pullsheets', eventId);
-    const snap = await getDoc(docRef);
-    if (!snap.exists()) {
-      return { success: false, error: 'Pull sheet not found' };
-    }
-    const data = snap.data();
-    if (data.tenantId && data.tenantId !== tenantId) {
-      return { success: false, error: 'Unauthorized: Tenant mismatch' };
-    }
+    return await Promise.race([
+      work,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          abort?.();
+          reject(new Error('Request timed out. The save may still have completed.'));
+        }, COMMAND_TIMEOUT_MS);
+      }),
+    ]);
+  } finally { if (timer) clearTimeout(timer); }
+}
 
-    const currentItems: any[] = Array.isArray(data.items) ? data.items : [];
-    const now = new Date();
-    let targetItem: any = null;
-    let hasChanges = false;
-    let updatedItems: any[] = [];
+async function requestJson(url: string, init: RequestInit): Promise<{ response: Response; data: any }> {
+  const controller = new AbortController();
+  return withDeadline((async () => {
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    const raw = await response.text();
+    let data: any = null;
+    try { data = JSON.parse(raw); } catch { /* An HTML/error body is not an acknowledgement. */ }
+    return { response, data };
+  })(), () => controller.abort());
+}
 
-    switch (action) {
-      case 'update_status': {
-        const { itemId, newStatus, scannedCount } = details || {};
-        updatedItems = currentItems.map((it) => {
-          if (it.id === itemId) {
-            hasChanges = true;
-            targetItem = {
-              ...it,
-              status: isActionablePullsheetItem(it) ? normalizePullsheetStatus(newStatus) : 'none',
-              ...(typeof scannedCount === 'number' ? { scannedQuantity: scannedCount } : {}),
-              statusUpdatedAt: now,
-              statusUpdatedBy: user.uid,
-            };
-            return targetItem;
-          }
-          return it;
-        });
-        if (!hasChanges) {
-          return { success: false, error: `Item with ID "${itemId}" not found on pull sheet` };
-        }
-        break;
-      }
-      case 'increment_scan': {
-        const { itemId, barcode, scannedCount, autoTransitionToPrepped } = details || {};
-        updatedItems = currentItems.map((it) => {
-          if (it.id === itemId) {
-            hasChanges = true;
-            const existingBarcodes: string[] = Array.isArray(it.scannedBarcodes)
-              ? [...it.scannedBarcodes]
-              : [];
-            if (barcode && !existingBarcodes.includes(barcode)) {
-              existingBarcodes.push(barcode);
-            }
-            const targetQty = Math.max(1, it.quantity || 1);
-            const currentScanned = typeof it.scannedQuantity === 'number'
-              ? it.scannedQuantity
-              : it.status === 'prepped_scanned'
-              ? targetQty
-              : 0;
-            const nextCount = typeof scannedCount === 'number' ? scannedCount : currentScanned + 1;
-            const isFullyPrepped = autoTransitionToPrepped ?? nextCount >= targetQty;
-            const nextStatus = isFullyPrepped ? 'prepped_scanned' : it.status;
-            targetItem = {
-              ...it,
-              scannedQuantity: nextCount,
-              scannedBarcodes: existingBarcodes,
-              status: isActionablePullsheetItem(it) ? normalizePullsheetStatus(nextStatus) : 'none',
-              statusUpdatedAt: now,
-              statusUpdatedBy: user.uid,
-            };
-            return targetItem;
-          }
-          return it;
-        });
-        if (!hasChanges) {
-          return { success: false, error: `Item with ID "${itemId}" not found on pull sheet` };
-        }
-        break;
-      }
-      case 'bulk_confirm': {
-        updatedItems = currentItems.map((it) => {
-          const isActionable = isActionablePullsheetItem(it);
-          const status = normalizePullsheetStatus(it.status);
-          if (isActionable && status === 'pending') {
-            hasChanges = true;
-            return {
-              ...it,
-              status: 'confirmed',
-              statusUpdatedAt: now,
-              statusUpdatedBy: user.uid,
-            };
-          }
-          return it;
-        });
-        break;
-      }
-    }
-
-    if (hasChanges) {
-      await updateDoc(
-        docRef,
-        removeUndefinedFields({
-          items: updatedItems,
-          updatedAt: serverTimestamp(),
-          updatedBy: user.uid,
-        })
-      );
-    }
-
-    return { success: true, item: targetItem };
-  } catch (err: any) {
-    return { success: false, error: err?.message || 'Direct Firestore fallback failed' };
+async function acknowledgeOperation(record: PendingOperationRecord, status?: string): Promise<void> {
+  if (status !== undefined && !['completed', 'pending', 'failed'].includes(status)) {
+    throw new Error('Unknown inventory synchronization state. Check status before retrying.');
+  }
+  if (status === 'pending' || status === 'failed') {
+    await savePendingOperation({ ...record, state: 'reconciling', committed: true, reconciliationStatus: status });
+  } else {
+    await clearPendingOperation(record.tenantId, record.userId, record.operationId);
   }
 }
 
-/**
- * Dispatches an authenticated pullsheet mutation command to the backend API.
- * Uses operationId for transaction idempotency and tracks in-flight state durably.
- */
+/** One authoritative write path. Unknown outcomes always retain the original receipt identity. */
 async function executePullsheetCommand(
-  action: 'increment_scan' | 'update_status' | 'bulk_confirm',
+  action: PendingOperationRecord['action'],
   eventId: string,
   tenantId: string,
   user: { uid: string },
-  details: {
-    itemId?: string;
-    barcode?: string;
-    newStatus?: PullsheetItemStatus;
-    scannedCount?: number;
-    autoTransitionToPrepped?: boolean;
-    clientTimestamp?: number;
-  },
+  details: CommandDetails,
   existingOperationId?: string
 ): Promise<CommandExecutionResult> {
-  // 1. Strict Online Guard
-  if (!isOnline()) {
-    return {
-      success: false,
-      error: 'Network connection required. Offline scanning is disabled.',
-    };
+  if (!isOnline()) return { success: false, error: 'Network connection required. Offline scanning is disabled.' };
+  const caller = auth.currentUser;
+  if (!eventId || !tenantId || !sameCaller(user.uid, caller)) {
+    return { success: false, error: 'Authentication required, with a valid tenant and event.' };
   }
-
-  let idToken: string | null = null;
+  const lock = { tenantId, userId: user.uid, eventId, itemId: action === 'bulk_confirm' ? undefined : details.itemId };
+  if ([...activeCommands].some((op) => op.tenantId === tenantId && op.userId === user.uid &&
+    op.eventId === eventId && (!op.itemId || !lock.itemId || op.itemId === lock.itemId))) {
+    return { success: false, error: 'A save is already in-flight. Please wait.' };
+  }
+  activeCommands.add(lock);
+  let pendingRecord: PendingOperationRecord | undefined;
+  let dispatched = false;
   try {
-    idToken = (await auth.currentUser?.getIdToken()) || null;
-  } catch (authError: any) {
-    console.warn('[pullSheetService] Token retrieval error:', authError);
-  }
-
-  if (!idToken) {
-    return {
-      success: false,
-      error: 'Authentication required. Please log in again.',
-    };
-  }
-
-  const operationId = existingOperationId || uuidv4();
-  const payload = {
-    operationId,
-    eventId,
-    tenantId,
-    action,
-    ...details,
-    clientTimestamp: details?.clientTimestamp || Date.now(),
-  };
-
-  // 3. Persist to durable storage as in_flight
-  const pendingRecord: PendingOperationRecord = {
-    operationId,
-    eventId,
-    tenantId,
-    userId: user.uid,
-    action,
-    payload,
-    timestamp: details?.clientTimestamp || Date.now(),
-    state: 'in_flight',
-  };
-  await savePendingOperation(pendingRecord);
-
-  // 4. HTTP Request with Timeout
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-  try {
-    const response = await fetch(`${API_CONFIG.baseUrl}/api/pullsheets/command`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${idToken}`,
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    const rawText = await response.text().catch(() => '');
-    let data: any = null;
-    try {
-      data = JSON.parse(rawText);
-    } catch {
-      // Non-JSON response (e.g. server crash HTML or gateway error)
+    const idToken = await withDeadline(caller!.getIdToken());
+    if (!idToken || !sameCaller(user.uid, caller)) throw new Error('Account changed. Please sign in again.');
+    const records = await getPendingOperations(tenantId, user.uid);
+    const original = existingOperationId ? records.find((op) => op.operationId === existingOperationId) : undefined;
+    if (existingOperationId && !original) throw new Error('Original save record not found. Check status first.');
+    if (original && (original.eventId !== eventId || original.action !== action ||
+        original.payload.operationId !== existingOperationId || original.payload.eventId !== eventId ||
+        original.payload.tenantId !== tenantId || original.payload.action !== action ||
+        original.payload.itemId !== details.itemId)) {
+      throw new Error('Stored operation does not match this request.');
     }
-
-    // 5. Validated Committed-Result Verification (Not merely HTTP 200)
-    if (
-      response.ok &&
-      data &&
-      data.success === true &&
-      data.status === 'committed' &&
-      data.operationId === operationId
-    ) {
-      // Clear durable record on acknowledged success
-      await clearPendingOperation(tenantId, user.uid, operationId);
-
+    const conflicting = records.some((op) => op.operationId !== existingOperationId &&
+      op.eventId === eventId && (action === 'bulk_confirm' || op.action === 'bulk_confirm' || op.payload.itemId === details.itemId));
+    if (conflicting) throw new Error('A previous save needs reconciliation before this item can be changed.');
+    const operationId = existingOperationId || uuidv4();
+    const payload = original?.payload || {
+      operationId, eventId, tenantId, action, ...details,
+      clientTimestamp: details.clientTimestamp ?? Date.now(),
+    };
+    pendingRecord = original || {
+      operationId, eventId, tenantId, userId: user.uid, action, payload,
+      timestamp: payload.clientTimestamp, state: 'in_flight',
+    };
+    // Storage failures stop dispatch; never silently lose the recovery record.
+    await savePendingOperation(pendingRecord);
+    if (!sameCaller(user.uid, caller) || !isOnline()) throw new Error('Session or connection changed before saving.');
+    dispatched = true;
+    const { response, data } = await requestJson(`${API_CONFIG.baseUrl}/api/pullsheets/command`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify(payload),
+    });
+    if (!sameCaller(user.uid, caller)) throw new Error('Account changed while saving. Check the original account for the result.');
+    if (response.ok && data?.success === true && data.status === 'committed' && data.operationId === operationId) {
+      await acknowledgeOperation(pendingRecord, data.reconciliationStatus);
       return {
-        success: true,
-        operationId,
-        alreadyCommitted: data.alreadyCommitted === true,
-        item: data.result?.updatedItem,
-        pullsheetSummary: data.result?.pullsheetSummary,
+        success: true, operationId, alreadyCommitted: data.alreadyCommitted === true,
+        item: data.result?.updatedItem, pullsheetSummary: data.result?.pullsheetSummary,
         reconciliationStatus: data.reconciliationStatus,
       };
     }
-
-    // 6. Processing status (HTTP 200 or 202 Accepted): poll status with bounded backoff
-    if (response.ok && data && data.status === 'processing') {
-      pendingRecord.state = 'reconciling';
-      await savePendingOperation(pendingRecord);
-
-      const pollResult = await reconcilePendingOperation(eventId, tenantId, user.uid, operationId);
-      if (pollResult.success && pollResult.status === 'committed') {
-        return {
-          success: true,
-          operationId,
-          item: pollResult.result?.updatedItem,
-          reconciliationStatus: pollResult.reconciliationStatus,
-        };
-      }
-
-      pendingRecord.state = 'outcome_unknown';
-      await savePendingOperation(pendingRecord);
-      return {
-        success: false,
-        error: 'Command is processing on server. Please check status or retry.',
-        outcomeUnknown: true,
-        operationId,
+    if (response.ok && data?.success === true && data.status === 'processing' && data.operationId === operationId) {
+      await savePendingOperation({ ...pendingRecord, state: 'reconciling' });
+      const polled = await reconcilePendingOperation(eventId, tenantId, user.uid, operationId);
+      if (polled.success && polled.status === 'committed') return {
+        success: true, operationId, item: polled.result?.updatedItem, reconciliationStatus: polled.reconciliationStatus,
       };
     }
-
-    // 5xx Server or Gateway Errors, 408 Request Timeout, or 499 Client Closed Request
-    if (response.status >= 500 || response.status === 408 || response.status === 499) {
-      console.warn(`[pullSheetService] Server returned status ${response.status}. Attempting direct Firestore fallback...`);
-      const fallbackResult = await directFirestoreFallback(action, eventId, tenantId, user, details);
-      if (fallbackResult.success) {
-        await clearPendingOperation(tenantId, user.uid, operationId);
-        return {
-          success: true,
-          operationId,
-          item: fallbackResult.item,
-        };
-      }
-
-      pendingRecord.state = 'outcome_unknown';
-      await savePendingOperation(pendingRecord);
-
-      const serverErrorMsg = data?.error || (rawText && !rawText.startsWith('<') ? rawText.slice(0, 150) : null);
-      return {
-        success: false,
-        error: serverErrorMsg || fallbackResult.error || `Server gateway error (${response.status}). Outcome unknown; please check status or retry.`,
-        outcomeUnknown: true,
-        operationId,
-      };
-    }
-
-    // If server returned 404 without a domain error, the endpoint is unmounted on the backend server
-    if (response.status === 404 && !data?.error) {
-      console.warn('[pullSheetService] Command route 404 (endpoint not mounted on server). Attempting direct Firestore fallback...');
-      const fallbackResult = await directFirestoreFallback(action, eventId, tenantId, user, details);
-      if (fallbackResult.success) {
-        await clearPendingOperation(tenantId, user.uid, operationId);
-        return {
-          success: true,
-          operationId,
-          item: fallbackResult.item,
-        };
-      }
+    // Only a new, definitively rejected command can be discarded. A rejected retry
+    // does not establish that its earlier request failed to commit.
+    if (!existingOperationId && response.status >= 400 && response.status < 500 &&
+      ![408, 409, 499].includes(response.status)) {
       await clearPendingOperation(tenantId, user.uid, operationId);
-      return {
-        success: false,
-        error: fallbackResult.error || 'Server returned status 404',
-      };
+      return { success: false, operationId, error: data?.error ||
+        (response.status === 404 ? 'The save endpoint is unavailable. No direct database fallback is allowed.' : `Save rejected (${response.status}).`) };
     }
-
-    // Explicit client rejection (4xx, e.g. 400 Bad Request, 401 Unauthorized, 403 Forbidden, 409 Conflict)
-    await clearPendingOperation(tenantId, user.uid, operationId);
-    return {
-      success: false,
-      error: data?.error || `Server returned status ${response.status}`,
-    };
-  } catch (networkError: any) {
-    clearTimeout(timeoutId);
-
-    // Mark as outcome_unknown on network error or timeout
-    pendingRecord.state = 'outcome_unknown';
-    await savePendingOperation(pendingRecord);
-
-    console.warn('[pullSheetService] In-flight command disconnect/timeout:', networkError);
-    return {
-      success: false,
-      error: 'Connection lost during save. Verify network connection and retry.',
-      outcomeUnknown: true,
-      operationId,
-    };
-  }
+    throw new Error(data?.error || 'Save not acknowledged. Check status before retrying.');
+  } catch (err: any) {
+    if (pendingRecord && dispatched) {
+      await savePendingOperation({ ...pendingRecord, state: pendingRecord.committed ? 'reconciling' : 'outcome_unknown' })
+        .catch(() => { /* The original durable in-flight record still supports recovery. */ });
+    } else if (pendingRecord && !existingOperationId) {
+      await clearPendingOperation(tenantId, user.uid, pendingRecord.operationId).catch(() => {});
+    }
+    return { success: false, error: err?.message || 'Unable to save.', outcomeUnknown: dispatched || undefined,
+      operationId: pendingRecord?.operationId };
+  } finally { activeCommands.delete(lock); }
 }
 
 // ============================================================================
@@ -661,8 +478,8 @@ export async function updatePullsheetItemScannedCount(
   eventId: string,
   tenantId: string,
   itemId: string,
-  newScannedCount: number,
-  autoTransitionToPrepped: boolean,
+  _newScannedCount: number,
+  _autoTransitionToPrepped: boolean,
   user: { uid: string },
   scannedBarcode?: string,
   existingOperationId?: string
@@ -675,8 +492,7 @@ export async function updatePullsheetItemScannedCount(
     {
       itemId,
       barcode: scannedBarcode,
-      scannedCount: newScannedCount,
-      autoTransitionToPrepped,
+      // The existing server computes the increment and completion from current data.
     },
     existingOperationId
   );
@@ -721,115 +537,48 @@ export interface StatusReconciliationResult {
  * Polls with bounded backoff if the server indicates 'processing'.
  */
 export async function reconcilePendingOperation(
-  eventId: string,
-  tenantId: string,
-  userId: string,
-  operationId: string,
-  maxPollAttempts: number = 3
+  eventId: string, tenantId: string, userId: string, operationId: string, maxPollAttempts: number = 3
 ): Promise<StatusReconciliationResult> {
-  if (!isOnline()) {
-    return { success: false, status: 'error', error: 'Network offline', operationId };
+  const caller = auth.currentUser;
+  if (!isOnline() || !sameCaller(userId, caller)) {
+    return { success: false, status: 'error', error: 'Network connection and the original account are required.', operationId };
   }
-
-  const idToken = (await auth.currentUser?.getIdToken().catch(() => null)) ?? null;
-  if (!idToken) {
-    return { success: false, status: 'error', error: 'Not authenticated', operationId };
-  }
-
-  const url = `${API_CONFIG.baseUrl}/api/pullsheets/command/status?eventId=${encodeURIComponent(
-    eventId
-  )}&operationId=${encodeURIComponent(operationId)}`;
-
-  let attempt = 0;
-  while (attempt < maxPollAttempts) {
-    attempt++;
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
+  try {
+    const idToken = await withDeadline(caller!.getIdToken());
+    const url = `${API_CONFIG.baseUrl}/api/pullsheets/command/status?eventId=${encodeURIComponent(eventId)}&operationId=${encodeURIComponent(operationId)}`;
+    for (let attempt = 0; attempt < Math.min(3, Math.max(1, maxPollAttempts)); attempt++) {
+      if (!sameCaller(userId, caller)) throw new Error('Account changed during reconciliation.');
+      const { response, data } = await requestJson(url, {
+        method: 'GET', headers: { Authorization: `Bearer ${idToken}` },
       });
-
-      const data = await response.json().catch(() => null);
-
-      if (response.ok && data && data.success === true) {
-        if (data.status === 'committed') {
-          // Acknowledged commit: clear durable record
-          await clearPendingOperation(tenantId, userId, operationId);
-          return {
-            success: true,
-            status: 'committed',
-            reconciliationStatus: data.reconciliationStatus,
-            result: data.result,
-            operationId,
-          };
-        }
-
-        if (data.status === 'not_found') {
-          // Update durable record state to outcome_unknown so it is ready for explicit retry
-          const existing = await getPendingOperations(tenantId, userId);
-          const target = existing.find((op) => op.operationId === operationId);
-          if (target && target.state !== 'outcome_unknown') {
-            target.state = 'outcome_unknown';
-            await savePendingOperation(target);
-          }
-          return {
-            success: true,
-            status: 'not_found',
-            operationId,
-          };
-        }
-
-        if (data.status === 'processing') {
-          if (attempt < maxPollAttempts) {
-            // Bounded exponential backoff
-            const backoffMs = Math.min(1000, 300 * Math.pow(2, attempt - 1));
-            await new Promise((resolve) => setTimeout(resolve, backoffMs));
-            continue;
-          } else {
-            // Polling exhausted: update durable record to outcome_unknown for explicit retry
-            const existing = await getPendingOperations(tenantId, userId);
-            const target = existing.find((op) => op.operationId === operationId);
-            if (target && target.state !== 'outcome_unknown') {
-              target.state = 'outcome_unknown';
-              await savePendingOperation(target);
-            }
-            return {
-              success: true,
-              status: 'processing',
-              operationId,
-            };
-          }
-        }
+      if (!sameCaller(userId, caller)) throw new Error('Account changed during reconciliation.');
+      if (!response.ok || data?.success !== true || data.operationId !== operationId) {
+        throw new Error(data?.error || 'Unverified status response. The save is still unresolved.');
       }
-
-      return {
-        success: false,
-        status: 'error',
-        error: data?.error || `Status query returned ${response.status}`,
-        operationId,
-      };
-    } catch (err: any) {
-      if (attempt < maxPollAttempts) {
-        await new Promise((resolve) => setTimeout(resolve, 300 * attempt));
-        continue;
+      if (data.status === 'committed') {
+        const stored = (await getPendingOperations(tenantId, userId)).find((op) =>
+          op.operationId === operationId && op.eventId === eventId);
+        if (stored) await acknowledgeOperation(stored, data.reconciliationStatus);
+        return { success: true, status: 'committed', operationId, result: data.result,
+          reconciliationStatus: data.reconciliationStatus };
       }
-      return {
-        success: false,
-        status: 'error',
-        error: err.message || 'Status query failed',
-        operationId,
-      };
+      if (data.status === 'not_found' || data.status === 'processing') {
+        await mutatePendingOperations(tenantId, userId, (records) => records.map((op) =>
+          op.operationId === operationId && op.eventId === eventId && !op.committed
+            ? { ...op, state: 'outcome_unknown' } : op));
+        if (data.status === 'not_found') return { success: true, status: 'not_found', operationId };
+        if (attempt + 1 < Math.min(3, Math.max(1, maxPollAttempts))) {
+          await new Promise((resolve) => setTimeout(resolve, 300 * 2 ** attempt));
+          continue;
+        }
+        return { success: true, status: 'processing', operationId };
+      }
+      throw new Error('Unknown receipt status. The save is still unresolved.');
     }
+  } catch (err: any) {
+    return { success: false, status: 'error', error: err?.message || 'Status check failed.', operationId };
   }
-
-  return {
-    success: false,
-    status: 'error',
-    error: 'Max poll attempts reached',
-    operationId,
-  };
+  return { success: false, status: 'error', error: 'Status check failed.', operationId };
 }
 
 /**
@@ -885,8 +634,8 @@ export async function isItemOperationPending(
   return pendingOps.some(
     (op) =>
       (op.state === 'in_flight' || op.state === 'outcome_unknown' || op.state === 'reconciling') &&
-      (op.payload?.itemId === itemId ||
-        (op.action === 'bulk_confirm' && (!eventId || op.eventId === eventId)))
+      (!eventId || op.eventId === eventId) &&
+      (op.payload?.itemId === itemId || op.action === 'bulk_confirm')
   );
 }
 
@@ -914,7 +663,19 @@ export async function retryPendingOperation(
   pendingOp: PendingOperationRecord,
   user: { uid: string }
 ): Promise<CommandExecutionResult> {
+  if (pendingOp.userId !== user.uid || auth.currentUser?.uid !== user.uid) {
+    return { success: false, error: 'Only the original account can retry this save.' };
+  }
   const { operationId, eventId, tenantId, action, payload } = pendingOp;
+  if (payload.operationId !== operationId || payload.eventId !== eventId ||
+      payload.tenantId !== tenantId || payload.action !== action) {
+    return { success: false, error: 'The original operation payload could not be verified.' };
+  }
+  // Replay the exact stored payload, including legacy absolute-count commands.
+  try {
+    const stored = (await getPendingOperations(tenantId, user.uid)).find((op) => op.operationId === operationId);
+    if (!stored) return { success: false, error: 'Original save record not found. Check status first.' };
+  } catch (err: any) { return { success: false, error: err.message }; }
   return executePullsheetCommand(
     action,
     eventId,
@@ -936,38 +697,16 @@ export async function retryPendingOperation(
  * Explicit command to trigger side effects reconciliation worker on the server.
  */
 export async function triggerSideEffectsRecovery(
-  eventId: string,
-  tenantId: string,
-  operationId: string
+  eventId: string, tenantId: string, operationId: string
 ): Promise<{ success: boolean; reconciliationStatus?: string; error?: string }> {
-  if (!isOnline()) {
-    return { success: false, error: 'Network connection required. Offline operations are disabled.' };
-  }
-
-  const idToken = await auth.currentUser?.getIdToken().catch(() => null);
-  if (!idToken) return { success: false, error: 'Not authenticated' };
-
+  if (!isOnline()) return { success: false, error: 'Network connection required.' };
+  const uid = auth.currentUser?.uid;
+  if (!uid) return { success: false, error: 'Not authenticated' };
   try {
-    const response = await fetch(`${API_CONFIG.baseUrl}/api/pullsheets/command`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${idToken}`,
-      },
-      body: JSON.stringify({
-        operationId,
-        eventId,
-        tenantId,
-        action: 'reconcile_side_effects',
-      }),
-    });
-
-    const data = await response.json().catch(() => null);
-    if (response.ok && data && data.success === true) {
-      return { success: true, reconciliationStatus: data.reconciliationStatus };
-    }
-    return { success: false, error: data?.error || 'Side effects recovery failed' };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Recovery call failed' };
-  }
+    const record = (await getPendingOperations(tenantId, uid)).find((op) =>
+      op.eventId === eventId && op.operationId === operationId && op.committed);
+    if (!record) return { success: false, error: 'Original committed save record is required for recovery.' };
+    // The fixed server retries side effects when the original command is replayed.
+    return retryPendingOperation(record, { uid });
+  } catch (err: any) { return { success: false, error: err.message }; }
 }

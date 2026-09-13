@@ -1,0 +1,2466 @@
+{
+  "verifiedAt": "2026-09-13T13:34:07.9897017+10:00",
+  "workspaceFilesChecked": 869,
+  "externalReferenceFilesChecked": 798,
+  "differences": [
+    {
+      "path": "kuro-web\\.firebaserc",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\.gitignore",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\.idx\\dev.nix",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\.idx\\icon.png",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\.vscode\\settings.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\apphosting.yaml",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\components.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\database.rules.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\docs\\blueprint.md",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\e2e\\01-navigation-settings.spec.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\e2e\\02-services-management.spec.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\e2e\\03-quote-table-interactions.spec.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\e2e\\04-pullsheet-workflow.spec.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\e2e\\05-dialogs-and-error-recovery.spec.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\firebase.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\firestore.rules",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\GEMINI.md",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\next.config.js",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\ORIGINAL_REQUEST.md",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\package.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\playwright-report\\index.html",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\playwright.config.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\postcss.config.mjs",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\PROJECT.md",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\README.md",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\adversarial_harness.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\challenger_verifier.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\contacts_mapped.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\events_mapped.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\extract_and_map.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\file-writer.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\flex_kuro_data_map.md",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\flex-client.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\flex-sample-data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\inventory_mapped.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\mappers.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\test_out_dir\\contacts_mapped.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\test_out_dir\\events_mapped.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\test_out_dir\\inventory_mapped.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scratch\\flex_migration_discovery\\validators.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scripts\\cleanup-websites.js",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scripts\\migrate-make.js",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scripts\\migrate-user-avatars.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scripts\\rebuild-ledger.js",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\scripts\\rebuild-ledger.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\change-logs\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\change-logs\\components\\change-logs-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\change-logs\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\change-logs\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\components\\settings-nav.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\db-maintenance\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\db-maintenance\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\document-templates\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\document-templates\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\email-templates\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\email-templates\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\email\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\email\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\find-global-inventory\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\find-global-inventory\\components\\find-global-inventory-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\find-global-inventory\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\find-global-inventory\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\components\\global-inventory-item-editor.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\components\\global-inventory-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\schemas.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\schemas.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\global\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\ledger-health\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\ledger-health\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\subscription-plans\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\subscription-plans\\components\\subscription-plans-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\subscription-plans\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\subscription-plans\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\super-users\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\super-users\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\super-users\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\system-broadcasts\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\system-broadcasts\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\taxes\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\taxes\\components\\taxes-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\settings\\taxes\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\support\\feedback\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\support\\feedback\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\module-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-data-management-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-data-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-details-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-files-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-system-log-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-transactions-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenants-table-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenants-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\admin\\tenants\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\admin\\enable-google-provider\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\admin\\migrate-auth\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\auth\\google-smtp\\callback\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\auth\\google-smtp\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\auth\\google-tenant-login\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\auth\\lookup-tenant\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\chat\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\clean-dev-mode\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\debug-firestore\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\debug\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\generate-pdf\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\health\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\pullsheets\\command\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\api\\pullsheets\\command\\status\\route.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\auth\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\chat\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\chat\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\components\\contact-client-users-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\components\\contact-details-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\components\\contact-name-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\components\\contact-people-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\components\\contact-projects-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\components\\contact-type-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\components\\contacts-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\schemas.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\contacts\\table\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\dispatch\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\dispatch\\components\\dispatch-entry-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\dispatch\\components\\dispatch-schedule-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\dispatch\\components\\dispatch-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\dispatch\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\dispatch\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\dispatch\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\dispatch\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\documents\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\documents\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\error.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\event-billing-details-tab.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\flex-migration-adversarial.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\m1-challenger-legacy-cleanup-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\m3-pricing-maxdiscount.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\m4-pullsheet-exclusion-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\m4-service-dnd-rates-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\m5-challenger-pullsheet-8matrix.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\m6-challenger-tier5-adversarial.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\pricing-engine-adversarial-challenger.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\pullsheet-service-exclusion.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\pullsheet-status.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\quote-invoice-adversarial.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\__tests__\\service-quote-integration.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\billing-status-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\billing-terms-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\client-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\department-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\equipment-status-indicator.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-details-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-equipment-form-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-equipment-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-logistics-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-name-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-number-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-pullsheet-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-pullsheet-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-status-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-table-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\event-type-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\events-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\generate-invoice-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\generate-quote-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\components\\venue-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\invoice-generator.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\pullsheet-actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\quote-generator.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\events\\schema.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\favicon.ico",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\forms\\feedback\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\global-error.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\globals.css",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\__tests__\\allocation-writer.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\__tests__\\availability-engine.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\__tests__\\inventory-maxdiscount.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\__tests__\\sales-consumption.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\__tests__\\warehouse-tracking.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\allocation-definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\allocation-writer.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\availability-actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\availability-engine.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\availability-rtdb.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\components\\availability-badge.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\components\\equipment-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\components\\global-equipment-autocomplete.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\components\\inventory-category-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\components\\inventory-contents-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\components\\inventory-item-editor.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\components\\inventory-properties-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\components\\inventory-serial-numbers-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\sales-actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\sales-definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\schemas.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\table\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\types\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\warehouse-actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\inventory\\warehouse-definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\kuro\\components\\fortnight-calendar-grid.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\kuro\\components\\month-calendar-grid.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\kuro\\components\\week-calendar-grid.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\kuro\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\kuro\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\login\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\__tests__\\challenger-edge-cases.test.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\__tests__\\challenger-sync-maps.test.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\__tests__\\logistics-tracking-footer.test.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\__tests__\\logistics-tracking-map.test.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\components\\logistics-board-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\components\\logistics-destinations-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\components\\logistics-entry-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\components\\logistics-schedule-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\components\\logistics-tracking-map.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\components\\logistics-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logistics\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logs\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logs\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logs\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\logs\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\payments\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\payments\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\register\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\register\\components\\account-step.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\register\\components\\email-verification-step.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\register\\components\\payment-step.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\register\\components\\plan-step.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\register\\components\\success-step.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\register\\components\\wizard.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\register\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\billing-status-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\condition-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\equipment-name-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\owner-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\priority-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\repair-details-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\repair-logistics-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\repair-number-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\repairs-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\requester-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\status-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\supplier-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\components\\ticket-table-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\schema.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\repair\\table\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\reports\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\reports\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m1-challenger-boundary.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m2-challenger-boundary-flat.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m2-challenger-settings-tree-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m2-table-stress-adversarial.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m2-table-virtualization.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m3-challenger1-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m3-challenger2-adversarial.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m3-dynamic-pricing-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m3-editor-rates-tab.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m3-service-table-rates.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\m3-tab-lifecycle-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\service-item-editor.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\service-navigation.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\service-schemas-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\service-schemas.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\settings-integration.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\settings-ui-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\__tests__\\tree-hierarchy-dnd-stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\components\\service-item-editor.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\components\\service-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\components\\service-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\schema.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\services\\table\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\account\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\account\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\billing-statuses\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\billing-statuses\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\billing-statuses\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\billing-terms\\__tests__\\billing-terms.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\billing-terms\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\billing-terms\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\billing-terms\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\categories\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\categories\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\components\\settings-nav.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\departments\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\departments\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\departments\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\dispatch-statuses\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\dispatch-statuses\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\dispatch-statuses\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\document-templates\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\document-templates\\default-templates.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\document-templates\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\event-statuses\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\event-statuses\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\event-statuses\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\event-types\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\event-types\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\event-types\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\actions.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\adversarial_stress.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\e2e-adversarial-relational-verification.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\empirical-diffing-verification.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\flex-settings-ui.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\flex\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\flex\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\flex\\helpers.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\integration\\__tests__\\adversarial-ui-state.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\integration\\__tests__\\challenger_m3_2_empirical.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\integration\\__tests__\\page.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\integration\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\integration\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\logistics-statuses\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\logistics-statuses\\components\\logistics-statuses-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\logistics-statuses\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\logistics-statuses\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\preferences\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\preferences\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\priorities\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\priorities\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\priorities\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\rate-factors\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\rate-factors\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\rate-factors\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\role-types\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\role-types\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\role-types\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\service-categories\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\templates\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\templates\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\theme\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\ticket-statuses\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\ticket-statuses\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\ticket-statuses\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\vehicles\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\vehicles\\components\\vehicles-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\vehicles\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\settings\\vehicles\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\__tests__\\schema.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\actions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\components\\avatar-creator.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\components\\contact-client-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\components\\crew-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\components\\tenant-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\components\\user-details-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\components\\user-role-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\schema.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\app\\users\\table\\page.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\analytics-tracker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\chat\\chat-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\chat\\chat-window.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\data-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\documents\\document-tree.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\documents\\entity-documents-tab.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\icons.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\__tests__\\error-boundaries-adversarial.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\__tests__\\global-search-services.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\about-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\action-bar-error-boundary.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\action-bar.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\ai-assistant-trigger.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\app-content.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\app-shell.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\app-title.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\barcode-search.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\change-log-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\change-password-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\connection-status.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\data-preloader.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\global-search.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\main-layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\select-tenant-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\settings-nav.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\sidebar-nav.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\sub-tab-nav.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\system-broadcast-banner.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\tab-bar.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\tab-content-layout.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\tab-error-boundary.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\title-bar.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\user-nav.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\layout\\version-checker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\page-header.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\accordion.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\address-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\advanced-marker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\alert-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\alert.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\asset-number-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\assignee-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\avatar.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\badge.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\barcode-number-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\break-time-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\bulk-delete-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\button.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\calendar.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\card.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\carousel.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\case-type-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\category-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\chart.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\checkbox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\collaborator-avatars.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\collapsible.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\color-picker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\command.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\confirmation-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\contact-distance-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\contact-name-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\country-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\currency-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\data-table-sort-header.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\data-table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\date-picker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\date-range-calendar.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\datetime-picker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\datetime-range-picker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\destination-name-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\dispatch-status-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\distance-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\driver-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\dropdown-menu.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\duration-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\duration-picker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\email-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\entity-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\equipment-type-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\event-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\event-timeline.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\expand-toggle-button.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\file-upload-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\filter-multiselect.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\form-input-field.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\form.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\icon-picker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\item-class-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\item-name-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\label.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\logistics-status-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\manufacturer-combobox.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\map-dialog.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\max-discount-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\multi-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\name-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\notes-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\online-indicator.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\open-in-new-tab-button.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\password-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\percent-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\phone-number-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\place-autocomplete.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\popover.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\position-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\postcode-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\price-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\progress.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\quantity-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\radio-group.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\realtime-field.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\scroll-area.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\search-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\separator.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\serialised-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\settings-page-header.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\sheet.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\show-more-button.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\sidebar.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\simple-modal.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\skeleton-loaders.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\skeleton.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\sort-menu.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\state-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\status-pulse-dot.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\street-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\suburb-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\switch.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\table-action-toolbar.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\table-cell-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\table-header-filter.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\table-sort-button.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\table.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\tabs.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\textarea.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\time-picker.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\toast.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\toaster.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\tooltip.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\unit-aware-inputs.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\unit-number-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\vehicle-select.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\components\\ui\\website-input.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\context\\action-bar-context.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\context\\dialog-context.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\context\\google-maps-context.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\context\\providers.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\context\\sidebar-context.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\context\\tab-context.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\context\\ui-state-context.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\context\\user-context.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\__tests__\\use-availability.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\__tests__\\use-connection-status.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\__tests__\\use-realtime-location-history.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-active-tab-broadcaster.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-auto-save.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-availability.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-chat.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-connection-status.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-crud-state.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-documents.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-logistics-calendar.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-mobile.tsx",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-presence-list.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-presence.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-contact.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-data.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-dispatch-entry.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-document.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-equipment-items.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-event.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-inventory-item.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-location-history.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-logistics-entry.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-repair-ticket.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-realtime-user.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-settings.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-tab-collaborators.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\hooks\\use-toast.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\__tests__\\avatar-utils.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\__tests__\\challenger-flex-m1.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\__tests__\\flex-mappers.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\__tests__\\flex-transport-adversarial.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\__tests__\\flex.test.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\ai-worker.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\analytics.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\avatar-utils.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\countries.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\csv-parser.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\definitions.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\firebase-admin.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\firebase.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\flex-mappers.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\flex.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\fuzzy-match.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\image-utils.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\nav-config.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\pricing-engine.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\rentman-repairs.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\rentman.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\route-service.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\search-utils.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\storage.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\units.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\lib\\utils.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\src\\store\\data-store.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\storage.rules",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\tailwind.config.ts",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\TEST_INFRA.md",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\TEST_READY.md",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\test-results\\.last-run.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\tsconfig.json",
+      "change": "missing"
+    },
+    {
+      "path": "kuro-web\\vitest.config.ts",
+      "change": "missing"
+    }
+  ],
+  "scope": "Filtered source/configuration fingerprints only; not a full Git or filesystem comparison",
+  "intendedAdditions": "kuro-mobile/docs/phase-0 only",
+  "observation": "Workspace kuro-web directory disappeared during the audit; agent issued no delete/move/edit for it. All 614 differences are missing paths in that directory. Remaining mobile/ems1 fingerprints unchanged."
+}

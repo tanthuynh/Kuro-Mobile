@@ -42,17 +42,13 @@ function getDevApiBaseUrl(): string {
     return `http://${host}:3000`;
   }
 
-  if (typeof __DEV__ !== 'undefined' && !__DEV__ && process.env.NODE_ENV !== 'test') {
-    console.warn(
-      '[Config] EXPO_PUBLIC_API_BASE_URL is not set in a standalone release build. Backend commands targeting API endpoints may fail.'
-    );
-  }
-
   return 'http://localhost:3000';
 }
 
+const isProductionBuild = typeof __DEV__ !== 'undefined' && !__DEV__ && process.env.NODE_ENV !== 'test';
+
 export const API_CONFIG = {
-  baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || getDevApiBaseUrl(),
+  baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || (isProductionBuild ? 'https://app.kurorms.com' : getDevApiBaseUrl()),
 } as const;
 
 const resolvedAppVersion = Constants.expoConfig?.version || '0.1.2';

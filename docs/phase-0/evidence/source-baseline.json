@@ -1,0 +1,3478 @@
+[
+  {
+    "path": "ems1\\.firebaserc",
+    "sha256": "E25AC699D66386233027B6C7579A3E7C9A206EC4C470DC1EC1B6A84473228D67"
+  },
+  {
+    "path": "ems1\\.gitignore",
+    "sha256": "E351E7A73A1D892422EB3AAE3BBCA6BC23CF8DB4EA717073913C68BEB7AF5224"
+  },
+  {
+    "path": "ems1\\.idx\\dev.nix",
+    "sha256": "6BB4C9BBF55BFB28958A35AC79BD68675CF032E0EFCB69409AACEF07A13A4DEB"
+  },
+  {
+    "path": "ems1\\.idx\\icon.png",
+    "sha256": "EC2E9CF39C8F7F44E224516FF3B4865816572E6B24939CCA94B545CD7C5092F6"
+  },
+  {
+    "path": "ems1\\.vscode\\settings.json",
+    "sha256": "92A0CF3D01561EF047C7D09A41EB9DF0DC60645927827B86C93526FD8D9E9B82"
+  },
+  {
+    "path": "ems1\\apphosting.yaml",
+    "sha256": "8446F7AD43BE7BB4CB1E36CA0D2B20476627F8AC5DA90928ADB8BDBB43801034"
+  },
+  {
+    "path": "ems1\\components.json",
+    "sha256": "30D320AC4AA3698FF061D6A98D5EC133B3E09652C33E2AC6E17F99C86C822DFF"
+  },
+  {
+    "path": "ems1\\contact_dump.json",
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "path": "ems1\\contact_full.json",
+    "sha256": "34C51F0445E7E4B8D8CD84F840F1DC69CF8993D0B4CECA8C92A4D8B87CAC0600"
+  },
+  {
+    "path": "ems1\\database.rules.json",
+    "sha256": "90F326A56B6275BAC1805F1C87D151B720747C020B0CC886862F5FBD74F9C392"
+  },
+  {
+    "path": "ems1\\diff.patch",
+    "sha256": "0271DC2940D7E84D81905F5D02A7E91658C36832CA973CE384CAF8269197E3D5"
+  },
+  {
+    "path": "ems1\\docs\\blueprint.md",
+    "sha256": "404B5EFC9DEDDEF68796E00A6BE320A972FF0501EBF663E0856A5717347F6BA8"
+  },
+  {
+    "path": "ems1\\e2e\\01-navigation-settings.spec.ts",
+    "sha256": "F90F447CA76B95DA5B59AB8ED1F19D7BD0643347310D42DD2443BFB334CD0A93"
+  },
+  {
+    "path": "ems1\\e2e\\02-services-management.spec.ts",
+    "sha256": "C7F0714D930EBA26B54812504B363997DE6AC244D2EB9B8E4F765985155F159E"
+  },
+  {
+    "path": "ems1\\e2e\\03-quote-table-interactions.spec.ts",
+    "sha256": "A7150F1B762A07FFEF8BE308C35D899BDF00F0BEB6B53FCFB332EA40D3822AE2"
+  },
+  {
+    "path": "ems1\\e2e\\04-pullsheet-workflow.spec.ts",
+    "sha256": "09039356924EA70FA064DA7C5B60863EFA4B384BAC463923845E14E354C664CA"
+  },
+  {
+    "path": "ems1\\e2e\\05-dialogs-and-error-recovery.spec.ts",
+    "sha256": "67CA77A3DE452A0A2F804F2FE382668D17FD555AB71188A0324E643E167A355B"
+  },
+  {
+    "path": "ems1\\firebase.json",
+    "sha256": "969E4A1C21D41DE0F273F8580B0B3E3AE8E920D56CE6F765921BA15973020E65"
+  },
+  {
+    "path": "ems1\\firestore.rules",
+    "sha256": "F9A2A545D992F5E6C45506A6F43457D2EAAF4F1A28B3B0F61C43120010E3D027"
+  },
+  {
+    "path": "ems1\\functions\\package.json",
+    "sha256": "F3D41C76FF6C73492A5DA0681F68D40A1D9757482355845453B77B7C553B0B9A"
+  },
+  {
+    "path": "ems1\\functions\\src\\__tests__\\adversarial-coverage.spec.ts",
+    "sha256": "62FE9C35A8C895C9DE560A1F94588701C0E27B00146A396C52400B0FF9673E1A"
+  },
+  {
+    "path": "ems1\\functions\\src\\__tests__\\adversarial.spec.ts",
+    "sha256": "E5AC1E14E179C01FBA981D5A7464E973231628E8D59F9AC36133162DFF968801"
+  },
+  {
+    "path": "ems1\\functions\\src\\__tests__\\bootstrap.spec.ts",
+    "sha256": "26BE3204F42CBFFA1BA90C7949B0819BAB1E1F52DCFF8E82983F539C6F835BDF"
+  },
+  {
+    "path": "ems1\\functions\\src\\__tests__\\helpers\\mock-firebase.ts",
+    "sha256": "A9A83FCAF1FA707E5CCCCCB9AD1FD0F1381A6D57D290B843F75CFCFE5A18B595"
+  },
+  {
+    "path": "ems1\\functions\\src\\__tests__\\lookupAuthTenantId.spec.ts",
+    "sha256": "2E63138EE1759CC5C9040A13F33B863C094306094C7E66479CA127E84EC5FA75"
+  },
+  {
+    "path": "ems1\\functions\\src\\__tests__\\mobile-client.spec.ts",
+    "sha256": "A975B4A4B9B7DBF7EAE110B6CD1817B6A6F79FD515BD1F615F3983C0F86E9CA4"
+  },
+  {
+    "path": "ems1\\functions\\src\\firebase-admin.ts",
+    "sha256": "5EB9523769852B462BAD1F665BEA6E5A3070DFFC5271A0137420BBD5075DDC18"
+  },
+  {
+    "path": "ems1\\functions\\src\\index.ts",
+    "sha256": "7532B8ABBE5E33B12FDF5D58E9280F72D30BB4DA142A24DC78CC640D1688C9B8"
+  },
+  {
+    "path": "ems1\\functions\\src\\lookupAuthTenantId.ts",
+    "sha256": "417EAC2960A1A9CA79DCD1A9228317D8D5838A3156A420062E2B07F197A1F0A5"
+  },
+  {
+    "path": "ems1\\functions\\src\\mobile-client.ts",
+    "sha256": "B13AC216C465ABCD52FE4C5E9558F9763E64E58582AB79198811E031FB7858C7"
+  },
+  {
+    "path": "ems1\\functions\\tsconfig.json",
+    "sha256": "398FED468A8CC5F69419FD1EE510F3C879FCE46766C6FC8F3B2290BF0D1741FE"
+  },
+  {
+    "path": "ems1\\functions\\vitest.config.ts",
+    "sha256": "B6F9C3B02C38D0308111AFA50D66FE258BF60EC137CD777CA6A17B1EDDD1E4F6"
+  },
+  {
+    "path": "ems1\\GEMINI.md",
+    "sha256": "9916D632D4D29615DBA3F4A7D1ABB06BEC5FA050B050E5D1C748992486761661"
+  },
+  {
+    "path": "ems1\\inventory_mapping_plan.md",
+    "sha256": "79A01E0AD2FDFCC896A1FF2304D03E4AAB90F291C5E6391CD260E695CD1B7416"
+  },
+  {
+    "path": "ems1\\next.config.js",
+    "sha256": "4D0451F1FE476C807C4C2A495BA9A33E91807FCB5720A883BC034FAC23645B5D"
+  },
+  {
+    "path": "ems1\\ORIGINAL_REQUEST.md",
+    "sha256": "ADF4921C69183E85B5D27A462E5DDD71812728B4B820B993B8355C8CFF7AF854"
+  },
+  {
+    "path": "ems1\\package.json",
+    "sha256": "937A40E77817429A55685B078FE1B64EAE62A648CE6168DB00BD4D087B20A83C"
+  },
+  {
+    "path": "ems1\\playwright.config.ts",
+    "sha256": "30FE89C8D91088B8A4630E44D1122B73DDD5ABC82BF16AF62077B4C737622AE4"
+  },
+  {
+    "path": "ems1\\postcss.config.mjs",
+    "sha256": "D54ACBE4C9478034B3795ECA94DE59E1FE0298198E4FDC9D40AFFFDE9C1DA3BF"
+  },
+  {
+    "path": "ems1\\PROJECT.md",
+    "sha256": "7C088FAE54922F5CA14DF3A5D0C0727AB8BFED8B3EB9E00DC559F3CCF70281EE"
+  },
+  {
+    "path": "ems1\\README.md",
+    "sha256": "23F5A64E975E18AFE8FCA9F27F07C5D2338B1381578E1F84EE3B1AF7D0C76BA9"
+  },
+  {
+    "path": "ems1\\src\\app\\api\\pullsheets\\command\\route.ts",
+    "sha256": "386F5C75F41F63A687BA7F95FD72FC3B5D79D185107C7EFFD0B8005A1BC4FAB0"
+  },
+  {
+    "path": "ems1\\src\\app\\api\\pullsheets\\command\\status\\route.ts",
+    "sha256": "05B8EAF47E2837232AA95267A827E3E9A3A4F92F89C7BE2248A8E9EA422C269D"
+  },
+  {
+    "path": "ems1\\storage.rules",
+    "sha256": "A189ED51724D252AD6C8D0C30B7B0EF0D07807CF157C49726DDFD37CDE433C01"
+  },
+  {
+    "path": "ems1\\swagger.json",
+    "sha256": "BC7451988871EDB609DB32FAE0AEE1AAAB47B406C8C605F3BEE3DAE65A89A8B9"
+  },
+  {
+    "path": "ems1\\tailwind.config.ts",
+    "sha256": "CFB3F156373750E222DAFD3CC1B7DDAB60D1B7E5EE341D976C5AF15314581074"
+  },
+  {
+    "path": "ems1\\TEST_INFRA.md",
+    "sha256": "EB6C045CAED3D9A40947BD0DA1D4905A10F3DDD668862A2574157140ED8225D8"
+  },
+  {
+    "path": "ems1\\TEST_READY.md",
+    "sha256": "03D1BC31269861422270481B4F36B881F5670C906173BFB8D10C074742AC6FB3"
+  },
+  {
+    "path": "ems1\\test-item.ts",
+    "sha256": "43BC88DA8A4A5017D74C1760CA7CBE6E90B9D16BE9F0B03520099664E59CCDBC"
+  },
+  {
+    "path": "ems1\\test-label.cjs",
+    "sha256": "E83C4229CD0C97E10177EFB8184816BAA4BF36E791724CCF2C35E295623A0B78"
+  },
+  {
+    "path": "ems1\\test-limit.ts",
+    "sha256": "5F529E75DBA6385C47CBDAB371F7E0DCE1032F0EE2A8A548EF7651C0669ECD92"
+  },
+  {
+    "path": "ems1\\test-page.ts",
+    "sha256": "92EF70A728E06A3AE4ECBEA07DEC77EFD25022782AF8CBF555858A1AC07BC1E6"
+  },
+  {
+    "path": "ems1\\test-sync.ts",
+    "sha256": "E6E290D3C4CD677B45C90884F5713164F03B4CA558F61FB0FE99AC0C06A3864F"
+  },
+  {
+    "path": "ems1\\tsconfig.json",
+    "sha256": "60663AB500075BB32BC3CB1662D9D75D7258BB08C6B170F3F7FE13386B9A4919"
+  },
+  {
+    "path": "ems1\\vitest.config.ts",
+    "sha256": "7F61708E65D8EC1E4F42F28B58BD26854AC54AA0935C9B112FCE6D51CC27F707"
+  },
+  {
+    "path": "ems1\\wipe-quotes.ts",
+    "sha256": "02DC3B6BCE2EC57D6CF6F173A859B20F5E06D363BA2AF61DB63E6684BD8C7C9A"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\adversarial-concurrency-buffering-m1-2.test.ts",
+    "sha256": "5DEED694F5DD46330AC94B39101930ABAC08D242011824CFA8182BBB98260608"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\auth-service.test.ts",
+    "sha256": "5FE520DB8353C71A978DC2662B3F67A78ACA7FB9752D5200ACA979F2FA8E5BAC"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\auth-session-lifecycle.adversarial.test.ts",
+    "sha256": "9C85723322D52D862F8B1227D989209FB99E19CD1DBF06B7861E552A8ECB212B"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\badge.test.tsx",
+    "sha256": "7772BE0D2FF859F84AAC812A47E9D595623FE615273461F5DC5F75AB49A080A0"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\categorization.test.ts",
+    "sha256": "6A0F6A50271806531CA1ED3E366133BBD8B7391CED489F923D301FA5F5D1C1BE"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\cleave-modal-input.test.tsx",
+    "sha256": "5DEAF830315DD1820123F81748F9CF7A18D3B3B2D3BEFD65D817BD9B5EC9E710"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\components.test.ts",
+    "sha256": "96D5AF068CC66847318E8113F03483F7E174861B8A992461179032844FD096DD"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\continuous-scanning-workflow.stress.test.tsx",
+    "sha256": "76C673A59EF9301D531749AE51AB33584FABD8EA873F554AD61DD3252DA45BE2"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\crew-avatar-svg.test.tsx",
+    "sha256": "D198B9790D0EE554BF6A30AC1B1FE4F02E7AAF897AFD663B6C169B3AB8C9326A"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\cross-feature-integration.hardening.test.tsx",
+    "sha256": "1A98D4C9837C81D50A6F5EC35CD61201287FE6D70791606C75430532F8C6AF15"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\date-utils.test.ts",
+    "sha256": "B5ED5B11DF2AA1D47F08B3F33AAF0AD7677C2A75FF8A53ED3941D872764D7899"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\disclosure-and-revocation.challenger.test.tsx",
+    "sha256": "865A4CCFA2A61DE3F8759F379C22DDA086AD2371B72D290BBD74172932124F0A"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\domain-engines.adversarial.test.ts",
+    "sha256": "3563C3F12C76DEDB56588A5817373E6792A005046186FF46FB3CE53A460022AA"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\e2e-gps-hardening-tiers1-4.test.tsx",
+    "sha256": "5F4FB293962637ADA689E7C8B0577FCBB542D33673D8E7166B9D19114FB5880A"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\equipment-cache.test.ts",
+    "sha256": "866391F6A28A57F5524FFA46CE1A5EF9486D82AF77DE0CA76426225EF7CCE6AD"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\event-service.test.ts",
+    "sha256": "D1E4E244341FE6EA652008D956D2C325B1CB61FDF96A6892584283CE64835C93"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\events.test.tsx",
+    "sha256": "9F6C5B7D85637A3BD862F7DA75B5C8EA9038CE35F45424877449822F2B303D4E"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\gating-alerts-finish-reliability.challenger.test.tsx",
+    "sha256": "4DDAC92EB13248FEC22167B27DD8113B7D74D3B2A0861E154183E46978EF7EBC"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\global-offline-banner.test.tsx",
+    "sha256": "92C0C027A0004F5CE58035161BDC0213817C04DE9CB9ACFF561594DE634FBE9F"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\gps-concurrency-lifecycle.adversarial.test.ts",
+    "sha256": "568746F555B5FA9C514AE294AA24737148AB4F0270080C974E4F4AB148F4133C"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\gps-lifecycle-transitions.adversarial.test.tsx",
+    "sha256": "5542BA94AC71F43C3542524B970F8CCE19639FF6AD2476C570A8F978E69DC222"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\inventory-filter.adversarial.test.ts",
+    "sha256": "A9B809E6950B2117BA460E2E04A31F82669AF2BC587FE90E2A3327C24A7C88B9"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\inventory.test.tsx",
+    "sha256": "6273FD65CB2B3F388B0662A56D5AC8F2379663697EA5DF77395EF0D52C787922"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\location-gating-adversarial.challenger.test.ts",
+    "sha256": "A6E164317D23BC4B391C7EE289AD3E700E4B078759C26BC371BE616B91645390"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\location-tracking-buffering.test.ts",
+    "sha256": "909F4C2FDC7E991E8AAEBA393CBD74635054CA69C1730FB634E7D93DBE091A21"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\location-tracking-hardening.test.ts",
+    "sha256": "83E853501A73102D27320BDCF5A89E278D5C68EDAB3FB614F1C8256A0B42B126"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\logistics-detail.test.tsx",
+    "sha256": "DA96F32624F66E909D25159AD6347311446425DABA89CE5338DAB613892BFFD8"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\logistics-feed.test.tsx",
+    "sha256": "A06A62B86FDBD9130A45F78DED1358CF2725DF35BE9D0CA053554891206F30CB"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\logistics-smart-actions-fuzzing.adversarial.test.tsx",
+    "sha256": "232BAAA00EBF93D176775D6C2BFC63E546920CCC3879C1EBF403FA7B6324EDAD"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\logistics-smart-actions-security.adversarial.test.ts",
+    "sha256": "9F9FD3E9BFA561BEC141CFFE2F81AF5A06A246E7A0011DEADB179A000C1BFC17"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\logistics-smart-actions.test.tsx",
+    "sha256": "F8F8B5A81C75E057CC4223E8E0057830E8ED953965BAA8031CCD3DC6255E3227"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\logistics-workflow.test.tsx",
+    "sha256": "1B00E9282AC6B22F653EE3DC4BF7EC1DA5456D454FEB7046833692A305125A2D"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m1-challenger-2-empirical.challenge.test.tsx",
+    "sha256": "CC45A298CBFDC5BA3498EB436E82B23DDC7B9C2AAFF2C6D1A37D83C4FF7A9CF4"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m1-immutability-stress.challenge.test.ts",
+    "sha256": "6CEDA619D8CE139C31EC355F9FAF9AD4A856CE0A8FA4B6BAF46F25E18416D487"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m1-offline-persistence.adversarial.test.ts",
+    "sha256": "BB0AC1A3037F99E4B61C9884426426C9F5692D39369B39D17427DDFC0BDCA0A3"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m1-services-adversarial.challenge.test.ts",
+    "sha256": "77533B207AA38CBC29284526FFF23A551D3D84AD4698712F0CD88A1F26C9DC6F"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m2-challenger-2-empirical.challenge.test.ts",
+    "sha256": "274FD78C508C097AFCF054EEE518837738D50901223255D5E0B15C17DB84B015"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m2-gps-buffering-stress.adversarial.test.ts",
+    "sha256": "817997FA7CA598C4F02DD93AA6F690378AC2512772258946D42C2D9F08AFD11D"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m3-offline-ux-adversarial.test.tsx",
+    "sha256": "FDEDB37094D8D61A5A3D4F050B943805B8FB3D218DA45942407E211EBD83A601"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m4-challenger-1-empirical.challenge.test.ts",
+    "sha256": "F61F3DB16223F71DC38105D7D85B53D570CA158B5DAFD30BAF5DA0DA8E74C6C5"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\m4-challenger-2-empirical.challenge.test.tsx",
+    "sha256": "7B775EE0DF6B602F41CA7EB1D7792B9AA9585C240F0F759EA4D74465F5C58B81"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\navigation-and-camera-lifecycle.test.tsx",
+    "sha256": "AB9BB381F1ED342E82F00E156D12A225521CB24CE22C18508BC8FAFEA2F02586"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\navigation-and-harmonization.test.tsx",
+    "sha256": "8ADC87B464F858355B661B3D9A89F8A2FD58A22EB2567AB649E18C08C7B5AE57"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\navigation.test.ts",
+    "sha256": "0F48F82B8C971180EAE75533338ED59509DCB8AADEA26A135908C62B36CAE088"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\new-repair-workflow.test.tsx",
+    "sha256": "33C3173489727DAEDBA565A23EF8A86D273E135AE1DE33CB600F66B51583D1D8"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\offline-ux-indicators.adversarial.test.tsx",
+    "sha256": "859DEF0F95315CDF7CEC537622A9F513ACC1A2582695ED98BA798A729DC74E18"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\pending-sync-indicators.test.tsx",
+    "sha256": "BF86E5A276939BA02A95F94F67BD7A9549E592DA4925D2438771DF0EDBC46C84"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\profile-signout.adversarial.test.ts",
+    "sha256": "BD71CD09363D3B96F1773C14DE8578E1FE429C470DDA60D765BFCA87B03015EC"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\pull-sheet-engine.test.ts",
+    "sha256": "BF16313F1D51E19AB7E1A4174E06608B8B002AC591D8AD653AF78C52689863D6"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\pull-sheet.test.tsx",
+    "sha256": "4B26207BC714B24EDC34598A007CB2402338892628BBAAEDDC410722BA6FD10D"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\pullsheet-concurrency-and-rules.test.ts",
+    "sha256": "B95B184E958E014380EFC8112FF82ED6EBC406DF67D8C3A4CE72D6DCCCA9EA5C"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\pullsheet-concurrency-reconciliation.integration.test.ts",
+    "sha256": "7D6C6D0FA83A077E6A695DF05CEAFECBF00E7F9D60EA78F36DFC32CC058BB406"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\pullsheet-jobsfeed.adversarial.test.tsx",
+    "sha256": "5C6D080E0808234E46CC163FA1594DBC7047BE8D2AFFAB6003D001C59E4BCB59"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\quickstatus-vehicle-resolution.adversarial.test.tsx",
+    "sha256": "3D58EA9B7002028902D2BDF39F6A57FCF3E1F1E401354AEAF3614EDF341D5498"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\rapid-job-switch-gating.challenger.test.ts",
+    "sha256": "B55830D4502854B4C60B6051EF9895DBDA33D922AB5915535195B94BE2E5EC4F"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\release-readiness-safety.test.tsx",
+    "sha256": "58D8BB179D7E248259D1C1216F9C1145287DA3D024F2D05AC5B01E5DC903F59A"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\repair-adversarial.challenge.test.ts",
+    "sha256": "F492DA79E604381DF0BF26FE26FE803F7179EC81FC8C5F79E14693269FFD1D7C"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\repair-e2e-workflow.test.tsx",
+    "sha256": "371CD76FA401B9D83E221D9C5B127B5CBC6389AE4C40D08CCFEBA03677C79E5A"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\repair-engine.test.ts",
+    "sha256": "4AE1DF7457638018626DF239EF7C2E66ED772D8BF7D3A8D1E116F4B9FA1403A5"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\repair-hardening-concurrency.test.ts",
+    "sha256": "7574A0663957DC5831537A80CACF26DD21512FADD40F4B1AFFE98FE149A6013C"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\repair-service.test.ts",
+    "sha256": "3EFB65D5728F058A20C6577E2A9DFD8387D2ADA64521223BB47173D74A148664"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\repair-ticket-detail.test.tsx",
+    "sha256": "65AF71D8EEEE0944E7EB60F99E70338F0ADDE84FF94440DD9125BD4DA572F242"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\repair-tickets-feed.test.tsx",
+    "sha256": "41E873E985FE839D180FF37435D1873612DF1F866FA3D0886EAEEDA580FA500D"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\route-guarding.adversarial.test.ts",
+    "sha256": "4381AF72377EF44FAB66E24C4E556AEC3921C2CA1F2F22FCD8DDA1CDC0CB3526"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\scan-to-repair-workflow.test.tsx",
+    "sha256": "B7AF5E23F2ABDD545ED1D0F07062CC88585702B433E10F8B993B0FA39EFA18F6"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\scanner-burst-debounce-harness.test.ts",
+    "sha256": "9B660687C9B5A6381C70A2FAADC4FEE6386E00C63CF8077D8B7ED7EC2EDD8B07"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\scanner-engine.test.ts",
+    "sha256": "F640C056852A71424CEBE33BA5D5526864684B7591C1C03938AA781B7FD919AD"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\scanner-guardrails-and-celebration.test.tsx",
+    "sha256": "9777E290C60CAC0B67AF48070BCA8A7BB7A4F27C9850517F1158C2FA06ED8B3D"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\scanner.adversarial.test.ts",
+    "sha256": "E09E4947FEA217E0FB06304F9D661E3CBA87C2312144CB39EBF2B966656CCC6D"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\scanner.test.tsx",
+    "sha256": "2DFF23D96F57035C81ECB84F89F2D74906DECEF199F50B5311B93CBADB5A6320"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\services.test.ts",
+    "sha256": "8BF119676DEE47B70A2C08A5411A83BF56DA93CCADC22337F75C154F6E0E4473"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\smart-actions-and-security.challenger.test.ts",
+    "sha256": "364CBDB8289CC14DE8ADF459C84962F94D40A28A8F5257209615FC17BCCCA77F"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\stress.test.ts",
+    "sha256": "018188045309AFBB4EC226B25D4F98B9A9A49D6770D2C2C1609FA431B4019C3D"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\swipe-to-scan.test.tsx",
+    "sha256": "2B856963A33ABF3F0F09A56836EE46B1605960E4DF8913D63CDBE00819E3C4F1"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\theme-contrast.adversarial.test.ts",
+    "sha256": "9AF643B02024947DB47229D756FC5FD553E6C31DA6649AD86375DC4AFCB2E0B7"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\theme.test.ts",
+    "sha256": "D8B5BA68716D865A81ABAAD5121705D25ED6313587D05224A931FCF5F3C1F5B0"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\tier5-service-adversarial.challenger.test.ts",
+    "sha256": "5991BDD180ABCC2C90C3506F1A808E88E25EA9124F1197452338B71E2B0230A9"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\tier5-ui-adversarial.challenger.test.tsx",
+    "sha256": "551994BBF6B95757B7CFE8FE079471D09B2B8171F4C85977243B97E05966E8E6"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\typography-standardization.test.tsx",
+    "sha256": "1F9479AB52AE8E8D65BA6555692A040A87BF0847517A07C2AC36886CF541EBD4"
+  },
+  {
+    "path": "kuro-mobile\\__tests__\\ui-primitives.test.tsx",
+    "sha256": "AFC2A8597F76573143C8703073CEF8D130513B9AD561C064DEF33046E54A66EB"
+  },
+  {
+    "path": "kuro-mobile\\.gitignore",
+    "sha256": "719343BAFC7463645C95DCE39098B75C1D51BAB8009F8D0B71FCDB3732276321"
+  },
+  {
+    "path": "kuro-mobile\\app.json",
+    "sha256": "CE3AE232C629E3B498D7B27D6CE94EC48BD2717EC8067ED9E47C4099591A18A6"
+  },
+  {
+    "path": "kuro-mobile\\app\\_layout.tsx",
+    "sha256": "C8E2A68B003AEC403452497F1AAA6E56CD73250F539DD3E37E71F8663618A666"
+  },
+  {
+    "path": "kuro-mobile\\app\\(auth)\\_layout.tsx",
+    "sha256": "40C4039FB44F35AA19C9312761C3E7C6774AA3DA2A479E7C880315254002C4EE"
+  },
+  {
+    "path": "kuro-mobile\\app\\(auth)\\login.tsx",
+    "sha256": "C5778798F1E57B1AB1F423BBCF115D418A0E0F1AFAEAA050FF1592F3FE41FCF0"
+  },
+  {
+    "path": "kuro-mobile\\app\\(tabs)\\_layout.tsx",
+    "sha256": "E68B1EA26D90963F60BBBD5F204BC9DA52945BCCA6214B8F565A8B90FC6BFB45"
+  },
+  {
+    "path": "kuro-mobile\\app\\(tabs)\\index.tsx",
+    "sha256": "CFC31ECD0094D3D7FF6730DA52B059E6ADC04E6419DE7AEAF89A6056C6B642FE"
+  },
+  {
+    "path": "kuro-mobile\\app\\(tabs)\\inventory.tsx",
+    "sha256": "3EB72F0E721CF4C2535151206EC180233F67BFDA1711E8A5706DEDE2D65BF610"
+  },
+  {
+    "path": "kuro-mobile\\app\\(tabs)\\logistics.tsx",
+    "sha256": "D146508250BE6D2D8A8D692ED725A4828CC7FAD846EEEBC522039856F3BC522F"
+  },
+  {
+    "path": "kuro-mobile\\app\\(tabs)\\profile.tsx",
+    "sha256": "66D7EF86D45E59D294AFCD21F9A824F187141F8E76CED8BD66D597AE1DC27FD2"
+  },
+  {
+    "path": "kuro-mobile\\app\\(tabs)\\repairs.tsx",
+    "sha256": "9F250C4843F4B333C4C6C276D026C9C65627F755D5F2B6006BC29FA4A95A5BDD"
+  },
+  {
+    "path": "kuro-mobile\\app\\(tabs)\\scanner.tsx",
+    "sha256": "5B2508691207D943FBB79A9371155C3254ACF56C2B6ED4F707A3CF3985C2ACAD"
+  },
+  {
+    "path": "kuro-mobile\\app\\+not-found.tsx",
+    "sha256": "03ADE0BC9B765F4B726FEA6EC0FF5609BEF1FA7D1646227DCAB65072953A822A"
+  },
+  {
+    "path": "kuro-mobile\\app\\events\\[id].tsx",
+    "sha256": "3A033F1A1BB84F99FF77947A6CD758C145574E4A32244D7E5A36CD072B121E21"
+  },
+  {
+    "path": "kuro-mobile\\app\\logistics\\[id].tsx",
+    "sha256": "531F53F6E18525DC12D0415441415EF2D18F8774D838112213CE26F39C82B361"
+  },
+  {
+    "path": "kuro-mobile\\app\\pullsheet\\[id].tsx",
+    "sha256": "3388C07DF0CBB705BD413CDCEA3285F0C5824F4ACF3B6CCEA90398F7B1D75423"
+  },
+  {
+    "path": "kuro-mobile\\app\\repair\\[id].tsx",
+    "sha256": "10F97FC4181D371A48C165F5CF28AFEC51B7F8914FD0AA42000FCCEB17D50509"
+  },
+  {
+    "path": "kuro-mobile\\app\\repair\\new.tsx",
+    "sha256": "CF62A5B755B5623AB6C58207E0686971B356E675AE29D88A7BF2FCB01CB8694B"
+  },
+  {
+    "path": "kuro-mobile\\babel.config.js",
+    "sha256": "C27C3E8F3470C96CFA6F165C5ADA8DCD66B1DB7556C22C31CB8F0450BABDF209"
+  },
+  {
+    "path": "kuro-mobile\\eas.json",
+    "sha256": "10B8B8551456155632A7F3A0E8F39D1F9DB36612456D084797F95094171A7317"
+  },
+  {
+    "path": "kuro-mobile\\eslint.config.js",
+    "sha256": "CCF37B1E920D7DD74CC084CC01062A65CCE60A74974AA053728FE5147BB4DEA4"
+  },
+  {
+    "path": "kuro-mobile\\firestore.indexes.json",
+    "sha256": "C34578A53A178713673A00437607F8BDB47B594347454C2F6C6465D4E285B320"
+  },
+  {
+    "path": "kuro-mobile\\jest.config.js",
+    "sha256": "473B8396714A52B1E233079827E226E016F994F55DCC9F328B68FE7EAA116D91"
+  },
+  {
+    "path": "kuro-mobile\\jest.setup.js",
+    "sha256": "E377EEB515D5D80C922065A372494F03A48B02891AE3776EFEE35990B3F1BD5B"
+  },
+  {
+    "path": "kuro-mobile\\metro.config.js",
+    "sha256": "E512D3E201D08A3272B75F3101001A78AF572910FCA892ABE7F418335DED75F2"
+  },
+  {
+    "path": "kuro-mobile\\package.json",
+    "sha256": "9685AD263DDD2ADDF42D57761318EB10030ACA09F464EDAFB27090EAC273A6EA"
+  },
+  {
+    "path": "kuro-mobile\\PROJECT.md",
+    "sha256": "56135CFCFC910D0BB0CFBBCA010F9629375E2042833DDEBC9CD63575B81D3093"
+  },
+  {
+    "path": "kuro-mobile\\scripts\\create-assets.js",
+    "sha256": "1DA95E5AF77B13D27F3173C16A802BF391D0CA2B4C960D40FF484559A404455D"
+  },
+  {
+    "path": "kuro-mobile\\scripts\\patch-expo-types.js",
+    "sha256": "AD001537366AE7A071839FB3E8D5E23C683DFEA3E0D652DF378AAD6CFCF8E0B9"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\common\\ErrorBoundary.tsx",
+    "sha256": "D7638FD365466B91B70141AF3C89322F1F5287A046F8BCBB585E729E9F4EC126"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\events\\event-card.tsx",
+    "sha256": "33040E8C89B0E7AE125E24FC2DD3BFDAB0AAB878A9704649A4C26090A93D1AC4"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\events\\event-filter-tabs.tsx",
+    "sha256": "F3C6BB42DC52326563D355F77E3594CF7B2521F5D4632A3D8B027EFF49AF5D88"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\events\\event-schedule-card.tsx",
+    "sha256": "CEBA6B12ADBA9BCD74BA1CEE0FDDC1AFBA927ADF1FA9A4CD7E79918264E9AF13"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\icons.tsx",
+    "sha256": "2C04D41A204C8AB36E7F62EF70422909BE0FD5899D857B5A4EC243B38B8A3F8E"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\inventory\\category-filter-bar.tsx",
+    "sha256": "031FE529D679BA5657117D895B365A63D0379632E09AC0CC6B59C7A2054CA1D2"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\inventory\\equipment-card.tsx",
+    "sha256": "E9DFF026579ECAF84B84D1BEB4F6B4A0A2D2394D5B0E46F59740400BAD7EF0CE"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\layout\\connection-status-bar.tsx",
+    "sha256": "FA5237D80CB5C36C06157418050EF4D8AD57936FAE9C1221E582D0CAE9CCCC44"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\layout\\global-offline-banner.tsx",
+    "sha256": "F2A95A6CEC36A4FAD9726E28DA054619E273D6CB47BF36122D1474C0B34E25A0"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\layout\\screen-header.tsx",
+    "sha256": "F38BEEAEDCA5B70EC558450BC1358187530EF1EF437D208F53561DA43A58E2E2"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\logistics\\__tests__\\LogisticsJobCard.test.tsx",
+    "sha256": "A4A3ABD32B38D8420DBECFC6DF5552AFC68F820D1614595921E15FB59C7C1097"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\logistics\\BackgroundLocationDisclosureModal.tsx",
+    "sha256": "78CB651603CB1AB2EAB9BBC603EE0FDB5B5E6015618E3FA7DDDD147C992A17F5"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\logistics\\LogisticsDestinationCard.tsx",
+    "sha256": "35F8DECA95D2ACAFFF07F01B475C9C7DA2183B82E3E3E1303E21E829445331BF"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\logistics\\LogisticsJobCard.tsx",
+    "sha256": "4F8E29734C9281CB1505BEA59FD53F1B4895DD057147821CA0EB1C5FE48C4D68"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\logistics\\LogisticsNotesModal.tsx",
+    "sha256": "05D57768C825C9919B2CF28847501AEE55759C353217D0C9B7904C6858E947A7"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\logistics\\LogisticsStatusModal.tsx",
+    "sha256": "B36A72512E4131CC505082A688078D95510E3387873F4308C339955F37D7F673"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\pull-sheets\\pull-sheet-item-row.tsx",
+    "sha256": "12E209181413B7C3AF0F85B78643655A8430B1D119495683D280444DE82F55CF"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\pull-sheets\\pull-sheet-progress-bar.tsx",
+    "sha256": "345B6965617C7DCAA20322FF0198DC6AC5869F8EB8CDE1C00176CB7CE51AFA8C"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\pull-sheets\\pull-sheet-section-header.tsx",
+    "sha256": "82A346C84D80799B74EA3F56D7119232933710710BF5388F4987CCE534848B1F"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\pull-sheets\\pull-sheet-status-badge.tsx",
+    "sha256": "0D7731407519067F3395FF3814FCC3DBE9903CB551FD5B1D5EDCECFAADE5AA98"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\pull-sheets\\pull-sheet-status-sheet.tsx",
+    "sha256": "C81DE36C5B596E6C5FDC2BD20003B15EE929DE05987E43E78EA90E39E3C176BF"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\repair\\add-action-note-modal.tsx",
+    "sha256": "A53F5608D0A699F39FA8A3A9B009CAC88D3CB11D916F6E62EEE80EA20CD71C89"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\repair\\autocomplete-input.tsx",
+    "sha256": "8AA784C0ECFD5AAD33C3E34C0D4E37C6A47AC7F4BA4281110F9A53D1B6278568"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\repair\\cleave-modal-input.tsx",
+    "sha256": "E9E8A0CA6DD4B9B57EBA9F454DB9F06342594F4C4F6377066B059AD9D51172C1"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\repair\\mobile-date-scroller.tsx",
+    "sha256": "922933D448DA2455778FA560713DFA8CCDE3AA3B1D5575500E8D10E74377AFCB"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\repair\\quick-status-selector.tsx",
+    "sha256": "481BB26FB11B861B5438DDCCEB9AD38089B0984F20F1BED9A7F6058ECABDE86C"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\repair\\repair-photo-gallery.tsx",
+    "sha256": "BB2D1729E68C1B551614A9DEEA0A400E038695AFB2431442752EA50EB78F7F71"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\repair\\repair-ticket-card.tsx",
+    "sha256": "75D2284BCD957B5073BFA41FA3379FD45204B9D466FD78B0D803F4D4EFC4CD7B"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\scanner\\camera-viewfinder.tsx",
+    "sha256": "0998051DF7A6CE707CFC93F7C27FFC433D8D75DFA7A59E225BBEB3FE77F3E012"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\scanner\\manual-code-input.tsx",
+    "sha256": "09B6C49BDE13901F17F67EB8130749DBD17693107602F49EC91DA727A65E9563"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\scanner\\scan-hud-overlay.tsx",
+    "sha256": "51FC72482AB753F8929D043929953E0D991414BB3D5078309F1784FE8B843353"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\badge.tsx",
+    "sha256": "C9E8CE55A25D3D53568E965252C81D40322DB00DC4341FE25834E3172549D99C"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\button.tsx",
+    "sha256": "724218EEE67CB0BB9ED263CB8394F013BE9741D3479BD9B0B1788DD159335997"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\card.tsx",
+    "sha256": "6CE9667DA9CF9A1ACBE17D91487A2C35C1EB3A95946A26FEEE7E36220C9D6EF9"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\empty-state.tsx",
+    "sha256": "B436C85DE2BFE161F2D7F8E66176AAB3A65A81FB774436BD2A28B0F215AA544B"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\input.tsx",
+    "sha256": "EFC7E255BA419EBC4592680305F448BA1CDD418F59DC3324156F5B1A29CEC5C3"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\modal-sheet.tsx",
+    "sha256": "7891A068DE2507048DB6323A88F1953C24EC4A8FFE550176A449AB4F4CF45C67"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\online-indicator.tsx",
+    "sha256": "A4CCF982C58FB007EC2BCA3F456A1E43F80EC94CA9BC18543965B06D0F936FB2"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\spinner.tsx",
+    "sha256": "927EE5DA2DB241CC33416A8C7B7295C11F9A1820EB7DFDA13ACCD65587924A4F"
+  },
+  {
+    "path": "kuro-mobile\\src\\components\\ui\\text.tsx",
+    "sha256": "2A2575DA6FE73730E9E93FA733BAB2F1D7B95806D96179E8531FB0CEF227078C"
+  },
+  {
+    "path": "kuro-mobile\\src\\constants\\config.ts",
+    "sha256": "80F1E5F983511B74DC5CC12FC8393601EA260E85D59B937B819400B5CD9D875A"
+  },
+  {
+    "path": "kuro-mobile\\src\\constants\\theme.ts",
+    "sha256": "6BF5FD816D383E299F2673E38B72154345E09D795E638CE3DC12EFBEE593E873"
+  },
+  {
+    "path": "kuro-mobile\\src\\context\\auth-context.tsx",
+    "sha256": "FBC5FDB2B49962AE857E9D8CAFABED583877A6F490BAA1B493DF69F3F906BBBF"
+  },
+  {
+    "path": "kuro-mobile\\src\\context\\network-context.tsx",
+    "sha256": "677E67BAE3E008CBFA92DEB07808D624B6EED1CADA54002D3CF0EDF2A58CACAC"
+  },
+  {
+    "path": "kuro-mobile\\src\\context\\scanner-context.tsx",
+    "sha256": "2CFF5167BC7786089610E8361A373AD90E83CD5BA45617EEF46C04482A92CB6F"
+  },
+  {
+    "path": "kuro-mobile\\src\\context\\theme-context.tsx",
+    "sha256": "D3A8E3487A69A070BA1D5B439F2E2FF01E09639CFA3B62E12018C8F06D2DB78D"
+  },
+  {
+    "path": "kuro-mobile\\src\\hooks\\__tests__\\use-logistics.test.tsx",
+    "sha256": "E8BF17B29C511BD42B00D9A38CB55E7657D6542B988492350852F7FE34BDC11B"
+  },
+  {
+    "path": "kuro-mobile\\src\\hooks\\use-consistent-back.ts",
+    "sha256": "E0A4FC97B833C58DAF631904D53741961AF49C5A2E829CCAADE32B058F4BEBA0"
+  },
+  {
+    "path": "kuro-mobile\\src\\hooks\\use-equipment.ts",
+    "sha256": "2A66ABCEE682BB2B499B90F0DE850A32AB9BF963AE72F8AD5AC340EB1DDA24AD"
+  },
+  {
+    "path": "kuro-mobile\\src\\hooks\\use-events.ts",
+    "sha256": "04E658D989709474F0291A6F12BFE1F4B152BC24C40D15B373EC27645F0926C3"
+  },
+  {
+    "path": "kuro-mobile\\src\\hooks\\use-logistics.ts",
+    "sha256": "32BC71CBDEAEEB5DC44C6B7817E42ED793092200E2529949E6B234349262184E"
+  },
+  {
+    "path": "kuro-mobile\\src\\hooks\\use-pull-sheet.ts",
+    "sha256": "B293FBE0343C5B7D4A1E532CE863BA74307FE0B65DD3CD574E568E1AB7D07812"
+  },
+  {
+    "path": "kuro-mobile\\src\\hooks\\use-tickets.ts",
+    "sha256": "055747EF4EB3C77994F73B3C887E053841D2D7B8802F9584E3C4315C5BB6C8BD"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\__tests__\\events-engine.test.ts",
+    "sha256": "45682AFF30E24325A62D2486C30F6E842502169E0C2C86E08386AB248E6E9117"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\__tests__\\firebase.test.ts",
+    "sha256": "43F87D82C005370BD2CE9890FB6FBD0B30A1FCA0EE4C91B17CC51DCB9B46D526"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\__tests__\\logistics-engine.test.ts",
+    "sha256": "24CCB0CC12646FA1BF56BABEA794F9304AD291CA1E72BCF96C4129418B22B537"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\categorization.ts",
+    "sha256": "21FCBCDA37631679BAE290C3F80432C6D5C37BC25CC8A4DE5892CE4BB8DE2467"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\date-utils.ts",
+    "sha256": "D317E4C267CEB7708FCA20F4B41ECAECF9B0E28954E9D5874C35090F0F893E90"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\events-engine.ts",
+    "sha256": "A054AA23FB6CD0FA8A43ACEF9B0711B9801E05B9D9B67BC54896F423196B316C"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\firebase.ts",
+    "sha256": "F828144B5348691FB9F336F0E7CA3C2406E0AE7976CCDE6AF16FD94A13F5B0A5"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\logistics-engine.ts",
+    "sha256": "32D0330153A4BBE5750E72DF7F93023307C47F5F0BC45E2DE12ECDD5BF44BB52"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\pull-sheet-engine.ts",
+    "sha256": "710EF8A8896C2C01305583658852F27AE793B309BACF2CC8292C1165D5CA94A5"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\repair-engine.ts",
+    "sha256": "E4EC3250B08481F4FC76380399BDE24AAF31DFE8E696C37B5CC86BAE1EE8945C"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\scanner-engine.ts",
+    "sha256": "37DBF6B8FD52285033ABEE76C87D5EAC006912BB09E41FE49067CFDDDDE3ED49"
+  },
+  {
+    "path": "kuro-mobile\\src\\lib\\shadows.ts",
+    "sha256": "D49E29F8322BCDF1B0FD93DCBF1105A57CC4F4A06C8BE95E9869F120AFFFD28F"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\__tests__\\location-tracking-service.test.ts",
+    "sha256": "5175C80659A677B7CAB9A81A23E7D0803E71C6776E8DDCC9C43DE063D68649F9"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\__tests__\\logistics-service.test.ts",
+    "sha256": "BD8AC147E19344FDC0ED6F2311727230DE5F85FB90713B056E67BF6E9A8E1FC6"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\audio-service.ts",
+    "sha256": "C23DAF542DD0C8B3E3209B9AE7E69198C2EF9DB192560045C8AE690AEE368858"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\auth-service.ts",
+    "sha256": "1E8866F681E747F9787A83BAC5D6E2F883A1B3E816745F1AF9562F38F912838D"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\auth.ts",
+    "sha256": "5276F7BDDDCBC1B96988B991211183246EDB96813584DC108A34BA67B4469CEF"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\equipment-cache.ts",
+    "sha256": "F9F3105569928316A14F69E76E4E26F62AFD10D226C05F59A6511D13C78561A8"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\equipment-service.ts",
+    "sha256": "7B3F354C80A86239A9FDF6CAB142CE41BFEA5E7D10CE4EB21B26D807B7CF84AB"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\event-service.ts",
+    "sha256": "99E1CE4F0B9E2FECCF556DE078C3C5B7C625757A7E86D47FC2F7E1BE7585BF3F"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\haptic-service.ts",
+    "sha256": "78B05D53DA0B9B79444C32F9CAF6F204B29FC5AD4DA3530AB218284B678A2945"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\location-tracking-service.ts",
+    "sha256": "860CDE551D7F9734708B12EADB76CB56A04D42F70B1C15F19A5EB346E11C7090"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\logistics-service.ts",
+    "sha256": "51F0878C3A487FEDD6B8A77214CF67DFF425A409C29C935C183FB1A87DA0FE24"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\presence-service.ts",
+    "sha256": "20E69776A83E7C3F9406646A1955759289EC6BD9835FE27B0D787ADEDC148F44"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\pull-sheet-service.ts",
+    "sha256": "E66A5FCBC34C96E5B790B79A0FA1D211AA6B10749FDB2A1F1F437D939873A57F"
+  },
+  {
+    "path": "kuro-mobile\\src\\services\\repair-service.ts",
+    "sha256": "7F3B94F0371FA92350D09CED5647360457B62205F09B8C74AF25A31FE67DBC66"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\auth.ts",
+    "sha256": "DF37A024C3501D476334D622E0B91A349817F7B7B1F65FA6607C5459CD9CA280"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\equipment.ts",
+    "sha256": "DAC8A0FB8AFB197AB13B668B6EE1CC06C76BAD7E510D524B19718644E4B48889"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\events.ts",
+    "sha256": "F43424A324D470F153F108E109EB40FDD1F7C8C1C3ACE712C99B51E899F9D9A1"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\logistics.ts",
+    "sha256": "2829D8EB2581C2EB01F517C32BB08A7E89747D0A37C462A9E8BAAD5E26FE439E"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\navigation.ts",
+    "sha256": "997BDB1819CE63FF0AD4440129D08DBD1C078003C50E9127EB01C86AF65AABCE"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\pull-sheet.ts",
+    "sha256": "3BE51D106B8B46F8A775F5879DE6086A003322B6E02960A546490CF2E12DF72F"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\react-native-fixes.d.ts",
+    "sha256": "2CB5660C4AA4BF055DAD7A904E2E8B6DABFC1DC4BA691840122890C2E78645FB"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\repair.ts",
+    "sha256": "3FAE924B2B8777D3AE30BEABF6A10849D4616A25B6D6734B0CAEA6EA23E39B8D"
+  },
+  {
+    "path": "kuro-mobile\\src\\types\\scanner.ts",
+    "sha256": "29B52D8B091466E091A78EA6E418190FA034CC5110197455295289D1B4F3588D"
+  },
+  {
+    "path": "kuro-mobile\\TEST_INFRA.md",
+    "sha256": "245FF1359AAEC90CC4E196BED2BD64DA506B3578E052029B5618FE5D33400B2A"
+  },
+  {
+    "path": "kuro-mobile\\tsconfig.json",
+    "sha256": "EA9D2DC457AC3B83A767DAD562257C0F433E9A529D8687798177F1A0BC711E3A"
+  },
+  {
+    "path": "kuro-web\\.firebaserc",
+    "sha256": "E25AC699D66386233027B6C7579A3E7C9A206EC4C470DC1EC1B6A84473228D67"
+  },
+  {
+    "path": "kuro-web\\.gitignore",
+    "sha256": "E351E7A73A1D892422EB3AAE3BBCA6BC23CF8DB4EA717073913C68BEB7AF5224"
+  },
+  {
+    "path": "kuro-web\\.idx\\dev.nix",
+    "sha256": "6BB4C9BBF55BFB28958A35AC79BD68675CF032E0EFCB69409AACEF07A13A4DEB"
+  },
+  {
+    "path": "kuro-web\\.idx\\icon.png",
+    "sha256": "EC2E9CF39C8F7F44E224516FF3B4865816572E6B24939CCA94B545CD7C5092F6"
+  },
+  {
+    "path": "kuro-web\\.vscode\\settings.json",
+    "sha256": "92A0CF3D01561EF047C7D09A41EB9DF0DC60645927827B86C93526FD8D9E9B82"
+  },
+  {
+    "path": "kuro-web\\apphosting.yaml",
+    "sha256": "8446F7AD43BE7BB4CB1E36CA0D2B20476627F8AC5DA90928ADB8BDBB43801034"
+  },
+  {
+    "path": "kuro-web\\components.json",
+    "sha256": "30D320AC4AA3698FF061D6A98D5EC133B3E09652C33E2AC6E17F99C86C822DFF"
+  },
+  {
+    "path": "kuro-web\\database.rules.json",
+    "sha256": "90F326A56B6275BAC1805F1C87D151B720747C020B0CC886862F5FBD74F9C392"
+  },
+  {
+    "path": "kuro-web\\docs\\blueprint.md",
+    "sha256": "404B5EFC9DEDDEF68796E00A6BE320A972FF0501EBF663E0856A5717347F6BA8"
+  },
+  {
+    "path": "kuro-web\\e2e\\01-navigation-settings.spec.ts",
+    "sha256": "F90F447CA76B95DA5B59AB8ED1F19D7BD0643347310D42DD2443BFB334CD0A93"
+  },
+  {
+    "path": "kuro-web\\e2e\\02-services-management.spec.ts",
+    "sha256": "C7F0714D930EBA26B54812504B363997DE6AC244D2EB9B8E4F765985155F159E"
+  },
+  {
+    "path": "kuro-web\\e2e\\03-quote-table-interactions.spec.ts",
+    "sha256": "A7150F1B762A07FFEF8BE308C35D899BDF00F0BEB6B53FCFB332EA40D3822AE2"
+  },
+  {
+    "path": "kuro-web\\e2e\\04-pullsheet-workflow.spec.ts",
+    "sha256": "99E8C32D7FA2FDC0381B3644543F468B5D7A0AD9DEDE51D1EACED76CD0DFC7B0"
+  },
+  {
+    "path": "kuro-web\\e2e\\05-dialogs-and-error-recovery.spec.ts",
+    "sha256": "67CA77A3DE452A0A2F804F2FE382668D17FD555AB71188A0324E643E167A355B"
+  },
+  {
+    "path": "kuro-web\\firebase.json",
+    "sha256": "33278B100F0078A3EF6F56CD4ECF9C32DE938A6F664F1DF3C4D92A2CA73C68F1"
+  },
+  {
+    "path": "kuro-web\\firestore.rules",
+    "sha256": "BFAED1B87E400200F6E081E4FCDB47A1CD72F86B9EF81E36B6ACAE160B3FDB9F"
+  },
+  {
+    "path": "kuro-web\\GEMINI.md",
+    "sha256": "252982DEE277913557EC4E5C2090429513B43C6225C2846B4757F9AF82F69120"
+  },
+  {
+    "path": "kuro-web\\next.config.js",
+    "sha256": "4D0451F1FE476C807C4C2A495BA9A33E91807FCB5720A883BC034FAC23645B5D"
+  },
+  {
+    "path": "kuro-web\\ORIGINAL_REQUEST.md",
+    "sha256": "2D6D77A7A051E1C764F1CD4F708C0C4BF8AABF653BB0510A9E23933FD1A84AA0"
+  },
+  {
+    "path": "kuro-web\\package.json",
+    "sha256": "8CF4A7EEAB9615216557F01079A817F1B252356A67172924C7D29585EB276D7F"
+  },
+  {
+    "path": "kuro-web\\playwright-report\\index.html",
+    "sha256": "45D2228F90047747DEE5BF44080596CAD6C9D3DB114B9832438D485350B866DB"
+  },
+  {
+    "path": "kuro-web\\playwright.config.ts",
+    "sha256": "CA3765EADBFE35E62199375F1299DCB02C9320298F368DB73FE46C46A798D754"
+  },
+  {
+    "path": "kuro-web\\postcss.config.mjs",
+    "sha256": "D54ACBE4C9478034B3795ECA94DE59E1FE0298198E4FDC9D40AFFFDE9C1DA3BF"
+  },
+  {
+    "path": "kuro-web\\PROJECT.md",
+    "sha256": "EA7FF3CFE388F35DBFBDC09BBC544DE54DD969922CCCAD364F291F68E9021B03"
+  },
+  {
+    "path": "kuro-web\\README.md",
+    "sha256": "23F5A64E975E18AFE8FCA9F27F07C5D2338B1381578E1F84EE3B1AF7D0C76BA9"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\adversarial_harness.ts",
+    "sha256": "EA3CF7E8C890ED214166CC0488F9FA36E3098FF6FA00E4BE51734FA2F235FF06"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\challenger_verifier.ts",
+    "sha256": "AB7E59683814E90AE21DC863B96480CA1AF1C631497E0909AFB778E48C2FAB6C"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\contacts_mapped.json",
+    "sha256": "D570E1E0C1C2584C4F2CEDBEAA5C541CA9AA2C93891F7ADB14571674DA75D9BF"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\events_mapped.json",
+    "sha256": "62727D8B9744C663FE367A837B17BD1A25A6BC254C9D57B95F720A2D19B467AB"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\extract_and_map.ts",
+    "sha256": "31B321617DCD3C170FA5FD5A4042D28F76D6CDB0980D57737174CC7A126270EA"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\file-writer.ts",
+    "sha256": "96EABF8A6F871A3B92E82F4D903B5311362E52164DF7F486E2ABDA96DF1B373A"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\flex_kuro_data_map.md",
+    "sha256": "E1EC4F1761F95221013EBE50F0AF22770C00D793D4C394174BD889C6D3A6B40B"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\flex-client.ts",
+    "sha256": "6D5CBCA11AD8987FFE4F4EEA18F132FFD1A949AD94E0F4603C6A31B89D6EF867"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\flex-sample-data.ts",
+    "sha256": "72980EB2D8BBB6A6C6F365A438C764A46469C78AFD15D2CD2403D41F2568D1C4"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\inventory_mapped.json",
+    "sha256": "951CCFCFFC9209A51DCC69F1CB8F9965213859617C8604488DCDDE3A66A5F6F5"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\mappers.ts",
+    "sha256": "CA1ABE893F8DA35824AB0A250A7BDBD9AB020E1A24DDFF09404DC832A2C247DF"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\test_out_dir\\contacts_mapped.json",
+    "sha256": "15105D6B4E921BEE79945DC3ABFD9D5A2760124E1E57507076A81F140F2B6387"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\test_out_dir\\events_mapped.json",
+    "sha256": "4DB5390B83A8D2371EEDA56667E79924927D0EB6194E8F5965A4BBB7F1148195"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\test_out_dir\\inventory_mapped.json",
+    "sha256": "9B6926DA823A95A5AB20646FB0E65EC3FFB1E8B09E346E755E90B5C006707103"
+  },
+  {
+    "path": "kuro-web\\scratch\\flex_migration_discovery\\validators.ts",
+    "sha256": "A6771AB36913D24B667180DDCA9899EDDDCFDA90A9F1196CD40FA0002A24A493"
+  },
+  {
+    "path": "kuro-web\\scripts\\cleanup-websites.js",
+    "sha256": "B9314B79EA1E4C9509C4732FC889E12BCBDE4F6C4FC85577C08E981775697E6F"
+  },
+  {
+    "path": "kuro-web\\scripts\\migrate-make.js",
+    "sha256": "6418E23B5AAD938F0EE1FD6F38336915AF862F8DC0BDCF03F4AE93F700DD8F1C"
+  },
+  {
+    "path": "kuro-web\\scripts\\migrate-user-avatars.ts",
+    "sha256": "39A03ACC20C5DAE1026D53FD9A147F9CBEA1D9BB6C718DBD4326DDFC826E2299"
+  },
+  {
+    "path": "kuro-web\\scripts\\rebuild-ledger.js",
+    "sha256": "9AFF7D5CBF92D1962E70A186B9A15EB1E41FB14E9EE69479F6005EF9B1D540A5"
+  },
+  {
+    "path": "kuro-web\\scripts\\rebuild-ledger.ts",
+    "sha256": "9B2DF4EC862C88FEA6A77EA140B55C1CC0F603380E3DFA9288F0243CB568B0E9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\change-logs\\actions.ts",
+    "sha256": "E236405A20D84BE45BB16D1BA2622BEBF5DDC44BEF281D8904FD0B1ADEBA7CA5"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\change-logs\\components\\change-logs-table.tsx",
+    "sha256": "0FA083A402B398C04E52A98EDE6C1AA9CF1A02F34497928C83089A8A3762EE0F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\change-logs\\data.ts",
+    "sha256": "89E5D89626C8205A89AAAFFCD6EBED1988A54218E7A7210A00AEDA96BEAC43A1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\change-logs\\page.tsx",
+    "sha256": "14AD350116F1DD612A049FDDBD9811823D0F963E778966E904F126A81508A109"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\components\\settings-nav.tsx",
+    "sha256": "4E5378370B614F7538C33925C9843D528E84426C03B1862D13521109E8C13E4E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\db-maintenance\\actions.ts",
+    "sha256": "B206F975E6BC12D2B97E95229412B5179596BEC08BA332752AF79A8076CB5896"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\db-maintenance\\page.tsx",
+    "sha256": "00AA19BAF183A2756855775ECC7CBED24331EEF9BFD7214277B2F3A324E7BA9B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\document-templates\\actions.ts",
+    "sha256": "BB967296BC0ADDC97169DA664A9B5B152141F768737A765A1283CDB5FA1F1AB9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\document-templates\\page.tsx",
+    "sha256": "89414BD0B3939380582CC5F669880D46764AAFF0D0934FA1CC53DAC005707C56"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\email-templates\\actions.ts",
+    "sha256": "D6C5532EFE56BA72E9E97F558A4C27D7EFC7999BB0FFF388176CFC8EC12818A6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\email-templates\\page.tsx",
+    "sha256": "21F2E16164981EB6504D8B699489C8815635D1814BB482352A9C200256AA72C6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\email\\actions.ts",
+    "sha256": "812E7F710F3A79187C0B8B0B39BC5622F2F98A3EFB2507AE39564923A71C2D70"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\email\\page.tsx",
+    "sha256": "790D05400A148E3BF55750727C376C082BD79DB180510B0C4CA687CFC2C8C82F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\find-global-inventory\\actions.ts",
+    "sha256": "71377F5F35443457E4B789973837B123A1CF606C388F526B8AF97257E83A5F71"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\find-global-inventory\\components\\find-global-inventory-table.tsx",
+    "sha256": "1A42287A9C0D0F40FC3338B0ADC7551735B667E15A4271E767319957FC5D9422"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\find-global-inventory\\data.ts",
+    "sha256": "836BD43E3A0A88AC8BAA3227C52AD4E1A9D64F11B065CC331EF7F1187A7668B0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\find-global-inventory\\page.tsx",
+    "sha256": "B79637A25592C09C5336F6F82DBD1022A4872575109127301B94F39C61262D9D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\actions.ts",
+    "sha256": "F70FB70DE7CA6CDA648ED0BEAEE83BD401A1855A18C41FD935FF14538FA706D6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\components\\global-inventory-item-editor.tsx",
+    "sha256": "372F47A179C5600D38E6FF795501D5A068FC9407297852BC912E29D8F93DCC81"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\components\\global-inventory-table.tsx",
+    "sha256": "2E28827D3AD00F766B54D459C83899E5471BF2546232CA565433345F6D02DDD8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\data.ts",
+    "sha256": "9D4681BE34EDCBBB9ECF48857BAA4024CADE69A7F2E771EFA6E2A075F42A5A9D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\definitions.ts",
+    "sha256": "5D60468FCE99697EAAFFD3C7F18B947B9C082E3EF82357853387E8259F5CE029"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\page.tsx",
+    "sha256": "4798A24A9A6AC28A10DC07763989D8BB80EFFB17DCEBC82CC0406E172D4AFD0C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-inventory\\schemas.ts",
+    "sha256": "4A27D01C537367A5592CB85B922C4CEA99DD3C40AF7D25BBA455717875838690"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\actions.ts",
+    "sha256": "E1A989989AD897EEC582F20087BDF15A2AEAB4973921AFDC1A06C842640177C9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\data.ts",
+    "sha256": "FD9B383ADED58CF7F7766D7A06E8EA569D5C82019EAA26C47661819CC3E3C6A9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\definitions.ts",
+    "sha256": "50452E010B5D09F0682B8C7439D491A24889CA0277D47A28345F710213A9B02D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\page.tsx",
+    "sha256": "84DD8394F7DD567CA03DDB7F4E062283821A06EBF126BFDD08DF8A98313774B8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global-manufacturers\\schemas.ts",
+    "sha256": "831204D32FA2767FF727505A054748EDF3CC5F84138C83D8300266A6100F58D3"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global\\actions.ts",
+    "sha256": "9A84065889515732845BA02B363A5224D77EE3163C7349A7093F372C1EB8CC21"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global\\data.ts",
+    "sha256": "FDAB38A8117CB7248567A6A219C4BCADB7580F1FE4407B4B5CEA09891FAF5A4F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\global\\page.tsx",
+    "sha256": "84B970B1BF04DC918D7677ABA4508D2FD74AA6774B1852DBCEA944C8C6FCFDDD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\layout.tsx",
+    "sha256": "B9A755B23C0E581968732FC16D60E17D09EFFCAC7254F4DAF5D4E9F12C8B9733"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\ledger-health\\actions.ts",
+    "sha256": "07FE41EB475F3E141359153359A85455E2B6B5CE3F194F816225F6F2380BF2A0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\ledger-health\\page.tsx",
+    "sha256": "717B9523EE8886A83ABCF53218D81DBBB298A1931CBF16824068176B6B70BF8E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\page.tsx",
+    "sha256": "450FD95E2D73CA7C4FF7CC267D7AFEBF211FA87DE26F3A0AFF6A7F1EDF4545D5"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\subscription-plans\\actions.ts",
+    "sha256": "51BCB0A20E1F1DA707AF10606CFA3ABFA882C5EF04DBBB84112626206E793410"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\subscription-plans\\components\\subscription-plans-table.tsx",
+    "sha256": "456C3A3A71CFEB08ABE27CA4A2D3554690865DC3795F8611F2AC18DF7FD7CEDD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\subscription-plans\\data.ts",
+    "sha256": "AE58B5E998EAB9836F43F6FD2181E890C96728E40292FF2B9DE535A90B343624"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\subscription-plans\\page.tsx",
+    "sha256": "209E75447A565FCCDC072FB5B70A94DC263D31C96964279D2310DAE58DC12369"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\super-users\\actions.ts",
+    "sha256": "75A25631B4FF1ED20FEF69AF6097677605FFA5EA84752690E48FC7E1B4971390"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\super-users\\layout.tsx",
+    "sha256": "A35A6841644942CDFACBF904CB6E56D014093E79F4B125CD0D642AA05AC35046"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\super-users\\page.tsx",
+    "sha256": "B2F512B92DBEF2249F1DBF87C00A44CDF8AA9623687344659A8213D7CDE6755D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\system-broadcasts\\actions.ts",
+    "sha256": "72A3A2DDA4982DE94B9C2E9BA9C540FB1912E94DFCA3575206FB927D1E910509"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\system-broadcasts\\page.tsx",
+    "sha256": "228CBE8BA65C97F5495D5AF584613B81EEBBA7B1B07BED45E8A599E94EBD2806"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\taxes\\actions.ts",
+    "sha256": "3A37EB5FB2FB80642D49D3D966AC973EAC8C5758E8D4610612E4B2D3803C7B73"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\taxes\\components\\taxes-table.tsx",
+    "sha256": "797C6EC18654608436D691459EF94441C7F383D79BB3D64DC19547678184966E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\settings\\taxes\\page.tsx",
+    "sha256": "DCCBBD43BD83707098F4121E5AD85B56B36E6FF638A3655B50082EB7C78F6715"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\support\\feedback\\layout.tsx",
+    "sha256": "7CA8DAAF5BDB987441EFCC4AAFD8F08111D06F7C25C93521A96FCB6C34A36E41"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\support\\feedback\\page.tsx",
+    "sha256": "E989EAB4B6762BF61496C7186D63B652C54FBF31539695BDD13B5B334774DCDF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\actions.ts",
+    "sha256": "8F7126A920FFC5C99A34C808588D699CD0E88FBD61CD7E77418113494A66DCC8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\module-select.tsx",
+    "sha256": "C589C22F10CAC9FBF747AAFC43E5D9F51E28317C29C741EF96DC020EBB6485A1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-data-management-tab.tsx",
+    "sha256": "00A10EDC3FAE12FFB063FA738C264EE8849FB97CD7B01BD6B7E5C666231F0B6B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-data-tab.tsx",
+    "sha256": "EB90A31D10435C46B86D4808B70A802DD858AC365D8771BA5070D0C1EB917E29"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-details-tab.tsx",
+    "sha256": "491237C94FF5D6242563BFFF1C5FF78DB0999D2EC1956C845773798008A7529F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-files-tab.tsx",
+    "sha256": "DE63DE44285201DC39E008CE2F484E21E447B971D7322693636C414A80413F19"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-system-log-tab.tsx",
+    "sha256": "D7B19CAA2CD41C3F2D34564ACF9A340082C0DAC6E3B4DEF6B712BE4A0B81A3B0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenant-transactions-table.tsx",
+    "sha256": "750785E7F0C05A9A8278E7A09C1B2B8D83B1D159FD1E09B4BBDB732C2E5C87C9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenants-table-tab.tsx",
+    "sha256": "8D7466660342CAE816064B32214401392F66F807BC557E5C977D7EFBBF50E9E5"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\components\\tenants-tree.tsx",
+    "sha256": "6F2835FFAE583B966D1B0AC5E334BCE93780F577555EDE367050AB5D3C8DA02A"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\data.ts",
+    "sha256": "F6A833CFF0925E56C82A663E0C129E205D123551DAA12AD307149EA7120546FB"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\definitions.ts",
+    "sha256": "249B2665AD2AE217BEF5862ED40D468EEE0178E9AA1E7CF62DF865811B552415"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\layout.tsx",
+    "sha256": "6781FFEAE72D34D05EA41539FEDB59991077D8C141EFC63E8F7A7677F7795555"
+  },
+  {
+    "path": "kuro-web\\src\\app\\admin\\tenants\\page.tsx",
+    "sha256": "FD0394A499E03BBE37E7270E6A78D65C3DE943161A3BA5BA353BA2FA995B2AF1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\admin\\enable-google-provider\\route.ts",
+    "sha256": "FD1968F0A12BE4C30A44595519D68C1FA971055398B44BF088C0019E32F32C98"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\admin\\migrate-auth\\route.ts",
+    "sha256": "C790294F100EB291BF2F6A6CB579E05198F53C5804984E57527D3B2A8151BE66"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\auth\\google-smtp\\callback\\route.ts",
+    "sha256": "498E8BDA5DE0A333A5B763BB60E3C637E3C459634C45A75B42CA11BDBD790A40"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\auth\\google-smtp\\route.ts",
+    "sha256": "770A6CB324BF81D476E31F12EBFB54FB9BB114C8B6F523193CECDB3C37B8139E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\auth\\google-tenant-login\\route.ts",
+    "sha256": "77A7F4B8730FFF50591B26F32B9CB9B1A46A435F62CDBB2E6F3DD456F112AC59"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\auth\\lookup-tenant\\route.ts",
+    "sha256": "B72A0EBF573C4B0063127E85939B87E1317E3C13580EC6FB763E934507CC9AC7"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\chat\\route.ts",
+    "sha256": "5D7AD1A27E5040E29A2FB193246DCB59392287EF570DD98205F0D93D64D7EB1D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\clean-dev-mode\\route.ts",
+    "sha256": "8A689944E7ED591FC17F50331C18187AABA434F19A0B4D816C21CCC348CAE1C3"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\debug-firestore\\route.ts",
+    "sha256": "4B1FC675D970B1A293A4F128D2BBFD063550ECB87A5D22B35A61913A514F652B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\debug\\route.ts",
+    "sha256": "27F56A7E7BA5B80BFB051D57ADEDAB72F197A87DFF519C28ACC8B389E134E1BF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\generate-pdf\\route.ts",
+    "sha256": "4CC8CBB05F14078D2770B16075ADB0D0333551EDAD42DD16C68E92E631996BDE"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\health\\route.ts",
+    "sha256": "409DEE0D2730EBD7434EDF2706BEFD0C5A49ED4A6C43AB239D912BF39E4E4E4B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\pullsheets\\command\\route.ts",
+    "sha256": "386F5C75F41F63A687BA7F95FD72FC3B5D79D185107C7EFFD0B8005A1BC4FAB0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\api\\pullsheets\\command\\status\\route.ts",
+    "sha256": "05B8EAF47E2837232AA95267A827E3E9A3A4F92F89C7BE2248A8E9EA422C269D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\auth\\actions.ts",
+    "sha256": "9A70C961D6B94CB1F6FEA4D2AE33E0609B634289CD91B9E4D3B5A7CC29262000"
+  },
+  {
+    "path": "kuro-web\\src\\app\\chat\\actions.ts",
+    "sha256": "D066A51482F11B098297A8A83889F25544CC6A5470C507C1504DFDD3A470140C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\chat\\definitions.ts",
+    "sha256": "7B593431AF27E5353B1D8A2F66FAF596E42DEA1AB3482472A1B693D502AACE14"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\actions.ts",
+    "sha256": "29A309E8BC9D7029828A7D09186C98DA827FBE4C492BEEE87C49A42991DB1A64"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\components\\contact-client-users-tab.tsx",
+    "sha256": "0FD77277A708517728D576D433E9C7D3DE43F82A0339C2BA2EBA45CC7822B50B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\components\\contact-details-tab.tsx",
+    "sha256": "FD005F1AFD23971DC9D8529D8796DE42A5B18F0954F1571233462E2E28D5951D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\components\\contact-name-input.tsx",
+    "sha256": "F030B989DB5DF18EB9F05AD6A21C43B2A44D0598C37EFA07DCCF53051219D5FD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\components\\contact-people-table.tsx",
+    "sha256": "62BAD80565C21851997443E2DDF8929F0BDEE8185C054C3FE27702FEEEE2FF1A"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\components\\contact-projects-tab.tsx",
+    "sha256": "8F9D29DBA24CBC494E582339AEA6525DF4931E2C405EA6CB3DCE7DC28ABB472B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\components\\contact-type-select.tsx",
+    "sha256": "DF7B22F1B569E78723BE3C992ED52DBFE6E095608C53E379E76AE2029D04A604"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\components\\contacts-tree.tsx",
+    "sha256": "DF7F1FCB863B81D5E6B55DB7BCAE2C9A5553DAB8E23C3789FF1D581139C3D9F9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\data.ts",
+    "sha256": "2C7D7F741145C4FD61726949D7C54B879723B62AB39A7415AA38F01E9B8440F0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\definitions.ts",
+    "sha256": "7588B78A43139652B60406546058DDCE662B55ADB4705A47AFFCFB63A053BA53"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\layout.tsx",
+    "sha256": "0DEFE90D39274F4940437C2F6972356C29E3380F14EA4312383B0CC12681BE35"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\page.tsx",
+    "sha256": "7E74B940BF96DEC30EF5D24D74583A3C6BB988C3BBB1DE5041FBA259F29C793C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\schemas.ts",
+    "sha256": "745852A11F129B5A361BEDC6F4C445F23F5971FCF6B20B1E2E18CDC9584BD847"
+  },
+  {
+    "path": "kuro-web\\src\\app\\contacts\\table\\page.tsx",
+    "sha256": "19040C83893567B120DE4C2BEFB524B69E95C32F14AE4D65127E979F65FF9F3F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\dispatch\\actions.ts",
+    "sha256": "848D2F0E7A0BD49E4A117AF63F34CC8184C9789AF0904D00329F599695D4920C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\dispatch\\components\\dispatch-entry-tab.tsx",
+    "sha256": "E1E3A3FA82C79A27ABC3033E6AC898F2BA2AEDB20D8D8D9712A6EF9A67AA8BD8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\dispatch\\components\\dispatch-schedule-table.tsx",
+    "sha256": "2C0E263F2D4A1660F8BD561EA874620EBC1FCBFC44660E539854543D72E8B7D9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\dispatch\\components\\dispatch-tree.tsx",
+    "sha256": "35200F18FF6B6E0EFC13C8E12157B75CBC8C7DB7D6EEAEA368EA153D7EB63C0B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\dispatch\\data.ts",
+    "sha256": "19D932CE027605334FE2E14485FAAF98B3665D5F6F03340A69FB4154346229F8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\dispatch\\definitions.ts",
+    "sha256": "5180F29D9D9ACAC53130B01809729A9886C2904607F4C571E412532AFCA46CEF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\dispatch\\layout.tsx",
+    "sha256": "5D0769D69EBB52585CB48C2CDB9DE344BCBFDD7C5D5B87A2FB8843D67ACEF76B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\dispatch\\page.tsx",
+    "sha256": "F666017559A4989FFD58C2CFD39798AD31CA6B9A7B7D9BAD32408932C6D8B841"
+  },
+  {
+    "path": "kuro-web\\src\\app\\documents\\actions.ts",
+    "sha256": "8916F62F0C73AF27738C6CEE97C3E8E254E8F12948EFC597A34FA431DE758E06"
+  },
+  {
+    "path": "kuro-web\\src\\app\\documents\\definitions.ts",
+    "sha256": "C960D890CFA7EDE69EC7BA1B337DE3322B0D4A0B953E41EE6C94C7E2DEDF6042"
+  },
+  {
+    "path": "kuro-web\\src\\app\\error.tsx",
+    "sha256": "FDEAF6A3BD7FB6C976C9352454E67B7168F7AD83C08D6A5AE4A74D7F23D94A69"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\event-billing-details-tab.test.ts",
+    "sha256": "F35D0200EA0C481FD665B293E824A9D982EBFD16249B5701D0608071954BA6FD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\flex-migration-adversarial.test.ts",
+    "sha256": "FD01967B1CD2516E02B190E0B508F7A3B994175536CAECB7C2D8F72799F4314C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\m1-challenger-legacy-cleanup-stress.test.ts",
+    "sha256": "F3D66EFFDA5D72A9C23B0B8513CA3D3013121A11EA3E08CE2F8E976C2FBC47C3"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\m3-pricing-maxdiscount.test.ts",
+    "sha256": "E5E94F41231E555D4AA482F7825B649F46A6F78D4F1D65DB30237C79D616CD03"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\m4-pullsheet-exclusion-stress.test.ts",
+    "sha256": "FB942AB7FE7575E348279CB6B73E40A04C19F84B5923DCA4FC45ACA383B0AC64"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\m4-service-dnd-rates-stress.test.ts",
+    "sha256": "7FF7E5A3F6CE7E6CA5DE0B850623FE73AA18E2B90CD23EF1F90ADA1940E44F38"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\m5-challenger-pullsheet-8matrix.test.ts",
+    "sha256": "94224CE96E273E70E76CEB04BA31570D4A348F6390B9141CFE0DE60BB0D6DA20"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\m6-challenger-tier5-adversarial.test.ts",
+    "sha256": "58AF2CC7F0B0AF154150CDABE018606781121E63D97D7DE569E584E93A080F06"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\pricing-engine-adversarial-challenger.test.ts",
+    "sha256": "6CBD2305AB4F375A42A133A7E7F5BF1BCAEA76D4B821929A54858C77ED2E83B0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\pullsheet-service-exclusion.test.ts",
+    "sha256": "EFB7C8204EFA83BEB8EA2773E7F472CDE972F1A79AE95963D47EFB6A2AE17A91"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\pullsheet-status.test.ts",
+    "sha256": "6435081969EA58E41BEAC00791EA7EBA34CE1F3E3A4450B2EA5FB13853735430"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\quote-invoice-adversarial.test.ts",
+    "sha256": "24E5ED8243B530564CBD88494EE2095A625D61AE073873C179961F7EB026FAA8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\__tests__\\service-quote-integration.test.ts",
+    "sha256": "D4BF21F501FB5AD366C9DF64790325E7040C6BD1F5F12217B69B88F0D926B963"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\actions.ts",
+    "sha256": "C7018782D3BC970CAAE21B048596C26C7E7CB0DA72F528A9648D397BF58C2042"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\billing-status-select.tsx",
+    "sha256": "68786A50C28468DA54FF6569F44E07317FB69ED9289186A7E4317481F2BABB0B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\billing-terms-select.tsx",
+    "sha256": "FDFA8E7DE4C41C4D3336B0E541648882F7D54E3F39ED77E8E58FF505B1BE663B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\client-combobox.tsx",
+    "sha256": "E74CAC89A6809EDDA0A0D2013535F42DB8CAB4D30FFE835FE87A1606BC0FEE7E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\department-select.tsx",
+    "sha256": "80452662E7A9D22ED6F99B06B2B210E1B263F5BAF732F0F970F46C549AF41460"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\equipment-status-indicator.tsx",
+    "sha256": "EC15A097CA1D2B51A15DE256CCEFE16F07176A23B9FC7552F38D20E4EF3F877E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-details-tab.tsx",
+    "sha256": "96B26F89660130B239DB89EE678D9B60C4D4DBC624FF79EB75D416663C8EAC29"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-equipment-form-dialog.tsx",
+    "sha256": "1558AB513AD007710A32DFDA19473CF372767A942FAE7D24BCBB9F4B0606EB23"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-equipment-table.tsx",
+    "sha256": "9884B27CF9E7F26E3C4FAAA8ED0ED8E0A4D8B51CCB73123EA4F338192FD91607"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-logistics-tab.tsx",
+    "sha256": "8C78CDDF2E71E7EAAD754DE235DC1215CA3A59F7CBEAAD595213199A90D205B6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-name-input.tsx",
+    "sha256": "21C41D8CDACFA8F1697BF2FC6444AAE9B9B88B60567BFDED6ACF0A4815D73DCA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-number-input.tsx",
+    "sha256": "F39C66E6F3AFFA7F57E15C051FB0B38C2A4B76E2206DA3CE39446B76B153396B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-pullsheet-tab.tsx",
+    "sha256": "99F3CCD4A0A79A40BC89991E56A9E40161087DA75958497905366C74458FC675"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-pullsheet-table.tsx",
+    "sha256": "21AC8F920B0FD59CB080CDD4520BFB63F452D7C40A449DB404B32FCC40EC6516"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-status-select.tsx",
+    "sha256": "B7C5EA5DADD91D2F339C133E91E792F1A75025C981C05ACB548225C131800F25"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-table-tab.tsx",
+    "sha256": "DA78EA784600568A860CE3DF0B5EB877B0CBF4D39151E9A711403A9AE3F495E3"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-table.tsx",
+    "sha256": "E9091FEC3AE8B22DC0DB610B2DF0883A53B587B49159F7770E0CEFE210697F3E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\event-type-select.tsx",
+    "sha256": "DB1C5B514EA3CFADD3EC3C96751FCCBAF407BCB80D514BC312F6A001686A35D4"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\events-tree.tsx",
+    "sha256": "9FA1DD834B06FCF6661EDF4DF04EC112D3C3A5C594FEA063996128DE3073C8E7"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\generate-invoice-dialog.tsx",
+    "sha256": "451BAFAD7A8893A83C7D72B05BF0F5B75F7449D58966DD6845CA4D8F571D12A3"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\generate-quote-dialog.tsx",
+    "sha256": "6821EAA3362C8B4AE428C0DDFA6516C64FED4B1149316A87F84ED0F1B29235A4"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\components\\venue-combobox.tsx",
+    "sha256": "C82B4CDC36D176EA3E22B53CA8E84DB2B5C74099BEF23C46276F27E2098CCCB6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\data.ts",
+    "sha256": "970EED790D7DFAE83B3336306EA37AF0FC12CF606367FA2B41C6291F5939BC97"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\definitions.ts",
+    "sha256": "3F3E36A292EDCDC68B4BA913895326D67D84BE4FCEFA65D9FB34CBFC80E19F0C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\invoice-generator.ts",
+    "sha256": "B8C2B9FA8BF50AB4525FC2046355C42E0D105C3529D816481CD5F10587D4EEE7"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\layout.tsx",
+    "sha256": "AFE441A09A1392A447A480E64296907BE7A5457D7F9FCCCC682AA06B9C451867"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\page.tsx",
+    "sha256": "86F317FB6B820D6DBB27DA364B9C3C136A443A2F18BB5ED174B1FBB9FE67B602"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\pullsheet-actions.ts",
+    "sha256": "31D5B3DE193DF3452D8F37EF6D85DFE5AD74E629A2DD1637BF9B43724F94FC06"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\quote-generator.ts",
+    "sha256": "15E182E75935E3B6475D88DFE97ED6B6ED7EE6365E67BDDE89358873C38A7954"
+  },
+  {
+    "path": "kuro-web\\src\\app\\events\\schema.ts",
+    "sha256": "67EABA438226268591C91AA61825E4755C3C6026938A88E65D54C8DFE7CBD9FF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\favicon.ico",
+    "sha256": "2F590EAC187D6A61252CC121577CBE50DE429397EF12028D2CA56C19A9DC0375"
+  },
+  {
+    "path": "kuro-web\\src\\app\\forms\\feedback\\page.tsx",
+    "sha256": "E989EAB4B6762BF61496C7186D63B652C54FBF31539695BDD13B5B334774DCDF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\global-error.tsx",
+    "sha256": "CF77E737D026C5059980910EAFE59ED9D8AFDA49FC1AE41A5E4FADA0F6F30827"
+  },
+  {
+    "path": "kuro-web\\src\\app\\globals.css",
+    "sha256": "E12E01EE2314B6AEC2DBACD072743184811AECADE1049263356F5E83A609251F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\__tests__\\allocation-writer.test.ts",
+    "sha256": "88B752333BA10E93690A2DE524A156579476612DE32431FDD174817A8D967DDC"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\__tests__\\availability-engine.test.ts",
+    "sha256": "C25325952E3CD6A43A95ECBC43E5A63E45269826A23458EF6441D22D884A15BF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\__tests__\\inventory-maxdiscount.test.ts",
+    "sha256": "5AA6D0E8B61BE426B9892BB3608246F8BFB565FD34A37D21D66F1DFCE6AA39D6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\__tests__\\sales-consumption.test.ts",
+    "sha256": "24291BF465A804C8F7114E8EB272088ACCE7E0CECBA0DC9724D133EA0F5F00BA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\__tests__\\warehouse-tracking.test.ts",
+    "sha256": "9FD1CE28B74B1B40D1589EA5A03986538B0C6AEDF60518C7457EBFB86C337DD4"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\actions.ts",
+    "sha256": "2754BB920FEC8FB1B91E415DE383617C5283B10C8F0D3D1E424FD7CCB748DC58"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\allocation-definitions.ts",
+    "sha256": "2D931234638DFB4D583B17929DE29FDFD17CD62EB34DA91258A8AEF84856E31B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\allocation-writer.ts",
+    "sha256": "30F70057CF2F7AB7F9EA5ACF054317CC6CF697FC74FACC66082F369410C37A3C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\availability-actions.ts",
+    "sha256": "B67A37D8DF5894184CE05B993F068009282F981CAB699FA6DB7E98FAE0D25AAD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\availability-engine.ts",
+    "sha256": "BAFBFFEA59AFACDF6587BFBC175BC5B47DDA8664DCFFBCFF321E640F44ABE222"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\availability-rtdb.ts",
+    "sha256": "331CCB5169B8F1562742157B2629D825EB56CCDDE39A9573F9EACE96F5A86F4A"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\components\\availability-badge.tsx",
+    "sha256": "FD905043B6F9D974C1AA13B896B70FC7B408A10BBCD43FF02EC5503C19A791DB"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\components\\equipment-table.tsx",
+    "sha256": "CDA24045717F9C1828F273EDF56B0368EE8FE3F924479A21C98ADFC1553BF8A2"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\components\\global-equipment-autocomplete.tsx",
+    "sha256": "6B20089112FDA841DBEC8AA61AA51FF86ABC488AD89ECBEED459FCD6B310B56D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\components\\inventory-category-tree.tsx",
+    "sha256": "113CEB7F5D23F0ABD6677CF610E557C8F5041ABAE4062AAC4960AC34B81EFCCD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\components\\inventory-contents-table.tsx",
+    "sha256": "153A083904E7050B77C8AA971D1B058400FBC7B1354BF4FBCC0BA093EEBDB384"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\components\\inventory-item-editor.tsx",
+    "sha256": "A660A2E74F6F30B86D5F311724AD4C22F6EBBD7D7B553C58B4A9148F19D8A5D2"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\components\\inventory-properties-table.tsx",
+    "sha256": "B6ECE25DBA8246E55EC47A1EBA1E59ABF46F8CA34952695DA7EA53A072E9B7CC"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\components\\inventory-serial-numbers-table.tsx",
+    "sha256": "DCC57E8151191F287554660A338CC7A21DB9ABD1C8D4A9077B5C4571940FF646"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\data.ts",
+    "sha256": "9E03AAEFFEC18F2D42D8CFE34B80F3DBFED19D70AAEFE44E620546ED146E7129"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\definitions.ts",
+    "sha256": "E038D402384F4F2A616C9489D04D97BA546F80FBA216031D7BB5CF328C873214"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\layout.tsx",
+    "sha256": "59F78281A02E453A84FD4FEB8EB28DE05158EF457C7BA789506E5A8CF97D055E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\page.tsx",
+    "sha256": "8188448B1D9172DC3756EE013EA2224FCAE0232F7713E6D622C4EC4D25734F1F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\sales-actions.ts",
+    "sha256": "23250DD802ABD9C045F535C3C26A2976703B645A6B09D758AF9B92D11021BCB3"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\sales-definitions.ts",
+    "sha256": "00030116F0354D400BF9996C7B172BA1779E87A4318C2E17E00DD9B3913A0E28"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\schemas.ts",
+    "sha256": "E85E66B7BBCD1BEEF2EBC1A282809384A90205EAC4637BD0CBCCCC24644AAD9B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\table\\page.tsx",
+    "sha256": "5A6DA40DEEC8A11AB8AFA1C97CF18EBE599B0ABDEBFA1483A25B8545BD74D075"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\types\\page.tsx",
+    "sha256": "89C5E10E8D025220CBA0E2B67A46BB5C46F0058CDE43495346CEFA84D9253A1C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\warehouse-actions.ts",
+    "sha256": "1DF0AC42AAD8DD03D4397BB3701B5081497D2235D6DDB5A6A12F30BD65A349F0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\inventory\\warehouse-definitions.ts",
+    "sha256": "6C235D0028B8C56146090C660E4FBF6D3C2BC755703970A005C2F07884F691AA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\kuro\\components\\fortnight-calendar-grid.tsx",
+    "sha256": "10F7ADCCF1667C790B2C085D338C066535E1A39108045F6272F3D46E1AB063BA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\kuro\\components\\month-calendar-grid.tsx",
+    "sha256": "920024BC31B2E60095F0395860D1D98892AADE03D0E390BBF7A0D49767E6B088"
+  },
+  {
+    "path": "kuro-web\\src\\app\\kuro\\components\\week-calendar-grid.tsx",
+    "sha256": "751C2EC3CBF5F8C3B7FE03D52CEC4CCCC9AED0187CE34CE01AF3A52D6532DED0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\kuro\\layout.tsx",
+    "sha256": "6207D9D499603CEE095D73CCB10479572FA0ABADB6221B3C7C056BD9D683C8BF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\kuro\\page.tsx",
+    "sha256": "308ED2C070144F452EE5D5467B8BC03508250FDD69CE1DC92C3D5AB8E8679AC0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\layout.tsx",
+    "sha256": "77FE4BDE6D9E00E6ADC79B07B2BD094D2F38F2E56FC43E9549396C9592AB016A"
+  },
+  {
+    "path": "kuro-web\\src\\app\\login\\page.tsx",
+    "sha256": "DD472FC15277C73C5F0213CDA50ACA79C3CBD24F1F13B2CC7CC5C8428386F460"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\__tests__\\challenger-edge-cases.test.tsx",
+    "sha256": "9106A8C9CA14CFC219C1EA84EDA82824D19566BFDD0D70C7C5527076BCD21241"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\__tests__\\challenger-sync-maps.test.tsx",
+    "sha256": "D9A089D4800293AEF4DA3E174969B5A9C0FEAA3E5D6C625BA18A11AF9945A754"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\__tests__\\logistics-tracking-footer.test.tsx",
+    "sha256": "9A56532DCB8566D8AEC1E5C9A2FF2895F286891B439408A7DC08DE04412AE340"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\__tests__\\logistics-tracking-map.test.tsx",
+    "sha256": "322C8049D9AF765F88DB204D3EE097080E061CD605D5B486812F5CC8E6B3F6BD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\actions.ts",
+    "sha256": "20CE41BB523E4373B3C489DC7060763F3ACF6AAC23769863F7952F6B44F65DAD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\components\\logistics-board-dialog.tsx",
+    "sha256": "AA6CAD72AB337819176EEABDBCD752545202BF6C4EFB0264DF9F5E6A3080547A"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\components\\logistics-destinations-table.tsx",
+    "sha256": "CB9449CEAABF883B5CFC4ABE5038FCDF9AEC338495AE197CB8CAF18AC4756D44"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\components\\logistics-entry-tab.tsx",
+    "sha256": "5DD3983253E96AA0530AFBC0721C9948D855ED0DCB2B5849B8C5075E7F627535"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\components\\logistics-schedule-table.tsx",
+    "sha256": "71168E6527B79208ED16248B8B946FF9C293B913A44F136DA577D8821741A028"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\components\\logistics-tracking-map.tsx",
+    "sha256": "BCFEC9483B47B5CD5801EE160B47C743EA1862EA97A66AF5DF23D45C129482A1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\components\\logistics-tree.tsx",
+    "sha256": "881F8492D2E7F2AC8254FCD01C7A17423AD830F00526FB44B4985EE4D5565A11"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\data.ts",
+    "sha256": "B1C52D83854E88B247C4987AD11BFA156B539C4CF67F2315E14D7B8B12F84FE7"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\definitions.ts",
+    "sha256": "920181C0A3F950E6439E4BC482E5A57DD7A07200867C700E0475728AA49A897C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\layout.tsx",
+    "sha256": "6ECFCD65B1F7192B3AFB32731C950B8E03E75035BCE7C5523A9685D706F07CB6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logistics\\page.tsx",
+    "sha256": "84D080B4B864D2E8541D3E1627EC5C52E28540F0D213F30E2577FDE3C8FF39BA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logs\\actions.ts",
+    "sha256": "22C6E8BCF3D53A7F94FA3510F68F9CD39131C6204A5327444A7BC44E340EC477"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logs\\data.ts",
+    "sha256": "47B9394659E3937784EE95BB4229482B2AECBD914E81EA62465B6513467D26B4"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logs\\layout.tsx",
+    "sha256": "754CAD1D53036E5D28E16CF1FB12BCC242D0445D2AAD5E8B74C30E0E57B402F9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\logs\\page.tsx",
+    "sha256": "0CB1E6C20D9FA5F350B2A870272BEF8C203606031884E699FAE7C5564525D204"
+  },
+  {
+    "path": "kuro-web\\src\\app\\page.tsx",
+    "sha256": "0E63E1FCFDAD9AA290B8160AC813059AB11ED739D0A6C03DD491A7B5B5921AB1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\payments\\layout.tsx",
+    "sha256": "0D9BFAC7F90AE552DB1484B729FCDD55355870C052377A9EF1B8337611540822"
+  },
+  {
+    "path": "kuro-web\\src\\app\\payments\\page.tsx",
+    "sha256": "047E6A3E9F2F6C59CF3B88EB6D1E3C4CC074019D7A1C57397DC938F9DBBF58B8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\register\\actions.ts",
+    "sha256": "9675860A3A00E4D6817BBD848E0193823263B103FF82AEAC9482DBA7F6447B5B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\register\\components\\account-step.tsx",
+    "sha256": "0F2895FE4B5CDA97646E18828A4B0788637FCD47C39F8600908BAD51BD8F2632"
+  },
+  {
+    "path": "kuro-web\\src\\app\\register\\components\\email-verification-step.tsx",
+    "sha256": "E1B85E506B8CED224EE8F0E284230BBFC8E5367BE02A40B9CDA6EB61B7283178"
+  },
+  {
+    "path": "kuro-web\\src\\app\\register\\components\\payment-step.tsx",
+    "sha256": "EED278B968CD74A834C0E16E9A2D4557B0A6428CE372548F38F60ECE9CED7511"
+  },
+  {
+    "path": "kuro-web\\src\\app\\register\\components\\plan-step.tsx",
+    "sha256": "C1168108DD6EC79ECC3C8BBF9A1330EB29905DC539B7B48B62E353FD96FF1620"
+  },
+  {
+    "path": "kuro-web\\src\\app\\register\\components\\success-step.tsx",
+    "sha256": "DA397ABFB8D72B148A19C552353EEEF7AF301936E5839F21858E0969E8C60A9D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\register\\components\\wizard.tsx",
+    "sha256": "D512ADFEEA9896A55EA78D7BB4957B6D80BC47A60B08DC6839369282F6E27DB1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\register\\page.tsx",
+    "sha256": "6CF2BDF8DD8F9902526EE68CBA3A960B849B04CB3CDCCF3475E1DF38604EDFF4"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\actions.ts",
+    "sha256": "BC360F07E230BE5AC39A58E3DB3A0B0730501B45C23E476475463FCCA1AA73CD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\billing-status-select.tsx",
+    "sha256": "171F9276BEE75D10CD1147BA6DC9BFE3D0416061CC5F1FEAF1FB6ACDC4691B48"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\condition-select.tsx",
+    "sha256": "C42FC2E030F13E72D41C34E15313C811868762147F8DF99D95CC7A9E6570DF14"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\equipment-name-combobox.tsx",
+    "sha256": "E49B2C0F8FFC36805D34A2EA7A844D11064A9BDDBE4D17B0DBA57AD26D2BA536"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\owner-combobox.tsx",
+    "sha256": "E8F95C4AF76CD82BE61B1B7DFE3CE7618151A6BD833D357D3DB49D781388AE62"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\priority-select.tsx",
+    "sha256": "6A78CFF2BE0089574EEAAEEE0C910D87B6F926F40AF885DF8DFCFF5FB61E09AA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\repair-details-tab.tsx",
+    "sha256": "C1349579A431D0C51DAE63EE4664CE10045F2EF5C3BA9EBE9703252E59E38E0C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\repair-logistics-tab.tsx",
+    "sha256": "44F517F9074BC956DC1558E6B8D87E317FC68C54DFB99AF9E87F8416823E6BB9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\repair-number-input.tsx",
+    "sha256": "FA6EB5A2845EF7FC2F41B97552D96EDAEBB105CBA8E82566EAE7DFB0956C912B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\repairs-tree.tsx",
+    "sha256": "F201D105A7A994AF82EE21EBD2960A9C906A83273723C4278FE712F525662506"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\requester-combobox.tsx",
+    "sha256": "13AB638727E2E565E823D3602A4E3659D0E9C626F830651133EB5EC7AC27BFA9"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\status-select.tsx",
+    "sha256": "5BD7B9F999F4D7ABA3C1371A5EF0EF981257BBEECB5B8FDC5F37A04AD1B89E43"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\supplier-combobox.tsx",
+    "sha256": "6EEE10C951CD1AFEB491B72CB8AAAFB6C8AF607F6D76A2938C3213BC58498B7D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\components\\ticket-table-tab.tsx",
+    "sha256": "846B931AD446ECFD9C7AD5ED6C0B6D2C0DEDEF0E9476BBE73D2504DEBA0436A1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\data.ts",
+    "sha256": "2047AC18375FCCE1349926191DE191B38B5972CA97B1922ABAC68243A2BFC8F7"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\definitions.ts",
+    "sha256": "590A08ECD1CEE37DEBC35FA31FA0EA6072A4C46713D7842EF7A0EBE3CF99EF9C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\layout.tsx",
+    "sha256": "6207D9D499603CEE095D73CCB10479572FA0ABADB6221B3C7C056BD9D683C8BF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\page.tsx",
+    "sha256": "927735DCCD3BBAA10CC1C345DCD9B292E0268C612AB228B7B1A6799C57B1D139"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\schema.ts",
+    "sha256": "25FFF396B25256709363D5CF57515D55D560E11BF90349A89CC1E6BDE098CC14"
+  },
+  {
+    "path": "kuro-web\\src\\app\\repair\\table\\page.tsx",
+    "sha256": "ABF4FEF199DBA337948B1D90F081B81128C3FE25095EE64DD5CC0316D1641800"
+  },
+  {
+    "path": "kuro-web\\src\\app\\reports\\layout.tsx",
+    "sha256": "420428C177ED222E305556C25AE0393717E259BC47028CC1FB1BE64CBE7BAF81"
+  },
+  {
+    "path": "kuro-web\\src\\app\\reports\\page.tsx",
+    "sha256": "29D25A354B514850F220102528A0EA5AEACAA7D9B0DD93D3FDBAEB8BA737AE25"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m1-challenger-boundary.test.ts",
+    "sha256": "4B66FCBB4651F6600850DDE7C984513F7B2D1885F003ABB332A625C69A9B25AD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m2-challenger-boundary-flat.test.ts",
+    "sha256": "D0A052F12739C9554B99B6DA592764F9B999D9C1A55F1FBE7A58F5C53559E92B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m2-challenger-settings-tree-stress.test.ts",
+    "sha256": "5CFB54D6EDF173F05004194D96CA76251DECA4FAFF9A3A7E64C5FEFCF937B0F1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m2-table-stress-adversarial.test.ts",
+    "sha256": "6B33C894ED5BBAB39D12E9EDD00AD9381B841C3EBCF8DCEB7AC981F5009B2575"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m2-table-virtualization.test.ts",
+    "sha256": "314A148927A3EB6FC4EEF3339FE3F04A0EA859F1BB4067A633A1124E8AD5E470"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m3-challenger1-stress.test.ts",
+    "sha256": "3A96A43711F096EFC053E7637A6BC6C0F2EEF899ACD59E75882475CDD51A3BE2"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m3-challenger2-adversarial.test.ts",
+    "sha256": "D80B2B3B2872D8E7A7977D162CBDFADB00C50BC3977F950962832289E958E5B3"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m3-dynamic-pricing-stress.test.ts",
+    "sha256": "3EEBB12FC5DE15F0712FE96E37FAFB7B1B83E4D4CCF238CCCCE4803765056B75"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m3-editor-rates-tab.test.ts",
+    "sha256": "B367BCF3562BC1961E84C41F8F7FEE4F2C16612BF7FE79923F9C832AA9D3A3F5"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m3-service-table-rates.test.ts",
+    "sha256": "DC3CA736ABD9795E891B8E858883924BECE3B3A26D36A567661C72A771B1DAB2"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\m3-tab-lifecycle-stress.test.ts",
+    "sha256": "40E3994BE63BD88B96EE6A446F6284EA2B72B240A8279530F78491CEEF9934AB"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\service-item-editor.test.ts",
+    "sha256": "F9D85975E5CAA1F129BFEB9FD9C603FB56C5A7CC1C7A456F25BA79B6480EE614"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\service-navigation.test.ts",
+    "sha256": "847A783F4D1CA6C3EB0A4CAE1E1B2EE0B2CD4F7D71E3203B35B7D5D23F8D8515"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\service-schemas-stress.test.ts",
+    "sha256": "C5697B4A99FA35F07F34A05DA3B6C14ECD091536669E799F6BDDA6EB58EA6ABC"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\service-schemas.test.ts",
+    "sha256": "191AAE64B79D8BB4901883F4FC0B5F38BDDF02E118F7824F475D094E0FB18024"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\settings-integration.test.ts",
+    "sha256": "70D0EBCCA1AEAFD1DF6A6C8BC968CACF67C4A4E03F397CCA391584E9875B3FDB"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\settings-ui-stress.test.ts",
+    "sha256": "75F325FC7BBAFA7853EAA0B23A90CAF9AF91069C97A771857FD274FC8006C3D4"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\__tests__\\tree-hierarchy-dnd-stress.test.ts",
+    "sha256": "AD3279B66EA24274066C2CD358BF2A2BC6D4EA96CA19669C7931C5B2CEDD54DC"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\actions.ts",
+    "sha256": "939895B0A2BD8D55448BDB393E2C6BB01CD7F358BFEDEFC79F414E76F7CAE6A8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\components\\service-item-editor.tsx",
+    "sha256": "FC220479A5BE10C948AABCE383ED5454F91EDF46409823447EDF45EAA1399CE7"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\components\\service-table.tsx",
+    "sha256": "B2637FB1EF52B16E8EFB9FE984CAF53AA06383ACA18FFBE6C12AAE8067F0CA12"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\components\\service-tree.tsx",
+    "sha256": "7DCEC1AAFC3C9EC2B1B9B9E3015087D12EC9741F31987FFBDFC645FBAA24D56F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\data.ts",
+    "sha256": "CF4911F19B5EB6836577E6C1293051C8940C34649F0ABB383A1C384EB728CE6E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\definitions.ts",
+    "sha256": "B12D636CE16F60AC9C04B3D561C3E83B514010EDB323BA51C4D40BDD405CA340"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\schema.ts",
+    "sha256": "668FCECFC1F521063FF8F2E2197C82217DE8DC77FB505C92FE36FDBF246F7F94"
+  },
+  {
+    "path": "kuro-web\\src\\app\\services\\table\\page.tsx",
+    "sha256": "6EBBCA407CA2945B97425C8A286F74AE0C713E9A3E8EFAD0471138F78A2D513F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\account\\actions.ts",
+    "sha256": "44C203887BD5CA247527565290403C44A8A3727F0C32C899903730D4904BEB1B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\account\\page.tsx",
+    "sha256": "B015D9D4A4325D5D97C32514CB4A9F9C8237A17E2A4BE18AD9891813AEEE7558"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\billing-statuses\\actions.ts",
+    "sha256": "75A6D239B77A4EDD9C6932543597CF4AA7C66907A1E0DDF1D308929FED12143D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\billing-statuses\\data.ts",
+    "sha256": "710C6598EA38A655E277703111639323AFDB867C64F8F9542967E444F0EFDE1F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\billing-statuses\\page.tsx",
+    "sha256": "6419D2854D9EED9CF6EDD178B599372FA5259D00A04F2D59B2E4C26984B3D5CC"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\billing-terms\\__tests__\\billing-terms.test.ts",
+    "sha256": "89779D9A967FFBCE27D13F5A25C51AE07966309C40CD310B2DEA3D774064ABDB"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\billing-terms\\actions.ts",
+    "sha256": "7EE3B3359A76BA6C4F105C1806A41A1F0F1E2CB740BC5922CDB397F61F832A15"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\billing-terms\\data.ts",
+    "sha256": "5B2EE7D777D0D1D0AE4B8195D4607688EC3EBF8FE53FB9A57426E873BD6A50F4"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\billing-terms\\page.tsx",
+    "sha256": "AC6A2888177A6FE268315BC519B2DF7BF932DED9E50CDE5205423EFB15F55647"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\categories\\actions.ts",
+    "sha256": "DB83CECDCA480AC13B7DE145A931B77C931069E5945B091B380B4D5ADA9CA0CF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\categories\\page.tsx",
+    "sha256": "528083D9D811432277D3B15EFF33D6FB98E66A463FA12A8D9D041154FEA4B656"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\components\\settings-nav.tsx",
+    "sha256": "1840C12FCD090F0AB3A07D402565D7A9F1CFD6A4D40666BC59CF42FC0C17860D"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\data.ts",
+    "sha256": "AB264EAC6E4F04EE7F8E99DA01CD50A1FCACC8445A4B841308BCACF3F983331A"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\definitions.ts",
+    "sha256": "0E7C05E73170E3C7CF3F07BF34B22A7D910F69CFE6CDD80551BB24F80E43A644"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\departments\\actions.ts",
+    "sha256": "0C18F09DC23BB2398F385006AB73D73BFC0E248C81AAD73FB8CA1F2DD29B08C2"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\departments\\data.ts",
+    "sha256": "CBEBF5B056D5690D81810C0A799E7CBED3534176D991E118E4D8B587DB178C09"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\departments\\page.tsx",
+    "sha256": "7AAA155E482DF6B4DC914C406995160E3B5236CCCB07BAB1601A62D40C7D150E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\dispatch-statuses\\actions.ts",
+    "sha256": "C67A1B99CFB0A8079670C2FB230A35ED12CE4CE3E1E1B3AB795DDC2A62FEBEC7"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\dispatch-statuses\\data.ts",
+    "sha256": "BBABA7D6497E2DFFABABA303967C7B2AB3EB88548AE4D669FBF9441771E0FA48"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\dispatch-statuses\\page.tsx",
+    "sha256": "043B447A48A2B40133BF869942C0082D62DB41ED1D66F8D47D062324043671DF"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\document-templates\\actions.ts",
+    "sha256": "C53FA81FD07B92E7B8DC52A095BACD9AB8271C4830E36DD3E57874DF67844BAD"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\document-templates\\default-templates.ts",
+    "sha256": "759059CB265E794FA85D987BFD4D5D5800DE4226AEB998F6FC70FAFDC21AD667"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\document-templates\\page.tsx",
+    "sha256": "338263EF43DEF7E084BB9F7FCE6EDDC6B6EAC34EC6E8486BD50962FB707A7F89"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\event-statuses\\actions.ts",
+    "sha256": "EB7316805DD54F42C2852D2A4F4025D247DC251E122C44D0EA9ADD9C39F2503E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\event-statuses\\data.ts",
+    "sha256": "6CA982B868307360B2B74D8DCF47C5D627CB462D7AF64276A170723CCF5B9B65"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\event-statuses\\page.tsx",
+    "sha256": "1CAA0896658F8B67CA5EFF066742DE20CC7EE9D5169A35110EE838FD3BB8D23A"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\event-types\\actions.ts",
+    "sha256": "8EA95EEE08F3D2876567A9412538D620F1CF12C5559CD5AAB72F5A34B93CB737"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\event-types\\data.ts",
+    "sha256": "A47C86C07F85B4FCEF71CF6949069214B5732DAEF4FA1CCE4B932EFBED240A05"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\event-types\\page.tsx",
+    "sha256": "A89C25AB2902960C86F4F3F78DA3781D647E8EB9D42D66CAD8F06ECDF837F115"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\actions.test.ts",
+    "sha256": "54DBE1D1E9E1C26AF83A64F85A4747BDE9524DC61B303D77231E60227F37BC3C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\adversarial_stress.test.ts",
+    "sha256": "4B11198007A883DBF8D01BD96D4C894C426AF03BF59497AC63F5E098D41D8713"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\e2e-adversarial-relational-verification.test.ts",
+    "sha256": "02B67F46C7D25A182D707B2F5A6353955E679FB6BEFEB1542D5131D174B8A0BA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\empirical-diffing-verification.test.ts",
+    "sha256": "0A683F3C02FF647504A5424B859EE5AEB48A0726FE327AE4E129DEA38E64EA5C"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\flex\\__tests__\\flex-settings-ui.test.ts",
+    "sha256": "FE4DF1883F824B9492E8D39438F19261A6495A88D7F10BDA0749208006740A14"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\flex\\actions.ts",
+    "sha256": "05EE26BCE1DEE746AC16E4E14C8ECDC78085EBC0C383910845DE6B2D301EC6E3"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\flex\\data.ts",
+    "sha256": "16D998DC3C38F079EB6697B1347F70FA1F5767BB56794B557AD59F5A39F27C47"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\flex\\helpers.ts",
+    "sha256": "D5ED2380B4E013CFB6490651A59526DD67D2B325415AA252F6BE5D60CE86F993"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\integration\\__tests__\\adversarial-ui-state.test.ts",
+    "sha256": "CD8B78C8BCDBDF3B5BAF0E14EBA4B694F7DC57F2DFCA3DC4334C12914A500BFA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\integration\\__tests__\\challenger_m3_2_empirical.test.ts",
+    "sha256": "E04A6EDB4BD05DFE08CCC431AE84DFFE83DB6644599EAAC42F0ADB79CF162571"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\integration\\__tests__\\page.test.ts",
+    "sha256": "858D512B0645402DD84F830ADA0B932DAFEF4AD6C482B78BD6D8586BB1914C42"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\integration\\actions.ts",
+    "sha256": "E9963AF37E5E86EBD4E7AD26A122AE14E2F1408CB6A6E2ED7279C962EEE34150"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\integration\\page.tsx",
+    "sha256": "FC547F7AD6CC93F7AE9A6A848DDAE1337FCF26B345AAF603628C2AD14E7EDC33"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\layout.tsx",
+    "sha256": "22819F8C53989DDF57CC809FE47F29C1DBC1762F055ED6F785685C12B446925B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\logistics-statuses\\actions.ts",
+    "sha256": "5CA8870091B371A2872B2238CC27DF2A66CF402795E6291D63322B78DEFC86E1"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\logistics-statuses\\components\\logistics-statuses-table.tsx",
+    "sha256": "98F6F9D4D5C9CD05029DE82AE41CA29B6AE72C410631CEBA33AC8C1B9071293B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\logistics-statuses\\data.ts",
+    "sha256": "DF6187A136622C64F49F7D531415ECDD579FFD14064814211C651C2103F6B1B7"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\logistics-statuses\\page.tsx",
+    "sha256": "01AEEE3B4ABF92084FC74FC7BE0D590D17DB30668C3E996F60FFDA95384CEC42"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\page.tsx",
+    "sha256": "CC1833E67A9EF46D3C97890D8A029C684A1E9B6BC6778D735EA8300C4AD77AAA"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\preferences\\actions.ts",
+    "sha256": "1C546BBB0666B0B328A182E03419F8288A811D5DBBA35E830FBE0D0D7250F6DC"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\preferences\\page.tsx",
+    "sha256": "1ECEF45875DAE284FFA7A33C13E5D8AAA7F6FB44B10C3E36B79F8C15B9E20DEE"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\priorities\\actions.ts",
+    "sha256": "A4DB3DC35B3D809155F07BE466E02CDDE56BA076D2EBF91CCF1AF8C9AAE7AB3B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\priorities\\data.ts",
+    "sha256": "C2B418EA98E412B6C4B00C0CF062D39D8E5A0F0E320A4B6E799869BF29F95A7F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\priorities\\page.tsx",
+    "sha256": "F46B3ED85B1239F41A989C94C2545D188FA285D1C09E93D1C8840BBD8DF7B5F6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\rate-factors\\actions.ts",
+    "sha256": "7B2F2ECA5143BBCB2962F10A2CBB30D2F8934B171ED5445B16FF53ED00E08185"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\rate-factors\\definitions.ts",
+    "sha256": "705A700A45E1C106B6CC08532ABA2711F5A8665F03A045B6E7937AA5C9ACF011"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\rate-factors\\page.tsx",
+    "sha256": "CB6399EC602F46642F74D4F834C681BDA54264D47631A9AD8BA1BB28F994CD76"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\role-types\\actions.ts",
+    "sha256": "5EE9A334AE434EE8F812F37BF7A502BDF86BAB92FD849B3093CF3C8645753C68"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\role-types\\data.ts",
+    "sha256": "A1F90D7002D74C1393E13058DCD0A23F01B6E3E7449040B84E2BA8ACBE461A85"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\role-types\\page.tsx",
+    "sha256": "5899936D423700B292192021387B01DC2160D2A762B6796AFAD631BD390EB887"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\service-categories\\page.tsx",
+    "sha256": "9F49CC888782FD6C3F6FB07E547E877D9A49BA954DA146FA29F94B3EA951C6D4"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\templates\\actions.ts",
+    "sha256": "3EE4C005A8E8AC97E31362870AA15207E7051AE98C792B60C6CB391875F6501E"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\templates\\page.tsx",
+    "sha256": "5C90B0A3BD1CD4913C4E39B36F3EAA7E3F39D08560C7DA09EE7510801B4D9DF6"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\theme\\page.tsx",
+    "sha256": "217F23A52527E15D70D5E4CF944C4F83192515651FCA613196BE49C77A3D767B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\ticket-statuses\\actions.ts",
+    "sha256": "BF37C4DBF72912BD85CF38EC5F7E6EA4F234BF1C7520CAB2E12FD086150E15C8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\ticket-statuses\\data.ts",
+    "sha256": "75A981F45105BF3A575B78B4536D54E273722AC7CDF447C83B8C55793A9D8A3A"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\ticket-statuses\\page.tsx",
+    "sha256": "1B620DB6001ECE8AA08D9B0F4ED155927BB868C52653CB91EEF8842D93DE5B56"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\vehicles\\actions.ts",
+    "sha256": "AD5A4E2ABCFB95AF8BC784BB7AC858948840888A3F70B09D87C77DBE4C41CDE5"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\vehicles\\components\\vehicles-table.tsx",
+    "sha256": "289381774913D7EE29B5934D026494004AFE4A962AFE5197807906ED470D7C6B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\vehicles\\data.ts",
+    "sha256": "1E78214BA54ECBF48B02B3B0B7638A81A23865A1AC54A5514AB1803A86649D35"
+  },
+  {
+    "path": "kuro-web\\src\\app\\settings\\vehicles\\page.tsx",
+    "sha256": "F74BA1D6630E5C9B8E6E9EBE47D58E89E1C84A2E152F1635B21782681750BB4F"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\__tests__\\schema.test.ts",
+    "sha256": "08BA61AC1254130505CBA56F18F3C81635997BEA7F548372A00D6F739EC14B95"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\actions.ts",
+    "sha256": "367A6356F6029B3C7261EB4D00BF7E3DD323940F4FA41FE16E2E9885094FB558"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\components\\avatar-creator.tsx",
+    "sha256": "A41386DEEE379551D122F71A2D60B2A579FB96EADCFD2C8D3FDD64BE438AC2E0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\components\\contact-client-select.tsx",
+    "sha256": "A8CF23662FCE8B5053133BB8473DE10EF24614ED017C90C73C8EF6E7C2438F98"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\components\\crew-tree.tsx",
+    "sha256": "A53AF90AD6BDDC9B389DBE73C51491A7BDB36D84F9120C6EF142BED5D65869B8"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\components\\tenant-select.tsx",
+    "sha256": "C366FCDF0F0BFEF99DAA7FABFB692AE2B71DF027CE9E31EBF03099F6C0FF176B"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\components\\user-details-tab.tsx",
+    "sha256": "E88C27C1E3A3A5D007DDF4C61B5C4DF9676664C931AE8853A56A0702C40A66F0"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\components\\user-role-select.tsx",
+    "sha256": "B9178585B2031E88AED0CA66F4A1AD9FB7C7180ABE4264972F864EFDB4C06B54"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\data.ts",
+    "sha256": "58CAC87A2F2AAE3BEB2A0A6CB63150CDC69B9E590C444C0947F01FEA8C802178"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\layout.tsx",
+    "sha256": "FF7ACAFBB9B338C24401498DB07EF4B4A88519CD4691AFA59055142A0B1E0912"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\page.tsx",
+    "sha256": "77BEF294F3208041DCBEC159A2FDEEEFFD218373B6A0E3562398185C20E4E4DC"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\schema.ts",
+    "sha256": "85D860F4E4ABA39B67B5A6840ED7C3B5F06AFA1E6E98BE11D244E6E74E1141CE"
+  },
+  {
+    "path": "kuro-web\\src\\app\\users\\table\\page.tsx",
+    "sha256": "4D16005735F05520E81674ED06BD4D5BA21368F74A2B567FF772246D8FED937B"
+  },
+  {
+    "path": "kuro-web\\src\\components\\analytics-tracker.tsx",
+    "sha256": "F7E91DD53BC7406BDE0B5E317BE44B7F0E5E510E9DAD64DA2D846F38C6BCA95C"
+  },
+  {
+    "path": "kuro-web\\src\\components\\chat\\chat-dialog.tsx",
+    "sha256": "2858759DA8666FB177326C6A0981C131592430876AF9FBC05D8DFD777307A919"
+  },
+  {
+    "path": "kuro-web\\src\\components\\chat\\chat-window.tsx",
+    "sha256": "966A88C7C0331E60030FEC675878339C23F4328A59F93B28A0B9FB153DB52647"
+  },
+  {
+    "path": "kuro-web\\src\\components\\data-table.tsx",
+    "sha256": "72BF86D45267DE58B7DFAD412497B09F41D33C1C06FBE177BAE6272458F9A47E"
+  },
+  {
+    "path": "kuro-web\\src\\components\\documents\\document-tree.tsx",
+    "sha256": "2B6FF8A6DE5D096D94EDBF25B35C8F9B4D3112C71AE73C5422FCA2FCA0BCC863"
+  },
+  {
+    "path": "kuro-web\\src\\components\\documents\\entity-documents-tab.tsx",
+    "sha256": "6312D6A25C7E088D427C0F93A3AD1F4CA2103A7B00C7C1BC03D92E75B1C5E515"
+  },
+  {
+    "path": "kuro-web\\src\\components\\icons.tsx",
+    "sha256": "FA045F6BFD4819DA6A44DE4A9256C1FA009A2CC5DEBEB431DE98BE60918A8FFC"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\__tests__\\error-boundaries-adversarial.test.ts",
+    "sha256": "8919C41994176D34F0021783A4FCA2DC51DB3AEE1DA12BFA3FCE250E036248D4"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\__tests__\\global-search-services.test.ts",
+    "sha256": "6F073A48497BEFBB4384FD6CE618AE4C2B8C50CFD3D19420D9196890CC538310"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\about-dialog.tsx",
+    "sha256": "025DF4E9EE7366987592DE1CA5422F656C45E281F115C61B4224FC3CE6C69666"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\action-bar-error-boundary.tsx",
+    "sha256": "D87A8FC706D1FBC322ED56E133E0F9097820193A0CA595ACA09A7F76D5EDD2FE"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\action-bar.tsx",
+    "sha256": "A415A39C2D60691A6BB5B53F27A309F5B28978E643DBC9B604BA51FC386CD9FD"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\ai-assistant-trigger.tsx",
+    "sha256": "374DD02F7B2B0A0CBE92EB8825B434B45AB90A845878085A9B4A6CD555DF42D8"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\app-content.tsx",
+    "sha256": "C30589D0E6A7A5D83CB50BCFF0A45F6A6459A8BAAFA7620E6C2415628CADA0F3"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\app-shell.tsx",
+    "sha256": "335912C1B90C55C942F4AD2CDE1CE1C6749AA78F3AF0CEB02D6381865DD33635"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\app-title.tsx",
+    "sha256": "3F0560BDCF217D784A310C6B81E1D856BE9AAD52306D0CDB60CE6B896923ADFF"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\barcode-search.tsx",
+    "sha256": "63A0115E097A6C4E64475D977F4BAB289654D364388F16928A1DC44C35FEED57"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\change-log-dialog.tsx",
+    "sha256": "24E44DA8992741080A1F78B0D783A5215F2783DC3356307970F745F291175FC1"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\change-password-dialog.tsx",
+    "sha256": "E52C484243CD2499FBDE5FE578D588598D020649955743B658A874448E759D2E"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\connection-status.tsx",
+    "sha256": "0CE67656B16A0A3F6EE2E532B0DFD3A9081F0C40372C2318467E78435424503D"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\data-preloader.tsx",
+    "sha256": "896A221CD7AB34B47D741A643197FCF5977199FBEA238967417846D0AECA5F5E"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\global-search.tsx",
+    "sha256": "2B1B085EA8D147524D4D5D06D350BEB0EEA7224DA02EACB468C84210425AA53F"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\main-layout.tsx",
+    "sha256": "3EE08EDCAFD8FDF5688A900DCD2309690F5F9AE70A7391A0405A08FCA0AD6B34"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\select-tenant-dialog.tsx",
+    "sha256": "CBFE5C96CBC49190A689E5CCC59D3BA74BBCE34FB47A7107F3B8D0C8F67C0712"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\settings-nav.tsx",
+    "sha256": "7945DC23E2CAAC63F8FB39E77AE319185F561907DEDBB1794798DE5C1C098E33"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\sidebar-nav.tsx",
+    "sha256": "4263ED4D746EAED7AE9E9A8732F868EC0419ED0E18A4A5ED29FED6B66B4DC45D"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\sub-tab-nav.tsx",
+    "sha256": "3C3F8893290FF294CB2B2B7B3C1EB96C3D007A239E101954818E1541122D0C46"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\system-broadcast-banner.tsx",
+    "sha256": "8B14A9B5D92B626079230DA44A139D1867EA2486AF24DCC70F9CB4D8BBBDD2FF"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\tab-bar.tsx",
+    "sha256": "A35C91BB28CAC80A1933116F9E6B8DC6FEDA1FEFE24F5760CD25EB38190602B5"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\tab-content-layout.tsx",
+    "sha256": "9431C397A25B4AF1B0BA76F96AFE3F294546BFFC39D91F0B5607664EA482D3A3"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\tab-error-boundary.tsx",
+    "sha256": "9D53903447E84DABE713748D31A680ECDB0D4BF2992DFD14D100558F6D506EF2"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\title-bar.tsx",
+    "sha256": "3AF1E6ADF245A3C065526575BE1D6527CEB5A194C5EB881390A47B90DCA14251"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\user-nav.tsx",
+    "sha256": "679C80AD9AFE84DE084F752B6DBD22D60E374A405F52B84A7E2FD951BF085827"
+  },
+  {
+    "path": "kuro-web\\src\\components\\layout\\version-checker.tsx",
+    "sha256": "0E6033DDA39249F097059B5BDC8337D87FE995B8CB66477E0617F22E25EB71F7"
+  },
+  {
+    "path": "kuro-web\\src\\components\\page-header.tsx",
+    "sha256": "7A0BBF1E61B4B65015F48D7589BFAB7F1E3DB0E504A0BB375E005320056D10D1"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\accordion.tsx",
+    "sha256": "CB85842E8A72665B95171D54B11436CFF2398806DCADB8B31077C3D7F2FBAC17"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\address-input.tsx",
+    "sha256": "960B720C5C0189A76030A6A7BE4E4A7D7BCDFA39A59783D8E9E910F1703BD54E"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\advanced-marker.tsx",
+    "sha256": "BC6097C26D5D8433D683700DE7C5433A376CCAE247B86170C26C9CE3EB171450"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\alert-dialog.tsx",
+    "sha256": "8C13D9F403A4F92345EFF7F8161F4B3CE96F183A052B7CCA0C4EB95270D4EAD9"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\alert.tsx",
+    "sha256": "1AABA23C7A1095F7ABEA7C9F6CE12A43C22BB8F97E957C9CAE222666E0C8BE83"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\asset-number-input.tsx",
+    "sha256": "5CAEF5B4118E31815FD97AE7648564BBD17195D836CE1AA09D4CB5F2DDA172E3"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\assignee-combobox.tsx",
+    "sha256": "F0BDBCBA9AF38AC22806D8115E66E0228C3EE5B0771B070CA28565C28D3EC6D7"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\avatar.tsx",
+    "sha256": "4EE6FBFF6D693BF5B76F1B30E4CD55DE6C6343C46A51E636C3E3B8A911FA7EC0"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\badge.tsx",
+    "sha256": "563824AE3F6B0A5DE408C13E58FE2A195808FF57CB09698FCAF2E875434BFB98"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\barcode-number-input.tsx",
+    "sha256": "9AC10F3BA99D30B4E6A9753C274E485268BF586CC0DC333CBEE2B1B7F4445325"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\break-time-input.tsx",
+    "sha256": "769E90FA81352BB78A7846A4B0CAD37D3C3085188B7EBD3240B029FD19A43E73"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\bulk-delete-dialog.tsx",
+    "sha256": "CAC5BC0E9EF828E0B748052166AD6BC6C0F068D544351238DA2374F15C2E6D1F"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\button.tsx",
+    "sha256": "5822FDFC074A46CD4C617E534F82851C735463BCD51710E0B5099A4F2B9A05C3"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\calendar.tsx",
+    "sha256": "F4473B1B331222085306EF38D81079A8112C3EBF6712776131541069D5B7FA44"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\card.tsx",
+    "sha256": "AC0C8ABEE8162037E0376650049C8A7ACDA9E2EEF7EECD37E47354926153675D"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\carousel.tsx",
+    "sha256": "3DC7708DC950EB3CE339A4E76D10A7364EDC00070131239B3D7DC200C3302E26"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\case-type-select.tsx",
+    "sha256": "290DA7BE0F327DFADDA18CF48856E8877330DAB9A4BAD34ADA72CE7B9ADC0327"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\category-combobox.tsx",
+    "sha256": "FE0F91724FF57F3FBBC1D47B6910C7056E85896AB14D8B5089B55C22936903D4"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\chart.tsx",
+    "sha256": "78975C4A1A51E0DF707AAA85237ABE711A8F36AEA66D19E30D5CB0B398351622"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\checkbox.tsx",
+    "sha256": "7E8867ACA9B508A892646F9FF50EB7A6001C4E8BA745730BB2D711FDDCF1318C"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\collaborator-avatars.tsx",
+    "sha256": "535D668974179F52EEA6D122D115A27467DBB7F4A888080D67E55A467AAE136C"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\collapsible.tsx",
+    "sha256": "BC854800960EF4129D4679A7C4A6B5091E7038ADC03698E4529D0C9B5AF0D831"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\color-picker.tsx",
+    "sha256": "19CF11D07C8C21F656BB30A66FAD2530446249DC84D739C028834CFC60D16178"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\combobox.tsx",
+    "sha256": "2D93DEE714504F56BAD2D4677B2D0B0E8ACC64DB660B50A0D73B8091CF54A2DE"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\command.tsx",
+    "sha256": "CFFE895BF819132A18153BD93DF6F423568AF99A80565AB25D2EA540DF7EC760"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\confirmation-dialog.tsx",
+    "sha256": "6EBE2E9A7AFFAADDBE23818340251573DC3A5BD7869A61054434A9FA83BD1315"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\contact-distance-input.tsx",
+    "sha256": "ED61E92EC3D2DDBA30B6AF2AAA54B87618133220BFEEA9196E7936C8B3EF4F92"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\contact-name-input.tsx",
+    "sha256": "53BA7548208B5B1BB1D0ED844886ED6B8B9299926F3ECEF29682C52B2CA598A1"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\country-combobox.tsx",
+    "sha256": "B65F6757B4548CBD854F294D7B2528DBA9774490E03F90C4978BFA3F958C756E"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\currency-input.tsx",
+    "sha256": "F6DDFAF645F316C84F83EC292E5162628602F8BED5E471F355C6E69279BA41B0"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\data-table-sort-header.tsx",
+    "sha256": "92A4E5A41EFFC0FEB149AB6D3BD6E32FE24D8D340C8FA71AF86F7099269D34D2"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\data-table.tsx",
+    "sha256": "BAEB2E413FD6436B41EB70CDF852FC6B9D86EA295D8FCD95C603B9310A5700CE"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\date-picker.tsx",
+    "sha256": "07B53312C5372C167006320F5AD3CA05261EE88E6A0E8DDCC574494593D4C13A"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\date-range-calendar.tsx",
+    "sha256": "8FC7128FFB0A4186267211F9E723D6D3EE1D8A6ECB3B1C7EE9F8ABC4DBC05A17"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\datetime-picker.tsx",
+    "sha256": "EB712A01B6079489BB87EB342ABB245DA654021545B3C27370C2D58F332E1472"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\datetime-range-picker.tsx",
+    "sha256": "9F142CF4331AADA459EA6348ACFC75D6FABC5B5E6FE696306916AB773A3EDDC4"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\destination-name-input.tsx",
+    "sha256": "F261589F4DCB1E123F856F88D7ED1BB53AABAB760BD6CDC4F50A4159E6C5BA38"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\dialog.tsx",
+    "sha256": "AD36FAB0861B292DCE97BC85F7848DB93B4566136BB26C651DF43864F1F1B01F"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\dispatch-status-select.tsx",
+    "sha256": "38A7B26215B2A5515577004F2C35ED6F2C5C5FEEBE4C6AE40F698F6B900377AC"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\distance-input.tsx",
+    "sha256": "5BA6994AFF338C83CF1B4C7C7F61BDA6579FE93F9DDADC9387B253B106E33EA3"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\driver-combobox.tsx",
+    "sha256": "F35B8FFD0809CE9535DD6033B779ACE0F4A354177A485EB62CCBB6E95F2A8ABD"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\dropdown-menu.tsx",
+    "sha256": "DA27AABCFC6699FDC38EA064D8C9214D4519D4E614876E24C5FEE4A98D971B36"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\duration-input.tsx",
+    "sha256": "0E6B55E6164277B54377F2D8E809A7E47B455CA810DA8BC4191177201ACB2696"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\duration-picker.tsx",
+    "sha256": "04B21B74D0141A459D6EAF3548876B1CF3E49496563670182D444683BD89B4BF"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\email-input.tsx",
+    "sha256": "298E86720BC3EF2F55B9A528D8FE1B87A0387AFBD1D04F24A1D66F6C8926E9D9"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\entity-combobox.tsx",
+    "sha256": "5197D88D002B963CB3AA1744A29482E160BF26AFBBC5324EDEA2478BC0DE5ACB"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\equipment-type-select.tsx",
+    "sha256": "50C768F8C9D576EDF92802F6CDA66E73983F8C4CF591A6DA188D4D2C41C1C277"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\event-combobox.tsx",
+    "sha256": "DA55F13D3AAA8C4EF9135A2427C46D7D00161456579E9BAD7E1E5E9C8E47A7D4"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\event-timeline.tsx",
+    "sha256": "D020B96944C0443CB97DD5E1AACC5B2691006106B7F2F549EA304D42B017FA64"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\expand-toggle-button.tsx",
+    "sha256": "D9AC57ABC7622CAA429AF5971D85B942A3454D8E8CDA7934331050D9BB9DCECE"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\file-upload-input.tsx",
+    "sha256": "0FFB45CBEE19D519DD6D408AD795E7ED516E86110E093F8A69A6F9C8EA61FA2C"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\filter-multiselect.tsx",
+    "sha256": "C0D5156FBD379CF333BF999CAEFAF68C4AD7EC08CC520A5A043AC7B09324FBFA"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\form-input-field.tsx",
+    "sha256": "375B32456C83328CF8115B7610FBE83AF4558D959943957D4CB68EB4885A01B7"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\form.tsx",
+    "sha256": "52164CEFA941A0F1941B2AF890A544E141D57CB1C618B20D06D1E004E150D03A"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\icon-picker.tsx",
+    "sha256": "A11CF5260B2AC2DAFB77E302506CE9FFDA99BA1361D4A5161F8BE158E47D7D7F"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\input.tsx",
+    "sha256": "85477459C4B393677128BB849C387A0393B9C647F15BED93EB8249EA6A7C3FD1"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\item-class-select.tsx",
+    "sha256": "C1FFEFCB181EA233174808CFAC87DED3D46753D7C3D950CCE2896C637C9CA17A"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\item-name-input.tsx",
+    "sha256": "D630A23E5EA8163B0CA752D2AD2E3D23F3BA57B5C39F668FE8E6981BD76B031C"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\label.tsx",
+    "sha256": "8253EE4179284DE5D037EEE03B55F4499B04FF41DDFA60B3176EA28D4BDC301C"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\logistics-status-select.tsx",
+    "sha256": "3FD5F679370878ADE430533873D396C488F5D2D92C43853EE9156510BCA1C311"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\manufacturer-combobox.tsx",
+    "sha256": "D00042BA4C14D79B342C39C572593015C3AABA482E72595C8CA2386F7B5E3F0A"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\map-dialog.tsx",
+    "sha256": "85F2A01BDA6CDCED7762FADD2EDE8520DDC6F126F3BAD931BE1349C3E1A156A4"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\max-discount-input.tsx",
+    "sha256": "6298B7A20AB2BAC00C824974CA6A391001E0DCCC63D0CC899B66E7534E3EB704"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\multi-select.tsx",
+    "sha256": "DBEE6968B60D2BF58E60799D63CD77246AD55BC59056A8D6D46012B6486EB9CE"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\name-input.tsx",
+    "sha256": "4F139EF1E380D475588147AAF1AE2696CAD5D17F6A6BDC6AAAF3CE751C13A7DB"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\notes-input.tsx",
+    "sha256": "CCA3116E114DA36161AA153E6EBFCF5FF672CAE94FD20FD9AAD30192615E4A02"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\online-indicator.tsx",
+    "sha256": "A6934BF4DDA4471CCE8DDE7A95F43EF40ADCD07E4DABC4A74A9F297F4B9A5638"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\open-in-new-tab-button.tsx",
+    "sha256": "37C13E3B7281A6E8967D3D1148335EB2FAB22E23078FA89D2159D26367E2C1DC"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\password-input.tsx",
+    "sha256": "C7730EC85ADE12FD7472A15F5B854ABCCBC6E9776E44557D20948EAD60B8F26E"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\percent-input.tsx",
+    "sha256": "75216F51CF4A3F21942E617B1BB9773EB6C81C2C986B33C6CBFAF39574605E18"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\phone-number-input.tsx",
+    "sha256": "EAAA258BA2B7578100AFDEB5BE276C50C3B5449C1EBBD6EC7C3C91A61CE11CA8"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\place-autocomplete.tsx",
+    "sha256": "48F4F659CFA9E0C04BA41364F7D9F52018D6B5B207EA4294CEC43A4E6EE5BDBE"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\popover.tsx",
+    "sha256": "5D69B396A11915ECE62D1647997BA5DD98026C2D9919C097979DD318491E771E"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\position-input.tsx",
+    "sha256": "DE4656F48341F7DDEE7B90CA690C0F6C20792C6E4CED70C711A1CC8C412871A9"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\postcode-input.tsx",
+    "sha256": "758001DB38901724F2A9434C482AB916990A85BA0D7CB3869FA1ACB0589E837F"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\price-input.tsx",
+    "sha256": "06E41522DA5EC31C14794446021C3EB5D02E88C36CDD48F7ADFEBD70FE3376B0"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\progress.tsx",
+    "sha256": "8C036DA4BAED076DE68D27719929DC98151A81B51456BFA6A2488D835303B1D7"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\quantity-input.tsx",
+    "sha256": "14F88490D3DD513C9A0EFFCB4FDC9D522300AD935382754F87EB0849B25C5303"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\radio-group.tsx",
+    "sha256": "4E0515412CAD83083F8B13E0F8F6BBDD4DD74D4156601F969A353A822DE66A50"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\realtime-field.tsx",
+    "sha256": "BAE0E3B0F8FEC5A2A6D978FBF4FD30614A8AF31289F16442BDDE3BDF55951878"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\scroll-area.tsx",
+    "sha256": "0827348260A534EFC4A4D236CAD6E73933E17BD642C55AD4F1170E75DFECBC1D"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\search-input.tsx",
+    "sha256": "FBEA39C3810E1205ACE807B622553CC1D7ECC944CBA99F4509CFB4C99E636451"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\select.tsx",
+    "sha256": "CDFB3E096EA3A0432258EF33CD5A6429161C6A3E621F20819CECBB2B0F169C0B"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\separator.tsx",
+    "sha256": "D2DEC642AFE71C74E76F2F3EE8A2A30FDE5743EF7C5D1C30EE21D4EC23D574E8"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\serialised-select.tsx",
+    "sha256": "F1F4F6D8BD2F00454A3EE0ED7A25463E679BAC5DB8A6769CE966A3004DF10D82"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\settings-page-header.tsx",
+    "sha256": "640C2A3FCF928C53881005212F39009347A4BA6D95A209788F20CEBA06BCB3FA"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\sheet.tsx",
+    "sha256": "5738C1BACCACEB6C7BC6A69F10AA17E3B479CDAD2E168F13892E107BCE5F94A2"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\show-more-button.tsx",
+    "sha256": "EAE7FEE91AD344237BA12757E528F156BC0A81D7F73725BA6CCCEC79FD544AB2"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\sidebar.tsx",
+    "sha256": "17785B3E251BDFFB732514C1F025AFE74336A9ADD0EF2B105C08B4D894E5B302"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\simple-modal.tsx",
+    "sha256": "1C1E8B4B2A238C6D60631A1257C76B6892EF5096D19D0CCB382504C46E57A335"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\skeleton-loaders.tsx",
+    "sha256": "48B6CC951ED4B17C62EFE809F8E54CF4E722E3D073F81509A2C4E1C8436AFC8F"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\skeleton.tsx",
+    "sha256": "467228E064D96C368310FA16F4E97B6CE697940FFA3FF55FC804BBA4BBDB6095"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\sort-menu.tsx",
+    "sha256": "B6769B0C4B8713AB2385E3C981CFCF49E0FC6163CE7656BF19B7166050D9975A"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\state-input.tsx",
+    "sha256": "4B9CE06EC04EDEACFD686AD5068FBE835F5B29E0CBEB786B518D728118F84A7F"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\status-pulse-dot.tsx",
+    "sha256": "5C3C095BBB45DD76C3627D94C96AF89D3C4EA2D9EEAB66481BDDA6C8EBDB0DC2"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\street-input.tsx",
+    "sha256": "399F0BFCCE29396B57927A054E1C9EEA39E1992707A9E30CE8BAEE3EE8555E2C"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\suburb-input.tsx",
+    "sha256": "0048F01842BAE6EFE7D7B17F2F7DDA7FE6F2586190518ECFC4FD5F091AE8365A"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\switch.tsx",
+    "sha256": "56D55F2600414C5B9E57A802D8E4D854C0079AAE2E88A31BFAF9DE170ADD4743"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\table-action-toolbar.tsx",
+    "sha256": "A0CB16D5A754AAF6A69B6711625E08222ED48455C15665AC1B49399044EFF41B"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\table-cell-input.tsx",
+    "sha256": "1392B9D3AA3275F6D616169C169FFFD71F406E97C8D21FE49AF1AB3C874D8213"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\table-header-filter.tsx",
+    "sha256": "611FF985BD45002AC1BCB9B246D9ECE8DB256632E9137D568D8C08E8C96CDFAE"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\table-sort-button.tsx",
+    "sha256": "2C9173C77995A6ACE14C9FF6D8CEC78D0170A9A195D047F978D0575A7217C9DE"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\table.tsx",
+    "sha256": "5F4AE90F9968D7EFB340898B3676B20458EAD88B68B4A434B1C55D287781FC69"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\tabs.tsx",
+    "sha256": "55B0A17EA4C1A41D00E8EEEA68CFE7391F242CFDABF9B1EF10C8DD26A4E9C288"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\textarea.tsx",
+    "sha256": "0E9C162C8F568B6D0A83CC94D9CE04FE89B438655EE208CE6EA90E15275EB791"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\time-picker.tsx",
+    "sha256": "62823210C58E97F0EB79290D39E147A9AF288397C12CE9D7724C5CAF70103D82"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\toast.tsx",
+    "sha256": "4D8E5FE154EF912CEE8AA0CB709A2E569632514450B9715FEE60933C6BD83A0C"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\toaster.tsx",
+    "sha256": "8D358FB5A3411C29E842C8AEE0BA68C0C85A9B1DCF080DBA6555FCF17165EBC3"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\tooltip.tsx",
+    "sha256": "AAC19DF3A138C5766DD91A0EC9278896C85D4D9724B2160E1C2EB96F921D52AA"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\unit-aware-inputs.tsx",
+    "sha256": "B1666CB4EB99DF769E548518C4E12316B5958B63B54FE4487D3EDF093829700F"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\unit-number-input.tsx",
+    "sha256": "25163A6704447DB40F7E579AEC8E3D3C05380D97C338A2D4C36B27AB15E723BC"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\vehicle-select.tsx",
+    "sha256": "CBD73A8E8B8730E3F76A9A6C85D4DFF32765419152876ABF5C8334ABA13630C7"
+  },
+  {
+    "path": "kuro-web\\src\\components\\ui\\website-input.tsx",
+    "sha256": "9D3A8985F2E10DA36CB0C894DAB5CF4AD03BF23F263BE6F8D8751FE2219105BE"
+  },
+  {
+    "path": "kuro-web\\src\\context\\action-bar-context.tsx",
+    "sha256": "9AC63132585D3CCA648BA2167FA250EDCFAB8993A6ECB7EB4C1FF0E97B8A3AD5"
+  },
+  {
+    "path": "kuro-web\\src\\context\\dialog-context.tsx",
+    "sha256": "1723F6A0106DE6D3E6377951E82C0DB7CB5B1D8AC2B4620A927522C38C63F80D"
+  },
+  {
+    "path": "kuro-web\\src\\context\\google-maps-context.tsx",
+    "sha256": "96911C5A4DB4A16386B515E8E9FB119A7804F31375E52AD32ED04D96ADD11736"
+  },
+  {
+    "path": "kuro-web\\src\\context\\providers.tsx",
+    "sha256": "C2D2C24294B1C297974558BF1CDFF7FF1085BAAC179C5AF21067298797FDAEBE"
+  },
+  {
+    "path": "kuro-web\\src\\context\\sidebar-context.tsx",
+    "sha256": "F453B4D6B15C18ABA0DB15F8BDFA7700E6FF7832B23126A1B8F10E40F60830B1"
+  },
+  {
+    "path": "kuro-web\\src\\context\\tab-context.tsx",
+    "sha256": "EB48EEA7E693310A8E98DD903AA20AAB3E39B9B8587D7E0FD04F3FA9561B6E2F"
+  },
+  {
+    "path": "kuro-web\\src\\context\\ui-state-context.tsx",
+    "sha256": "68209B5BD568DBD8A057BBA0AE09704FE42E911A51D06AE6BAA603B387493197"
+  },
+  {
+    "path": "kuro-web\\src\\context\\user-context.tsx",
+    "sha256": "AFE2295A19AEA11E029C74F7E4F93B0A62C633BC4109DA74725D31DEA2C7869F"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\__tests__\\use-availability.test.ts",
+    "sha256": "50D609AFB286148F45B82B1A3D07DB20DECAB9E640200C5288F8EC3AD9AE1A70"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\__tests__\\use-connection-status.test.ts",
+    "sha256": "4362D3D0B8C30A60C5FE6AFAA72DD00D6B560C421B4C0FD070375C8D25DD91E7"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\__tests__\\use-realtime-location-history.test.ts",
+    "sha256": "928ACBE4615D1CB8EF20FDDF10CD1F0C8A7D7F8FF1053DC9D5A5A9DB5827737C"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-active-tab-broadcaster.ts",
+    "sha256": "9AB29A944E0A571CDD85898AE304DBD3F36F7BDEB176A1FC70B1473053F36F67"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-auto-save.ts",
+    "sha256": "D839FEE793576073C9D0F3746B1D1CCE26A3027C6A437E0FC58CD7ECE7E05F51"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-availability.ts",
+    "sha256": "46EE0690D4E2BD5845FB2A7A80449DBF4B00DEB3583FE229FAD50CE99FFD42F2"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-chat.ts",
+    "sha256": "E3D532488FEBF637D33730B9661B0C4C73B79EAC247DCBCDAAF964EF66CE7ADD"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-connection-status.ts",
+    "sha256": "C70D1D3F39A8BCEBFC35DE06E6B3A6B97E1FCEF1E71A843DB99C000AAC548F4D"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-crud-state.ts",
+    "sha256": "564F62BA427F710FDAC7CFBE88D58C09F649A8EE53A3C409C5E523ACABAB3110"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-documents.ts",
+    "sha256": "AC53B3BD502A5ABE50D37B8F6144CEB64B741C44B8B05DC790266610BCB2D663"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-logistics-calendar.ts",
+    "sha256": "CB2568D4429A909E137870F2E0094BC4DFBCBA3CDA3495567C4C272F21C79E9A"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-mobile.tsx",
+    "sha256": "D2377FBAD5AD2BDF7FA896A68C36AC8BF4AA74A974B2061F77B41AE58D623001"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-presence-list.ts",
+    "sha256": "3CA2245C25EC0BD5B7810A434BBDE31BC691CA697A6D7CED25DB526C1D9618AC"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-presence.ts",
+    "sha256": "ADFA7BFBD57C04D88D4B9407D4CDB53E766C3CEDCC91F35A1B0FA4FD7CD04464"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-contact.ts",
+    "sha256": "8D71E6BF4C7F253EC7D950FC48C91F02605E3EC0D65325E24D7E6A1C89EBDC85"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-data.ts",
+    "sha256": "FC2773821A733F84EB1FBD50C798C0A5A40B292FE3A32D0244996F5E3C057425"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-dispatch-entry.ts",
+    "sha256": "CA698580841D9190B6B0ABC7591AEE17B7C1E9665B829CF83C85FB9C5CA58FC6"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-document.ts",
+    "sha256": "448D4A2E5F0E6BC62481CF6FD5F26006DA82CC1705F5D3E8288E6442011581D0"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-equipment-items.ts",
+    "sha256": "2DD32EF615B9C78B4385A5539BB89959D5520A701F9AB8BB44D5670A8F4C29BC"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-event.ts",
+    "sha256": "8AD6E722744E4ADE0500190540B7E349B3736D1EE54BC5187A29C8D2671C8C0F"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-inventory-item.ts",
+    "sha256": "F4AF1EF45CC295BD90D2821488D8F5C381999B54D9BFB27D73A91320107C9710"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-location-history.ts",
+    "sha256": "CDB9A24F9B6ED86DAEA28BCD44B6A2AFB432B7675DE7E81470DE0C9577D1A672"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-logistics-entry.ts",
+    "sha256": "82E990B64166BB7D40E476CE6235C1EE41310D0B18D454CD4B924BFAF4902690"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-repair-ticket.ts",
+    "sha256": "53CADCF2DDE98A8BDAC29AB55702957AA72F6BCC193D71180ECF113902FD8F96"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-realtime-user.ts",
+    "sha256": "AB3654203938CF0D66ADCF6370480418E0E38DA5C8FBBE585640F6E0B4AE91D6"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-settings.ts",
+    "sha256": "78344FBD050567F7F1050B1B11FBC2FE96614BE4970E14671AF62E41E09AC33F"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-tab-collaborators.ts",
+    "sha256": "03E8E0D659C5AB22A0E129F92C89B477B37D12F33867A42DE2E3CDFB9E907B02"
+  },
+  {
+    "path": "kuro-web\\src\\hooks\\use-toast.ts",
+    "sha256": "3ACCEADD9737FF51DD09521C5C2933B972367B35FEF0EF7DFE84F925833A75C1"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\__tests__\\avatar-utils.test.ts",
+    "sha256": "ED554E360F1BFFBD34CD262947F06AB584CCA3F8AD026B4310A8B2FB9BE9D956"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\__tests__\\challenger-flex-m1.test.ts",
+    "sha256": "FCA1ABF2DFD27B6255C0898C6FB9D33B79DE481CEB5551A40C65D4729CC103D7"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\__tests__\\flex-mappers.test.ts",
+    "sha256": "3145EAC702C71A85BF9A9B2E6E3115E96C8B94FA26FF4E5B24F41FD2EEAEF8A4"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\__tests__\\flex-transport-adversarial.test.ts",
+    "sha256": "BA38EB526064BA5A06FB76C45B8931BAFB2FFB17608A9468A440DA5F31AADE85"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\__tests__\\flex.test.ts",
+    "sha256": "0E4AE931063FA3EA055AE30C96081B8D8066196DCEF8CE9B79DD93E29F754C59"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\ai-worker.ts",
+    "sha256": "0A05DCE89293703EFB7B75199A118C42E8EEF53D31660831A332F5D7F739F871"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\analytics.ts",
+    "sha256": "69C9DC5880917E6B1240EF3F8AD8B8CEC5CE40699081DEB5548DFA2622C6EC5A"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\avatar-utils.ts",
+    "sha256": "6FA94A78E81FA80F1AA65F149D0E5BBB0F5DBED8D6FC2DD6BD1F2F90E9E436E6"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\countries.ts",
+    "sha256": "ED9EA4DA57F58FD5BC1AA700A43AF677F0FC0A51EAFD0EC166145A67C97F788E"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\csv-parser.ts",
+    "sha256": "AE881DB5193B2E41EE8022ED338DF77A89CF2A8A81F5E8F9B3F0A71D3F750D8D"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\definitions.ts",
+    "sha256": "939604888998698FEE45A0BF89933F3E0C38BC7715C5D3C403A27BEFD8273F4C"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\firebase-admin.ts",
+    "sha256": "1CD703E26BE666B6DDD43912444C2E0CD794620FE7AFA3B51986E051CAA1F0FA"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\firebase.ts",
+    "sha256": "8962588A9DFDDE85979D6FC37AC5DF6FD462D6A9999C5A39CDB60B5849610D78"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\flex-mappers.ts",
+    "sha256": "44CCCDD2A9491571D492FFD4A1292DDF906A0482D38312566C99626AEE92DB71"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\flex.ts",
+    "sha256": "25088ECD361B26B62205C59B3EF1E0A20ADA016AC15E5C319404A9C1493FF2E5"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\fuzzy-match.ts",
+    "sha256": "517C168AB94991ECC8E8DE0EF8A160D5717C22A01C351D9A88937535BAEB8413"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\image-utils.ts",
+    "sha256": "624864A30DF7A590CBE9D5E288F4730EDE24AEE0D68A63FA0C72DAD0494EAE6C"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\nav-config.ts",
+    "sha256": "FD4A11D628716ADBB2759EAF7A8B8354E4CB32896593F4CA8892125D8ED71623"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\pricing-engine.ts",
+    "sha256": "F52503D60ED71C76AAC2947CB303AD063F986D62798DB0EE32E5554123597085"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\rentman-repairs.ts",
+    "sha256": "3F0B8017DE8A9875A17287F23B7F007CB8BFD19F80EB82296621DEDBE5C9EFD5"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\rentman.ts",
+    "sha256": "7929EFC2947E244AF1196474D3491E9C79F3777679524025999EA1556A56211F"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\route-service.ts",
+    "sha256": "0939887B56DDD403F460522390A106149D3F7751BFCA138CF6ECF86220D6869B"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\search-utils.ts",
+    "sha256": "05B0670D01AD051BB80FDAC7F8B0953B47A312D454BE6C9EA2225BD4BF5AA979"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\storage.ts",
+    "sha256": "6853A9A828A4B9D6CF40017C6E4F741FC942D25A6A4267E3E8816D1AC93974F5"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\units.ts",
+    "sha256": "828B8090B35F72E84ADFAA8095D14F3E282642F3D5104B16106D850FC0F063B9"
+  },
+  {
+    "path": "kuro-web\\src\\lib\\utils.ts",
+    "sha256": "F34EBA755B185F9C06C44019F9DC374B765565BB7C8BED9C6CB00FB0503C7E5E"
+  },
+  {
+    "path": "kuro-web\\src\\store\\data-store.ts",
+    "sha256": "CF09037DB188A2B1344E8C2D35C75533A00E115B200F6723FB4F0216A8D2E914"
+  },
+  {
+    "path": "kuro-web\\storage.rules",
+    "sha256": "A189ED51724D252AD6C8D0C30B7B0EF0D07807CF157C49726DDFD37CDE433C01"
+  },
+  {
+    "path": "kuro-web\\tailwind.config.ts",
+    "sha256": "CFB3F156373750E222DAFD3CC1B7DDAB60D1B7E5EE341D976C5AF15314581074"
+  },
+  {
+    "path": "kuro-web\\TEST_INFRA.md",
+    "sha256": "07F5A9E90E9607E9E57B1B5937C2826FF2BD969506D5C0C0459CCCFD494F6160"
+  },
+  {
+    "path": "kuro-web\\TEST_READY.md",
+    "sha256": "184641402245DB318638AC5B9EE3713DEF9870D08B7BD5F397EB14A0567C6806"
+  },
+  {
+    "path": "kuro-web\\test-results\\.last-run.json",
+    "sha256": "91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903"
+  },
+  {
+    "path": "kuro-web\\tsconfig.json",
+    "sha256": "AD5286875D6909D6F632CA01361781A256A3BF75798E6CCC78ADDEBC53C32ECA"
+  },
+  {
+    "path": "kuro-web\\vitest.config.ts",
+    "sha256": "CEF329742298C2DE8D12D4F764A5BD2387E64A7BCB84EE887C5102E6B8EEA692"
+  }
+]

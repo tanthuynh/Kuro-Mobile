@@ -429,7 +429,7 @@ describe('M1 Adversarial & Stress Testing: Offline Persistence & Mutations', () 
 
       let caught: any = null;
       try {
-        await updateLogisticsStatus('job-nonexistent-404', 'in_progress', {
+        await updateLogisticsStatus('job-nonexistent-404', 'In Progress', {
           tenantId,
         });
       } catch (err) {

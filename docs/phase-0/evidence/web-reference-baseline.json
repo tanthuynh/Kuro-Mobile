@@ -1,0 +1,3194 @@
+[
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\.firebaserc",
+    "sha256": "E25AC699D66386233027B6C7579A3E7C9A206EC4C470DC1EC1B6A84473228D67"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\.gitignore",
+    "sha256": "E351E7A73A1D892422EB3AAE3BBCA6BC23CF8DB4EA717073913C68BEB7AF5224"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\.idx\\dev.nix",
+    "sha256": "6BB4C9BBF55BFB28958A35AC79BD68675CF032E0EFCB69409AACEF07A13A4DEB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\.idx\\icon.png",
+    "sha256": "EC2E9CF39C8F7F44E224516FF3B4865816572E6B24939CCA94B545CD7C5092F6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\.vscode\\settings.json",
+    "sha256": "92A0CF3D01561EF047C7D09A41EB9DF0DC60645927827B86C93526FD8D9E9B82"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\apphosting.yaml",
+    "sha256": "8446F7AD43BE7BB4CB1E36CA0D2B20476627F8AC5DA90928ADB8BDBB43801034"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\components.json",
+    "sha256": "30D320AC4AA3698FF061D6A98D5EC133B3E09652C33E2AC6E17F99C86C822DFF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\contact_dump.json",
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\contact_full.json",
+    "sha256": "34C51F0445E7E4B8D8CD84F840F1DC69CF8993D0B4CECA8C92A4D8B87CAC0600"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\database.rules.json",
+    "sha256": "90F326A56B6275BAC1805F1C87D151B720747C020B0CC886862F5FBD74F9C392"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\diff.patch",
+    "sha256": "0271DC2940D7E84D81905F5D02A7E91658C36832CA973CE384CAF8269197E3D5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\docs\\blueprint.md",
+    "sha256": "404B5EFC9DEDDEF68796E00A6BE320A972FF0501EBF663E0856A5717347F6BA8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\e2e\\01-navigation-settings.spec.ts",
+    "sha256": "0DCA02F9D09A5F0047FAC6EA5ED41D811D9709075D172FF6C6B2A7BD228DCB10"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\e2e\\02-services-management.spec.ts",
+    "sha256": "C7F0714D930EBA26B54812504B363997DE6AC244D2EB9B8E4F765985155F159E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\e2e\\03-quote-table-interactions.spec.ts",
+    "sha256": "A7150F1B762A07FFEF8BE308C35D899BDF00F0BEB6B53FCFB332EA40D3822AE2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\e2e\\04-pullsheet-workflow.spec.ts",
+    "sha256": "09039356924EA70FA064DA7C5B60863EFA4B384BAC463923845E14E354C664CA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\e2e\\05-dialogs-and-error-recovery.spec.ts",
+    "sha256": "67CA77A3DE452A0A2F804F2FE382668D17FD555AB71188A0324E643E167A355B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\firebase.json",
+    "sha256": "969E4A1C21D41DE0F273F8580B0B3E3AE8E920D56CE6F765921BA15973020E65"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\firestore.rules",
+    "sha256": "F9A2A545D992F5E6C45506A6F43457D2EAAF4F1A28B3B0F61C43120010E3D027"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\package.json",
+    "sha256": "F3D41C76FF6C73492A5DA0681F68D40A1D9757482355845453B77B7C553B0B9A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\__tests__\\adversarial-coverage.spec.ts",
+    "sha256": "62FE9C35A8C895C9DE560A1F94588701C0E27B00146A396C52400B0FF9673E1A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\__tests__\\adversarial.spec.ts",
+    "sha256": "E5AC1E14E179C01FBA981D5A7464E973231628E8D59F9AC36133162DFF968801"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\__tests__\\bootstrap.spec.ts",
+    "sha256": "26BE3204F42CBFFA1BA90C7949B0819BAB1E1F52DCFF8E82983F539C6F835BDF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\__tests__\\helpers\\mock-firebase.ts",
+    "sha256": "A9A83FCAF1FA707E5CCCCCB9AD1FD0F1381A6D57D290B843F75CFCFE5A18B595"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\__tests__\\lookupAuthTenantId.spec.ts",
+    "sha256": "2E63138EE1759CC5C9040A13F33B863C094306094C7E66479CA127E84EC5FA75"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\__tests__\\mobile-client.spec.ts",
+    "sha256": "A975B4A4B9B7DBF7EAE110B6CD1817B6A6F79FD515BD1F615F3983C0F86E9CA4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\firebase-admin.ts",
+    "sha256": "5EB9523769852B462BAD1F665BEA6E5A3070DFFC5271A0137420BBD5075DDC18"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\index.ts",
+    "sha256": "7532B8ABBE5E33B12FDF5D58E9280F72D30BB4DA142A24DC78CC640D1688C9B8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\lookupAuthTenantId.ts",
+    "sha256": "417EAC2960A1A9CA79DCD1A9228317D8D5838A3156A420062E2B07F197A1F0A5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\src\\mobile-client.ts",
+    "sha256": "B13AC216C465ABCD52FE4C5E9558F9763E64E58582AB79198811E031FB7858C7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\tsconfig.json",
+    "sha256": "398FED468A8CC5F69419FD1EE510F3C879FCE46766C6FC8F3B2290BF0D1741FE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\functions\\vitest.config.ts",
+    "sha256": "B6F9C3B02C38D0308111AFA50D66FE258BF60EC137CD777CA6A17B1EDDD1E4F6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\GEMINI.md",
+    "sha256": "9916D632D4D29615DBA3F4A7D1ABB06BEC5FA050B050E5D1C748992486761661"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\inventory_mapping_plan.md",
+    "sha256": "79A01E0AD2FDFCC896A1FF2304D03E4AAB90F291C5E6391CD260E695CD1B7416"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\next.config.js",
+    "sha256": "27D51B8A7295789A1E8D2201425D5D22F907B34A6B1534D194FAA80EBB77B4F6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\ORIGINAL_REQUEST.md",
+    "sha256": "BBCD52C336CBD571EB5F4B52FE0B80E32970AACD703C6D3B7EE36DDBCD9ACB48"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\package.json",
+    "sha256": "22A2164593BD8C686DDBA5ECE4C38301971F3F79AC4BE15C5A455B751DCEA078"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\playwright-report\\index.html",
+    "sha256": "CDCFF65A292ADB1B7E89BFAED4EADBE22DDD9DC64B6C410AC3CDA9D5E755848B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\playwright.config.ts",
+    "sha256": "30FE89C8D91088B8A4630E44D1122B73DDD5ABC82BF16AF62077B4C737622AE4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\postcss.config.mjs",
+    "sha256": "D54ACBE4C9478034B3795ECA94DE59E1FE0298198E4FDC9D40AFFFDE9C1DA3BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\PROJECT.md",
+    "sha256": "7C088FAE54922F5CA14DF3A5D0C0727AB8BFED8B3EB9E00DC559F3CCF70281EE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\README.md",
+    "sha256": "23F5A64E975E18AFE8FCA9F27F07C5D2338B1381578E1F84EE3B1AF7D0C76BA9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\adversarial_harness.ts",
+    "sha256": "EA3CF7E8C890ED214166CC0488F9FA36E3098FF6FA00E4BE51734FA2F235FF06"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\challenger_verifier.ts",
+    "sha256": "AB7E59683814E90AE21DC863B96480CA1AF1C631497E0909AFB778E48C2FAB6C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\contacts_mapped.json",
+    "sha256": "D570E1E0C1C2584C4F2CEDBEAA5C541CA9AA2C93891F7ADB14571674DA75D9BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\events_mapped.json",
+    "sha256": "62727D8B9744C663FE367A837B17BD1A25A6BC254C9D57B95F720A2D19B467AB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\extract_and_map.ts",
+    "sha256": "31B321617DCD3C170FA5FD5A4042D28F76D6CDB0980D57737174CC7A126270EA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\file-writer.ts",
+    "sha256": "96EABF8A6F871A3B92E82F4D903B5311362E52164DF7F486E2ABDA96DF1B373A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\flex_kuro_data_map.md",
+    "sha256": "E1EC4F1761F95221013EBE50F0AF22770C00D793D4C394174BD889C6D3A6B40B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\flex-client.ts",
+    "sha256": "6D5CBCA11AD8987FFE4F4EEA18F132FFD1A949AD94E0F4603C6A31B89D6EF867"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\flex-sample-data.ts",
+    "sha256": "72980EB2D8BBB6A6C6F365A438C764A46469C78AFD15D2CD2403D41F2568D1C4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\inventory_mapped.json",
+    "sha256": "951CCFCFFC9209A51DCC69F1CB8F9965213859617C8604488DCDDE3A66A5F6F5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\mappers.ts",
+    "sha256": "CA1ABE893F8DA35824AB0A250A7BDBD9AB020E1A24DDFF09404DC832A2C247DF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\test_out_dir\\contacts_mapped.json",
+    "sha256": "15105D6B4E921BEE79945DC3ABFD9D5A2760124E1E57507076A81F140F2B6387"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\test_out_dir\\events_mapped.json",
+    "sha256": "4DB5390B83A8D2371EEDA56667E79924927D0EB6194E8F5965A4BBB7F1148195"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\test_out_dir\\inventory_mapped.json",
+    "sha256": "9B6926DA823A95A5AB20646FB0E65EC3FFB1E8B09E346E755E90B5C006707103"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scratch\\flex_migration_discovery\\validators.ts",
+    "sha256": "A6771AB36913D24B667180DDCA9899EDDDCFDA90A9F1196CD40FA0002A24A493"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\__tests__\\migrate-priorities.test.ts",
+    "sha256": "AF2E3A9D408B4216F003352522F1CBB6E67C88344F4781D1FA6949E0763CF8A6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\cleanup-websites.js",
+    "sha256": "B9314B79EA1E4C9509C4732FC889E12BCBDE4F6C4FC85577C08E981775697E6F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\migrate-make.js",
+    "sha256": "6418E23B5AAD938F0EE1FD6F38336915AF862F8DC0BDCF03F4AE93F700DD8F1C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\migrate-priorities.ts",
+    "sha256": "88E66CEAAD2EB7B2DB56106A6B1E5A1DF12F0EAA4B2594E172B53AE0E25F2F99"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\migrate-user-avatars.ts",
+    "sha256": "39A03ACC20C5DAE1026D53FD9A147F9CBEA1D9BB6C718DBD4326DDFC826E2299"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\rebuild-ledger.js",
+    "sha256": "9AFF7D5CBF92D1962E70A186B9A15EB1E41FB14E9EE69479F6005EF9B1D540A5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\rebuild-ledger.ts",
+    "sha256": "9B2DF4EC862C88FEA6A77EA140B55C1CC0F603380E3DFA9288F0243CB568B0E9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\temp-m4-challenger.test.ts",
+    "sha256": "E1DF786871E8FDCD40CFE4E8C87E890E02D1878875AFB6D8A508583C308EF94F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\scripts\\test-eh-api.ts",
+    "sha256": "19F9D9E57475AB12DE8CBE69C8D690E12FA166C7DB6C2771EB42C4FADAC977F9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\__tests__\\challenger-status-migration-empirical-stress.test.ts",
+    "sha256": "1CF6FAF381BEAAEF399EF02EE212AF3A8876ECCF5F3F220EC938DE3235DDF566"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\__tests__\\m2-challenger-empirical-stress.test.ts",
+    "sha256": "3CA46D38A4166D163E8071326C84472064E565AAB643ACFBAFBE303BCC5AE536"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\__tests__\\m2-challenger2-stress.test.ts",
+    "sha256": "F088929200554D4FC573C808DFF59240705FD5C908BF2120875E5A69EBD0F7BD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\__tests__\\m2-detail-pages-logging.test.ts",
+    "sha256": "E1A961528ED9C03F070621936BC6902A3C3046B54C2BAC62E3280F48C72CCD9D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\invoice\\[token]\\components\\invoice-not-found.tsx",
+    "sha256": "A303A733788AA91D1DEE7B3EE9ED763517E063D72C87061CC7488BAA659F2A3B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\invoice\\[token]\\components\\invoice-pdf-viewer.tsx",
+    "sha256": "7C3854A48BF92EC35CCB789BAC23A6D00A33F14D5BDDF6A30431AF2C8EDC0281"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\invoice\\[token]\\components\\invoice-status-views.tsx",
+    "sha256": "6912ADF85DE3BE202DC2664053F36D214E5D5771B15FAD3E699C3624DFEB8DBB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\invoice\\[token]\\components\\public-invoice-portal.tsx",
+    "sha256": "0FD5B63689F159B416101F06E50C9D4ECE8143BCE0A158CB57D3A89E8BAE3367"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\invoice\\[token]\\components\\stripe-payment-card.tsx",
+    "sha256": "8603CFDD34110125A58B613EA1BDE9DC86BC89E96A303C8EDD5F6F7FC58D7B48"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\invoice\\[token]\\page.tsx",
+    "sha256": "A1B0B41792B6BA0F4549EAD6B6AEF59D2E2DB51696A719CB3F2CC6DA41692BAE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\quote\\__tests__\\public-quote-flow.test.ts",
+    "sha256": "3798A2DBD8C75C8E7B0C3759280EAF27A45ECD173959A2EA95357186F0077A0A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\quote\\[token]\\components\\decline-quote-card.tsx",
+    "sha256": "E70717CBB31B57BAD6D033848D7B056FEE4B7C4472251A088878334D54B2A651"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\quote\\[token]\\components\\public-quote-portal.tsx",
+    "sha256": "BFE93D92276B646E3E2261A4D2F4006D7126C1A64CF643F47E7DC811D70CC988"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\quote\\[token]\\components\\quote-not-found.tsx",
+    "sha256": "A14FA8C773D7560D363B56A8F7187098FBAB0A06993267EBC43475887EBD2C99"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\quote\\[token]\\components\\quote-pdf-viewer.tsx",
+    "sha256": "C4886ECD114C9E7CF23B73EBB9FBDB9AB79C2332C68968F402FFBA4151F8C79E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\quote\\[token]\\components\\quote-status-views.tsx",
+    "sha256": "273BAFBCD4B4BBE9569F15E72543208C342979DA4C2FBF9BFCF5BDEBDF4E6FF3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\quote\\[token]\\components\\signature-capture-card.tsx",
+    "sha256": "7B8ADD1DEEA0EF98C2944FF2B343DC20EFFB38BB96DE3687B0000E11C310E832"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\[slug]\\quote\\[token]\\page.tsx",
+    "sha256": "03F77E5B1C5E88EA7DE6D97D637CDFFEE1539727CD33F4680808D9788AF55515"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\__tests__\\challenger-m2-2-admin-empirical-stress.test.ts",
+    "sha256": "239F3137853EDF42315430ADA411AB2342FCF9F0F823BB42AE2A7E2EC7596B1F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\change-logs\\actions.ts",
+    "sha256": "E236405A20D84BE45BB16D1BA2622BEBF5DDC44BEF281D8904FD0B1ADEBA7CA5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\change-logs\\components\\change-logs-table.tsx",
+    "sha256": "0FA083A402B398C04E52A98EDE6C1AA9CF1A02F34497928C83089A8A3762EE0F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\change-logs\\data.ts",
+    "sha256": "89E5D89626C8205A89AAAFFCD6EBED1988A54218E7A7210A00AEDA96BEAC43A1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\change-logs\\page.tsx",
+    "sha256": "14AD350116F1DD612A049FDDBD9811823D0F963E778966E904F126A81508A109"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\components\\settings-nav.tsx",
+    "sha256": "4E5378370B614F7538C33925C9843D528E84426C03B1862D13521109E8C13E4E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\db-maintenance\\actions.ts",
+    "sha256": "0AFE349FBEA3B1293FF07404DA43576E115D55DAE9DE00D67B629D3FAE01C8BE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\db-maintenance\\page.tsx",
+    "sha256": "3C1E42A9C2957FD0C9733A93E6098719C71526C210EDF910764888C1B7F20072"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\document-templates\\actions.ts",
+    "sha256": "BB967296BC0ADDC97169DA664A9B5B152141F768737A765A1283CDB5FA1F1AB9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\document-templates\\page.tsx",
+    "sha256": "89414BD0B3939380582CC5F669880D46764AAFF0D0934FA1CC53DAC005707C56"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\email-templates\\actions.ts",
+    "sha256": "D6C5532EFE56BA72E9E97F558A4C27D7EFC7999BB0FFF388176CFC8EC12818A6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\email-templates\\page.tsx",
+    "sha256": "21F2E16164981EB6504D8B699489C8815635D1814BB482352A9C200256AA72C6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\email\\actions.ts",
+    "sha256": "812E7F710F3A79187C0B8B0B39BC5622F2F98A3EFB2507AE39564923A71C2D70"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\email\\page.tsx",
+    "sha256": "790D05400A148E3BF55750727C376C082BD79DB180510B0C4CA687CFC2C8C82F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\find-global-inventory\\actions.ts",
+    "sha256": "71377F5F35443457E4B789973837B123A1CF606C388F526B8AF97257E83A5F71"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\find-global-inventory\\components\\find-global-inventory-table.tsx",
+    "sha256": "1A42287A9C0D0F40FC3338B0ADC7551735B667E15A4271E767319957FC5D9422"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\find-global-inventory\\data.ts",
+    "sha256": "836BD43E3A0A88AC8BAA3227C52AD4E1A9D64F11B065CC331EF7F1187A7668B0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\find-global-inventory\\page.tsx",
+    "sha256": "B79637A25592C09C5336F6F82DBD1022A4872575109127301B94F39C61262D9D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-inventory\\actions.ts",
+    "sha256": "35DDEE225727BBD8E8E53AA12C7DFF506A7956B5A0A21526218C01C91EDBB545"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-inventory\\components\\global-inventory-item-editor.tsx",
+    "sha256": "372F47A179C5600D38E6FF795501D5A068FC9407297852BC912E29D8F93DCC81"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-inventory\\components\\global-inventory-table.tsx",
+    "sha256": "2E28827D3AD00F766B54D459C83899E5471BF2546232CA565433345F6D02DDD8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-inventory\\data.ts",
+    "sha256": "9D4681BE34EDCBBB9ECF48857BAA4024CADE69A7F2E771EFA6E2A075F42A5A9D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-inventory\\definitions.ts",
+    "sha256": "5D60468FCE99697EAAFFD3C7F18B947B9C082E3EF82357853387E8259F5CE029"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-inventory\\page.tsx",
+    "sha256": "4798A24A9A6AC28A10DC07763989D8BB80EFFB17DCEBC82CC0406E172D4AFD0C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-inventory\\schemas.ts",
+    "sha256": "4A27D01C537367A5592CB85B922C4CEA99DD3C40AF7D25BBA455717875838690"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-manufacturers\\actions.ts",
+    "sha256": "E1A989989AD897EEC582F20087BDF15A2AEAB4973921AFDC1A06C842640177C9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-manufacturers\\data.ts",
+    "sha256": "FD9B383ADED58CF7F7766D7A06E8EA569D5C82019EAA26C47661819CC3E3C6A9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-manufacturers\\definitions.ts",
+    "sha256": "50452E010B5D09F0682B8C7439D491A24889CA0277D47A28345F710213A9B02D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-manufacturers\\page.tsx",
+    "sha256": "84DD8394F7DD567CA03DDB7F4E062283821A06EBF126BFDD08DF8A98313774B8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global-manufacturers\\schemas.ts",
+    "sha256": "831204D32FA2767FF727505A054748EDF3CC5F84138C83D8300266A6100F58D3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global\\actions.ts",
+    "sha256": "9A84065889515732845BA02B363A5224D77EE3163C7349A7093F372C1EB8CC21"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global\\data.ts",
+    "sha256": "FDAB38A8117CB7248567A6A219C4BCADB7580F1FE4407B4B5CEA09891FAF5A4F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\global\\page.tsx",
+    "sha256": "F091B3AA40D9E58D3482DC3CD1304CFBD03115D70A3B48553F9F00D7591D9745"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\layout.tsx",
+    "sha256": "B9A755B23C0E581968732FC16D60E17D09EFFCAC7254F4DAF5D4E9F12C8B9733"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\ledger-health\\actions.ts",
+    "sha256": "07FE41EB475F3E141359153359A85455E2B6B5CE3F194F816225F6F2380BF2A0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\ledger-health\\page.tsx",
+    "sha256": "717B9523EE8886A83ABCF53218D81DBBB298A1931CBF16824068176B6B70BF8E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\page.tsx",
+    "sha256": "450FD95E2D73CA7C4FF7CC267D7AFEBF211FA87DE26F3A0AFF6A7F1EDF4545D5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\subscription-plans\\actions.ts",
+    "sha256": "51BCB0A20E1F1DA707AF10606CFA3ABFA882C5EF04DBBB84112626206E793410"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\subscription-plans\\components\\subscription-plans-table.tsx",
+    "sha256": "456C3A3A71CFEB08ABE27CA4A2D3554690865DC3795F8611F2AC18DF7FD7CEDD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\subscription-plans\\data.ts",
+    "sha256": "AE58B5E998EAB9836F43F6FD2181E890C96728E40292FF2B9DE535A90B343624"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\subscription-plans\\page.tsx",
+    "sha256": "209E75447A565FCCDC072FB5B70A94DC263D31C96964279D2310DAE58DC12369"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\super-users\\actions.ts",
+    "sha256": "755F81996C54A3972472F86097FFBC25858AC1C4237FDBD7EF9CDBD65A9B926B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\super-users\\layout.tsx",
+    "sha256": "A35A6841644942CDFACBF904CB6E56D014093E79F4B125CD0D642AA05AC35046"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\super-users\\page.tsx",
+    "sha256": "9183F1872EECEE9D5F8E2549210B1B7A7DE079B732F13FBD478EDB6EA335DADB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\system-broadcasts\\actions.ts",
+    "sha256": "72A3A2DDA4982DE94B9C2E9BA9C540FB1912E94DFCA3575206FB927D1E910509"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\system-broadcasts\\page.tsx",
+    "sha256": "228CBE8BA65C97F5495D5AF584613B81EEBBA7B1B07BED45E8A599E94EBD2806"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\taxes\\actions.ts",
+    "sha256": "CBB97E9D9626DEB511355285F84C2C52B8E06D6151C99A9FF030C5B5E2C8159C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\taxes\\components\\taxes-table.tsx",
+    "sha256": "797C6EC18654608436D691459EF94441C7F383D79BB3D64DC19547678184966E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\settings\\taxes\\page.tsx",
+    "sha256": "DCCBBD43BD83707098F4121E5AD85B56B36E6FF638A3655B50082EB7C78F6715"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\support\\feedback\\layout.tsx",
+    "sha256": "7CA8DAAF5BDB987441EFCC4AAFD8F08111D06F7C25C93521A96FCB6C34A36E41"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\support\\feedback\\page.tsx",
+    "sha256": "E989EAB4B6762BF61496C7186D63B652C54FBF31539695BDD13B5B334774DCDF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\__tests__\\m2-slug-uniqueness-adversarial.test.ts",
+    "sha256": "31A261BEF18189188A98EF1FC2C1234DBDEB6248F6C4C40B82D1A77510704350"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\__tests__\\purge-stress-challenge.test.ts",
+    "sha256": "8A8F4F52ED960DEB20FAAF9D403382E63331A9BB96C83D6274F247B569BA3030"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\__tests__\\tenant-actions.test.ts",
+    "sha256": "5FF42EF9A80C7F841051B129DAD6055A016FEE3F768F30AA48A0C1CF61E4F8B9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\actions.ts",
+    "sha256": "0C7960036E9D65C29A276AD91522560588DDC924BBA3EFA50826ADC199F27117"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\module-select.tsx",
+    "sha256": "1B095DA416291BEB5F730BCD43182969BF33854AEC519C893B9F00BA483842B1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\tenant-data-management-tab.tsx",
+    "sha256": "00A10EDC3FAE12FFB063FA738C264EE8849FB97CD7B01BD6B7E5C666231F0B6B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\tenant-data-tab.tsx",
+    "sha256": "EB90A31D10435C46B86D4808B70A802DD858AC365D8771BA5070D0C1EB917E29"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\tenant-details-tab.tsx",
+    "sha256": "214EB4F84AE7365D6F94C11F19585A84DEBB81BC4017D30935E8CEFF65B8A2A7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\tenant-files-tab.tsx",
+    "sha256": "DE63DE44285201DC39E008CE2F484E21E447B971D7322693636C414A80413F19"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\tenant-system-log-tab.tsx",
+    "sha256": "D7B19CAA2CD41C3F2D34564ACF9A340082C0DAC6E3B4DEF6B712BE4A0B81A3B0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\tenant-transactions-table.tsx",
+    "sha256": "750785E7F0C05A9A8278E7A09C1B2B8D83B1D159FD1E09B4BBDB732C2E5C87C9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\tenants-table-tab.tsx",
+    "sha256": "8D7466660342CAE816064B32214401392F66F807BC557E5C977D7EFBBF50E9E5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\components\\tenants-tree.tsx",
+    "sha256": "468FB132107E057823AE3B00328BEA6E53633DED9CA2047929E9EAA37C1DD676"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\data.ts",
+    "sha256": "5AE885E0BE91C533182C36386F048B397396142D832BBEFB823D83AEEC7832AD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\definitions.ts",
+    "sha256": "249B2665AD2AE217BEF5862ED40D468EEE0178E9AA1E7CF62DF865811B552415"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\layout.tsx",
+    "sha256": "6781FFEAE72D34D05EA41539FEDB59991077D8C141EFC63E8F7A7677F7795555"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\admin\\tenants\\page.tsx",
+    "sha256": "FD0394A499E03BBE37E7270E6A78D65C3DE943161A3BA5BA353BA2FA995B2AF1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\__tests__\\migration-routes-adversarial-stress.test.ts",
+    "sha256": "301652568A50F747CE2E420DD2F6FE89CB017552CA26A43337D3169DF6800055"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\admin\\enable-google-provider\\route.ts",
+    "sha256": "FD1968F0A12BE4C30A44595519D68C1FA971055398B44BF088C0019E32F32C98"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\admin\\migrate-auth\\route.ts",
+    "sha256": "C790294F100EB291BF2F6A6CB579E05198F53C5804984E57527D3B2A8151BE66"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\auth\\google-smtp\\callback\\route.ts",
+    "sha256": "498E8BDA5DE0A333A5B763BB60E3C637E3C459634C45A75B42CA11BDBD790A40"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\auth\\google-smtp\\route.ts",
+    "sha256": "770A6CB324BF81D476E31F12EBFB54FB9BB114C8B6F523193CECDB3C37B8139E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\auth\\google-tenant-login\\route.ts",
+    "sha256": "77A7F4B8730FFF50591B26F32B9CB9B1A46A435F62CDBB2E6F3DD456F112AC59"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\auth\\lookup-tenant\\route.ts",
+    "sha256": "5F5BDDB5B538DA9655B9D27153DD8955125AB909DD7FA07B21FBA0D6E551BB39"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\chat\\route.ts",
+    "sha256": "5D7AD1A27E5040E29A2FB193246DCB59392287EF570DD98205F0D93D64D7EB1D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\clean-dev-mode\\route.ts",
+    "sha256": "8A689944E7ED591FC17F50331C18187AABA434F19A0B4D816C21CCC348CAE1C3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\debug-firestore\\route.ts",
+    "sha256": "4B1FC675D970B1A293A4F128D2BBFD063550ECB87A5D22B35A61913A514F652B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\debug\\route.ts",
+    "sha256": "27F56A7E7BA5B80BFB051D57ADEDAB72F197A87DFF519C28ACC8B389E134E1BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\document-proxy\\__tests__\\document-proxy.test.ts",
+    "sha256": "5E19E3F5219A43F09D6B444A15E89513CCF2E0AF10DCA33E8CD3BC1963A61418"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\document-proxy\\route.ts",
+    "sha256": "96D96823C43E8E639DC5826738DA8FB665F67450CFFA573BBF7A30976FB0E6D4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\generate-pdf\\route.ts",
+    "sha256": "4CC8CBB05F14078D2770B16075ADB0D0333551EDAD42DD16C68E92E631996BDE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\health\\route.ts",
+    "sha256": "409DEE0D2730EBD7434EDF2706BEFD0C5A49ED4A6C43AB239D912BF39E4E4E4B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\invoice-payment-confirm\\route.ts",
+    "sha256": "2B6BC0EF87C6528C054D0E5FC76C57F2223AADE9F4828252B3E28EE7DA6A810E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\invoice-payment-intent\\route.ts",
+    "sha256": "0FD0A714AF361AB1097C0C8FE4F6DE7BB28A04DE3D4A98D810A1AB5EB1C702CB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\invoice-pdf\\[...slug]\\route.ts",
+    "sha256": "E411FAB15FA36AB45537A70DD7A45597F0C71C09CBAC4ADBD5DB738B99A1CE9B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\migrate-logistics-dispatch-statuses\\route.ts",
+    "sha256": "10745D31A39B90FE71BE59F602C68A0E242FC2315C57E1086FB8F2448FF6BE87"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\migrate-ticket-statuses\\route.ts",
+    "sha256": "729797ECD1D6C615FA7220BE9CCBE3CA6454AFC3D3EF4E14636302B761303031"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\pullsheets\\command\\route.ts",
+    "sha256": "386F5C75F41F63A687BA7F95FD72FC3B5D79D185107C7EFFD0B8005A1BC4FAB0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\pullsheets\\command\\status\\route.ts",
+    "sha256": "05B8EAF47E2837232AA95267A827E3E9A3A4F92F89C7BE2248A8E9EA422C269D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\quote-pdf\\[...slug]\\route.ts",
+    "sha256": "C5E4447625C2591D4DAB84B9EF31C47EDF066BC32EC0A6BD7CD98DF80C66DBD4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\api\\quote-sign\\route.ts",
+    "sha256": "7B086B5E671C516E47F5D74B65BE4A2429D60396D268B96D7E742BE7775EAF75"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\apple-icon.png",
+    "sha256": "F7732FAD3F7E03774D074E4A53E8B34C7B2E70F2119982DD126A67EA4DBB2990"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\auth\\actions.ts",
+    "sha256": "9A70C961D6B94CB1F6FEA4D2AE33E0609B634289CD91B9E4D3B5A7CC29262000"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\chat\\actions.ts",
+    "sha256": "0BFFDBD3D388A3E65CF25D48F55DD7CC1B70785A30E38330434CB94527982168"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\chat\\definitions.ts",
+    "sha256": "FF98D29D71A58D6A67A04F3E458D2E61DABC61036FFBDFC929232EB79603A701"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\actions.ts",
+    "sha256": "449F65C91F65FE5CB0AFFFDF30A928DED168A81D7C665FC31253A6AADC6D89EB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\components\\billing-term-select.tsx",
+    "sha256": "125C2D71060BA38CC8BFA356F1D23CCBF82256F9885234ADA2D69EA451C7951D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\components\\contact-client-users-tab.tsx",
+    "sha256": "0FD77277A708517728D576D433E9C7D3DE43F82A0339C2BA2EBA45CC7822B50B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\components\\contact-details-tab.tsx",
+    "sha256": "1FA7C98687D433E857FE7051F8C9F0F0254EB0069888702FFD49EF6D2303BE59"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\components\\contact-name-input.tsx",
+    "sha256": "F030B989DB5DF18EB9F05AD6A21C43B2A44D0598C37EFA07DCCF53051219D5FD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\components\\contact-people-table.tsx",
+    "sha256": "8C9D48A56BB6F6AEAA08AFE1DCEFACE00CFD3651F0BFFA60F2292313FACA7AC5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\components\\contact-projects-tab.tsx",
+    "sha256": "6B33F7B3F809B8EF932E42008AAD63F70191F59F90F1ACFF5461D8752D5AE0F7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\components\\contact-type-select.tsx",
+    "sha256": "DF7B22F1B569E78723BE3C992ED52DBFE6E095608C53E379E76AE2029D04A604"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\components\\contacts-tree.tsx",
+    "sha256": "6501784988F1A99C5A7D41DC0FABF6F86A6858ED215B2FAA450C351BAB1D986E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\data.ts",
+    "sha256": "F110B0A3EACE867A771B874B21740E8BBF2E99140ABD0A5A55B93482C156A338"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\definitions.ts",
+    "sha256": "D4176C222F51A1AD7A1497D8705306B936C5BB55C1E9AE3E774B6618387EFF69"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\layout.tsx",
+    "sha256": "0DEFE90D39274F4940437C2F6972356C29E3380F14EA4312383B0CC12681BE35"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\page.tsx",
+    "sha256": "7E74B940BF96DEC30EF5D24D74583A3C6BB988C3BBB1DE5041FBA259F29C793C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\schemas.ts",
+    "sha256": "7449F8F4C47B0E69004A8FE7387DBADFA09015F121B51AC17363AB6E2C34FA28"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\contacts\\table\\page.tsx",
+    "sha256": "A96AD19A5A68ECF564A29682295BF557FBE8B06DBE8406E259D0B16207B0B46B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\__tests__\\dispatch-gate2-adversarial-stress.test.ts",
+    "sha256": "9D36119FC54AFF77A628FA93AB8EF871D347A140F62672225A29CD15F4A3ACB5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\__tests__\\dispatch-table-tab.test.ts",
+    "sha256": "23C413C1D69C37929B11DDFFCAF0D6FAA245B878AD86EF3598EE66C630D93155"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\actions.ts",
+    "sha256": "5B868E5DDF952E36C046C3E5111B8F217E4320DAF9F6CFD85CFF963C04C8ABEF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\components\\dispatch-entry-tab.tsx",
+    "sha256": "E49BC43CEB80F17B3ACDDF2E6263EEB6DAEFC0B2404DCECA1B84875BB638F07C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\components\\dispatch-schedule-table.tsx",
+    "sha256": "553F68AEA43AB287667DF0464D54AD9145B6AFCB30869FD3A8BB51FF22DD8ACF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\components\\dispatch-table-tab.tsx",
+    "sha256": "D99FFA82161967CE2BA41751280A7121C59897AB0467134BF8C6DC0AE9EFB7E4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\components\\dispatch-table.tsx",
+    "sha256": "9710AE341D3EAA62FF9807E4C99F02E63875EDA40443924DE81C4803A0EF3323"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\components\\dispatch-tree.tsx",
+    "sha256": "DB126163A3A62CD7015A9600FF444EA55E324613B061F244FD0AF4A37D76F9FD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\data.ts",
+    "sha256": "4ECF392D25AF98F58B1DC50A2F8E42CB2601A1E7819A685D02E804C5302EB8EB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\definitions.ts",
+    "sha256": "270F6CD3DA89FE72D066E09B15A5E65A2E75ADD4D722A30D1973303F3A71B051"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\layout.tsx",
+    "sha256": "5D0769D69EBB52585CB48C2CDB9DE344BCBFDD7C5D5B87A2FB8843D67ACEF76B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\dispatch\\page.tsx",
+    "sha256": "3D1928F4C6949F86C3F8868923FEA9ABE3A43D02B4C3D75E8FF3398FFF88A10E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\documents\\actions.ts",
+    "sha256": "AB92F4BE96943395D2BAEB6D52CF196B6A69F0D7BA785408AE3B4F0A3287D8FC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\documents\\definitions.ts",
+    "sha256": "C960D890CFA7EDE69EC7BA1B337DE3322B0D4A0B953E41EE6C94C7E2DEDF6042"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\error.tsx",
+    "sha256": "FDEAF6A3BD7FB6C976C9352454E67B7168F7AD83C08D6A5AE4A74D7F23D94A69"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\challenger-m1-definitions-empirical.test.ts",
+    "sha256": "1D9B12682FA6058C01B7E3F3CDEBB716C787FD0BAACDE1D6FCD3EE1BE83DD8DA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\challenger-m1-empirical-stress.test.ts",
+    "sha256": "5C41AE38BB860A46CBD2BBEE926389E238990CBFF7C9C1C6E27C40F77C72ED7F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\challenger-whitebox-coverage.test.ts",
+    "sha256": "722017CCFB27928C8768B64A0738B81496E74A5EDD81BAA63BEE191734157C8D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\data-efficiency-optimization.test.ts",
+    "sha256": "2809539A74F7090A65D1FC1B8994E0CB093A492E0CB3B53A2104C60347EF23F5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\event-billing-details-tab.test.ts",
+    "sha256": "FA2F4E5973EEBF7FE7217D2467E3C6626434F0BAC6843C95FCE17DEBEEAD217A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\flex-migration-adversarial.test.ts",
+    "sha256": "FD01967B1CD2516E02B190E0B508F7A3B994175536CAECB7C2D8F72799F4314C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\invoice-stamp-service.test.ts",
+    "sha256": "A6D57B92140D6C4B68C90C8B05604BFB2D046FB3CE3137E0959BD4C035807B3E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m1-challenger-legacy-cleanup-stress.test.ts",
+    "sha256": "F3D66EFFDA5D72A9C23B0B8513CA3D3013121A11EA3E08CE2F8E976C2FBC47C3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m2-slug-quote-invoice-adversarial.test.ts",
+    "sha256": "1927DD53F83BB565B7CED9A513460EF0E8D9EF2A1E5EC6C7845C54E34E7B3A06"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m3-pricing-maxdiscount.test.ts",
+    "sha256": "E5E94F41231E555D4AA482F7825B649F46A6F78D4F1D65DB30237C79D616CD03"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m3-public-slug-validation.test.ts",
+    "sha256": "3E0FDE05CD0521E3DD0BC86B48C46FE0B6A6C7288D9D05710FD3A0F9E82F6775"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m3-slug-adversarial-challenge.test.ts",
+    "sha256": "E1F28E1C883D88E58B3257223563EDB96F3720DCB361C57675CDA5CBC410E84C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m4-challenger-empirical-adversarial.test.ts",
+    "sha256": "8EAECE7DA7DA7CE515845D4BB2AC53E96947AABC0AD4DC0E5F2F688BAAB3F83C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m4-challenger-m4-1-adversarial.test.ts",
+    "sha256": "883282E438B1B3BFAE7936D6638FBD134A04A4B492D54478716F450BA496FA7C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m4-dialog-url-slug.test.ts",
+    "sha256": "7EE765C3CE0993781CABE19DDBA54C883D31F2E4E06DB2DA43BC090167018F9F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m4-pullsheet-exclusion-stress.test.ts",
+    "sha256": "FB942AB7FE7575E348279CB6B73E40A04C19F84B5923DCA4FC45ACA383B0AC64"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m4-service-dnd-rates-stress.test.ts",
+    "sha256": "7FF7E5A3F6CE7E6CA5DE0B850623FE73AA18E2B90CD23EF1F90ADA1940E44F38"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m5-adversarial-challenger-tier5.test.ts",
+    "sha256": "CCB63C7DF2F4A92226370CBB44D32D36EB833924C2CA073D854A1ED609E9FEBD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m5-challenger-pullsheet-8matrix.test.ts",
+    "sha256": "2E88331D11870AC4753CD2F56B99AC33C6923793BB3C20871731D4F21F875510"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m5-e2e-adversarial-challenger.test.ts",
+    "sha256": "0D0F1E7EAD14DCB94314E93AB4FC986016B1053B2AC845E3CB5FE51E55916CF4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\m6-challenger-tier5-adversarial.test.ts",
+    "sha256": "58AF2CC7F0B0AF154150CDABE018606781121E63D97D7DE569E584E93A080F06"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-invoice-actions.test.ts",
+    "sha256": "254E08C1DA88D6A5940500B3A58F29C738D8B2068A39B346345C479CEB0D5BC5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-invoice-dialog.test.ts",
+    "sha256": "AD983FDA546EF2D7296AF75A1D4C764084F5BDF79F98856F7E4E6D48555B8E0D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-adversarial-challenger.test.ts",
+    "sha256": "1BAEC0C15B170A5F2B40E163AC19638CB9999B84EE01B0272825B6A97D51A0A6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-config-caching.test.ts",
+    "sha256": "7A583C8C3FB390DBF508CFCA22E74E12C3596660E057428C90D93421A73249AA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-dialog-template.test.ts",
+    "sha256": "1E3471F201AD81D8D668EAEC282EE1AD959DA04D6011D15A4E032CD043AE959B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-f1-f5-tier1.test.ts",
+    "sha256": "2F0CEFE4B130D627FE8F80F228D43E29D337DA5211968E03B2844AD5DB68A0D5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-f1-f5-tier2-boundary.test.ts",
+    "sha256": "7C3050306563F142DDC16396A2A62357B2D1EEF3EC70FE6155242E7903E27049"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-f6-f13-tier1.test.ts",
+    "sha256": "A0CC26DDFEC3CC9119260C4708B5757DEC2CE83440BF72D862E0EB3E00FC79F5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-f6-f13-tier2-boundary.test.ts",
+    "sha256": "DFB2B49D53C411FEDD6E55995C09AD9AF83809AC28FE5FC0218BCE201A161399"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-invoice-adversarial-review.test.ts",
+    "sha256": "003298A633D705345C4EC0504DFA9EAF7889BC399F557C10D1369D0A6BBC9EE1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-invoice-ui-parity.test.ts",
+    "sha256": "3FD94AF68FFF814B85F866CF5705297E45EBB12B63EA81168619C38995AFB678"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-m2m3-challenger-adversarial.test.ts",
+    "sha256": "857C9C89F370925A15171C36ACCE20E3256AFE325387854B636904E53FCC72EC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-m2m3-challenger-empirical.test.ts",
+    "sha256": "514CE3A65BB2AACBBFD91D9AEC5AD0506E870D9589555E5F0C5EED2373B3FC4A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-m2m3-ui-dialog.test.ts",
+    "sha256": "7FCA684A983081912E01E50A0703EBC49EA07AC9B5F1D3FCDFB0C4B502FF19BC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-m3-dialog.test.ts",
+    "sha256": "B315B2713B9172A9485876B69E477D72B676F826F7F14B1ECE0CC8B9597B7CDC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-m4-challenger-tier5-empirical.test.ts",
+    "sha256": "5D98D54EEAE3BCC3F40C79DAE0ED6CD622BC5E55A5AFBF8F9AC0CFBA26871CD5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-m4-challenger-tier5.test.ts",
+    "sha256": "132C451A73E38BE152818E7E7040816FB2C6BD2AB439A64B9F3F9A16AF237232"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-r3-reviewer-adversarial.test.ts",
+    "sha256": "A966E6D225781D046FA9C5B6A3C7894B31CAB7CBDA6350799ACF99B0F657B41F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-refactor-test-helpers.ts",
+    "sha256": "1CE05023158228D2ECEF7533219D5059532EFC5476EF14D7A7107A2B8213210D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-refactor-tier1.test.ts",
+    "sha256": "7EF09B3358FC0456CC7A502A10067F43067BB6783EAEEB0A00455AE54C1425C8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-refactor-tier2-boundary.test.ts",
+    "sha256": "24BAA23DA314539662B07094DA0270C474C0358ED83E17CB22A7EC271F809414"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-refactor-tier3-statemachine.test.ts",
+    "sha256": "94CCE2E0773F099B61C72288EB6DECC30D16F6D15FC12224BC101D99878E4BFC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-refactor-tier4-workloads.test.ts",
+    "sha256": "0229B84A3B2BEE8EDBC04388D56C58147FA500C0FAF3C42F241442C95428FF38"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-test-helpers.ts",
+    "sha256": "4EE0AA0DE0FA5758D3B0A3DCC52238F56A5FB4EAA4FA9306141121D4C46ADDD1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-tier3-combinations.test.ts",
+    "sha256": "C554AE9F3FD9DD38FCE8B78B82B312895A3B66333B866485D4F56E1F9B7DD433"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-tier4-scenarios.test.ts",
+    "sha256": "DD1AA12C3008355768B96CDD7F336AFAE4FBDFD3420AE461E498ECEC143BE3FD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\online-quote-version-deletion.test.ts",
+    "sha256": "91FF46A8B25EB09A0A011C48088247E313C29067E4D77FF9857825C3F00EB4F5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\pricing-engine-adversarial-challenger.test.ts",
+    "sha256": "6CBD2305AB4F375A42A133A7E7F5BF1BCAEA76D4B821929A54858C77ED2E83B0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\pricing-tailoring-and-grand-total.test.ts",
+    "sha256": "343DE9F65DA9238F1C57101AC66A334AEAC5E62E8C010326D9124DD524737931"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\pullsheet-selective-sync.test.ts",
+    "sha256": "8C5DE1044AF774DD532A7E0754A685FD9883FE3711364608455C4560E88B66B6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\pullsheet-service-exclusion.test.ts",
+    "sha256": "EFB7C8204EFA83BEB8EA2773E7F472CDE972F1A79AE95963D47EFB6A2AE17A91"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\pullsheet-status.test.ts",
+    "sha256": "F6239EACF04CB2360AA3C671D02756D17B1526F6A89DAE5F8605767AA1DEF503"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\pullsheet-sync-adversarial-challenger1.test.ts",
+    "sha256": "F33C0F6B36ED7C6A361154CFF978389B46AA233B5197916673D4BA9A075C75AE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\pullsheet-sync-adversarial-challenger2.test.ts",
+    "sha256": "60A59AC1B3E358ECAE95ADF892928B000E2635E49A765A284486D1883FBCAE64"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\quote-invoice-adversarial.test.ts",
+    "sha256": "AA24CD6AB7C8C083BDEA5B59A15854C2E51D6478A635A491FFF8A075BB5D0BBF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\quote-sign-service.test.ts",
+    "sha256": "94BAE5FDE14129F1761A4153EDD4C167221DED7E04084CB8A8254CFC2A0229D7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\server-actions-slug.test.ts",
+    "sha256": "797E5E9A5949BF53F08C6B5DC959AFB97E3EBBC63E25D5775A0545D4F0551AF2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\service-quote-integration.test.ts",
+    "sha256": "D4BF21F501FB5AD366C9DF64790325E7040C6BD1F5F12217B69B88F0D926B963"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\__tests__\\zustand-preloader-and-archived-caching.test.ts",
+    "sha256": "A657C009242378F7831BCE3CB778A06CAAC5BD9DE81ACD0CD0DD18C1E418D97F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\actions.ts",
+    "sha256": "DD04E743505FB610C59B0D61D99518C9DBAA9B967C07E02BA11BEBB46C21D1E3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\billing-status-select.tsx",
+    "sha256": "49D295016D73D7FD15B580B3043457E55F9D2207EF34BBB299A08EB01B27CDEC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\billing-terms-select.tsx",
+    "sha256": "BD5261FED9FEA3E914F0A940A667518F33668C7294EA8580F9BE0FA116B4EBB7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\client-combobox.tsx",
+    "sha256": "26214BD7E6FF0D9DCEAE02A8AB94D7342EE5BE440D9AF22DD45CE2BE0E0629B3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\department-select.tsx",
+    "sha256": "80452662E7A9D22ED6F99B06B2B210E1B263F5BAF732F0F970F46C549AF41460"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\equipment-status-indicator.tsx",
+    "sha256": "EC15A097CA1D2B51A15DE256CCEFE16F07176A23B9FC7552F38D20E4EF3F877E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-details-tab.tsx",
+    "sha256": "7AAC39A806A6BAC1AECDFC1A3AB826950BC4D94F18279F1D699D9A41C6B3C041"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-equipment-form-dialog.tsx",
+    "sha256": "1558AB513AD007710A32DFDA19473CF372767A942FAE7D24BCBB9F4B0606EB23"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-equipment-table.tsx",
+    "sha256": "66A73BECBD3E4CF5009E9D661444E7596674C4B284313B09B883E71F91FD63E5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-logistics-tab.tsx",
+    "sha256": "D58C9C54780E0C6AD72248EE796C1CBFD10BF0CFE6922952E6148C758704D9EC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-name-input.tsx",
+    "sha256": "8C784FB517A6F719D5E4511E6E0FBEB038A6BD45EC3B51AE852965F318CFA65C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-number-input.tsx",
+    "sha256": "6C90E5A119B00AE7D1495C725860B5663EE05886E8A7BF0A094DA971285B8C8C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-pullsheet-tab.tsx",
+    "sha256": "36B9F63F85E2AE42731DF89E57FA0A50A9CA7554056F53DB4EA8FA6252924AC2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-pullsheet-table.tsx",
+    "sha256": "8F62E7E79CB853AF90718E641ED2144722DC0278CC9E79C6BE762AE4D9BDB780"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-status-select.tsx",
+    "sha256": "B7C5EA5DADD91D2F339C133E91E792F1A75025C981C05ACB548225C131800F25"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-table-tab.tsx",
+    "sha256": "B0AAD0D859A469A01E997BAF2A5ABA6046443945C5A52F1319A915AAB71D0145"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-table.tsx",
+    "sha256": "F89814120A959631E12A0A63E16E3A565FB60557E18E4CCA97AD7A11C404FF5C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\event-type-select.tsx",
+    "sha256": "DB1C5B514EA3CFADD3EC3C96751FCCBAF407BCB80D514BC312F6A001686A35D4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\events-tree.tsx",
+    "sha256": "DDE61D94BFA7B6FDFD293483FB92754A1FFE315284447F6944964A01BAA81889"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\online-invoice-dialog.tsx",
+    "sha256": "A9408B480319A2A0EA15D0BEDBE5C15BE8DC5B4670ED91889C8BA3F59339329D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\online-quote-dialog.tsx",
+    "sha256": "95025F5DDE9DD7781CE44A0514E9DC71FCA2647B9A8F405D6E429CE2C3FCD7AA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\components\\venue-combobox.tsx",
+    "sha256": "EB940B5C0101ABDD402EFF38A8455F158AC4AF6C66F90508A0F3030578B954DC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\data.ts",
+    "sha256": "78442B81A83AA6E8C2A96F803EEB5EB88CE3A0FF4E99FA3893AD0310AAA85E4F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\definitions.ts",
+    "sha256": "0F6498E43217A7E4D7B932F695C23E91454A80B6388F8A132415B9649F42238F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\invoice-generator.ts",
+    "sha256": "9D033F1A04497DA7018AB3F1E4C9EC5196E180E89C67CD4A1C13D6B444F4A3BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\invoice-stamp-service.ts",
+    "sha256": "5580620E393C03BD7C6F5582F2A80D67E6AFE3F5A21D449C8744DC008C58CA88"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\layout.tsx",
+    "sha256": "AFE441A09A1392A447A480E64296907BE7A5457D7F9FCCCC682AA06B9C451867"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\online-invoice-actions.ts",
+    "sha256": "9C7CCCEC88EB6075AF87A378C3EEFF178E5EEC6C8263D7CC100343627BCB1FF2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\online-quote-actions.ts",
+    "sha256": "D03AEB87229F5EC7C91B2C6A4FF111A49B43DF3A3041B11C2D876E8E574EF77A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\page.tsx",
+    "sha256": "86F317FB6B820D6DBB27DA364B9C3C136A443A2F18BB5ED174B1FBB9FE67B602"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\pullsheet-actions.ts",
+    "sha256": "32F3EBA0F53197B4ACCBA71867B68A11868006B605989C487AC6F68D0F19009E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\quote-config-cache.ts",
+    "sha256": "16DB0E32293EEEF12ECA3F0FC0B0402551D7FB2FE4CE1ADB1A5CFED638E03FD3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\quote-generator.ts",
+    "sha256": "14D50834E5D1DB455BFE4FEA89C970E0C9AB921E03DB268B14E9225A56E711A9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\quote-sign-service.ts",
+    "sha256": "BF9325B71DE961330C25C1E24565EB3DEC6A845577EAA20330F7D0A32C78BE43"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\events\\schema.ts",
+    "sha256": "4DCE3B3C5EC4153AB8BB59BA10FFEDD7887DA72910D6B71E265AC3A25D21AA3F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\favicon.ico",
+    "sha256": "141A79A29FBE10A95222978F7389C196F75B9518702AFB2748BFDC058AB3B37E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\forms\\feedback\\page.tsx",
+    "sha256": "E989EAB4B6762BF61496C7186D63B652C54FBF31539695BDD13B5B334774DCDF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\global-error.tsx",
+    "sha256": "CF77E737D026C5059980910EAFE59ED9D8AFDA49FC1AE41A5E4FADA0F6F30827"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\globals.css",
+    "sha256": "164DA07BB868482CB43766A7266BF8100FFF46B442A5CC4C2420D4370236796A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\icon.svg",
+    "sha256": "4D1EF1C24B9F41B701AC4CAEFD84B6F3789DD49F8B822E2383DFB95343737FB2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\__tests__\\allocation-writer.test.ts",
+    "sha256": "88B752333BA10E93690A2DE524A156579476612DE32431FDD174817A8D967DDC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\__tests__\\availability-engine.test.ts",
+    "sha256": "C25325952E3CD6A43A95ECBC43E5A63E45269826A23458EF6441D22D884A15BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\__tests__\\inventory-maxdiscount.test.ts",
+    "sha256": "5AA6D0E8B61BE426B9892BB3608246F8BFB565FD34A37D21D66F1DFCE6AA39D6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\__tests__\\sales-consumption.test.ts",
+    "sha256": "24291BF465A804C8F7114E8EB272088ACCE7E0CECBA0DC9724D133EA0F5F00BA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\__tests__\\warehouse-tracking.test.ts",
+    "sha256": "9FD1CE28B74B1B40D1589EA5A03986538B0C6AEDF60518C7457EBFB86C337DD4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\actions.ts",
+    "sha256": "1258374A990217C9B88EC832320647664152ACF9382A2B34A428E7C19EBD0C06"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\allocation-definitions.ts",
+    "sha256": "2D931234638DFB4D583B17929DE29FDFD17CD62EB34DA91258A8AEF84856E31B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\allocation-writer.ts",
+    "sha256": "30F70057CF2F7AB7F9EA5ACF054317CC6CF697FC74FACC66082F369410C37A3C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\availability-actions.ts",
+    "sha256": "B67A37D8DF5894184CE05B993F068009282F981CAB699FA6DB7E98FAE0D25AAD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\availability-engine.ts",
+    "sha256": "BAFBFFEA59AFACDF6587BFBC175BC5B47DDA8664DCFFBCFF321E640F44ABE222"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\availability-rtdb.ts",
+    "sha256": "331CCB5169B8F1562742157B2629D825EB56CCDDE39A9573F9EACE96F5A86F4A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\components\\availability-badge.tsx",
+    "sha256": "FD905043B6F9D974C1AA13B896B70FC7B408A10BBCD43FF02EC5503C19A791DB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\components\\equipment-table.tsx",
+    "sha256": "08ACDF462265550D1D4367977993BC51566994B22961C0B4E27BDE6B56E51FE3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\components\\global-equipment-autocomplete.tsx",
+    "sha256": "6B20089112FDA841DBEC8AA61AA51FF86ABC488AD89ECBEED459FCD6B310B56D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\components\\inventory-category-tree.tsx",
+    "sha256": "71E408C5F7A8FA5C38A0C58D974E46E7D1ABB5987AD7C108C644DCF62C3B09E6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\components\\inventory-contents-table.tsx",
+    "sha256": "64A2312D4E810E71098C16ABC6407674C60D1E11C8B0E5F21970ABEAB8C12742"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\components\\inventory-item-editor.tsx",
+    "sha256": "E0824CA12E25C2E7D6314AA25EAC6CBE673AAF200A42C39146EE6684325096C1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\components\\inventory-properties-table.tsx",
+    "sha256": "B6ECE25DBA8246E55EC47A1EBA1E59ABF46F8CA34952695DA7EA53A072E9B7CC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\components\\inventory-serial-numbers-table.tsx",
+    "sha256": "DCC57E8151191F287554660A338CC7A21DB9ABD1C8D4A9077B5C4571940FF646"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\data.ts",
+    "sha256": "6C40F02BAF57DE12B001D4EE476A5A61BC3A175CED9934DE9015ACF43CE7A80D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\definitions.ts",
+    "sha256": "E038D402384F4F2A616C9489D04D97BA546F80FBA216031D7BB5CF328C873214"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\layout.tsx",
+    "sha256": "59F78281A02E453A84FD4FEB8EB28DE05158EF457C7BA789506E5A8CF97D055E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\page.tsx",
+    "sha256": "8188448B1D9172DC3756EE013EA2224FCAE0232F7713E6D622C4EC4D25734F1F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\sales-actions.ts",
+    "sha256": "23250DD802ABD9C045F535C3C26A2976703B645A6B09D758AF9B92D11021BCB3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\sales-definitions.ts",
+    "sha256": "00030116F0354D400BF9996C7B172BA1779E87A4318C2E17E00DD9B3913A0E28"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\schemas.ts",
+    "sha256": "E85E66B7BBCD1BEEF2EBC1A282809384A90205EAC4637BD0CBCCCC24644AAD9B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\table\\page.tsx",
+    "sha256": "5BD5BB28E93823590E6993A14341A8373521CCC1A0D27CBB2FAB4630D1189B75"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\types\\page.tsx",
+    "sha256": "89C5E10E8D025220CBA0E2B67A46BB5C46F0058CDE43495346CEFA84D9253A1C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\warehouse-actions.ts",
+    "sha256": "1DF0AC42AAD8DD03D4397BB3701B5081497D2235D6DDB5A6A12F30BD65A349F0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\inventory\\warehouse-definitions.ts",
+    "sha256": "6C235D0028B8C56146090C660E4FBF6D3C2BC755703970A005C2F07884F691AA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\kuro\\components\\fortnight-calendar-grid.tsx",
+    "sha256": "F9C8018A2A4F39654B76A279F41BB7408D14FA5D4BAD3058C29A5550F3413205"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\kuro\\components\\month-calendar-grid.tsx",
+    "sha256": "C7EF43268BA5E5D2ECDF93FD795D664080BB20A366229187406113328E4F6FCD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\kuro\\components\\week-calendar-grid.tsx",
+    "sha256": "F5B784546420CE1AB5F03B279E283636C1EAC8DD92669345FC60507CB1037BA2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\kuro\\layout.tsx",
+    "sha256": "6207D9D499603CEE095D73CCB10479572FA0ABADB6221B3C7C056BD9D683C8BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\kuro\\page.tsx",
+    "sha256": "D6FDC4369DE3886869624B5FC7C955AD1B30265D1D4626A7AAA8A685F5FC842F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\layout.tsx",
+    "sha256": "04B894DC3195DFF1073EE56F326DFC366C11588D1EB07648DFF0B2F19053A0E2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\loading.tsx",
+    "sha256": "D31E950A7B46076C2B32461F8268DD0C093836561CB6F85219BA212981FDD9A3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\login\\page.tsx",
+    "sha256": "D3012DE4B1420FFED6D50E7729B622F636A37C46C80F0E0BC9164D58D9A467F8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\adversarial-tier5.test.ts",
+    "sha256": "40044A4A0C4850E7136047482DB6FD50C230EC64265C6E0EABD6FDC7095ECE66"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\archived-data-serialization-stress.test.ts",
+    "sha256": "4BCDF17C8CBDBDA30FE547BED6686BEDC57EEEDF787FEF4B7254CA6FE94CA99D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\challenger-status-matrix.test.ts",
+    "sha256": "A9CADE934392C440C7A2DCDA125D5FAB400135A17EF643FF58A1EC7164422060"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\logistics-bulk-actions.test.ts",
+    "sha256": "9ADFB910AF42D14A7945CC9048BF175F1BAB1448BF81C3E4864B4739903680E5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\logistics-dispatch-statuses.test.ts",
+    "sha256": "AFE9BE663A3B6C574C12D6F38E2794E9E40475F12006C33525FBACC19A65A53F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\logistics-dispatch-table-tabs-tier1.test.ts",
+    "sha256": "F611ECBCAF52042E26600C6641C6AE8EBCAE0482FE757A2034ADF23E30838579"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\logistics-dispatch-table-tabs-tier2-boundary.test.ts",
+    "sha256": "37B7DD344C597604070CD42BBEB17A958FAC1EFFC1AC64996F0067ED92FE568F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\logistics-dispatch-table-tabs-tier3-combinations.test.ts",
+    "sha256": "E0DD4DB949465476C702921AF07E15C028E4F123FCB3C3119319085E9A36A700"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\logistics-dispatch-table-tabs-tier4-workloads.test.ts",
+    "sha256": "90688E5D1FEA6B0946CE33A043A521697BABF26D29780D0BAE97558BDABAD291"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\__tests__\\table-tabs-test-helpers.ts",
+    "sha256": "84F435AD78424313AB5483760ACE138145B35001B171B59385B1392D71C8B966"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\actions.ts",
+    "sha256": "F4475B154A1C28678297E9B8F72F8A6184FF690DE2F4ECD5A994F9D60828DF5A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-board-dialog.tsx",
+    "sha256": "96B31ED766BEDDA4ACC456E0AF79853D914A5D4FAC8D74E74D43E5AA8F99B7CF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-destinations-table.tsx",
+    "sha256": "D61AEA57CEA075F7E41A253AF168514AA82E4E3527CA541E9075319954C11DED"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-entry-tab.tsx",
+    "sha256": "AA4858A5C2EB1CCF52B1E159FD800E38DB60143CC33D04B4D213F3A3DA43CAAF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-schedule-table.tsx",
+    "sha256": "42418D3FDE6999B7C62129450AB0473D865F70B0129B31A5DC637E3C36976FA4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-table-tab.tsx",
+    "sha256": "AB3882A8E1BA9BC52E00CB5A6F93CCA7B4E124E5C10755DC1FCEF768CCA91D2C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-table.tsx",
+    "sha256": "207B88C3E40A90C87A038D0A5D371B2637A3947F34E19D51C170344AF9803E5C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-tracking-map.tsx",
+    "sha256": "EF45CEF387E03A7C51F60A980CC46EBCE5A037686B93E443DDD6F007867242FD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-tracking-overview.tsx",
+    "sha256": "8A98862EE0741B04AB14D143414336B251FBB0DC489FB3D133A38E66FB11F399"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\logistics-tree.tsx",
+    "sha256": "BE60E838D386BF4D22E3EA4FF51A1A2D8917D5AE681E8E5EA4DA6E3D25DF861C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\tracking-overview-bar.tsx",
+    "sha256": "1C146A776DB7F2A7B5439F4586B3666BA3B43E80915BC055B22C9261D85023E5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\components\\tracking-overview-map.tsx",
+    "sha256": "8883EED2AF25FA4807B725023978131DA28E924B9AEE2979F4805668305D076A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\data.ts",
+    "sha256": "01A651E5086F8EB2A38E9C462820C174C19CAAF3258A69901BAE967064A39A5C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\definitions.ts",
+    "sha256": "C4D008DB09672A1402C4DBA3653F2B0A69EF2AFA91039840BBB93E97AC721536"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\layout.tsx",
+    "sha256": "6ECFCD65B1F7192B3AFB32731C950B8E03E75035BCE7C5523A9685D706F07CB6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logistics\\page.tsx",
+    "sha256": "EE42CE28077929B82E0E720CF95FC5DED85961430BF26471DF3F886D06257662"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logs\\actions.ts",
+    "sha256": "22C6E8BCF3D53A7F94FA3510F68F9CD39131C6204A5327444A7BC44E340EC477"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logs\\data.ts",
+    "sha256": "47B9394659E3937784EE95BB4229482B2AECBD914E81EA62465B6513467D26B4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logs\\layout.tsx",
+    "sha256": "754CAD1D53036E5D28E16CF1FB12BCC242D0445D2AAD5E8B74C30E0E57B402F9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\logs\\page.tsx",
+    "sha256": "0CB1E6C20D9FA5F350B2A870272BEF8C203606031884E699FAE7C5564525D204"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\manifest.ts",
+    "sha256": "D247E3A5055F4319E45955CF80B7C653761DF6E0B7B4A8416D68A27A58B01EE9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\page.tsx",
+    "sha256": "0E63E1FCFDAD9AA290B8160AC813059AB11ED739D0A6C03DD491A7B5B5921AB1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\payments\\layout.tsx",
+    "sha256": "0D9BFAC7F90AE552DB1484B729FCDD55355870C052377A9EF1B8337611540822"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\payments\\page.tsx",
+    "sha256": "047E6A3E9F2F6C59CF3B88EB6D1E3C4CC074019D7A1C57397DC938F9DBBF58B8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\register\\actions.ts",
+    "sha256": "9675860A3A00E4D6817BBD848E0193823263B103FF82AEAC9482DBA7F6447B5B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\register\\components\\account-step.tsx",
+    "sha256": "0F2895FE4B5CDA97646E18828A4B0788637FCD47C39F8600908BAD51BD8F2632"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\register\\components\\email-verification-step.tsx",
+    "sha256": "E1B85E506B8CED224EE8F0E284230BBFC8E5367BE02A40B9CDA6EB61B7283178"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\register\\components\\payment-step.tsx",
+    "sha256": "EED278B968CD74A834C0E16E9A2D4557B0A6428CE372548F38F60ECE9CED7511"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\register\\components\\plan-step.tsx",
+    "sha256": "C1168108DD6EC79ECC3C8BBF9A1330EB29905DC539B7B48B62E353FD96FF1620"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\register\\components\\success-step.tsx",
+    "sha256": "DA397ABFB8D72B148A19C552353EEEF7AF301936E5839F21858E0969E8C60A9D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\register\\components\\wizard.tsx",
+    "sha256": "D512ADFEEA9896A55EA78D7BB4957B6D80BC47A60B08DC6839369282F6E27DB1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\register\\page.tsx",
+    "sha256": "86A896E6471BFF07F8E56820AC137AEDA95469F17921C96DA9F70E72D01F3530"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\__tests__\\challenger-m1-2-empirical-stress.test.ts",
+    "sha256": "75B3FE0B61AFEFFDDF7D12E9261C266B479F8BB8C61C79FFF59C44EF28C4A7A2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\__tests__\\challenger-m2-1-negative-grep-stress.test.ts",
+    "sha256": "7A3E521E783C2A520FDE626A1BA24010516C34AEB015F778088B025335AB1290"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\__tests__\\ticket-statuses.test.ts",
+    "sha256": "511E4D7199446958EAC9E1A6A72ACE195EB6D1FE9E31E7D8B2763EEB0838D293"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\actions.ts",
+    "sha256": "22BCD51C14BFCAF42D7D9DC5183324DAE321F7CD0ED8789B091F4B3D4B05495D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\billing-status-select.tsx",
+    "sha256": "171F9276BEE75D10CD1147BA6DC9BFE3D0416061CC5F1FEAF1FB6ACDC4691B48"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\condition-select.tsx",
+    "sha256": "C42FC2E030F13E72D41C34E15313C811868762147F8DF99D95CC7A9E6570DF14"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\equipment-name-combobox.tsx",
+    "sha256": "DEA1CCB550DABB1724996F4B1EB52F6394F9176CE2C0EE2E733CB366B04D576E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\owner-combobox.tsx",
+    "sha256": "6F19642F29B20333A69168637A8CF005ADD5E63D1C79CDC9B10AAC750851184C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\priority-select.tsx",
+    "sha256": "7FA5BADA8F1E81DE41349DBEDEE5A43ADD7921E2245A1AC680C82DDE9418BDEB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\repair-details-tab.tsx",
+    "sha256": "A281CB7E22E84CF81E36F61EF9AC7A726D043E57662387F35B7150006CB8BB7A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\repair-logistics-tab.tsx",
+    "sha256": "B24486B30906719789D9139B5790AC6E732B880CC84B178A18F8E712F14C1F16"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\repair-number-input.tsx",
+    "sha256": "A27E70BC98162B8E9B8390CA3F6F30C70771AD3D63FAA18891CEE445F903E31C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\repairs-tree.tsx",
+    "sha256": "AB95EE041494FDC71F7E086BCE3CE62366D4B714FA986F426B6ED6F3AE96B2AB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\requester-combobox.tsx",
+    "sha256": "4A32D0231BE82D9BE7B43102C6DFA105F03757CEDDDD19A5732171637E603A94"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\status-select.tsx",
+    "sha256": "7AACC056983BDDB4111C3883EAD3C20792DFC60166D3A718DE7E9F6CC0A69FC1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\supplier-combobox.tsx",
+    "sha256": "87ADB1305C9FD587C6D9DFE7D09B9514C84E9D9DAA4ED8F1E0BD3BB1FEDF48FC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\components\\ticket-table-tab.tsx",
+    "sha256": "FB8792C5938F5D7AE410F95C72B87EFBF9AC82CD1C7601FCC9DEEBA43E1DD1D8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\data.ts",
+    "sha256": "72BE1E1B2D0546822C7B16E90486D46A28211BA48A05F245264899FA584CCB78"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\definitions.ts",
+    "sha256": "59A6B8C74B5652DED69BD45B6D1F1A2F140248BDF1D34E032E64E69CB2E1BF12"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\layout.tsx",
+    "sha256": "6207D9D499603CEE095D73CCB10479572FA0ABADB6221B3C7C056BD9D683C8BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\page.tsx",
+    "sha256": "927735DCCD3BBAA10CC1C345DCD9B292E0268C612AB228B7B1A6799C57B1D139"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\schema.ts",
+    "sha256": "426E6A048FE98707948903A6AE19E351C20455DB633D6981D28D235A5D2AE0F9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\repair\\table\\page.tsx",
+    "sha256": "642F2909BC01B5AFD10C407284E3944DC2D315402B575745838249CEC172AFB3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\reports\\layout.tsx",
+    "sha256": "420428C177ED222E305556C25AE0393717E259BC47028CC1FB1BE64CBE7BAF81"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\reports\\page.tsx",
+    "sha256": "29D25A354B514850F220102528A0EA5AEACAA7D9B0DD93D3FDBAEB8BA737AE25"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m1-challenger-boundary.test.ts",
+    "sha256": "4B66FCBB4651F6600850DDE7C984513F7B2D1885F003ABB332A625C69A9B25AD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m2-challenger-boundary-flat.test.ts",
+    "sha256": "D0A052F12739C9554B99B6DA592764F9B999D9C1A55F1FBE7A58F5C53559E92B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m2-challenger-settings-tree-stress.test.ts",
+    "sha256": "5CFB54D6EDF173F05004194D96CA76251DECA4FAFF9A3A7E64C5FEFCF937B0F1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m2-table-stress-adversarial.test.ts",
+    "sha256": "6B33C894ED5BBAB39D12E9EDD00AD9381B841C3EBCF8DCEB7AC981F5009B2575"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m2-table-virtualization.test.ts",
+    "sha256": "314A148927A3EB6FC4EEF3339FE3F04A0EA859F1BB4067A633A1124E8AD5E470"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m3-challenger1-stress.test.ts",
+    "sha256": "3A96A43711F096EFC053E7637A6BC6C0F2EEF899ACD59E75882475CDD51A3BE2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m3-challenger2-adversarial.test.ts",
+    "sha256": "D80B2B3B2872D8E7A7977D162CBDFADB00C50BC3977F950962832289E958E5B3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m3-dynamic-pricing-stress.test.ts",
+    "sha256": "3EEBB12FC5DE15F0712FE96E37FAFB7B1B83E4D4CCF238CCCCE4803765056B75"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m3-editor-rates-tab.test.ts",
+    "sha256": "B367BCF3562BC1961E84C41F8F7FEE4F2C16612BF7FE79923F9C832AA9D3A3F5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m3-service-table-rates.test.ts",
+    "sha256": "DC3CA736ABD9795E891B8E858883924BECE3B3A26D36A567661C72A771B1DAB2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\m3-tab-lifecycle-stress.test.ts",
+    "sha256": "40E3994BE63BD88B96EE6A446F6284EA2B72B240A8279530F78491CEEF9934AB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\service-item-editor.test.ts",
+    "sha256": "F9D85975E5CAA1F129BFEB9FD9C603FB56C5A7CC1C7A456F25BA79B6480EE614"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\service-navigation.test.ts",
+    "sha256": "847A783F4D1CA6C3EB0A4CAE1E1B2EE0B2CD4F7D71E3203B35B7D5D23F8D8515"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\service-schemas-stress.test.ts",
+    "sha256": "C5697B4A99FA35F07F34A05DA3B6C14ECD091536669E799F6BDDA6EB58EA6ABC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\service-schemas.test.ts",
+    "sha256": "191AAE64B79D8BB4901883F4FC0B5F38BDDF02E118F7824F475D094E0FB18024"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\settings-integration.test.ts",
+    "sha256": "70D0EBCCA1AEAFD1DF6A6C8BC968CACF67C4A4E03F397CCA391584E9875B3FDB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\settings-ui-stress.test.ts",
+    "sha256": "75F325FC7BBAFA7853EAA0B23A90CAF9AF91069C97A771857FD274FC8006C3D4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\__tests__\\tree-hierarchy-dnd-stress.test.ts",
+    "sha256": "AD3279B66EA24274066C2CD358BF2A2BC6D4EA96CA19669C7931C5B2CEDD54DC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\actions.ts",
+    "sha256": "315BEA5A4499766CDAB89EB12F3C63860672AE3DFBE543EF27BCB1B19CE2C2DC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\components\\service-item-editor.tsx",
+    "sha256": "8271352C248AC208CC675B91DF27C8F1D5ABE0E45D7A6C50044F77783B533ECA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\components\\service-table.tsx",
+    "sha256": "B2637FB1EF52B16E8EFB9FE984CAF53AA06383ACA18FFBE6C12AAE8067F0CA12"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\components\\service-tree.tsx",
+    "sha256": "B49864BBA73E3D27D63A8E63D110444630AB9CFCBED82469E76F98811AA3916C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\data.ts",
+    "sha256": "CF4911F19B5EB6836577E6C1293051C8940C34649F0ABB383A1C384EB728CE6E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\definitions.ts",
+    "sha256": "B12D636CE16F60AC9C04B3D561C3E83B514010EDB323BA51C4D40BDD405CA340"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\schema.ts",
+    "sha256": "668FCECFC1F521063FF8F2E2197C82217DE8DC77FB505C92FE36FDBF246F7F94"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\services\\table\\page.tsx",
+    "sha256": "6EBBCA407CA2945B97425C8A286F74AE0C713E9A3E8EFAD0471138F78A2D513F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\account\\__tests__\\account-settings-optimization.test.ts",
+    "sha256": "8C75B849DBFD95AA6F6A565C23473567745A9F36E905CB7793272D5484400209"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\account\\actions.ts",
+    "sha256": "1A7FC79681E51DEE16BD93856C61630CF87B6192F894679F3FE45FA3714FD991"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\account\\page.tsx",
+    "sha256": "DDC185C15A32EF036191DA7D26047E0D7F3468FF54C9D1931E0A42D2971D1C9C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\billing-statuses\\actions.ts",
+    "sha256": "75A6D239B77A4EDD9C6932543597CF4AA7C66907A1E0DDF1D308929FED12143D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\billing-statuses\\data.ts",
+    "sha256": "710C6598EA38A655E277703111639323AFDB867C64F8F9542967E444F0EFDE1F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\billing-statuses\\page.tsx",
+    "sha256": "2E6151D0F80A77243D47436AAF560FB8EF82768A123EF0B45169F11A9497E410"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\billing-terms\\__tests__\\billing-terms.test.ts",
+    "sha256": "89779D9A967FFBCE27D13F5A25C51AE07966309C40CD310B2DEA3D774064ABDB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\billing-terms\\actions.ts",
+    "sha256": "7EE3B3359A76BA6C4F105C1806A41A1F0F1E2CB740BC5922CDB397F61F832A15"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\billing-terms\\data.ts",
+    "sha256": "5B2EE7D777D0D1D0AE4B8195D4607688EC3EBF8FE53FB9A57426E873BD6A50F4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\billing-terms\\page.tsx",
+    "sha256": "A56D6669A5E9209E41F263799D8DF8E7C5340843FFD539B0C2AE7C285B873EF7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\categories\\actions.ts",
+    "sha256": "DB83CECDCA480AC13B7DE145A931B77C931069E5945B091B380B4D5ADA9CA0CF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\categories\\page.tsx",
+    "sha256": "0657B1B394ED826FFE947EFB5199DF68A2691A792CFC90672F643BEC1AF8F630"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\components\\settings-nav.tsx",
+    "sha256": "407E2B12A8D3E8609E11D6E2217210564A34ED24623F098936A73B822B4F4DB8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\data.ts",
+    "sha256": "AB264EAC6E4F04EE7F8E99DA01CD50A1FCACC8445A4B841308BCACF3F983331A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\definitions.ts",
+    "sha256": "0E7C05E73170E3C7CF3F07BF34B22A7D910F69CFE6CDD80551BB24F80E43A644"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\departments\\actions.ts",
+    "sha256": "0C18F09DC23BB2398F385006AB73D73BFC0E248C81AAD73FB8CA1F2DD29B08C2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\departments\\data.ts",
+    "sha256": "CBEBF5B056D5690D81810C0A799E7CBED3534176D991E118E4D8B587DB178C09"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\departments\\page.tsx",
+    "sha256": "6B5CDA44DC67D4BD47F3EA1F60CF038BCA99469519CD478C8F879AF5F4176228"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\document-templates\\actions.ts",
+    "sha256": "629C775E15ED2045DEE9CFED52A170FDE7D2057A236F6A61B17B36254B1CAEBC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\document-templates\\default-templates.ts",
+    "sha256": "00817FE444C9FB1D743C60BD1B120EB7C2CBAAD2C16BF3F1EC3CC979C2A0DE0E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\document-templates\\page.tsx",
+    "sha256": "BAE9D7AC625BB720B6736A3027972E5326AE0C5CE513AFAC6BEB85EEB2B6C3B6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\event-types\\actions.ts",
+    "sha256": "8EA95EEE08F3D2876567A9412538D620F1CF12C5559CD5AAB72F5A34B93CB737"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\event-types\\data.ts",
+    "sha256": "A47C86C07F85B4FCEF71CF6949069214B5732DAEF4FA1CCE4B932EFBED240A05"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\event-types\\page.tsx",
+    "sha256": "A6E3280CE8DC6DF3467939C4F384B7726A8965DF283FD92BF313C69884989B24"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\__tests__\\actions.test.ts",
+    "sha256": "4C6B6BA7D82F0A9126AFEF53894A3F2B49B4196025DFBA501C730123C24CC9A8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\__tests__\\adversarial_stress.test.ts",
+    "sha256": "4B11198007A883DBF8D01BD96D4C894C426AF03BF59497AC63F5E098D41D8713"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\__tests__\\e2e-adversarial-relational-verification.test.ts",
+    "sha256": "02B67F46C7D25A182D707B2F5A6353955E679FB6BEFEB1542D5131D174B8A0BA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\__tests__\\empirical-diffing-verification.test.ts",
+    "sha256": "0A683F3C02FF647504A5424B859EE5AEB48A0726FE327AE4E129DEA38E64EA5C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\__tests__\\flex-settings-ui.test.ts",
+    "sha256": "FE4DF1883F824B9492E8D39438F19261A6495A88D7F10BDA0749208006740A14"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\__tests__\\services-adversarial-challenge.test.ts",
+    "sha256": "CB71A69D4EB3B38503D92D599E534F447F75DB0A266F6419F07FFF721845D250"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\actions.ts",
+    "sha256": "2B14CC46875BCF01853B6C19AA30FE20315A871D91CC64111DC0319D44C7615C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\data.ts",
+    "sha256": "B504E26CA883B4BE94F1742233030493D742B13ED28F5C59497E020E598D7AD5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\flex\\helpers.ts",
+    "sha256": "D714EEDF25CE7A12BEC91AA124A3FF6969E92C35EB82F3CD6BD7C796FFE22A8D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\integration\\__tests__\\adversarial-ui-state.test.ts",
+    "sha256": "CD8B78C8BCDBDF3B5BAF0E14EBA4B694F7DC57F2DFCA3DC4334C12914A500BFA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\integration\\__tests__\\challenger_m3_2_empirical.test.ts",
+    "sha256": "E04A6EDB4BD05DFE08CCC431AE84DFFE83DB6644599EAAC42F0ADB79CF162571"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\integration\\__tests__\\page.test.ts",
+    "sha256": "858D512B0645402DD84F830ADA0B932DAFEF4AD6C482B78BD6D8586BB1914C42"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\integration\\__tests__\\stripe-integration.test.ts",
+    "sha256": "DBB68E2A6638B7F15C6863DBF056F0E5290F6772A9D51D0CEFF0D10433F1BD2D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\integration\\__tests__\\subtab-adversarial-review.test.ts",
+    "sha256": "810B7E2C5FCFF2CFD1042B8742FA9CCD93EA61134C6A2E40C2480BE023FB61DE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\integration\\__tests__\\subtab-navigation.test.ts",
+    "sha256": "F66BA4D261BD60637F1FCAA584CD2AFC59BE32628BE32C788990E417BFA829FD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\integration\\actions.ts",
+    "sha256": "4E87A1FF479C06DC149F13DFE98D3FB2A2AE43C052EFD2D91F4C83B6B0D0081D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\integration\\page.tsx",
+    "sha256": "D9ABD7793E1CCDA438FF1490283E80A1DBE21E84F7AA4584E941974EE0D0BB93"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\layout.tsx",
+    "sha256": "22819F8C53989DDF57CC809FE47F29C1DBC1762F055ED6F785685C12B446925B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\page.tsx",
+    "sha256": "CC1833E67A9EF46D3C97890D8A029C684A1E9B6BC6778D735EA8300C4AD77AAA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\preferences\\actions.ts",
+    "sha256": "7F3DD2C5A946AF647DF5F3271447CA21D2C937DBE8C7993C2EBC116916E70BCA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\preferences\\page.tsx",
+    "sha256": "4AD1F23EB6F2481A79D2DC5670FC89D90347828FFDD753E1221CDB4F842CB589"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\rate-factors\\actions.ts",
+    "sha256": "7B2F2ECA5143BBCB2962F10A2CBB30D2F8934B171ED5445B16FF53ED00E08185"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\rate-factors\\definitions.ts",
+    "sha256": "705A700A45E1C106B6CC08532ABA2711F5A8665F03A045B6E7937AA5C9ACF011"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\rate-factors\\page.tsx",
+    "sha256": "27F9BD256192600A7C3F0BE2D91AE4E452F889AA359DC28A811D642B2B3E1212"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\role-types\\actions.ts",
+    "sha256": "5EE9A334AE434EE8F812F37BF7A502BDF86BAB92FD849B3093CF3C8645753C68"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\role-types\\data.ts",
+    "sha256": "A1F90D7002D74C1393E13058DCD0A23F01B6E3E7449040B84E2BA8ACBE461A85"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\role-types\\page.tsx",
+    "sha256": "1C896F4360E2EA647459DA4FF90FE031FBC6575B9F4B889E7723B03DD344209F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\service-categories\\page.tsx",
+    "sha256": "7226CF2028B79F13247027DED79F973CC646796928C834ADCABB29D738D5516A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\templates\\actions.ts",
+    "sha256": "AD00245F3EBA349737C2695FDEBE3A82D4BC9D51C76A61F3B082A5CF9C8644EF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\templates\\page.tsx",
+    "sha256": "6F552F61107467224C5A093C560BAC35F1A508C4F10F2286127BA9A05DCD8631"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\theme\\page.tsx",
+    "sha256": "81924A71CC940B13241A8C304BF115CC3D7AD5AA21DB14D245C00FA4E3CCE622"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\vehicles\\actions.ts",
+    "sha256": "AD5A4E2ABCFB95AF8BC784BB7AC858948840888A3F70B09D87C77DBE4C41CDE5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\vehicles\\components\\vehicles-table.tsx",
+    "sha256": "289381774913D7EE29B5934D026494004AFE4A962AFE5197807906ED470D7C6B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\vehicles\\data.ts",
+    "sha256": "1E78214BA54ECBF48B02B3B0B7638A81A23865A1AC54A5514AB1803A86649D35"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\settings\\vehicles\\page.tsx",
+    "sha256": "DE63A75B2D8085CA7B9083877103712B4160E81874041D3C70EB759872BABD24"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\__tests__\\schema.test.ts",
+    "sha256": "08BA61AC1254130505CBA56F18F3C81635997BEA7F548372A00D6F739EC14B95"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\actions.ts",
+    "sha256": "6BAFFABE5300B92BD851C896F399ACFDAC371CDAE51EFD228BBFF3064AF61A45"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\components\\avatar-creator.tsx",
+    "sha256": "A41386DEEE379551D122F71A2D60B2A579FB96EADCFD2C8D3FDD64BE438AC2E0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\components\\contact-client-select.tsx",
+    "sha256": "A8CF23662FCE8B5053133BB8473DE10EF24614ED017C90C73C8EF6E7C2438F98"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\components\\crew-tree.tsx",
+    "sha256": "1BF00073B4C89FCF3F1C607C37F964A12FA0B7115AA9B4F8F1E0FE3D3A43A0FD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\components\\tenant-select.tsx",
+    "sha256": "C366FCDF0F0BFEF99DAA7FABFB692AE2B71DF027CE9E31EBF03099F6C0FF176B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\components\\user-details-tab.tsx",
+    "sha256": "E88C27C1E3A3A5D007DDF4C61B5C4DF9676664C931AE8853A56A0702C40A66F0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\components\\user-role-select.tsx",
+    "sha256": "75413CE7175B8E1FB7BA04220B162AEDDD5AECFC85063F99F261D222CA0B5CCE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\data.ts",
+    "sha256": "A44375245435C59B2A0EA17A92C007B820A4C5AD654D08878DD31030E6F3806C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\layout.tsx",
+    "sha256": "FF7ACAFBB9B338C24401498DB07EF4B4A88519CD4691AFA59055142A0B1E0912"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\page.tsx",
+    "sha256": "77BEF294F3208041DCBEC159A2FDEEEFFD218373B6A0E3562398185C20E4E4DC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\schema.ts",
+    "sha256": "85D860F4E4ABA39B67B5A6840ED7C3B5F06AFA1E6E98BE11D244E6E74E1141CE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\users\\table\\page.tsx",
+    "sha256": "A86DC70A3278781EF613EB1273D74B72FBDD04A0F5132EC189307E09951BB2CD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\__tests__\\prep-deprep-loading.test.ts",
+    "sha256": "6CAF2D60CBCFAD7F60F1DE52F01CE3EEEAE5F0ACE723E48A1FE06682ED07E5D3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\__tests__\\scanning-adversarial.test.ts",
+    "sha256": "9D230D215995E4D221E37FDC4F72F61F81E1D747853CF89699EF9BB6ED14FC18"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\__tests__\\scanning-bar-summation.test.ts",
+    "sha256": "7C5C577F9CD24F3FE7EC82E68BFC61C5942FDDC4337F701E36CDA48C90117693"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\__tests__\\warehouse-tree-adversarial.test.ts",
+    "sha256": "5723CBBB63C2D68289615FA116E50BFB32825C456B347236684B96EFFD5897B6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\__tests__\\warehouse-tree-filtering.test.ts",
+    "sha256": "5632EDFA14B4411D3FD6FADE6F89CCA81A8D1987A1904628AF0A2A502F01ED4A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\__tests__\\warehouse-ui-state-persistence.test.ts",
+    "sha256": "136DCFEB10B540950EF19101045C8F6B13342A21CF259464A198FEF50B55685A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\audio.ts",
+    "sha256": "C4BC3006A8FD26F5B8F71F848F1844F55EA8D13FBA5B02F8633C8E1947CD43B9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\components\\warehouse-details-tab.tsx",
+    "sha256": "2E44978D865FCE18EEBF35832D0C65B5F612EECF27F94291EEAD058844224C12"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\components\\warehouse-pullsheet-tab.tsx",
+    "sha256": "98F4C51F8EA94141F253787A30BBB7E7EB364A66A6F93C61A366A9441B199662"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\components\\warehouse-pullsheet-table.tsx",
+    "sha256": "52D616CFD8C9E945D6091DDF92DDE8279BC0E50168A29A0580E8B953CFB848E6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\components\\warehouse-tree.tsx",
+    "sha256": "EDBE1C4989DD3BAC40E176EDAFB3252B2E54292AC4074827E159C68A90D2230A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\app\\warehouse\\utils.ts",
+    "sha256": "078EDB5A61DFA5BA65EA1FB8AC16897B9D69F275DEAFB0D3889B16857A3F7FF7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\__tests__\\icons.test.tsx",
+    "sha256": "DDD5B5D752B958AC1D5128539EB30DC0563B8301BDB59E8682CF403947BBE458"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\analytics-tracker.tsx",
+    "sha256": "F7E91DD53BC7406BDE0B5E317BE44B7F0E5E510E9DAD64DA2D846F38C6BCA95C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\activity-window-test-helpers.ts",
+    "sha256": "B620DB0D02F2AB6D2C697A14B708DDD2409F39166B1BCA9ED5BFD5468543991C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\activity-window-tier1-features.test.ts",
+    "sha256": "9D8EA4C81B08F286E26EBBEC39D6BB8D63FC2B7961EE4C99ABC1840DD6E36941"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\activity-window-tier2-boundary.test.ts",
+    "sha256": "933A40A42672A841970F31A040E4F8CDC77A9B23A671D7318860B75FF91D2EAB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\activity-window-tier3-combinations.test.ts",
+    "sha256": "5D4DF541AE5BA349724976E8251F54AB69AE75B956867A44FB5211DA49FF68FF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\activity-window-tier4-workloads.test.ts",
+    "sha256": "575B74B9A1BE47DF6A0B6BFD0E2CC7B042F4A2C55851C5D9901E68CE9B153B19"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\chat-dialog-table.test.tsx",
+    "sha256": "327C2C0828B628063B09A81A2641815C44AFEF7DC39A5E0FF8CCD00ED16E61CE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\m3-challenger-stress.test.ts",
+    "sha256": "14B4B73DD1D7742EDD411BA2F2E99D0F6FEE932D7863B7FB3FB55141E55677DA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\m3-challenger2-stress.test.ts",
+    "sha256": "383722AE0C3B1B421A4F5CC9EA8FADC00E7BADAE5E8133EEA0FB031476937FFC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\tier5-adversarial-challenger1.test.ts",
+    "sha256": "FBF6E11B3310054B92ADD165B4BA2CB86E9ED4752C8C0E3D9E4C3AD93852B40E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\__tests__\\tier5-adversarial-challenger2.test.ts",
+    "sha256": "BF6523878D9AD9E102043034B13C96B75189FBD7D97C005CE11578D69CA97E7E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\chat-dialog.tsx",
+    "sha256": "2A09987EF7DBFA9A1E90730FB6F48F1C844367D60364C9B67E5B637E50C4771C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\chat\\chat-window.tsx",
+    "sha256": "9ECEFF572A37302AEBBA41F7DCD777E4D4A641B6508231163CA9A437140A99B0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\data-table.tsx",
+    "sha256": "72BF86D45267DE58B7DFAD412497B09F41D33C1C06FBE177BAE6272458F9A47E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\documents\\document-tree.tsx",
+    "sha256": "2B6FF8A6DE5D096D94EDBF25B35C8F9B4D3112C71AE73C5422FCA2FCA0BCC863"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\documents\\entity-documents-tab.tsx",
+    "sha256": "ED03953C907F583455752521A084E87D02B55FAC896587A24EC90F040DD07D15"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\icons.tsx",
+    "sha256": "4850F2AA67A9BB1A12BC7D6A380450FC6BC02CAF347A1E717AA9CD55ED16E712"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\__tests__\\error-boundaries-adversarial.test.ts",
+    "sha256": "8919C41994176D34F0021783A4FCA2DC51DB3AEE1DA12BFA3FCE250E036248D4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\__tests__\\global-search-services.test.ts",
+    "sha256": "6F073A48497BEFBB4384FD6CE618AE4C2B8C50CFD3D19420D9196890CC538310"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\about-dialog.tsx",
+    "sha256": "025DF4E9EE7366987592DE1CA5422F656C45E281F115C61B4224FC3CE6C69666"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\action-bar-error-boundary.tsx",
+    "sha256": "D87A8FC706D1FBC322ED56E133E0F9097820193A0CA595ACA09A7F76D5EDD2FE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\action-bar.tsx",
+    "sha256": "53A55FE40EF9CB813F7DC97BA463F23135E981A61C9EB4503008551878E90CED"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\ai-assistant-trigger.tsx",
+    "sha256": "1FCAFB2D0C428F9D50C9ADEAEEFC84EA05FD8AA75E7E4FE12F04832CC8E05A6F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\app-content.tsx",
+    "sha256": "CBDF05404BE31A4B02CD248B4EE1EEE99820EF5BAFC9BD202C123D4BC4B8C9F3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\app-shell.tsx",
+    "sha256": "A3458D16C58AE7CDE932F90D7C3524A8510D52BCE30570A71B13045F5551B8F8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\app-title.tsx",
+    "sha256": "75B04D86FE06673755827F8535153B7B15C32BFA81E7374037E67EC98136E233"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\barcode-search.tsx",
+    "sha256": "31B206810B437014246F29502FEB08DA0CCCBBBD90E791E75A76F6DA2DDE5A57"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\change-log-dialog.tsx",
+    "sha256": "24E44DA8992741080A1F78B0D783A5215F2783DC3356307970F745F291175FC1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\change-password-dialog.tsx",
+    "sha256": "E52C484243CD2499FBDE5FE578D588598D020649955743B658A874448E759D2E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\connection-status.tsx",
+    "sha256": "AB2617C996E2E31C4574BF7176B1E0E8BA6D5EB3E46ACAF7E5EF6752EE534F51"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\data-preloader.tsx",
+    "sha256": "AC29DAA4EBF14471F44919BA3E2A10CD14403A79529CEE895AAB92F852CA2343"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\global-search.tsx",
+    "sha256": "8BFC0DDE6CE96A7121A25EDDAFD930CDEE4AF2F4B5E82FB1C4E7B9C9DF5B35A4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\main-layout.tsx",
+    "sha256": "3EE08EDCAFD8FDF5688A900DCD2309690F5F9AE70A7391A0405A08FCA0AD6B34"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\offline-banner.tsx",
+    "sha256": "F36B3FAEB0D6752A26992E55A567AD13255D90ACB0D88A7FA8500730EA9B73CA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\select-tenant-dialog.tsx",
+    "sha256": "CBFE5C96CBC49190A689E5CCC59D3BA74BBCE34FB47A7107F3B8D0C8F67C0712"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\service-worker-register.tsx",
+    "sha256": "48DAC5A0B0C4E976601C44ADF9DC58CB4628A723AD9EDF0FB181D819865C47CE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\settings-nav.tsx",
+    "sha256": "DB0027CBD31EF24D1DE59AF8C441759096A13B1B017C85A9D08C430B10314FA4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\sidebar-nav.tsx",
+    "sha256": "D70968991602DBBCE5BF84E3D9866014C41EEC0790911CD07EE674D5A9E2062C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\sub-tab-nav.tsx",
+    "sha256": "3C3F8893290FF294CB2B2B7B3C1EB96C3D007A239E101954818E1541122D0C46"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\system-broadcast-banner.tsx",
+    "sha256": "8B14A9B5D92B626079230DA44A139D1867EA2486AF24DCC70F9CB4D8BBBDD2FF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\tab-bar.tsx",
+    "sha256": "AD7C7D302663DFA317D1F8405096C031472D3C4D79AF93F708302B41C3837ED6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\tab-content-layout.tsx",
+    "sha256": "9431C397A25B4AF1B0BA76F96AFE3F294546BFFC39D91F0B5607664EA482D3A3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\tab-error-boundary.tsx",
+    "sha256": "9D53903447E84DABE713748D31A680ECDB0D4BF2992DFD14D100558F6D506EF2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\title-bar.tsx",
+    "sha256": "3AF1E6ADF245A3C065526575BE1D6527CEB5A194C5EB881390A47B90DCA14251"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\user-nav.tsx",
+    "sha256": "C140D3CD7520769A9DC9D4329A385FA894970C7A59613CEC8A883298D44A7131"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\layout\\version-checker.tsx",
+    "sha256": "0E6033DDA39249F097059B5BDC8337D87FE995B8CB66477E0617F22E25EB71F7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\page-header.tsx",
+    "sha256": "7A0BBF1E61B4B65015F48D7589BFAB7F1E3DB0E504A0BB375E005320056D10D1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\pdf\\__tests__\\pdf-viewer-refactor-integration.test.tsx",
+    "sha256": "99CB44CEFD72022C3BFC76301A2331E09EAEA28081EA41259497353151D58F43"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\pdf\\__tests__\\shared-pdf-viewer.test.tsx",
+    "sha256": "B2344C14CB9B0E24D303F41134401CB608E6D8A30733DC2A6766FAF1F9D1FA35"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\pdf\\pdf-polyfill.ts",
+    "sha256": "04CEFAF7FECB0140A219B376D8112D0716EBE700083A0160A6B31C20F8E8FA2B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\pdf\\shared-pdf-viewer-client.tsx",
+    "sha256": "B9DF8E049C207649F8471C80EF0CFCE915CC482DAF49290429051149E1DF9D51"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\pdf\\shared-pdf-viewer.tsx",
+    "sha256": "A1ECAC8944E67D8E17FBE9387D251717E02D6A0D5AA3F0178D5F27A2626ACE62"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\__tests__\\advanced-marker.test.tsx",
+    "sha256": "CEC9DE44E8784020EFA21533C9B326AA01FE16627AB4FBCF2A1B895794BE0C75"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\accordion.tsx",
+    "sha256": "CB85842E8A72665B95171D54B11436CFF2398806DCADB8B31077C3D7F2FBAC17"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\address-input.tsx",
+    "sha256": "960B720C5C0189A76030A6A7BE4E4A7D7BCDFA39A59783D8E9E910F1703BD54E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\advanced-marker.tsx",
+    "sha256": "AB5AEFBE52618BB4B66B306FE5E22EA8ACEBED98C17CE333E0273414D568405B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\alert-dialog.tsx",
+    "sha256": "8C13D9F403A4F92345EFF7F8161F4B3CE96F183A052B7CCA0C4EB95270D4EAD9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\alert.tsx",
+    "sha256": "1AABA23C7A1095F7ABEA7C9F6CE12A43C22BB8F97E957C9CAE222666E0C8BE83"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\asset-number-input.tsx",
+    "sha256": "5CAEF5B4118E31815FD97AE7648564BBD17195D836CE1AA09D4CB5F2DDA172E3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\assignee-combobox.tsx",
+    "sha256": "CBA46BBFC3BB794BDA18EFFDEE9423E2DFB45AE375B8D0D7DF6D3E099B58F4EF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\avatar.tsx",
+    "sha256": "4EE6FBFF6D693BF5B76F1B30E4CD55DE6C6343C46A51E636C3E3B8A911FA7EC0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\badge.tsx",
+    "sha256": "563824AE3F6B0A5DE408C13E58FE2A195808FF57CB09698FCAF2E875434BFB98"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\barcode-number-input.tsx",
+    "sha256": "9AC10F3BA99D30B4E6A9753C274E485268BF586CC0DC333CBEE2B1B7F4445325"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\break-time-input.tsx",
+    "sha256": "769E90FA81352BB78A7846A4B0CAD37D3C3085188B7EBD3240B029FD19A43E73"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\bulk-delete-dialog.tsx",
+    "sha256": "CAC5BC0E9EF828E0B748052166AD6BC6C0F068D544351238DA2374F15C2E6D1F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\button.tsx",
+    "sha256": "5822FDFC074A46CD4C617E534F82851C735463BCD51710E0B5099A4F2B9A05C3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\calendar.tsx",
+    "sha256": "E632912676B295DFCD788B8ED71F3E05F33B87828323D11CD1C830D4AC27F8F0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\card.tsx",
+    "sha256": "AC0C8ABEE8162037E0376650049C8A7ACDA9E2EEF7EECD37E47354926153675D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\carousel.tsx",
+    "sha256": "3DC7708DC950EB3CE339A4E76D10A7364EDC00070131239B3D7DC200C3302E26"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\case-type-select.tsx",
+    "sha256": "290DA7BE0F327DFADDA18CF48856E8877330DAB9A4BAD34ADA72CE7B9ADC0327"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\category-combobox.tsx",
+    "sha256": "CA9ED0186D63A36CEB1B6C66197AFAD27F9BADACCB3C3F700AE48A4FA47B7A35"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\chart.tsx",
+    "sha256": "78975C4A1A51E0DF707AAA85237ABE711A8F36AEA66D19E30D5CB0B398351622"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\checkbox.tsx",
+    "sha256": "F5069D4C17E0277E5C14F86EDC98B039A22D9CB410A87AB43C2DDF3566B36CEB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\collaborator-avatars.tsx",
+    "sha256": "535D668974179F52EEA6D122D115A27467DBB7F4A888080D67E55A467AAE136C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\collapsible.tsx",
+    "sha256": "BC854800960EF4129D4679A7C4A6B5091E7038ADC03698E4529D0C9B5AF0D831"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\color-picker.tsx",
+    "sha256": "19CF11D07C8C21F656BB30A66FAD2530446249DC84D739C028834CFC60D16178"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\combobox.tsx",
+    "sha256": "29FD5BC4649CF49A510FFB5EEA04958A212CCFFEB50EB4593C3C521B4A9F9E85"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\command.tsx",
+    "sha256": "F60BC7BC229243ABA94DEC448AD912CED2C7CBFB5A2B86BDBEBBCB108690A0DB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\confirmation-dialog.tsx",
+    "sha256": "F15B33CDA5E3B15ED933BC170C42D31612B71F27913CAC0E9548AFB55BDC17D9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\contact-distance-input.tsx",
+    "sha256": "ED61E92EC3D2DDBA30B6AF2AAA54B87618133220BFEEA9196E7936C8B3EF4F92"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\contact-name-input.tsx",
+    "sha256": "53BA7548208B5B1BB1D0ED844886ED6B8B9299926F3ECEF29682C52B2CA598A1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\country-combobox.tsx",
+    "sha256": "D105D3373548414C867EF6B201198023A066E5981AE691392DEB7EA9F915C488"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\currency-input.tsx",
+    "sha256": "F6DDFAF645F316C84F83EC292E5162628602F8BED5E471F355C6E69279BA41B0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\data-table-sort-header.tsx",
+    "sha256": "92A4E5A41EFFC0FEB149AB6D3BD6E32FE24D8D340C8FA71AF86F7099269D34D2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\data-table.tsx",
+    "sha256": "BAEB2E413FD6436B41EB70CDF852FC6B9D86EA295D8FCD95C603B9310A5700CE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\date-picker.tsx",
+    "sha256": "2CC6731D38417CC930640975C4C7BEDD3DCA48EE404BD2EAC9446D20B968963E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\date-range-calendar.tsx",
+    "sha256": "8FC7128FFB0A4186267211F9E723D6D3EE1D8A6ECB3B1C7EE9F8ABC4DBC05A17"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\datetime-picker.tsx",
+    "sha256": "030202D60E6BF6C568E9120DDE6595980351A03F1A9B6EEB5FE7569857E25FE1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\datetime-range-picker.tsx",
+    "sha256": "77BEC50F3CE4ACD52BE2C5E1A175C9A3E255B65EBBF7466018AEBB2B7E7EFED6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\destination-name-input.tsx",
+    "sha256": "F261589F4DCB1E123F856F88D7ED1BB53AABAB760BD6CDC4F50A4159E6C5BA38"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\dialog.tsx",
+    "sha256": "0F2CA7A58A68D3CBDB7FDCA79C1B655C84DCA87DC78119E9DA8975BBF229E537"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\dispatch-status-select.tsx",
+    "sha256": "732B8E3751F85682DA5A1BDA03906CC7821BA70240B5B5D908495A88E6EF4D8F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\distance-input.tsx",
+    "sha256": "5BA6994AFF338C83CF1B4C7C7F61BDA6579FE93F9DDADC9387B253B106E33EA3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\driver-combobox.tsx",
+    "sha256": "4283F7D63702A8A70990472FB7657FC960A1F002800389D0A535D1DBBA46D2C2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\dropdown-menu.tsx",
+    "sha256": "DA27AABCFC6699FDC38EA064D8C9214D4519D4E614876E24C5FEE4A98D971B36"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\duration-input.tsx",
+    "sha256": "0E6B55E6164277B54377F2D8E809A7E47B455CA810DA8BC4191177201ACB2696"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\duration-picker.tsx",
+    "sha256": "04B21B74D0141A459D6EAF3548876B1CF3E49496563670182D444683BD89B4BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\email-input.tsx",
+    "sha256": "298E86720BC3EF2F55B9A528D8FE1B87A0387AFBD1D04F24A1D66F6C8926E9D9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\entity-combobox.tsx",
+    "sha256": "AC820F5A17B37193C07AEE40B064C0729E13B56D5FE0184DBC5D4CF8F28CAB2B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\equipment-type-select.tsx",
+    "sha256": "50C768F8C9D576EDF92802F6CDA66E73983F8C4CF591A6DA188D4D2C41C1C277"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\event-combobox.tsx",
+    "sha256": "1D1EBDD7C522E349F6A86CB7ED54D6D32B88CE93E290CD4592BD4B4EF0A86F43"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\event-timeline.tsx",
+    "sha256": "D020B96944C0443CB97DD5E1AACC5B2691006106B7F2F549EA304D42B017FA64"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\expand-toggle-button.tsx",
+    "sha256": "D9AC57ABC7622CAA429AF5971D85B942A3454D8E8CDA7934331050D9BB9DCECE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\file-upload-input.tsx",
+    "sha256": "AF3CA0F0F08C5AE140657BD818721BFFF029D0A699F2D4D1235159387A6E0CA7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\filter-multiselect.tsx",
+    "sha256": "C0D5156FBD379CF333BF999CAEFAF68C4AD7EC08CC520A5A043AC7B09324FBFA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\form-input-field.tsx",
+    "sha256": "375B32456C83328CF8115B7610FBE83AF4558D959943957D4CB68EB4885A01B7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\form.tsx",
+    "sha256": "52164CEFA941A0F1941B2AF890A544E141D57CB1C618B20D06D1E004E150D03A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\hover-card.tsx",
+    "sha256": "D93ABF25436EEEBE5027BD775130EB0DEACAB9EA23D2DD4304C6C209A9C2FA42"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\icon-picker.tsx",
+    "sha256": "A11CF5260B2AC2DAFB77E302506CE9FFDA99BA1361D4A5161F8BE158E47D7D7F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\input.tsx",
+    "sha256": "F3A1AC943E23B87D91D58DDF2704604B9A635B9460FFB671E8FE346C58280110"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\item-class-select.tsx",
+    "sha256": "C1FFEFCB181EA233174808CFAC87DED3D46753D7C3D950CCE2896C637C9CA17A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\item-name-input.tsx",
+    "sha256": "D630A23E5EA8163B0CA752D2AD2E3D23F3BA57B5C39F668FE8E6981BD76B031C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\label.tsx",
+    "sha256": "C1F08B1CBE5698070AEF29300259FEFC8711156D813ADD0CE87401D2D2006835"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\logistics-status-select.tsx",
+    "sha256": "0CBFF8746109FFCCF4F4EEFABE67967EBC6183381AEB60BA01B6576F8D78B76A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\manufacturer-combobox.tsx",
+    "sha256": "CB3834FF817B4CAB4491B0800CC2D74370B3FD945C3819597D0A92CD99B81EF9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\map-dialog.tsx",
+    "sha256": "85F2A01BDA6CDCED7762FADD2EDE8520DDC6F126F3BAD931BE1349C3E1A156A4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\max-discount-input.tsx",
+    "sha256": "6298B7A20AB2BAC00C824974CA6A391001E0DCCC63D0CC899B66E7534E3EB704"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\multi-select.tsx",
+    "sha256": "DBEE6968B60D2BF58E60799D63CD77246AD55BC59056A8D6D46012B6486EB9CE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\name-input.tsx",
+    "sha256": "4F139EF1E380D475588147AAF1AE2696CAD5D17F6A6BDC6AAAF3CE751C13A7DB"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\notes-input.tsx",
+    "sha256": "CCA3116E114DA36161AA153E6EBFCF5FF672CAE94FD20FD9AAD30192615E4A02"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\offline-guarded-button.tsx",
+    "sha256": "09126F3866811A470E9FF37B8858ABEB0C1417BF464D236ABCD263670A4E3E4E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\online-indicator.tsx",
+    "sha256": "A6934BF4DDA4471CCE8DDE7A95F43EF40ADCD07E4DABC4A74A9F297F4B9A5638"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\open-in-new-tab-button.tsx",
+    "sha256": "37C13E3B7281A6E8967D3D1148335EB2FAB22E23078FA89D2159D26367E2C1DC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\password-input.tsx",
+    "sha256": "C7730EC85ADE12FD7472A15F5B854ABCCBC6E9776E44557D20948EAD60B8F26E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\percent-input.tsx",
+    "sha256": "75216F51CF4A3F21942E617B1BB9773EB6C81C2C986B33C6CBFAF39574605E18"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\phone-number-input.tsx",
+    "sha256": "EAAA258BA2B7578100AFDEB5BE276C50C3B5449C1EBBD6EC7C3C91A61CE11CA8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\place-autocomplete.tsx",
+    "sha256": "48F4F659CFA9E0C04BA41364F7D9F52018D6B5B207EA4294CEC43A4E6EE5BDBE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\popover.tsx",
+    "sha256": "5D69B396A11915ECE62D1647997BA5DD98026C2D9919C097979DD318491E771E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\position-input.tsx",
+    "sha256": "DE4656F48341F7DDEE7B90CA690C0F6C20792C6E4CED70C711A1CC8C412871A9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\postcode-input.tsx",
+    "sha256": "758001DB38901724F2A9434C482AB916990A85BA0D7CB3869FA1ACB0589E837F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\price-input.tsx",
+    "sha256": "06E41522DA5EC31C14794446021C3EB5D02E88C36CDD48F7ADFEBD70FE3376B0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\progress.tsx",
+    "sha256": "8C036DA4BAED076DE68D27719929DC98151A81B51456BFA6A2488D835303B1D7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\quantity-input.tsx",
+    "sha256": "14F88490D3DD513C9A0EFFCB4FDC9D522300AD935382754F87EB0849B25C5303"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\radio-group.tsx",
+    "sha256": "FADA5DC6F57240CA440C0F96D2B4DB203E1D3A92F6C42AE978A496A1E588DBA5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\realtime-field.tsx",
+    "sha256": "F6943321DCA6794398FEBCF315805D2845EBFF37B2AB225B9E1B2C17FEA7C748"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\scroll-area.tsx",
+    "sha256": "0827348260A534EFC4A4D236CAD6E73933E17BD642C55AD4F1170E75DFECBC1D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\search-input.tsx",
+    "sha256": "FBEA39C3810E1205ACE807B622553CC1D7ECC944CBA99F4509CFB4C99E636451"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\select.tsx",
+    "sha256": "49AD91DC4E70605E6BB67756E9225A3D2F98926605742DDFD739C771A8E35938"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\separator.tsx",
+    "sha256": "D2DEC642AFE71C74E76F2F3EE8A2A30FDE5743EF7C5D1C30EE21D4EC23D574E8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\serialised-select.tsx",
+    "sha256": "F1F4F6D8BD2F00454A3EE0ED7A25463E679BAC5DB8A6769CE966A3004DF10D82"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\settings-page-header.tsx",
+    "sha256": "640C2A3FCF928C53881005212F39009347A4BA6D95A209788F20CEBA06BCB3FA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\shared-pdf-viewer.tsx",
+    "sha256": "09BD02F1489C49A10D3AA475B5155E257B98F982D27DF7AC9E4C802B32F0A97A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\sheet.tsx",
+    "sha256": "5738C1BACCACEB6C7BC6A69F10AA17E3B479CDAD2E168F13892E107BCE5F94A2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\show-more-button.tsx",
+    "sha256": "EAE7FEE91AD344237BA12757E528F156BC0A81D7F73725BA6CCCEC79FD544AB2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\sidebar.tsx",
+    "sha256": "17785B3E251BDFFB732514C1F025AFE74336A9ADD0EF2B105C08B4D894E5B302"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\simple-modal.tsx",
+    "sha256": "1C1E8B4B2A238C6D60631A1257C76B6892EF5096D19D0CCB382504C46E57A335"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\skeleton-loaders.tsx",
+    "sha256": "48B6CC951ED4B17C62EFE809F8E54CF4E722E3D073F81509A2C4E1C8436AFC8F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\skeleton.tsx",
+    "sha256": "467228E064D96C368310FA16F4E97B6CE697940FFA3FF55FC804BBA4BBDB6095"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\sort-menu.tsx",
+    "sha256": "B6769B0C4B8713AB2385E3C981CFCF49E0FC6163CE7656BF19B7166050D9975A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\state-input.tsx",
+    "sha256": "4B9CE06EC04EDEACFD686AD5068FBE835F5B29E0CBEB786B518D728118F84A7F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\status-pulse-dot.tsx",
+    "sha256": "5C3C095BBB45DD76C3627D94C96AF89D3C4EA2D9EEAB66481BDDA6C8EBDB0DC2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\street-input.tsx",
+    "sha256": "399F0BFCCE29396B57927A054E1C9EEA39E1992707A9E30CE8BAEE3EE8555E2C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\suburb-input.tsx",
+    "sha256": "0048F01842BAE6EFE7D7B17F2F7DDA7FE6F2586190518ECFC4FD5F091AE8365A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\switch.tsx",
+    "sha256": "F03F78997CF3AAB31632EA1C0CD65FCFDE04023771EA62BC9C5302E14012AF42"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\table-action-toolbar.tsx",
+    "sha256": "A0CB16D5A754AAF6A69B6711625E08222ED48455C15665AC1B49399044EFF41B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\table-cell-input.tsx",
+    "sha256": "E6E231263F13B8497DA66D5BC988073EDEC7974C47DE7F307A1EB1A96DEF9619"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\table-header-filter.tsx",
+    "sha256": "253E718B8299B33F4380D5494085700F21A10472DE502094F0DB38091E52B779"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\table-sort-button.tsx",
+    "sha256": "2C9173C77995A6ACE14C9FF6D8CEC78D0170A9A195D047F978D0575A7217C9DE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\table.tsx",
+    "sha256": "5F4AE90F9968D7EFB340898B3676B20458EAD88B68B4A434B1C55D287781FC69"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\tabs.tsx",
+    "sha256": "55B0A17EA4C1A41D00E8EEEA68CFE7391F242CFDABF9B1EF10C8DD26A4E9C288"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\textarea.tsx",
+    "sha256": "744A5CF52240A12B715013B77F48E75A53205ACE8AE047CDCD832F95D537169E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\time-picker.tsx",
+    "sha256": "62823210C58E97F0EB79290D39E147A9AF288397C12CE9D7724C5CAF70103D82"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\toast.tsx",
+    "sha256": "4D8E5FE154EF912CEE8AA0CB709A2E569632514450B9715FEE60933C6BD83A0C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\toaster.tsx",
+    "sha256": "8D358FB5A3411C29E842C8AEE0BA68C0C85A9B1DCF080DBA6555FCF17165EBC3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\tooltip.tsx",
+    "sha256": "AAC19DF3A138C5766DD91A0EC9278896C85D4D9724B2160E1C2EB96F921D52AA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\unit-aware-inputs.tsx",
+    "sha256": "B1666CB4EB99DF769E548518C4E12316B5958B63B54FE4487D3EDF093829700F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\unit-number-input.tsx",
+    "sha256": "25163A6704447DB40F7E579AEC8E3D3C05380D97C338A2D4C36B27AB15E723BC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\vehicle-select.tsx",
+    "sha256": "CBD73A8E8B8730E3F76A9A6C85D4DFF32765419152876ABF5C8334ABA13630C7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\components\\ui\\website-input.tsx",
+    "sha256": "9D3A8985F2E10DA36CB0C894DAB5CF4AD03BF23F263BE6F8D8751FE2219105BE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\context\\action-bar-context.tsx",
+    "sha256": "9AC63132585D3CCA648BA2167FA250EDCFAB8993A6ECB7EB4C1FF0E97B8A3AD5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\context\\dialog-context.tsx",
+    "sha256": "1723F6A0106DE6D3E6377951E82C0DB7CB5B1D8AC2B4620A927522C38C63F80D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\context\\google-maps-context.tsx",
+    "sha256": "96911C5A4DB4A16386B515E8E9FB119A7804F31375E52AD32ED04D96ADD11736"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\context\\providers.tsx",
+    "sha256": "C2D2C24294B1C297974558BF1CDFF7FF1085BAAC179C5AF21067298797FDAEBE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\context\\sidebar-context.tsx",
+    "sha256": "F453B4D6B15C18ABA0DB15F8BDFA7700E6FF7832B23126A1B8F10E40F60830B1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\context\\tab-context.tsx",
+    "sha256": "400B9C9706010FC7E9091A7C4F898805ADDEF86682990F64AE47BB6A3CFD53FE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\context\\ui-state-context.tsx",
+    "sha256": "F52D7685CDDFAE7B993F5BEA8780468B2725A94D91310750E973F85242DDFF81"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\context\\user-context.tsx",
+    "sha256": "4CCCB8EA7FE0474FC59BB10F8E1FFBBE05AF9330C6B0D06927D0ADAA37A4B6EE"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\__tests__\\use-active-tab-broadcaster-offline.test.ts",
+    "sha256": "2D08047FCB10B81EB43E5D60FA8D64D6648A700D2F05C402047B2095129B50EA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\__tests__\\use-availability.test.ts",
+    "sha256": "50D609AFB286148F45B82B1A3D07DB20DECAB9E640200C5288F8EC3AD9AE1A70"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\__tests__\\use-choice-lists.test.ts",
+    "sha256": "008312D58E1D6B047C505907D1E2C8229A5E44D34CEBC800FAFC425EE2B3AAD4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\__tests__\\use-connection-status.test.ts",
+    "sha256": "4362D3D0B8C30A60C5FE6AFAA72DD00D6B560C421B4C0FD070375C8D25DD91E7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\__tests__\\use-presence-offline.test.ts",
+    "sha256": "C8102B96B99AB6C13CCEA02DE9919DC807D54CCCEE46CF19D9D85106BD030E99"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\__tests__\\use-presence-slotted.test.ts",
+    "sha256": "F610640AF91A157CAB7A0071684D0B699B4E77CC140D93DB08F194A6D467EB6C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-active-tab-broadcaster.ts",
+    "sha256": "EE2156E3BE1EC21A4B0EBAB545097AB3C6AD43EE3A4DA4B8760A51CFAFEEC071"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-auto-save.ts",
+    "sha256": "D839FEE793576073C9D0F3746B1D1CCE26A3027C6A437E0FC58CD7ECE7E05F51"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-availability.ts",
+    "sha256": "46EE0690D4E2BD5845FB2A7A80449DBF4B00DEB3583FE229FAD50CE99FFD42F2"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-chat.ts",
+    "sha256": "E3D532488FEBF637D33730B9661B0C4C73B79EAC247DCBCDAAF964EF66CE7ADD"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-choice-lists.ts",
+    "sha256": "4BDCA6A6D8EA7432E8A2287EBDFA5E639C6D25900CA00746463476F7A1BCE714"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-connection-status.ts",
+    "sha256": "447DD80FFB2A455FD667EBE51C26A0F18BE80D6FFA378816F3832EFC1D9F1373"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-crud-state.ts",
+    "sha256": "564F62BA427F710FDAC7CFBE88D58C09F649A8EE53A3C409C5E523ACABAB3110"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-documents.ts",
+    "sha256": "AC53B3BD502A5ABE50D37B8F6144CEB64B741C44B8B05DC790266610BCB2D663"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-logistics-calendar.ts",
+    "sha256": "CB2568D4429A909E137870F2E0094BC4DFBCBA3CDA3495567C4C272F21C79E9A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-mobile.tsx",
+    "sha256": "D2377FBAD5AD2BDF7FA896A68C36AC8BF4AA74A974B2061F77B41AE58D623001"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-presence-list.ts",
+    "sha256": "F9550940AED53943E16BF2882DC3F07E20E3F14C0AC9DCF8584FE4596B8BF735"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-presence.ts",
+    "sha256": "A65A8EA6EB705DA4130400672CF162D930592FA6357A736A3E25599AB2EC023F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-contact.ts",
+    "sha256": "8D71E6BF4C7F253EC7D950FC48C91F02605E3EC0D65325E24D7E6A1C89EBDC85"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-data.ts",
+    "sha256": "FC2773821A733F84EB1FBD50C798C0A5A40B292FE3A32D0244996F5E3C057425"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-dispatch-entry.ts",
+    "sha256": "CA698580841D9190B6B0ABC7591AEE17B7C1E9665B829CF83C85FB9C5CA58FC6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-document.ts",
+    "sha256": "448D4A2E5F0E6BC62481CF6FD5F26006DA82CC1705F5D3E8288E6442011581D0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-equipment-items.ts",
+    "sha256": "2DD32EF615B9C78B4385A5539BB89959D5520A701F9AB8BB44D5670A8F4C29BC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-event.ts",
+    "sha256": "8AD6E722744E4ADE0500190540B7E349B3736D1EE54BC5187A29C8D2671C8C0F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-inventory-item.ts",
+    "sha256": "F4AF1EF45CC295BD90D2821488D8F5C381999B54D9BFB27D73A91320107C9710"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-location-history.ts",
+    "sha256": "509D7CE6C235E0426C11F3D2B4787D32201557519027DF77F481E4705013A658"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-logistics-entry.ts",
+    "sha256": "82E990B64166BB7D40E476CE6235C1EE41310D0B18D454CD4B924BFAF4902690"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-repair-ticket.ts",
+    "sha256": "53CADCF2DDE98A8BDAC29AB55702957AA72F6BCC193D71180ECF113902FD8F96"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-realtime-user.ts",
+    "sha256": "AB3654203938CF0D66ADCF6370480418E0E38DA5C8FBBE585640F6E0B4AE91D6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-server-action.ts",
+    "sha256": "4CBEC6AD06903EA0400E2A6C4CEEF1CDC6FDB5BED9950B37F8B133348BF5A2F3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-settings.ts",
+    "sha256": "78344FBD050567F7F1050B1B11FBC2FE96614BE4970E14671AF62E41E09AC33F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-tab-collaborators.ts",
+    "sha256": "03E8E0D659C5AB22A0E129F92C89B477B37D12F33867A42DE2E3CDFB9E907B02"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\hooks\\use-toast.ts",
+    "sha256": "3ACCEADD9737FF51DD09521C5C2933B972367B35FEF0EF7DFE84F925833A75C1"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\activity-debouncer.test.ts",
+    "sha256": "E975310A2E94444AAC88EF4374DCED67D53C2DC31302A02AE69771CC169FB4A0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\activity-logging-stress.test.ts",
+    "sha256": "F510FF96ECF6BD4C237EC210EFCC2AD16ADBEEDE81014F41C5268D48E34F3253"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\avatar-utils.test.ts",
+    "sha256": "ED554E360F1BFFBD34CD262947F06AB584CCA3F8AD026B4310A8B2FB9BE9D956"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\challenger-flex-m1.test.ts",
+    "sha256": "FCA1ABF2DFD27B6255C0898C6FB9D33B79DE481CEB5551A40C65D4729CC103D7"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\challenger-m1-2-empirical.test.ts",
+    "sha256": "C48FF57155DAFB719A7EB17E9F2E64E20F886C97E5F748A5EDEFB987EEAAFAB3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\challenger-m1-adversarial.test.ts",
+    "sha256": "8EAF66107A603A75F87A91D12F2A10954D5B9D4CFAB107D9A1E363BE60FEDA46"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\challenger-m1-empirical-stress.test.ts",
+    "sha256": "AB4167080056C2CD2D8CB750EBE6F4BB0ADA1CB8B975A9708BFE0085DC735691"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\challenger-m2-services-adversarial.test.ts",
+    "sha256": "7603E959D4BB7E1BE8C3B37F0182F419DE3EFFA56EB715FC7BB329A859051F01"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\flex-mappers.test.ts",
+    "sha256": "5E28A85C5B1555EDC3CE6E0E80E36AC3869FAA9C2E0D6F100CE0744B5A8C7F7C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\flex-transport-adversarial.test.ts",
+    "sha256": "BA38EB526064BA5A06FB76C45B8931BAFB2FFB17608A9468A440DA5F31AADE85"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\flex.test.ts",
+    "sha256": "CA5BC6C733D5453CE80FB4AB88F7CB10725117023EAE3D3F63308792A9DB87BC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\form-utils.test.ts",
+    "sha256": "DD7165487FE0C1E5F4FF540074F9ECDEA7CEDA8895212E61A031852AEB1ED0B3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\offline-guard.test.ts",
+    "sha256": "641F0B507E85AC81944BD9E8CF40475C503F3F05DF62C4E895261D267884D92D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\offline-resilience-e2e.test.ts",
+    "sha256": "BD2C966849E4AA9EC6309E0E89630D325115545845F91D7D56BC7D3C5B0A7399"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\pwa-service-worker.test.ts",
+    "sha256": "585AD6F65006F557A6249E0924614FB0514E2389AB83DBF58A4D19F67E826162"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\__tests__\\subtable-diff-utils.test.ts",
+    "sha256": "8C9B7C55572CD95C7035BD3946DAB4D720B336D14CD23F78C042313A89B05341"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\activity-debouncer.ts",
+    "sha256": "AF748237D625A1E9C72C3C11DA20BD50A61B1F621890EA16BF95194F4F591BA8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\ai-worker.ts",
+    "sha256": "0A05DCE89293703EFB7B75199A118C42E8EEF53D31660831A332F5D7F739F871"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\analytics.ts",
+    "sha256": "69C9DC5880917E6B1240EF3F8AD8B8CEC5CE40699081DEB5548DFA2622C6EC5A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\avatar-utils.ts",
+    "sha256": "6FA94A78E81FA80F1AA65F149D0E5BBB0F5DBED8D6FC2DD6BD1F2F90E9E436E6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\countries.ts",
+    "sha256": "ED9EA4DA57F58FD5BC1AA700A43AF677F0FC0A51EAFD0EC166145A67C97F788E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\csv-parser.ts",
+    "sha256": "AE881DB5193B2E41EE8022ED338DF77A89CF2A8A81F5E8F9B3F0A71D3F750D8D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\definitions.ts",
+    "sha256": "68192278B03632366FBFD8765419E65465538284249F6C8D95CB0636FBDFB499"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\firebase-admin.ts",
+    "sha256": "1CD703E26BE666B6DDD43912444C2E0CD794620FE7AFA3B51986E051CAA1F0FA"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\firebase.ts",
+    "sha256": "5A932C5837309ACAB1FD3030B746986A9777752A5845E2AE2693E722BB49EE25"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\flex-mappers.ts",
+    "sha256": "93798FE0EDF34A003067FEF2B80421640F3CFFDFC2E5131DC7477D6AA66345BF"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\flex.ts",
+    "sha256": "C9745B1A9202435D00BD523565ACCBA12A75B2D8DFEA05784DB53590E986A6A3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\form-utils.ts",
+    "sha256": "6C047A957E9E6F77E354B1BAB357BB6233B4FADD18BDFBC2B474EB8AFDD12019"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\fuzzy-match.ts",
+    "sha256": "517C168AB94991ECC8E8DE0EF8A160D5717C22A01C351D9A88937535BAEB8413"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\image-utils.ts",
+    "sha256": "624864A30DF7A590CBE9D5E288F4730EDE24AEE0D68A63FA0C72DAD0494EAE6C"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\nav-config.ts",
+    "sha256": "598E452BBC8CD59F15DCB88D301967EEC0933E7DDF8EBA38E65EFA56465B7F3B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\offline-guard.ts",
+    "sha256": "0136F0CF49D30D2BEBE9D5F9B4A826D9C90002D297883470AC1DE719DE27FE38"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\pricing-engine.ts",
+    "sha256": "F52503D60ED71C76AAC2947CB303AD063F986D62798DB0EE32E5554123597085"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\priorities.ts",
+    "sha256": "4F8E45F3E8876EE77C138F42E855F594218A62383F011AD006B5873C8049EE96"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\rentman-repairs.ts",
+    "sha256": "41FE71CCE0B74064F7F49E6295CA51CBCA0F173DE6A9B83C04B43E7420EC7383"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\rentman.ts",
+    "sha256": "7929EFC2947E244AF1196474D3491E9C79F3777679524025999EA1556A56211F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\route-service.ts",
+    "sha256": "0939887B56DDD403F460522390A106149D3F7751BFCA138CF6ECF86220D6869B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\search-utils.ts",
+    "sha256": "05B0670D01AD051BB80FDAC7F8B0953B47A312D454BE6C9EA2225BD4BF5AA979"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\storage.ts",
+    "sha256": "6853A9A828A4B9D6CF40017C6E4F741FC942D25A6A4267E3E8816D1AC93974F5"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\stripe.ts",
+    "sha256": "4CAEF01130CAAB9D45B07048FC85CAA8B8CBAAEFAF45E41DE26680AF0F8DE9C4"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\subtable-diff-utils.ts",
+    "sha256": "9E9BBB82FC8F5AD60E3C7E70ACC527990CA842EFD3A09D15720ECD1CDB43A97B"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\units.ts",
+    "sha256": "828B8090B35F72E84ADFAA8095D14F3E282642F3D5104B16106D850FC0F063B9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\lib\\utils.ts",
+    "sha256": "F34EBA755B185F9C06C44019F9DC374B765565BB7C8BED9C6CB00FB0503C7E5E"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\store\\__tests__\\m1-challenger-boundaries.test.ts",
+    "sha256": "F170365AC15D4C8046AB01F6EA8AB8B49784AA76DC06BB73AA0D20EB59D42D66"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\store\\__tests__\\m1-challenger-stress.test.ts",
+    "sha256": "0E7889B536CA724B59C02BBCDE1D7AD247E2B653F3054A8B294B16D636E464D0"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\store\\__tests__\\network-store-resilience.test.ts",
+    "sha256": "609ED8BB652180476B293D711BC04FF3C9CBCC727FD9EB8D8613701150B9DC70"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\store\\data-store.ts",
+    "sha256": "08CB0AD5DBBB4DF1FF1129167499F1EE140146789C8E40B6843B18A97A80227D"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\src\\store\\network-store.ts",
+    "sha256": "54AF0C7EE45995C1A7734B13EEB13E8ED93CAEE0CDD025D4436FE13C364BB16A"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\storage.rules",
+    "sha256": "A189ED51724D252AD6C8D0C30B7B0EF0D07807CF157C49726DDFD37CDE433C01"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\swagger.json",
+    "sha256": "BC7451988871EDB609DB32FAE0AEE1AAAB47B406C8C605F3BEE3DAE65A89A8B9"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\tailwind.config.ts",
+    "sha256": "CFB3F156373750E222DAFD3CC1B7DDAB60D1B7E5EE341D976C5AF15314581074"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\TEST_INFRA.md",
+    "sha256": "EB6C045CAED3D9A40947BD0DA1D4905A10F3DDD668862A2574157140ED8225D8"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\TEST_READY.md",
+    "sha256": "03D1BC31269861422270481B4F36B881F5670C906173BFB8D10C074742AC6FB3"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\test-item.ts",
+    "sha256": "43BC88DA8A4A5017D74C1760CA7CBE6E90B9D16BE9F0B03520099664E59CCDBC"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\test-label.cjs",
+    "sha256": "E83C4229CD0C97E10177EFB8184816BAA4BF36E791724CCF2C35E295623A0B78"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\test-limit.ts",
+    "sha256": "5F529E75DBA6385C47CBDAB371F7E0DCE1032F0EE2A8A548EF7651C0669ECD92"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\test-page.ts",
+    "sha256": "92EF70A728E06A3AE4ECBEA07DEC77EFD25022782AF8CBF555858A1AC07BC1E6"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\test-results\\.last-run.json",
+    "sha256": "91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\test-sync.ts",
+    "sha256": "E6E290D3C4CD677B45C90884F5713164F03B4CA558F61FB0FE99AC0C06A3864F"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\tsconfig.json",
+    "sha256": "60663AB500075BB32BC3CB1662D9D75D7258BB08C6B170F3F7FE13386B9A4919"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\vitest.config.ts",
+    "sha256": "E96B302D2D2BBDE337F25E22CEE457248990F66CC01FE4E6EB3A3BED17886330"
+  },
+  {
+    "path": "C:\\Users\\Tan\\Documents\\Amia Studios\\Kuro\\ems1\\wipe-quotes.ts",
+    "sha256": "02DC3B6BCE2EC57D6CF6F173A859B20F5E06D363BA2AF61DB63E6684BD8C7C9A"
+  }
+]

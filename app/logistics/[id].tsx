@@ -379,12 +379,8 @@ export default function LogisticsJobDetailScreen() {
         backTestID="logistics-detail-back-btn"
         backAccessibilityLabel="Go back to Logistics Feed"
         rightAction={
-          <Badge
-            variant={showPermissionRevokedWarning ? 'destructive' : isTracking ? 'brand' : 'secondary'}
-            icon={isTracking ? <Radio size={12} color={colors.primary} /> : undefined}
-            testID="header-tracking-status-badge"
-          >
-            {showPermissionRevokedWarning ? 'Permission Required' : isTracking ? 'Tracking' : 'Idle'}
+          <Badge variant={getStatusBadgeVariant(job.status)} testID="header-job-status-badge">
+            {job.status}
           </Badge>
         }
       />
@@ -483,8 +479,12 @@ export default function LogisticsJobDetailScreen() {
               <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
                 JOB OVERVIEW
               </Text>
-              <Badge variant={getStatusBadgeVariant(job.status)} testID="detail-job-status-badge">
-                {job.status}
+              <Badge
+                variant={showPermissionRevokedWarning ? 'destructive' : isTracking ? 'brand' : 'secondary'}
+                icon={isTracking ? <Radio size={12} color={colors.primary} /> : undefined}
+                testID="detail-tracking-status-badge"
+              >
+                {showPermissionRevokedWarning ? 'Permission Required' : isTracking ? 'Tracking' : 'Idle'}
               </Badge>
             </View>
 
@@ -521,7 +521,7 @@ export default function LogisticsJobDetailScreen() {
             <View style={styles.quickStatusContainer}>
               <QuickStatusSelector
                 currentStatus={job.status}
-                statuses={['Pending', 'Scheduled', 'In Progress', 'Completed', 'Cancelled']}
+                statuses={['Pending', 'Planned', 'In Progress', 'Completed', 'Cancelled']}
                 disabledStatuses={['Pending']}
                 onSelectStatus={handleQuickStatusSelect}
                 isUpdating={isUpdatingStatus}
@@ -537,7 +537,7 @@ export default function LogisticsJobDetailScreen() {
         <View style={styles.stopsSection} testID="destination-stops-section">
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
-              DESTINATION STOPS ({job.destinations?.length || 0})
+              DESTINATION STOPS ({Math.max(0, (job.destinations?.length || 0) - 1)})
             </Text>
           </View>
 

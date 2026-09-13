@@ -581,7 +581,7 @@ describe('Comprehensive Repair Ticket Details Screen & Mobile Cleave Architectur
 
       expect(await findByText('Images')).toBeTruthy();
       expect(getByText('Documents (1)')).toBeTruthy();
-      expect(getByText('Notes (1)')).toBeTruthy();
+      expect(getByText('INTERNAL NOTES')).toBeTruthy();
     });
 
     it('supports opening document URL directly with View/Open Document action button', async () => {
@@ -604,35 +604,15 @@ describe('Comprehensive Repair Ticket Details Screen & Mobile Cleave Architectur
       expect(openURLSpy).toHaveBeenCalledWith('https://firebasestorage.googleapis.com/v0/b/mock/o/service_manual.pdf');
     });
 
-    it('supports adding and editing notes with modal', async () => {
-      const updateNoteSpy = jest
-        .spyOn(repairService, 'updateRepairNote')
-        .mockResolvedValueOnce({ id: 'note-1', content: 'Updated technician findings' } as any);
-
-      const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
-
-      const noteItem = await findByTestId('note-item-0');
-      await act(async () => {
-        fireEvent.press(noteItem);
-      });
-
-      expect(getByTestId('edit-note-modal')).toBeTruthy();
-
-      const input = getByTestId('edit-note-input');
-      fireEvent.changeText(input, 'Updated technician findings');
-
-      const saveBtn = getByTestId('save-edit-note-btn');
-      await act(async () => {
-        fireEvent.press(saveBtn);
-      });
-
-      expect(updateNoteSpy).toHaveBeenCalledWith(
-        'ticket-101',
-        'note-1',
-        'Updated technician findings',
-        expect.anything(),
-        'tenant-alpha'
-      );
+    it('edits internal notes through the visible modal and saves the narrow field update', async () => {
+      const updateSpy = jest.spyOn(repairService, 'updateRepairTicketFields').mockResolvedValue({ success: true });
+      const { findByTestId, getByTestId, unmount } = render(<RepairTicketDetailScreen />);
+      fireEvent.press(await findByTestId('ticket-internal-notes-btn'));
+      fireEvent.changeText(getByTestId('edit-internal-notes-input'), 'Updated technician findings');
+      fireEvent.press(getByTestId('save-edit-internal-notes-btn'));
+      await act(async () => { unmount(); });
+      expect(updateSpy).toHaveBeenCalledWith('ticket-101',
+        expect.objectContaining({ internalNotes: 'Updated technician findings' }), expect.anything(), 'tenant-alpha');
     });
 
     it('invokes real camera capture with permissions and attaches photo', async () => {
@@ -662,34 +642,12 @@ describe('Comprehensive Repair Ticket Details Screen & Mobile Cleave Architectur
   // 8. DUAL FIXED BOTTOM ACTION BAR
   // ==========================================================================
   describe('Dual Fixed Bottom Action Bar', () => {
-    it('opens Add Note modal and appends note to ticket', async () => {
-      const appendNoteSpy = jest
-        .spyOn(repairService, 'appendRepairNote')
-        .mockResolvedValueOnce({ id: 'note-new', content: 'Added bench note', timestamp: new Date().toISOString() } as any);
-
+    it('opens the attachment chooser from the bottom action bar', async () => {
       const { findByTestId, getByTestId } = render(<RepairTicketDetailScreen />);
-
-      const addNoteBtn = await findByTestId('detail-add-note-btn');
-      await act(async () => {
-        fireEvent.press(addNoteBtn);
-      });
-
-      expect(getByTestId('add-note-modal')).toBeTruthy();
-
-      const input = getByTestId('add-note-input');
-      fireEvent.changeText(input, 'Added bench note');
-
-      const submitBtn = getByTestId('submit-add-note-btn');
-      await act(async () => {
-        fireEvent.press(submitBtn);
-      });
-
-      expect(appendNoteSpy).toHaveBeenCalledWith(
-        'ticket-101',
-        'Added bench note',
-        expect.anything(),
-        'tenant-alpha'
-      );
+      fireEvent.press(await findByTestId('detail-add-attachment-btn'));
+      expect(getByTestId('add-attachment-modal')).toBeTruthy();
+      expect(getByTestId('add-photo-evidence-btn')).toBeTruthy();
+      expect(getByTestId('add-doc-evidence-btn')).toBeTruthy();
     });
   });
 
@@ -717,11 +675,13 @@ describe('Comprehensive Repair Ticket Details Screen & Mobile Cleave Architectur
 
       const supplierInput = getByTestId('input-supplier');
       const requesterInput = getByTestId('input-requested-by');
-      const descInput = getByTestId('input-fault-description');
+      fireEvent.press(getByTestId('ticket-internal-notes-btn'));
+    const descInput = getByTestId('edit-internal-notes-input');
 
       fireEvent.changeText(supplierInput, 'Custom Boutique Supplier Pty Ltd');
       fireEvent.changeText(requesterInput, 'External Subcontractor Jane');
       fireEvent.changeText(descInput, 'Blown power supply unit');
+    fireEvent.press(getByTestId('save-edit-internal-notes-btn'));
 
       const submitBtn = getByTestId('submit-repair-btn');
       await act(async () => {
@@ -734,7 +694,7 @@ describe('Comprehensive Repair Ticket Details Screen & Mobile Cleave Architectur
           supplierId: 'Custom Boutique Supplier Pty Ltd',
           requestedBy: 'External Subcontractor Jane',
           owner: 'Custom Production Client',
-          initialNote: 'Blown power supply unit',
+          internalNotes: 'Blown power supply unit',
         }),
         expect.anything()
       );

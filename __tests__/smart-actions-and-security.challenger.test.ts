@@ -269,7 +269,7 @@ describe('Adversarial Smart Actions & Security Challenger Suite', () => {
       });
 
       await expect(
-        updateLogisticsStatus('job_secure_01', 'In Transit', {
+        updateLogisticsStatus('job_secure_01', 'In Progress', {
           tenantId: 'tenant_attacker_org',
           updatedBy: 'Attacker',
         })

@@ -145,7 +145,7 @@ describe('Scanner Guardrails & 100% Completion Celebration Suite', () => {
     );
 
     jest.spyOn(pullSheetService, 'updatePullsheetItemScannedCount').mockResolvedValue({
-      success: true,
+      success: true, item: { ...mockPullsheetState.items[0], scannedQuantity: 2, status: 'prepped_scanned' },
     });
 
     jest.spyOn(AudioService, 'playScanSuccess').mockResolvedValue();
@@ -215,7 +215,7 @@ describe('Scanner Guardrails & 100% Completion Celebration Suite', () => {
 
       let scanResult: any;
       await act(async () => {
-        scanResult = await result.current.processScan('BAR-LA-K2-001');
+        scanResult = await result.current.processScan('SN-K2-001');
       });
 
       expect(scanResult.type).toBe('NOT_ON_PULLSHEET');
@@ -253,6 +253,21 @@ describe('Scanner Guardrails & 100% Completion Celebration Suite', () => {
   });
 
   describe('3. 100% Pull Sheet Completion Celebration', () => {
+    it.each(['missing-item', 'failed-sync', 'newer-incomplete-snapshot'])('does not celebrate an unverified completion: %s', async (scenario) => {
+      jest.spyOn(pullSheetService, 'updatePullsheetItemScannedCount').mockImplementation(async () => {
+        if (scenario === 'newer-incomplete-snapshot') pullsheetListener?.({ ...mockPullsheetState,
+          items: [{ ...mockPullsheetState.items[0], scannedQuantity: 1, status: 'confirmed' }, mockPullsheetState.items[1]] });
+        return { success: true, reconciliationStatus: scenario === 'failed-sync' ? 'failed' : 'completed',
+          item: scenario === 'missing-item' ? undefined : { ...mockPullsheetState.items[0], scannedQuantity: 2, status: 'prepped_scanned' } };
+      });
+      const wrapper = ({ children }: { children: React.ReactNode }) => <ScannerProvider>{children}</ScannerProvider>;
+      const { result } = renderHook(() => useScanner(), { wrapper });
+      act(() => result.current.setActiveEventId('event-fest-2026'));
+      await act(async () => { await result.current.processScan('SN-K2-001'); });
+      expect(AudioService.playCelebrationChime).not.toHaveBeenCalled();
+      expect(result.current.isCompletionModalVisible).toBe(false);
+    });
+
     it('triggers victory chime, celebration haptics, and opens completion modal when final item is scanned', async () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <ScannerProvider>{children}</ScannerProvider>
@@ -269,7 +284,7 @@ describe('Scanner Guardrails & 100% Completion Celebration Suite', () => {
       // This fulfills the ENTIRE pull sheet!
       let scanResult: any;
       await act(async () => {
-        scanResult = await result.current.processScan('BAR-LA-K2-001');
+        scanResult = await result.current.processScan('SN-K2-001');
       });
 
       expect(scanResult.type).toBe('SUCCESS');
@@ -289,7 +304,7 @@ describe('Scanner Guardrails & 100% Completion Celebration Suite', () => {
         2,
         true,
         { uid: 'operator-uid-100' },
-        'BAR-LA-K2-001'
+        'SN-K2-001'
       );
     });
 
@@ -304,7 +319,7 @@ describe('Scanner Guardrails & 100% Completion Celebration Suite', () => {
 
       // Enter the code for the final missing item
       const input = getByPlaceholderText('Type barcode or serial number...');
-      fireEvent.changeText(input, 'BAR-LA-K2-001');
+      fireEvent.changeText(input, 'SN-K2-001');
 
       const submitBtn = getByTestId('manual-code-submit-btn');
       await act(async () => {

@@ -5,6 +5,7 @@
  * note logging, and GPS location syncing.
  */
 
+import { logisticsStatusForWrite } from '@/lib/web-write-contract';
 import {
   collection,
   doc,
@@ -386,7 +387,7 @@ export function formatVehicleDisplayName(
  * Optionally logs an accompanying note and attribution.
  *
  * @param entryId Target logistics document ID.
- * @param status New status string (e.g. 'In Transit', 'Completed').
+ * @param status New web-compatible status (e.g. 'In Progress', 'Completed').
  * @param options Optional note, author identifier, and tenant isolation ID.
  */
 export async function updateLogisticsStatus(
@@ -400,6 +401,7 @@ export async function updateLogisticsStatus(
   if (!status || !status.trim()) {
     throw new Error('Status string is required for status update');
   }
+  status = logisticsStatusForWrite(status.trim());
 
   const docRef = doc(db, 'logistics', entryId);
 
@@ -782,7 +784,7 @@ export async function createLogisticsEntry(
     ...entry,
     id,
     tenantId,
-    status: entry.status || 'Scheduled',
+    status: logisticsStatusForWrite(entry.status || 'Pending'),
     archived: entry.archived ?? false,
     location: entry.location || '',
     eventName: entry.eventName || '',
@@ -795,4 +797,3 @@ export async function createLogisticsEntry(
   await setDoc(targetDocRef, payload);
   return id;
 }
-

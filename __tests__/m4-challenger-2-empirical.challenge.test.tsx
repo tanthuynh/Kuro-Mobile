@@ -253,7 +253,7 @@ describe('M4 Challenger 2: Cross-Feature Adversarial Integration Challenge', () 
 
       // 2. Dispatch interleaved concurrent offline mutations
       const [jobStatusResult, ticketStatusResult, jobNoteResult, ticketNoteResult] = await Promise.all([
-        updateLogisticsStatus('job-cf-alpha', 'In Transit', {
+        updateLogisticsStatus('job-cf-alpha', 'In Progress', {
           note: 'Driver departed warehouse',
           updatedBy: 'Jordan',
           tenantId,
@@ -389,7 +389,7 @@ describe('M4 Challenger 2: Cross-Feature Adversarial Integration Challenge', () 
       setPullsheetNetworkOnlineState(false);
 
       // Queue an offline Logistics update
-      await updateLogisticsStatus('job-cf-alpha', 'Arrived', { tenantId });
+      await updateLogisticsStatus('job-cf-alpha', 'In Progress', { tenantId });
 
       // Queue an offline Repair update
       await updateRepairTicketStatus('ticket-cf-beta', 'Pending', { id: userId, name: 'Tech' }, tenantId);

@@ -76,27 +76,28 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
     expect(getByDisplayValue('SN-FX6-9921')).toBeTruthy();
   });
 
-  it('validates mandatory fault description before submission', async () => {
+  it('validates mandatory equipment name before submission', async () => {
     const createSpy = jest.spyOn(repairService, 'createRepairTicket');
     const { getByTestId, findByText, findByDisplayValue } = render(<NewRepairScreen />);
     await findByDisplayValue('Sony FX6 Cinema Camera');
 
+    fireEvent.changeText(getByTestId('input-equipment-name'), '');
     const submitBtn = getByTestId('submit-repair-btn');
     await act(async () => {
       fireEvent.press(submitBtn);
     });
 
     expect(createSpy).not.toHaveBeenCalled();
-    expect(await findByText('Please provide a fault description / damage notes')).toBeTruthy();
+    expect(await findByText('Equipment name or identifier is required')).toBeTruthy();
   });
 
   it('allows selecting priority, repair type, and operational condition toggle', async () => {
     const { getByTestId, findByDisplayValue } = render(<NewRepairScreen />);
     await findByDisplayValue('Sony FX6 Cinema Camera');
 
-    // Select Critical Priority
-    const criticalPill = getByTestId('priority-pill-critical');
-    fireEvent.press(criticalPill);
+    // Select High Priority
+    const highPill = getByTestId('priority-pill-high');
+    fireEvent.press(highPill);
 
     // Toggle Operational Condition to Available
     const availableToggle = getByTestId('condition-available');
@@ -149,8 +150,10 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
     await findByDisplayValue('Sony FX6 Cinema Camera');
 
     // Enter fault description
-    const descInput = getByTestId('input-fault-description');
+    fireEvent.press(getByTestId('ticket-internal-notes-btn'));
+    const descInput = getByTestId('edit-internal-notes-input');
     fireEvent.changeText(descInput, 'HDMI output port is loose and dropping signal intermittently.');
+    fireEvent.press(getByTestId('save-edit-internal-notes-btn'));
 
     // Add damage photo
     const addPhotoBtn = getByTestId('gallery-add-photo-btn');
@@ -176,7 +179,7 @@ describe('Milestone 2: Scan-to-Repair Workflow', () => {
         priority: 'High',
         status: 'Reported',
         condition: 'Out of Service',
-        initialNote: 'HDMI output port is loose and dropping signal intermittently.',
+        internalNotes: 'HDMI output port is loose and dropping signal intermittently.',
         requestedBy: 'Alex Technician',
         attachments: expect.arrayContaining([
           expect.objectContaining({

@@ -551,7 +551,7 @@ describe('Adversarial Smart Actions & Security Challenge Suite', () => {
     });
 
     it('GPS-ADV-03: updateLogisticsStatus automatically sets isTrackingActive: false upon completion', async () => {
-      const completedStatuses = ['Completed', 'Delivered', 'Returned', 'Closed', 'completed', 'DELIVERED'];
+      const completedStatuses = ['Completed'];
 
       for (const status of completedStatuses) {
         mockFirestore.updateDoc.mockResolvedValueOnce(undefined);

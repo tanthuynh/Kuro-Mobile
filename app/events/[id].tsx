@@ -36,6 +36,7 @@ import {
   X,
   CheckCheck,
   Layers,
+  Barcode,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/context/theme-context';
@@ -120,6 +121,10 @@ export default function EventDetailsScreen() {
     updateStatus,
     rollbackStatus,
     bulkConfirm,
+    error: pullsheetError,
+    pendingOperations,
+    reconcileOperation,
+    retryOperation,
   } = usePullSheet(eventId);
 
   const {
@@ -146,6 +151,7 @@ export default function EventDetailsScreen() {
   const [isBulkConfirming, setIsBulkConfirming] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [scanMode, setScanMode] = useState<'barcode' | 'qr'>('barcode');
   const [localTargetStatus, setLocalTargetStatus] = useState<ScanTargetStatus>(
     scanTargetStatus || 'prepped_scanned'
   );
@@ -510,15 +516,6 @@ export default function EventDetailsScreen() {
       >
         {/* Compact Combined Overview Card: Client, Venue & Schedule */}
         <Card style={styles.compactOverviewCard} testID="event-client-venue-card">
-          <CardHeader style={styles.compactCardHeader}>
-            <View style={styles.headerTitleRow}>
-              <Building2 size={16} color={colors.primary} style={{ marginRight: 6 }} />
-              <Text style={[styles.sectionTitle, { color: colors.foreground, fontSize: typography.fontSize.md }]}>
-                Client & Venue
-              </Text>
-            </View>
-          </CardHeader>
-
           <CardContent style={styles.compactCardContent}>
             {/* Top Grid: Client & Venue */}
             <View style={styles.compactGridRow}>
@@ -536,7 +533,7 @@ export default function EventDetailsScreen() {
                   VENUE
                 </Text>
                 <Text style={[styles.infoMainText, { color: colors.cardForeground, fontSize: typography.fontSize.sm }]} numberOfLines={1}>
-                  {venueContact?.name || event.venueId || 'Sydney Showground (Hall 5 & Dock 2)'}
+                  {venueContact?.name || event.venueName || event.venueId || 'Sydney Showground (Hall 5 & Dock 2)'}
                 </Text>
                 <Text style={[styles.addressText, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]} numberOfLines={1}>
                   {venueContact?.fullAddress || '1 Showground Rd, Sydney Olympic Park NSW 2127'}
@@ -563,7 +560,6 @@ export default function EventDetailsScreen() {
 
               <View style={styles.compactGridCol}>
                 <View style={styles.stageLabelRow}>
-                  <Clock size={12} color={colors.primary} style={{ marginRight: 4 }} />
                   <Text style={[styles.fieldSubLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.xs }]}>
                     EVENT
                   </Text>
@@ -575,25 +571,6 @@ export default function EventDetailsScreen() {
             </View>
           </CardContent>
         </Card>
-
-        {/* Operational Notes Card */}
-        {event.notes ? (
-          <Card style={styles.sectionCard}>
-            <CardHeader style={styles.sectionHeader}>
-              <View style={styles.headerTitleRow}>
-                <FileText size={16} color={colors.primary} style={{ marginRight: 6 }} />
-                <Text style={[styles.sectionTitle, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                  Production Notes
-                </Text>
-              </View>
-            </CardHeader>
-            <CardContent style={styles.cardContentNoTop}>
-              <Text style={[styles.notesText, { color: colors.cardForeground, fontSize: typography.fontSize.sm }]}>
-                {event.notes}
-              </Text>
-            </CardContent>
-          </Card>
-        ) : null}
 
         {/* Pull Sheet Equipment Section */}
         <View style={styles.equipmentSectionHeaderRow}>
@@ -607,13 +584,27 @@ export default function EventDetailsScreen() {
           ) : null}
         </View>
 
-        {/* Progress Overview Card */}
-        <Card style={styles.progressCard} testID="pullsheet-progress-card">
-          <CardContent style={{ paddingTop: spacing.base }}>
-            <PullSheetProgressBar progress={progress} />
-          </CardContent>
-        </Card>
-
+        {pullsheetError ? <Text accessibilityRole="alert" style={{ color: colors.foreground, marginBottom: 12 }}>
+          {pullsheetError.message}
+        </Text> : null}
+        {pendingOperations?.map((operation) => (
+          <View key={operation.operationId} style={{ marginBottom: 12, gap: 8 }} testID="pullsheet-save-recovery">
+            <Text style={{ color: colors.foreground }}>
+              {operation.committed ? 'Saved. Inventory synchronization needs attention.' :
+                operation.state === 'in_flight' ? 'Saving changes…' : 'Save outcome unknown. Check status before retrying.'}
+            </Text>
+            {operation.state !== 'in_flight' ? <View style={{ flexDirection: 'row', gap: 20 }}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Check save status"
+                onPress={() => reconcileOperation(operation.operationId)}>
+                <Text style={{ color: colors.primary, paddingVertical: 8 }}>Check status</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" accessibilityLabel="Retry original save"
+                onPress={() => retryOperation(operation.operationId)}>
+                <Text style={{ color: colors.primary, paddingVertical: 8 }}>Retry original save</Text>
+              </Pressable>
+            </View> : null}
+          </View>
+        ))}
         {/* Search Bar */}
         <View style={styles.searchWrap}>
           <Input
@@ -706,24 +697,48 @@ export default function EventDetailsScreen() {
               </Badge>
             </View>
 
-            <Pressable
-              onPress={toggleTorch}
-              style={[
-                styles.torchToggleBtn,
-                {
-                  backgroundColor: torchEnabled ? colors.primary : colors.card,
-                  borderColor: colors.border,
-                },
-              ]}
-              testID="scanner-torch-toggle-btn"
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              {torchEnabled ? (
-                <Zap size={16} color={colors.primaryForeground} />
-              ) : (
-                <ZapOff size={16} color={colors.mutedForeground} />
-              )}
-            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Pressable
+                onPress={() => setScanMode('barcode')}
+                style={[
+                  styles.modeButton,
+                  { backgroundColor: scanMode === 'barcode' ? colors.primary : colors.card, borderColor: colors.border }
+                ]}
+              >
+                <Barcode size={14} color={scanMode === 'barcode' ? colors.primaryForeground : colors.mutedForeground} style={{ marginRight: 4 }} />
+                <Text style={{ fontSize: typography.fontSize.xs, color: scanMode === 'barcode' ? colors.primaryForeground : colors.mutedForeground, fontFamily: typography.fontFamily.bold }}>1D</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => setScanMode('qr')}
+                style={[
+                  styles.modeButton,
+                  { backgroundColor: scanMode === 'qr' ? colors.primary : colors.card, borderColor: colors.border }
+                ]}
+              >
+                <QrCode size={14} color={scanMode === 'qr' ? colors.primaryForeground : colors.mutedForeground} style={{ marginRight: 4 }} />
+                <Text style={{ fontSize: typography.fontSize.xs, color: scanMode === 'qr' ? colors.primaryForeground : colors.mutedForeground, fontFamily: typography.fontFamily.bold }}>QR</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={toggleTorch}
+                style={[
+                  styles.torchToggleBtn,
+                  {
+                    backgroundColor: torchEnabled ? colors.primary : colors.card,
+                    borderColor: colors.border,
+                  },
+                ]}
+                testID="scanner-torch-toggle-btn"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                {torchEnabled ? (
+                  <Zap size={16} color={colors.primaryForeground} />
+                ) : (
+                  <ZapOff size={16} color={colors.mutedForeground} />
+                )}
+              </Pressable>
+            </View>
           </View>
 
           {/* Camera Viewfinder */}
@@ -791,7 +806,7 @@ export default function EventDetailsScreen() {
               size="default"
               icon={<QrCode size={18} color={colors.primaryForeground} />}
               onPress={() => setIsScannerOpen(true)}
-              style={styles.bottomBarBtn}
+              style={[styles.bottomBarBtn, { backgroundColor: colors.brandGreen }]}
               testID="start-scanning-btn"
               accessibilityLabel="Start Scanning"
             >
@@ -1007,6 +1022,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     zIndex: 20,
     overflow: 'hidden',
+  },
+  modeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    minHeight: 32,
   },
   scannerTopToolbar: {
     flexDirection: 'row',

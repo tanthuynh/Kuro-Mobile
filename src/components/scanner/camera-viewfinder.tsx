@@ -294,53 +294,6 @@ export const CameraViewfinder: React.FC<CameraViewfinderProps> = ({
         ]}
       />
 
-      {/* Viewfinder Controls Overlay (Top) */}
-      <View style={styles.topControls}>
-        <View style={styles.modeGroup}>
-          <Pressable
-            onPress={() => onToggleMode?.('barcode')}
-            style={[
-              styles.modeButton,
-              {
-                backgroundColor: scanMode === 'barcode' ? colors.primary : 'rgba(0,0,0,0.6)',
-              },
-            ]}
-          >
-            <Barcode size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
-            <Text style={styles.modeText}>1D Barcode</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => onToggleMode?.('qr')}
-            style={[
-              styles.modeButton,
-              {
-                backgroundColor: scanMode === 'qr' ? colors.primary : 'rgba(0,0,0,0.6)',
-              },
-            ]}
-          >
-            <QrCode size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
-            <Text style={styles.modeText}>QR Code</Text>
-          </Pressable>
-        </View>
-
-        {onToggleTorch ? (
-          <Pressable
-            onPress={onToggleTorch}
-            style={[
-              styles.torchButton,
-              {
-                backgroundColor: torchEnabled ? colors.status.degraded : 'rgba(0,0,0,0.6)',
-              },
-            ]}
-            accessibilityLabel={torchEnabled ? 'Torch Off' : 'Torch On'}
-            testID="torch-toggle-btn"
-          >
-            {torchEnabled ? <Zap size={18} color="#000000" /> : <ZapOff size={18} color="#FFFFFF" />}
-          </Pressable>
-        ) : null}
-      </View>
-
       {/* Viewfinder Guidance Label (Bottom) */}
       <View style={styles.bottomPrompt}>
         <Text style={styles.promptText}>

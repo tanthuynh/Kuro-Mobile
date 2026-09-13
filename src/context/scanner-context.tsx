@@ -22,12 +22,13 @@ import {
   updatePullsheetItemStatus,
   isItemOperationPending,
   isOnline,
+  type CommandExecutionResult,
 } from '@/services/pull-sheet-service';
 import {
   isActionablePullsheetItem,
   normalizePullsheetStatus,
 } from '@/lib/pull-sheet-engine';
-import { evaluatePullsheetScan, createScanThrottle } from '@/lib/scanner-engine';
+import { evaluatePullsheetScan, createScanThrottle, getSerializedScanCode } from '@/lib/scanner-engine';
 import { AudioService } from '@/services/audio-service';
 import { HapticService } from '@/services/haptic-service';
 import type { Pullsheet, PullsheetItem } from '@/types/pull-sheet';
@@ -78,8 +79,11 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const { equipmentLookupMap, equipment } = useEquipment();
 
+  const scanBusyRef = useRef(false);
+  const snapshotRevisionRef = useRef(0);
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
   const [activePullsheet, setActivePullsheet] = useState<Pullsheet | null>(null);
+  const latestPullsheetRef = useRef<Pullsheet | null>(null);
   const [scannerMode, setScannerMode] = useState<ScannerMode>('continuous');
   const [scanTargetStatus, setScanTargetStatus] = useState<ScanTargetStatus>('prepped_scanned');
   const [torchEnabled, setTorchEnabled] = useState<boolean>(false);
@@ -104,6 +108,9 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsCompletionModalVisible(false);
   }
 
+  const scanScopeRef = useRef({ activeEventId, tenantId, currentUserId });
+  scanScopeRef.current = { activeEventId, tenantId, currentUserId };
+
   const dismissCompletionModal = useCallback(() => {
     setIsCompletionModalVisible(false);
   }, []);
@@ -119,10 +126,15 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
 
+    let subscribed = true;
     const unsubscribe = subscribePullsheet(
       activeEventId,
       tenantId,
       (data) => {
+        if (!subscribed || scanScopeRef.current.activeEventId !== activeEventId ||
+            scanScopeRef.current.tenantId !== tenantId || scanScopeRef.current.currentUserId !== currentUserId) return;
+        snapshotRevisionRef.current++;
+        latestPullsheetRef.current = data;
         setActivePullsheet(data);
       },
       (err) => {
@@ -131,9 +143,10 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     );
 
     return () => {
+      subscribed = false;
       unsubscribe();
     };
-  }, [activeEventId, tenantId]);
+  }, [activeEventId, tenantId, currentUserId]);
 
   const toggleTorch = useCallback(() => {
     setTorchEnabled((prev) => !prev);
@@ -213,7 +226,14 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         };
       }
 
+      if (scanBusyRef.current) return { type: 'ALREADY_COMPLETED', message: 'A scan is already saving. Please wait.' };
+      scanBusyRef.current = true;
+      const scanScope = scanScopeRef.current;
+      const scanRevision = snapshotRevisionRef.current;
+      const isCurrentScan = () => scanScopeRef.current.activeEventId === scanScope.activeEventId &&
+        scanScopeRef.current.tenantId === scanScope.tenantId && scanScopeRef.current.currentUserId === scanScope.currentUserId;
       setIsProcessing(true);
+      try {
 
       const pullsheetItems = activePullsheet?.items || [];
       const effectiveTargetStatus = targetStatusOverride || scanTargetStatus;
@@ -222,7 +242,7 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Multi-sensory feedback & Firestore reconciliation
       switch (result.type) {
         case 'SUCCESS': {
-          let saveResult: { success: boolean; error?: string } = { success: true };
+          let saveResult: CommandExecutionResult = { success: true };
 
           if (result.item) {
             if (!activeEventId || !tenantId) {
@@ -240,6 +260,7 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
             // Guard against conflicting actions on an item with an in-flight or outcome-unknown operation
             const isPending = await isItemOperationPending(tenantId, currentUserId, result.item.id, activeEventId);
+            if (!isCurrentScan()) return { type: 'UNKNOWN_CODE', message: 'Session changed before saving.' };
             if (isPending) {
               await HapticService.scanWarning();
               await AudioService.playScanWarning();
@@ -250,6 +271,7 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 warningOnly: true,
                 message: `Operation in-flight for "${result.item.description || cleanCode}". Please wait or reconcile.`,
               };
+              if (!isCurrentScan()) return pendingResult;
               setLastResult(pendingResult);
               showHudWithTimeout();
               setIsProcessing(false);
@@ -292,23 +314,44 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 newCount,
                 isFullyPrepped,
                 { uid: currentUserId },
-                cleanCode
+                getSerializedScanCode(cleanCode, result.equipment)
               );
 
-              // 100% completion celebration triggers ONLY after validated server acknowledgement
-              if (saveResult.success) {
-                const is100Percent =
-                  isFullyPrepped && isPullsheet100PercentComplete(pullsheetItems, result.item.id);
-
-                if (is100Percent) {
+              if (!isCurrentScan()) return { type: 'UNKNOWN_CODE', message: 'Scan saved for the previous session. Check that pull sheet.' };
+              // Only acknowledged server state can determine count/completion.
+              const receiptItem = saveResult.item as PullsheetItem | undefined;
+              const completionItems = snapshotRevisionRef.current === scanRevision
+                ? pullsheetItems : latestPullsheetRef.current?.items || [];
+              const committedItem = snapshotRevisionRef.current === scanRevision ? receiptItem
+                : completionItems.find((item) => item.id === receiptItem?.id);
+              result.isFullyPrepped = false;
+              result.newScannedCount = undefined;
+              result.message = 'Scan saved. Waiting for the updated count.';
+              if (saveResult.success && committedItem?.id === result.item.id) {
+                result.item = committedItem;
+                result.newScannedCount = committedItem.scannedQuantity;
+                result.isFullyPrepped = committedItem.status === 'prepped_scanned';
+                result.message = `Prepped: ${committedItem.description || cleanCode} (${committedItem.scannedQuantity ?? 0}/${committedItem.quantity})`;
+                if (snapshotRevisionRef.current === scanRevision) {
+                  setActivePullsheet((prev) => prev ? { ...prev, items: prev.items.map((it) =>
+                    it.id === committedItem.id ? { ...it, ...committedItem } : it) } : prev);
+                }
+                if (result.isFullyPrepped && saveResult.reconciliationStatus !== 'pending' &&
+                    saveResult.reconciliationStatus !== 'failed' &&
+                    isPullsheet100PercentComplete(completionItems, committedItem.id)) {
                   await HapticService.scanCelebration();
                   await AudioService.playCelebrationChime();
-                  setIsCompletionModalVisible(true);
+                  if (isCurrentScan()) setIsCompletionModalVisible(true);
                 }
               }
             }
           }
 
+          if (!isCurrentScan()) return { type: 'UNKNOWN_CODE', message: 'Session changed during the save. Check the original pull sheet.' };
+          if (saveResult.success && (saveResult.reconciliationStatus === 'pending' || saveResult.reconciliationStatus === 'failed')) {
+            result.warningOnly = true;
+            result.message = 'Scan saved. Inventory synchronization needs recovery from the pull sheet.';
+          }
           if (!saveResult.success) {
             // Server rejection or network loss: trigger error feedback and abort celebration
             await HapticService.scanError();
@@ -317,6 +360,7 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
               type: 'UNKNOWN_CODE',
               message: saveResult.error || 'Server rejected scan update',
             };
+            if (!isCurrentScan()) return failureResult;
             setLastResult(failureResult);
             showHudWithTimeout();
             setIsProcessing(false);
@@ -332,6 +376,7 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
             await AudioService.playScanSuccess();
           }
 
+          if (!isCurrentScan()) return result;
           setLastResult(result);
           showHudWithTimeout();
           break;
@@ -341,6 +386,7 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
           // Over-prep or already completed guard: warning audio and haptic
           await HapticService.scanWarning();
           await AudioService.playScanWarning();
+          if (!isCurrentScan()) return result;
           setLastResult(result);
           showHudWithTimeout();
           break;
@@ -353,12 +399,14 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
           // Strict rejection: error audio and haptic, zero Firestore writes
           await HapticService.scanError();
           await AudioService.playScanError();
+          if (!isCurrentScan()) return result;
           setLastResult(result);
           showHudWithTimeout();
           break;
         }
       }
 
+      if (!isCurrentScan()) return result;
       // Record in recent scans list
       const newRecord: RecentScanRecord = {
         id: `scan-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -377,6 +425,11 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setIsProcessing(false);
 
       return result;
+      } catch (err: any) {
+        const failure: ScanEvaluationResult = { type: 'UNKNOWN_CODE', message: err?.message || 'Unable to process scan.' };
+        if (isCurrentScan()) { setLastResult(failure); showHudWithTimeout(); }
+        return failure;
+      } finally { scanBusyRef.current = false; setIsProcessing(false); }
     },
     [activePullsheet, equipmentLookupMap, activeEventId, tenantId, currentUserId, scanTargetStatus, showHudWithTimeout]
   );

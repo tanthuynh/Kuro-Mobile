@@ -14,6 +14,7 @@ import {
   Pressable,
   Image,
   Platform,
+  Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -21,6 +22,7 @@ import {
   Moon,
   Sun,
   Smartphone,
+  ExternalLink,
 } from 'lucide-react-native';
 import { SvgXml } from 'react-native-svg';
 import { ref, onValue, set } from 'firebase/database';
@@ -488,6 +490,67 @@ export default function ProfileScreen() {
                 </Text>
               </Pressable>
             </View>
+          </CardContent>
+        </Card>
+
+        {/* Enterprise Account & Data Policy Card */}
+        <Card style={styles.sectionCard}>
+          <CardHeader>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: colors.cardForeground, fontSize: typography.fontSize.lg },
+              ]}
+            >
+              Enterprise Account & Privacy
+            </Text>
+          </CardHeader>
+          <CardContent>
+            <Text
+              style={{
+                color: colors.mutedForeground,
+                fontSize: typography.fontSize.sm,
+                lineHeight: 20,
+                fontFamily: 'Calibri',
+                marginBottom: 8,
+              }}
+            >
+              Kuro Mobile is an enterprise logistics and warehouse operations tool. User accounts, access permissions, and company data are provisioned and administered via the Kuro Web portal.
+            </Text>
+            <Text
+              style={{
+                color: colors.mutedForeground,
+                fontSize: typography.fontSize.sm,
+                lineHeight: 20,
+                fontFamily: 'Calibri',
+                marginBottom: 12,
+              }}
+            >
+              To request account deactivation, data export, or deletion in accordance with Apple and Google Play privacy policies, contact your organization's administrator or access the web management portal.
+            </Text>
+            <Pressable
+              onPress={() => Linking.openURL('https://app.kurorms.com')}
+              accessibilityRole="link"
+              accessibilityLabel="Open Kuro Web Portal at app.kurorms.com"
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                paddingVertical: 6,
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.brandGreen,
+                  fontSize: typography.fontSize.sm,
+                  fontWeight: '600',
+                  fontFamily: 'Calibri',
+                }}
+              >
+                Open Kuro Web (app.kurorms.com)
+              </Text>
+              <ExternalLink size={14} color={colors.brandGreen} />
+            </Pressable>
           </CardContent>
         </Card>
       </ScrollView>

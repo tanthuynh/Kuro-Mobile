@@ -46,7 +46,16 @@ export function LogisticsDestinationCard({
   const { colors, typography, spacing, layout } = useTheme();
 
   const isNoteType = destination.type === 'note';
-  const stopLabel = isNoteType ? 'Itinerary Note' : `Stop ${index + 1}`;
+  const isStart = index === 0;
+  
+  let stopLabel = 'Stop';
+  if (isNoteType) {
+    stopLabel = 'Itinerary Note';
+  } else if (isStart) {
+    stopLabel = 'Start';
+  } else {
+    stopLabel = `Stop ${index}`;
+  }
 
   const mapsUrl = buildMapsUrl(destination.address, destination.destinationName);
   const phoneUrl = buildPhoneUrl(destination.contact);
@@ -146,35 +155,37 @@ export function LogisticsDestinationCard({
         ) : null}
 
         {/* 1-Tap Smart Actions Bar */}
-        <View style={[styles.actionsBar, { borderTopColor: colors.border }]}>
-          {/* 1-Tap Open in Maps */}
-          <Button
-            variant="outline"
-            size="sm"
-            icon={<Navigation size={14} color={mapsUrl ? colors.primary : colors.mutedForeground} />}
-            onPress={handleOpenMaps}
-            disabled={!mapsUrl}
-            style={styles.actionButton}
-            testID={`open-maps-btn-${destination.id || index}`}
-            accessibilityLabel={`Open ${destination.destinationName || 'destination'} in Google Maps`}
-          >
-            Open in Maps
-          </Button>
+        {!isStart && (
+          <View style={[styles.actionsBar, { borderTopColor: colors.border }]}>
+            {/* 1-Tap Open in Maps */}
+            <Button
+              variant="outline"
+              size="sm"
+              icon={<Navigation size={14} color={mapsUrl ? colors.primary : colors.mutedForeground} />}
+              onPress={handleOpenMaps}
+              disabled={!mapsUrl}
+              style={styles.actionButton}
+              testID={`open-maps-btn-${destination.id || index}`}
+              accessibilityLabel={`Open ${destination.destinationName || 'destination'} in Google Maps`}
+            >
+              Open in Maps
+            </Button>
 
-          {/* 1-Tap Call Contact */}
-          <Button
-            variant="outline"
-            size="sm"
-            icon={<Phone size={14} color={phoneUrl ? colors.status.online : colors.mutedForeground} />}
-            onPress={handleCallContact}
-            disabled={!phoneUrl}
-            style={styles.actionButton}
-            testID={`call-contact-btn-${destination.id || index}`}
-            accessibilityLabel={`Call contact ${destination.contact || ''}`}
-          >
-            Call Contact
-          </Button>
-        </View>
+            {/* 1-Tap Call Contact */}
+            <Button
+              variant="outline"
+              size="sm"
+              icon={<Phone size={14} color={phoneUrl ? colors.status.online : colors.mutedForeground} />}
+              onPress={handleCallContact}
+              disabled={!phoneUrl}
+              style={styles.actionButton}
+              testID={`call-contact-btn-${destination.id || index}`}
+              accessibilityLabel={`Call contact ${destination.contact || ''}`}
+            >
+              Call Contact
+            </Button>
+          </View>
+        )}
       </CardContent>
     </Card>
   );

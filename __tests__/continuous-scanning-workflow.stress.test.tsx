@@ -76,7 +76,7 @@ describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () =>
       tenantId: 'tenant-kuro-sydney',
       name: 'L-Acoustics K2 Line Array',
       barcode: 'BAR-LA-K2-0042',
-      serialNumber: 'SN-994821',
+      serialNumber: 'SN-994821', serialisation: 'No',
       category: 'Audio',
       knownLocation: 'Sydney Warehouse Bay A1',
       quantity: 16,
@@ -86,7 +86,7 @@ describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () =>
       tenantId: 'tenant-kuro-sydney',
       name: 'Robe BMFL Blade Moving Head',
       barcode: 'BAR-RB-BMFL-018',
-      serialNumber: 'SN-441209',
+      serialNumber: 'SN-441209', serialisation: 'No',
       category: 'Lighting',
       knownLocation: 'Sydney Warehouse Bay L3',
       quantity: 12,
@@ -222,7 +222,7 @@ describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () =>
         if (pullsheetSubCallback) {
           pullsheetSubCallback(currentPullsheetState);
         }
-        return { success: true };
+        return { success: true, item: currentPullsheetState.items.find((it) => it.id === itemId) };
       }
     );
 
@@ -273,7 +273,7 @@ describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () =>
         1,
         false,
         { uid: 'operator-uid-99' },
-        'BAR-LA-K2-0042'
+        undefined
       );
 
       // Step 3: Scan distinct item BMFL with 0ms transition delay (1 of 1 -> fully prepped)
@@ -294,7 +294,7 @@ describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () =>
         1,
         true,
         { uid: 'operator-uid-99' },
-        'BAR-RB-BMFL-018'
+        undefined
       );
 
       // Step 4: Scan K2 second unit (2 of 2 -> now fully prepped)
@@ -313,7 +313,7 @@ describe('Continuous Camera Scanning Workflow Stress & Integration Suite', () =>
         2,
         true,
         { uid: 'operator-uid-99' },
-        'BAR-LA-K2-0042'
+        undefined
       );
 
       // Step 5: Verify Session Scan Log recorded all 3 operations with details

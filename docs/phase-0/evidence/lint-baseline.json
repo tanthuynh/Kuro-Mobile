@@ -1,0 +1,61 @@
+{
+  "command": "node node_modules/eslint/bin/eslint.js app src --format json --output-file=<temp>/kuro-phase0-lint.json",
+  "errors": 106.0,
+  "warnings": 167.0,
+  "rules": [
+    {
+      "rule": "@typescript-eslint/no-unused-vars",
+      "Count": 139
+    },
+    {
+      "rule": "react-hooks/refs",
+      "Count": 65
+    },
+    {
+      "rule": "react-hooks/set-state-in-effect",
+      "Count": 22
+    },
+    {
+      "rule": "react/no-unescaped-entities",
+      "Count": 10
+    },
+    {
+      "rule": "@typescript-eslint/array-type",
+      "Count": 9
+    },
+    {
+      "rule": "@typescript-eslint/no-require-imports",
+      "Count": 7
+    },
+    {
+      "rule": "react-hooks/exhaustive-deps",
+      "Count": 5
+    },
+    {
+      "rule": "import/export",
+      "Count": 4
+    },
+    {
+      "rule": "import/no-named-as-default-member",
+      "Count": 4
+    },
+    {
+      "rule": "react-hooks/preserve-manual-memoization",
+      "Count": 4
+    },
+    {
+      "rule": "import/no-duplicates",
+      "Count": 2
+    },
+    {
+      "rule": "react-hooks/error-boundaries",
+      "Count": 1
+    },
+    {
+      "rule": "unicode-bom",
+      "Count": 1
+    }
+  ],
+  "scope": "app and src; includes colocated tests, excludes root __tests__",
+  "autoFix": false
+}

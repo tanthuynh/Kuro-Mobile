@@ -104,8 +104,8 @@ describe('Milestone 4: Continuous Scanner UI & Workflow', () => {
 
       // Trigger barcode scanned event on CameraView in test environment
       const cameraView = getByTestId('camera-view-native');
-      fireEvent(cameraView, 'barcodeScanned', { data: 'BAR-LA-K2-0042' });
-      expect(onScan).toHaveBeenCalledWith('BAR-LA-K2-0042');
+      fireEvent(cameraView, 'barcodeScanned', { data: 'SN-994821' });
+      expect(onScan).toHaveBeenCalledWith('SN-994821');
 
       // Toggle torch
       const torchBtn = getByTestId('torch-toggle-btn');
@@ -169,12 +169,12 @@ describe('Milestone 4: Continuous Scanner UI & Workflow', () => {
       );
 
       const input = getByPlaceholderText('Type barcode or serial number...');
-      fireEvent.changeText(input, 'BAR-LA-K2-0042');
+      fireEvent.changeText(input, 'SN-994821');
 
       const submitBtn = getByTestId('manual-code-submit-btn');
       fireEvent.press(submitBtn);
 
-      expect(onSubmit).toHaveBeenCalledWith('BAR-LA-K2-0042');
+      expect(onSubmit).toHaveBeenCalledWith('SN-994821');
     });
   });
 
@@ -210,14 +210,14 @@ describe('Milestone 4: Continuous Scanner UI & Workflow', () => {
       // Match item on pullsheet by barcode
       let scanRes: any;
       await act(async () => {
-        scanRes = await result.current.processScan('BAR-LA-K2-0042');
+        scanRes = await result.current.processScan('SN-994821');
       });
 
       expect(scanRes.type).toBe('SUCCESS');
       expect(AudioService.playScanSuccess).toHaveBeenCalled();
       expect(HapticService.scanSuccess).toHaveBeenCalled();
       expect(result.current.recentScans.length).toBe(1);
-      expect(result.current.recentScans[0].code).toBe('BAR-LA-K2-0042');
+      expect(result.current.recentScans[0].code).toBe('SN-994821');
 
       // Scan gear in fleet but not on pullsheet
       let notOnJobRes: any;

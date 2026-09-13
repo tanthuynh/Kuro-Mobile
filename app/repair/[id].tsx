@@ -1486,6 +1486,7 @@ export default function RepairTicketDetailScreen({
                   style={({ pressed }) => [
                     styles.sideEqualBox,
                     {
+                      flexDirection: 'column',
                       backgroundColor:
                         !isOutOfService
                           ? isDark
@@ -1502,7 +1503,7 @@ export default function RepairTicketDetailScreen({
                   accessibilityLabel="Set condition to Available to Use"
                 >
                   <CheckCircle2
-                    size={12}
+                    size={16}
                     color={!isOutOfService ? (isDark ? '#34D399' : '#047857') : colors.mutedForeground}
                   />
                   <Text
@@ -1530,6 +1531,7 @@ export default function RepairTicketDetailScreen({
                   style={({ pressed }) => [
                     styles.sideEqualBox,
                     {
+                      flexDirection: 'column',
                       backgroundColor:
                         isOutOfService
                           ? isDark
@@ -1546,7 +1548,7 @@ export default function RepairTicketDetailScreen({
                   accessibilityLabel="Set condition to Out of Service"
                 >
                   <ShieldAlert
-                    size={12}
+                    size={16}
                     color={isOutOfService ? (isDark ? '#F87171' : '#DC2626') : colors.mutedForeground}
                   />
                   <Text
@@ -1573,7 +1575,6 @@ export default function RepairTicketDetailScreen({
               <View style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}>
                 <Pressable testID="condition-available" onPress={() => handleSelectCondition('Available to Use')} />
                 <Pressable testID="condition-out-of-service" onPress={() => handleSelectCondition('Out of Service')} />
-                <Pressable testID="priority-pill-critical" onPress={() => handleSelectPriority('Critical')} />
                 <Pressable testID="priority-pill-high" onPress={() => handleSelectPriority('High')} />
                 <Pressable testID="priority-pill-medium" onPress={() => handleSelectPriority('Medium')} />
                 <Pressable testID="priority-pill-low" onPress={() => handleSelectPriority('Low')} />
@@ -1765,10 +1766,12 @@ export default function RepairTicketDetailScreen({
                 accessibilityLabel={`Repair Period: ${periodDisplay}. Tap to edit`}
               >
                 <View style={styles.periodTileHeader}>
-                  <Text style={[styles.fieldLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                    REPAIR PERIOD
-                  </Text>
-                  <Calendar size={13} color={colors.primary} />
+                  <View style={styles.internalNotesTitleGroup}>
+                    <Calendar size={15} color={colors.primary} style={{ marginRight: 6 }} />
+                    <Text style={[styles.fieldLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginBottom: 0 }]}>
+                      REPAIR PERIOD
+                    </Text>
+                  </View>
                 </View>
                 <Text style={[styles.periodValueText, { color: colors.foreground, fontSize: typography.fontSize.base }]}>
                   {periodDisplay}
@@ -1803,7 +1806,7 @@ export default function RepairTicketDetailScreen({
               <RepairPhotoGallery
                 photos={photoAttachments}
                 editable={true}
-                onAddPhoto={handleTakeCameraPhoto}
+                onAddPhoto={isNewMode ? handleAddNewModePhoto : undefined}
                 onRemovePhoto={isNewMode ? handleRemoveNewModePhoto : (id) => promptDeleteAttachment({ id })}
                 onPressPhoto={(photo) => setViewingPhoto(photo)}
                 title="Images"
@@ -1821,8 +1824,9 @@ export default function RepairTicketDetailScreen({
                 </View>
 
                 {docAttachments.length === 0 ? (
-                  <View style={[styles.emptySectionBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <Text style={[styles.emptySectionText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
+                  <View style={[styles.emptySectionBox, { backgroundColor: colors.card, borderColor: colors.border, borderStyle: 'dashed' }]}>
+                    <FileText size={26} color={colors.mutedForeground} />
+                    <Text style={[styles.emptySectionText, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginTop: 6 }]}>
                       No documents attached.
                     </Text>
                   </View>
@@ -1942,20 +1946,28 @@ export default function RepairTicketDetailScreen({
             {isSubmittingNew ? 'Creating Ticket...' : 'Create Ticket'}
           </Button>
         ) : (
-          <>
-
-
+          <View style={{ flexDirection: 'row', gap: 8, width: '100%' }}>
+            <Button
+              variant="outline"
+              size="default"
+              icon={<Camera size={16} color={colors.primary} />}
+              onPress={handleTakeCameraPhoto}
+              style={[styles.bottomBarButton, { flex: 1 }]}
+              testID="detail-add-photo-btn"
+            >
+              Add Photo
+            </Button>
             <Button
               variant="primary"
               size="default"
               icon={<Paperclip size={16} color={colors.primaryForeground} />}
               onPress={() => setIsAddAttachmentOpen(true)}
-              style={styles.bottomBarButton}
+              style={[styles.bottomBarButton, { flex: 1 }]}
               testID="detail-add-attachment-btn"
             >
               Add Attachment
             </Button>
-          </>
+          </View>
         )}
       </View>
 

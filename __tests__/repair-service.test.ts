@@ -1050,7 +1050,7 @@ describe('repair-service', () => {
       const res = await updateRepairTicketFields(
         'ticket-101',
         {
-          priority: 'Critical',
+          priority: 'High',
           condition: 'Available to Use',
           internalReference: 'REF-NEW-2026',
           repairPeriodStart: '2026-08-25T00:00:00.000Z',
@@ -1064,7 +1064,7 @@ describe('repair-service', () => {
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          priority: 'Critical',
+          priority: 'High',
           condition: 'Available to Use',
           internalReference: 'REF-NEW-2026',
           repairPeriodStart: '2026-08-25T00:00:00.000Z',
@@ -1231,7 +1231,7 @@ describe('repair-service', () => {
       );
     });
 
-    it('SVC-FLD-09: successfully updates priority to None', async () => {
+    it('SVC-FLD-09: rejects unsupported new priority None', async () => {
       mockFirestore.getDoc.mockResolvedValue({
         exists: () => true,
         data: () => ({
@@ -1247,13 +1247,8 @@ describe('repair-service', () => {
         'tenant-alpha'
       );
 
-      expect(res.success).toBe(true);
-      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          priority: 'None',
-        })
-      );
+      expect(res.success).toBe(false);
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
     });
 
     it('SVC-FLD-10: preserves existing equipment properties when updating partial equipment object', async () => {
@@ -1946,7 +1941,6 @@ describe('repair-service', () => {
     });
   });
 });
-
 
 
 

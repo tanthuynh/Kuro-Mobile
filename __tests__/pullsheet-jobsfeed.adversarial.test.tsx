@@ -418,7 +418,8 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
 
       const updateCountSpy = jest
         .spyOn(pullSheetService, 'updatePullsheetItemScannedCount')
-        .mockResolvedValue({ success: true });
+        .mockResolvedValueOnce({ success: true, item: { ...items[0], scannedQuantity: 1 } })
+        .mockResolvedValueOnce({ success: true, item: { ...items[0], scannedQuantity: 2, status: 'prepped_scanned' } });
 
       const { result } = renderHook(() => usePullSheet('ev-scan-01'));
 
@@ -565,7 +566,7 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
   /* 6. Bulk Confirmation Concurrency & Race Conditions                         */
   /* ========================================================================== */
   describe('6. Bulk Confirmation Concurrency & Race Conditions', () => {
-    it('executes 25 parallel bulk confirmations safely without state corruption', async () => {
+    it('coalesces 25 rapid bulk-confirm taps into one save without state corruption', async () => {
       const items: PullsheetItem[] = [
         { id: 'p-1', quantity: 1, type: 'item', status: 'pending', description: 'Pending Item 1' },
         { id: 'p-2', quantity: 1, type: 'item', status: 'pending', description: 'Pending Item 2' },
@@ -598,10 +599,9 @@ describe('Adversarial Challenge: Pull Sheet & Jobs Feed Systems', () => {
         results = await Promise.all(promises);
       });
 
-      for (const res of results) {
-        expect(res).toBe(true);
-      }
-      expect(bulkSpy).toHaveBeenCalledTimes(25);
+      expect(results.filter(Boolean)).toHaveLength(1);
+      expect(results.filter((saved) => !saved)).toHaveLength(24);
+      expect(bulkSpy).toHaveBeenCalledTimes(1);
 
       // Verify that already advanced items were NEVER mutated to 'confirmed' or reverted
       const preppedItem = result.current.items.find((it) => it.id === 'pr-1');

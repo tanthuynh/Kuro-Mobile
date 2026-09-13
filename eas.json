@@ -9,6 +9,9 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://app.kurorms.com"
+      },
       "android": {
         "buildType": "apk"
       }
@@ -16,6 +19,7 @@
     "production": {
       "autoIncrement": true,
       "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://app.kurorms.com",
         "EXPO_PUBLIC_FIRESTORE_LONG_POLLING_TIMEOUT_SECONDS": "25"
       },
       "android": {

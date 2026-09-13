@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#141414"
+      "backgroundColor": "#20572B"
     },
     "ios": {
       "supportsTablet": true,
@@ -31,7 +31,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#141414"
+        "backgroundColor": "#20572B"
       },
       "package": "com.amiastudios.kuromobile",
       "versionCode": 1,

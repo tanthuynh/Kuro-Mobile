@@ -78,7 +78,7 @@ describe('NewRepairScreen (app/repair/new.tsx)', () => {
 
     expect(await findByText('Report Fault')).toBeTruthy();
     expect(getByDisplayValue('Alex Technician')).toBeTruthy();
-    expect(getByTestId('fault-details-card')).toBeTruthy();
+    expect(getByTestId('ticket-internal-notes-btn')).toBeTruthy();
   });
 
   it('allows filling out equipment, fault description, and submitting new repair ticket', async () => {
@@ -89,11 +89,13 @@ describe('NewRepairScreen (app/repair/new.tsx)', () => {
     await findByTestId('ticket-info-card');
 
     const equipInput = getByTestId('input-equipment-name');
-    const descInput = getByTestId('input-fault-description');
+    fireEvent.press(getByTestId('ticket-internal-notes-btn'));
+    const descInput = getByTestId('edit-internal-notes-input');
     const submitBtn = getByTestId('submit-repair-btn');
 
     fireEvent.changeText(equipInput, 'Clay Paky Mythos 2');
     fireEvent.changeText(descInput, 'Pan motor belt snapped during rig');
+    fireEvent.press(getByTestId('save-edit-internal-notes-btn'));
 
     await act(async () => {
       fireEvent.press(submitBtn);
@@ -105,7 +107,7 @@ describe('NewRepairScreen (app/repair/new.tsx)', () => {
         equipment: expect.objectContaining({
           name: 'Clay Paky Mythos 2',
         }),
-        initialNote: 'Pan motor belt snapped during rig',
+        internalNotes: 'Pan motor belt snapped during rig',
         requestedBy: 'Alex Technician',
       }),
       expect.anything()

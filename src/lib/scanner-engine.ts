@@ -9,6 +9,26 @@ import type { PullsheetItem } from '@/types/pull-sheet';
 import type { Equipment } from '@/types/equipment';
 import type { ScanEvaluationResult, ScanTargetStatus } from '@/types/scanner';
 
+/** Only a unit identity belongs in the server's barcode deduplication list. */
+export function getSerializedScanCode(code: string, equipment?: Equipment): string | undefined {
+  const normalized = code.trim().toLowerCase();
+  if (!equipment || equipment.serialisation === 'No') return undefined;
+  const serial = equipment.serialNumbers?.find((sn) => sn.serial.trim().toLowerCase() === normalized)?.serial;
+  if (serial) return serial.trim();
+  if (equipment.serialNumber?.trim().toLowerCase() === normalized) return equipment.serialNumber.trim();
+  // An explicitly serialized single asset can use its asset tag. A model barcode
+  // shared by several serials cannot identify a unit.
+  if (equipment.serialisation === 'Yes' && !equipment.serialNumbers?.length) {
+    const assetCode = [equipment.assetNumber, equipment.segAssetNumber, equipment.barcode]
+      .find((value) => value?.trim().toLowerCase() === normalized)?.trim();
+    if (assetCode) return assetCode;
+  }
+  if (equipment.serialisation === 'Yes' || equipment.serialNumbers?.length || equipment.serialNumber) {
+    throw new Error('Scan the individual serial number for this equipment.');
+  }
+  return undefined;
+}
+
 /**
  * Evaluates a scanned barcode or manual code input against the active pull sheet
  * and the equipment catalog.

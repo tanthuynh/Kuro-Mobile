@@ -46,7 +46,7 @@ describe('Logistics Service (Firestore)', () => {
           assigneeId: 'user-01',
           location: 'Sydney Olympic Park',
           notes: 'Deliver before 10 AM',
-          status: 'In Transit',
+          status: 'In Progress',
           start: { _seconds: 1756118400, _nanoseconds: 0 },
           end: { _seconds: 1756204800, _nanoseconds: 0 },
           createdBy: 'user-admin',
@@ -91,7 +91,7 @@ describe('Logistics Service (Firestore)', () => {
       expect(entry.tenantId).toBe('tenant-kuro');
       expect(entry.eventName).toBe('Midnight Summer Festival');
       expect(entry.eventNumber).toBe(501);
-      expect(entry.status).toBe('In Transit');
+      expect(entry.status).toBe('In Progress');
       expect(entry.start).toBeInstanceOf(Date);
       expect(entry.end).toBeInstanceOf(Date);
       expect(entry.destinations).toHaveLength(1);
@@ -441,21 +441,21 @@ describe('Logistics Service (Firestore)', () => {
   // ==========================================================================
   describe('updateLogisticsStatus', () => {
     it('throws error if entryId or status is blank', async () => {
-      await expect(updateLogisticsStatus('', 'In Transit')).rejects.toThrow();
+      await expect(updateLogisticsStatus('', 'In Progress')).rejects.toThrow();
       await expect(updateLogisticsStatus('job-1', '')).rejects.toThrow();
     });
 
     it('updates status and serverTimestamp in Firestore', async () => {
       mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
 
-      await updateLogisticsStatus('job-1', 'In Transit', {
+      await updateLogisticsStatus('job-1', 'In Progress', {
         updatedBy: 'Alex Driver',
       });
 
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          status: 'In Transit',
+          status: 'In Progress',
           updatedBy: 'Alex Driver',
           updatedAt: expect.anything(),
         })
@@ -487,7 +487,7 @@ describe('Logistics Service (Firestore)', () => {
       });
       mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
 
-      await updateLogisticsStatus('job-1', 'En Route', {
+      await updateLogisticsStatus('job-1', 'In Progress', {
         note: 'Delayed 10 mins in traffic',
         updatedBy: 'Driver Dan',
       });
@@ -495,7 +495,7 @@ describe('Logistics Service (Firestore)', () => {
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          status: 'En Route',
+          status: 'In Progress',
           notes: expect.stringContaining('Delayed 10 mins in traffic'),
         })
       );
@@ -663,7 +663,7 @@ describe('Logistics Service (Firestore)', () => {
           tenantId: 'tenant-1',
           eventName: 'Sydney Opera House Tour',
           location: 'Bennelong Point',
-          status: 'Scheduled',
+          status: 'Pending',
           archived: false,
         })
       );

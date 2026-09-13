@@ -4,6 +4,7 @@
  * for Kuro Mobile Repair & Fault Logging.
  */
 
+import { repairStatusForWrite, repairPriorityForWrite, attachmentForWrite, WEB_REPAIR_PRIORITIES } from '@/lib/web-write-contract';
 import {
   collection,
   doc,
@@ -972,6 +973,12 @@ export async function createRepairTicket(
   if (!ticketData.equipment?.name || !ticketData.equipment.name.trim()) {
     throw new Error('Equipment name is required');
   }
+  // Validate before creating receipts, notes, or ticket documents.
+  const writeStatus = repairStatusForWrite(ticketData.status || 'Reported');
+  const writePriority = repairPriorityForWrite(ticketData.priority || 'Medium');
+  const writeAttachments = (ticketData.attachments || []).map(attachmentForWrite);
+  ticketData = { ...ticketData, status: writeStatus as RepairStatus,
+    priority: writePriority as RepairPriority, attachments: writeAttachments };
 
   // Tenant Authorization check
   if (currentUser?.tenantId && currentUser.tenantId !== tenantId) {
@@ -1128,8 +1135,8 @@ export async function createRepairTicket(
       rentmanId: anyTicketData.rentmanId || null,
       equipment: removeUndefinedFields(ticketData.equipment),
       repairType: ticketData.repairType || 'Standard Repair',
-      priority: ticketData.priority || 'Medium',
-      status,
+      priority: writePriority,
+      status: writeStatus,
       condition,
       billingStatus: ticketData.billingStatus || 'Internal',
       assignee: ticketData.assignee ? removeUndefinedFields(ticketData.assignee) : null,
@@ -1145,7 +1152,7 @@ export async function createRepairTicket(
         : null,
       notes: initialNotes,
       internalNotes: ticketData.internalNotes || '',
-      attachments: Array.isArray(ticketData.attachments) ? ticketData.attachments.map(removeUndefinedFields) : [],
+      attachments: writeAttachments.map(removeUndefinedFields),
       partsUsed: Array.isArray(ticketData.partsUsed) ? ticketData.partsUsed.map(removeUndefinedFields) : [],
       actions: [initialAction, ...(ticketData.actions || [])].map(removeUndefinedFields),
       internalReference: ticketData.internalReference || '',
@@ -1250,7 +1257,7 @@ export async function updateRepairTicketStatus(
     const actionEntry = removeUndefinedFields(createActionLogEntry(user, actionText, tenantId));
 
     const updates: Record<string, any> = removeUndefinedFields({
-      status: normNewStatus,
+      status: repairStatusForWrite(normNewStatus),
       actions: arrayUnion(actionEntry),
       updatedAt: serverTimestamp(),
       ...(updatedCondition !== undefined ? { condition: updatedCondition } : {}),
@@ -1443,8 +1450,8 @@ export async function updateRepairTicketFields(
     }
 
     // 3. Priority
-    const VALID_PRIORITIES: RepairPriority[] = ['None', 'Low', 'Medium', 'High', 'Deferred', 'Critical'];
-    if (fields.priority !== undefined) {
+    const VALID_PRIORITIES: readonly string[] = WEB_REPAIR_PRIORITIES;
+    if (fields.priority !== undefined && fields.priority !== currentData.priority) {
       if (!VALID_PRIORITIES.includes(fields.priority as any)) {
         return { success: false, error: `Invalid priority level "${fields.priority}"` };
       }
@@ -1729,7 +1736,7 @@ export async function appendRepairAttachment(
     console.warn('[repairService] getDoc offline/unreachable during appendRepairAttachment:', docErr);
   }
 
-  const sanitizedAttachment = removeUndefinedFields(attachment);
+  const sanitizedAttachment = removeUndefinedFields(attachmentForWrite(attachment));
   const actionEntry = removeUndefinedFields(
     createActionLogEntry(
       user,
@@ -2296,4 +2303,3 @@ export async function fetchTenantCrewMembers(tenantId: string): Promise<TenantCr
     return [];
   }
 }
-

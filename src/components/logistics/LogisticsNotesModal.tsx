@@ -14,6 +14,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import {
   FileText,
@@ -117,9 +118,12 @@ export function LogisticsNotesModal({
 
         {/* Multiline Note Input */}
         <View style={styles.inputContainer}>
-          <Input
-            label="Note Content"
-            placeholder=""
+          <Text style={[styles.inputLabel, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
+            Note Content
+          </Text>
+          <TextInput
+            placeholder="Type your internal note..."
+            placeholderTextColor={colors.mutedForeground}
             value={content}
             onChangeText={(val) => {
               setContent(val);
@@ -128,7 +132,15 @@ export function LogisticsNotesModal({
             multiline
             numberOfLines={4}
             testID="logistics-note-input"
-            style={styles.multilineInput}
+            style={[
+              styles.multilineInput,
+              {
+                color: colors.foreground,
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                fontSize: typography.fontSize.base,
+              }
+            ]}
           />
         </View>
 
@@ -232,10 +244,18 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 16,
   },
+  inputLabel: {
+    fontFamily: 'Calibri',
+    fontWeight: '500',
+    marginBottom: 6,
+  },
   multilineInput: {
     fontFamily: 'Calibri',
     minHeight: 100,
     textAlignVertical: 'top',
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 12,
   },
   buttonRow: {
     flexDirection: 'row',

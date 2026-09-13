@@ -249,7 +249,7 @@ describe('Challenger 1: Final Comprehensive Adversarial Stress Suite (M4)', () =
 
       for (let i = 0; i < 50; i++) {
         operations.push(
-          updateLogisticsStatus(`job-batch-${i}`, 'in_transit', {
+          updateLogisticsStatus(`job-batch-${i}`, 'In Progress', {
             tenantId,
             note: `Departure note ${i}`,
             updatedBy: 'Dispatcher',

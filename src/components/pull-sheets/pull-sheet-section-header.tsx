@@ -44,27 +44,6 @@ export const PullSheetSectionHeader: React.FC<PullSheetSectionHeaderProps> = ({
           {title}
         </Text>
       </View>
-
-      {itemCount !== undefined ? (
-        <View
-          style={[
-            styles.countBadge,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              styles.countText,
-              { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
-            ]}
-          >
-            {itemCount} {itemCount === 1 ? 'item' : 'items'}
-          </Text>
-        </View>
-      ) : null}
     </View>
   );
 };
