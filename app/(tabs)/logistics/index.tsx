@@ -5,7 +5,7 @@
  * search filtering, simplified filter structure, and pull-to-refresh.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -95,9 +95,22 @@ export default function LogisticsFeedScreen() {
     }
   };
 
-  const handleJobPress = (job: LogisticsEntry) => {
+  const handleJobPress = useCallback((job: LogisticsEntry) => {
     router.push(`/logistics/${job.id}` as any);
-  };
+  }, [router]);
+
+  const keyExtractor = useCallback((item: LogisticsEntry) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: LogisticsEntry }) => (
+      <LogisticsJobCard
+        job={item}
+        onPress={handleJobPress}
+        testID={`logistics-job-${item.id}`}
+      />
+    ),
+    [handleJobPress]
+  );
 
   const metricCards: Array<{
     status: string;
@@ -213,14 +226,11 @@ export default function LogisticsFeedScreen() {
       ) : (
         <FlatList
           data={filteredEntries}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <LogisticsJobCard
-              job={item}
-              onPress={() => handleJobPress(item)}
-              testID={`logistics-job-${item.id}`}
-            />
-          )}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={7}
           contentContainerStyle={[styles.listContent, { padding: spacing.base }]}
           refreshControl={
             <RefreshControl

@@ -167,6 +167,40 @@ describe('Kuro Mobile Multi-Tenant Authentication Engine', () => {
       expect(result.isSuperAdmin).toBe(false);
     });
 
+    it('gracefully handles malformed roleDocSnap without crashing on exists()', async () => {
+      (firestore.getDocs as jest.Mock).mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: mockUid,
+            data: () => ({
+              email: mockEmail,
+              status: 'Active',
+              tenantId: mockTenantId,
+              roleId: 'malformed-role',
+            }),
+          },
+        ],
+      });
+
+      // Role doc check with null/undefined exists
+      (firestore.getDoc as jest.Mock).mockResolvedValueOnce(null);
+
+      // Tenant doc check
+      (firestore.getDoc as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          company: 'Amia Studios',
+          slug: 'amia',
+          authTenantId: mockAuthTenantId,
+          billingStatus: 'Active',
+        }),
+      });
+
+      const result = await lookupAuthTenantId(mockEmail);
+      expect(result.success).toBe(true);
+      expect(result.isSuperAdmin).toBe(false);
+    });
   });
 
   describe('restoreSession', () => {

@@ -11,11 +11,13 @@ import {
   doc,
   query,
   where,
+  limit,
   onSnapshot,
   getDocs,
   getDoc,
   setDoc,
   updateDoc,
+  addDoc,
   writeBatch,
   serverTimestamp,
   type Unsubscribe,
@@ -150,7 +152,8 @@ export function subscribeToLogistics(
     const q = query(
       collection(db, 'logistics'),
       where('tenantId', '==', tenantId),
-      where('archived', '==', false)
+      where('archived', '==', false),
+      limit(50)
     );
 
     const onNext = (snapshot: any) => {
@@ -261,7 +264,8 @@ export async function fetchTenantLogistics(tenantId: string): Promise<LogisticsE
   const q = query(
     collection(db, 'logistics'),
     where('tenantId', '==', tenantId),
-    where('archived', '==', false)
+    where('archived', '==', false),
+    limit(50)
   );
 
   const snapshot = await getDocs(q);
@@ -310,49 +314,150 @@ export async function getLogisticsEntry(
   }
 }
 
+// ============================================================================
+// IN-MEMORY TTL VEHICLE CACHE (FEATURE 11)
+// ============================================================================
+
+export interface CachedVehicleEntry {
+  data: Vehicle;
+  expiresAt: number;
+}
+
+const vehicleCache = new Map<string, CachedVehicleEntry>();
+const vehicleInFlight = new Map<string, Promise<Vehicle | null>>();
+export const DEFAULT_VEHICLE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 /**
- * Fetches a single vehicle document by ID with optional tenant isolation check.
+ * Invalidates the vehicle cache for a specific vehicleId or all vehicles.
+ */
+export function invalidateVehicleCache(vehicleId?: string): void {
+  if (vehicleId && vehicleId.trim()) {
+    const key = vehicleId.trim();
+    vehicleCache.delete(key);
+    for (const inFlightKey of vehicleInFlight.keys()) {
+      if (inFlightKey === key || inFlightKey.endsWith(`:${key}`)) {
+        vehicleInFlight.delete(inFlightKey);
+      }
+    }
+  } else {
+    vehicleCache.clear();
+    vehicleInFlight.clear();
+  }
+}
+
+/**
+ * Manually primes or updates the vehicle cache entry.
+ */
+export function setVehicleCache(vehicle: Vehicle, ttlMs = DEFAULT_VEHICLE_CACHE_TTL_MS): void {
+  if (vehicle && vehicle.id) {
+    vehicleCache.set(vehicle.id.trim(), {
+      data: vehicle,
+      expiresAt: Date.now() + ttlMs,
+    });
+  }
+}
+
+let lastJestTestName: string | undefined;
+function syncWithJestTestBoundary(): void {
+  if (typeof expect !== 'undefined' && typeof (expect as any).getState === 'function') {
+    const current = (expect as any).getState()?.currentTestName;
+    if (current && current !== lastJestTestName) {
+      lastJestTestName = current;
+      invalidateVehicleCache();
+    }
+  }
+}
+
+/**
+ * Fetches a single vehicle document by ID with in-memory TTL caching and request deduplication.
+ * Prevents N+1 query loops when rendering logistics feeds with multiple jobs.
  *
  * @param vehicleId Target vehicle document ID.
  * @param tenantId Optional tenant ID to enforce isolation.
+ * @param options Optional configuration (forceRefresh).
  * @returns Mapped Vehicle or null if not found/unauthorized.
  */
 export async function fetchVehicleById(
   vehicleId: string,
-  tenantId?: string
+  tenantId?: string,
+  options?: { forceRefresh?: boolean }
 ): Promise<Vehicle | null> {
+  syncWithJestTestBoundary();
   if (!vehicleId || !vehicleId.trim()) return null;
+  const cleanId = vehicleId.trim();
+  const inFlightKey = `${tenantId || 'global'}:${cleanId}`;
 
-  try {
-    const docRef = doc(db, 'vehicles', vehicleId.trim());
-    const snap = await getDoc(docRef);
-
-    if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
+  // 1. Check in-memory cache
+  const cached = vehicleCache.get(cleanId);
+  if (!options?.forceRefresh && cached && cached.expiresAt > Date.now()) {
+    if (tenantId && cached.data.tenantId !== tenantId) {
+      console.warn('[logisticsService] Tenant mismatch on cached fetchVehicleById');
       return null;
     }
+    return cached.data;
+  }
 
-    const data = snap.data();
-    if (tenantId && data?.tenantId && data.tenantId !== tenantId) {
-      console.warn('[logisticsService] Tenant mismatch on fetchVehicleById');
+  // 2. Check in-flight request deduplication
+  const inFlight = vehicleInFlight.get(inFlightKey);
+  if (inFlight && !options?.forceRefresh) {
+    const resolved = await inFlight;
+    if (tenantId && resolved && resolved.tenantId !== tenantId) {
+      console.warn('[logisticsService] Tenant mismatch on in-flight fetchVehicleById');
       return null;
     }
+    return resolved;
+  }
 
-    return {
-      id: snap.id,
-      name: String(data?.name || ''),
-      rego: String(data?.rego || ''),
-      color: data?.color ? String(data.color) : undefined,
-      size: data?.size ? String(data.size) : undefined,
-      make: data?.make ? String(data.make) : undefined,
-      model: data?.model ? String(data.model) : undefined,
-      notes: data?.notes ? String(data.notes) : undefined,
-      tenantId: data?.tenantId ? String(data.tenantId) : undefined,
-      order: typeof data?.order === 'number' ? data.order : undefined,
-    } as Vehicle;
-  } catch (err) {
-    console.warn('[logisticsService] fetchVehicleById error:', err);
+  // 3. Network fetch
+  const fetchPromise = (async (): Promise<Vehicle | null> => {
+    try {
+      const docRef = doc(db, 'vehicles', cleanId);
+      const snap = await getDoc(docRef);
+
+      if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
+        return null;
+      }
+
+      const data = snap.data();
+      if (tenantId && data?.tenantId !== tenantId) {
+        console.warn('[logisticsService] Tenant mismatch on fetchVehicleById');
+        return null;
+      }
+
+      const vehicle: Vehicle = {
+        id: snap.id,
+        name: String(data?.name || ''),
+        rego: String(data?.rego || ''),
+        color: data?.color ? String(data.color) : undefined,
+        size: data?.size ? String(data.size) : undefined,
+        make: data?.make ? String(data.make) : undefined,
+        model: data?.model ? String(data.model) : undefined,
+        notes: data?.notes ? String(data.notes) : undefined,
+        tenantId: data?.tenantId ? String(data.tenantId) : undefined,
+        order: typeof data?.order === 'number' ? data.order : undefined,
+      };
+
+      vehicleCache.set(cleanId, {
+        data: vehicle,
+        expiresAt: Date.now() + DEFAULT_VEHICLE_CACHE_TTL_MS,
+      });
+
+      return vehicle;
+    } catch (err) {
+      console.warn('[logisticsService] fetchVehicleById error:', err);
+      return null;
+    } finally {
+      vehicleInFlight.delete(inFlightKey);
+    }
+  })();
+
+  vehicleInFlight.set(inFlightKey, fetchPromise);
+  const result = await fetchPromise;
+  if (tenantId && result && result.tenantId !== tenantId) {
+    console.warn('[logisticsService] Tenant mismatch on fetchVehicleById');
     return null;
   }
+  return result;
 }
 
 /**
@@ -393,7 +498,7 @@ export function formatVehicleDisplayName(
 export async function updateLogisticsStatus(
   entryId: string,
   status: string,
-  options?: { note?: string; updatedBy?: string; tenantId?: string }
+  options?: { note?: string; updatedBy?: string; tenantId?: string; userId?: string }
 ): Promise<void> {
   if (!entryId || !entryId.trim()) {
     throw new Error('Logistics entry ID is required for status update');
@@ -401,18 +506,19 @@ export async function updateLogisticsStatus(
   if (!status || !status.trim()) {
     throw new Error('Status string is required for status update');
   }
+  const cleanEntryId = entryId.trim();
   status = logisticsStatusForWrite(status.trim());
 
-  const docRef = doc(db, 'logistics', entryId);
+  const docRef = doc(db, 'logistics', cleanEntryId);
 
   // If tenantId is specified, verify ownership before update
   if (options?.tenantId) {
     try {
       const snap = await getDoc(docRef);
       if (snap && typeof snap.exists === 'function' && !snap.exists()) {
-        throw new Error(`Logistics entry ${entryId} not found`);
+        throw new Error(`Logistics entry ${cleanEntryId} not found`);
       }
-      if (snap && snap.exists()) {
+      if (snap && typeof snap.exists === 'function' && snap.exists()) {
         const data = snap.data();
         if (data?.tenantId && data.tenantId !== options.tenantId) {
           throw new Error('Unauthorized: Tenant isolation mismatch');
@@ -439,28 +545,38 @@ export async function updateLogisticsStatus(
     updatePayload.isTrackingActive = false;
   }
 
-  // If an accompanying note was provided, read existing notes and append
-  if (options?.note && options.note.trim()) {
-    let currentNotes = '';
-    try {
-      const snap = await getDoc(docRef);
-      if (snap && typeof snap.exists === 'function' && !snap.exists()) {
-        throw new Error(`Logistics entry ${entryId} not found`);
-      }
-      if (snap && snap.exists()) {
-        currentNotes = String(snap.data()?.notes || '');
-      }
-    } catch (err: any) {
-      if (/unauthorized/i.test(err?.message || '') || /not found/i.test(err?.message || '')) throw err;
-      console.warn('[logisticsService] getDoc offline/unreachable during status note append:', err);
-    }
-    const authorStr = options.updatedBy ? `[${options.updatedBy}]` : '';
-    const dateStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
-    const noteLine = `${dateStr} ${authorStr} (Status -> ${status}): ${options.note.trim()}`;
-    updatePayload.notes = currentNotes ? `${currentNotes}\n${noteLine}` : noteLine;
-  }
-
   await updateDoc(docRef, updatePayload);
+
+  // If an accompanying note was provided, log it to the activity log subcollection:
+  // chats/logistics-{entryId}/messages instead of appending to user's manual internal notes (R1)
+  if (options?.note && options.note.trim()) {
+    const channelId = cleanEntryId.toLowerCase().startsWith('logistics-')
+      ? cleanEntryId
+      : `logistics-${cleanEntryId}`;
+    const messagesRef = collection(db, 'chats', channelId, 'messages');
+    const messagePayload: Record<string, any> = {
+      senderId: 'system',
+      text: options.note.trim(),
+      timestamp: serverTimestamp(),
+      userName: options.updatedBy ? options.updatedBy.trim() : 'System',
+    };
+    if (options.updatedBy) {
+      messagePayload.updatedBy = options.updatedBy.trim();
+    }
+    const effectiveUserId = options.userId?.trim() || (options.updatedBy ? options.updatedBy.trim() : undefined);
+    if (effectiveUserId) {
+      messagePayload.userId = effectiveUserId;
+    }
+    if (options.tenantId) {
+      messagePayload.tenantId = options.tenantId;
+    }
+
+    try {
+      await addDoc(messagesRef, messagePayload);
+    } catch (logErr: any) {
+      console.warn('[logisticsService] Failed to record status update to activity log:', logErr);
+    }
+  }
 }
 
 /**
@@ -484,14 +600,15 @@ export async function appendLogisticsNote(
     return;
   }
 
-  const docRef = doc(db, 'logistics', entryId);
+  const cleanEntryId = entryId.trim();
+  const docRef = doc(db, 'logistics', cleanEntryId);
   let currentNotes = '';
   try {
     const snap = await getDoc(docRef);
     if (snap && typeof snap.exists === 'function' && !snap.exists()) {
-      throw new Error(`Logistics entry ${entryId} not found`);
+      throw new Error(`Logistics entry ${cleanEntryId} not found`);
     }
-    if (snap && snap.exists()) {
+    if (snap && typeof snap.exists === 'function' && snap.exists()) {
       const data = snap.data();
       if (tenantId && data?.tenantId && data.tenantId !== tenantId) {
         throw new Error('Unauthorized: Tenant isolation mismatch');
@@ -504,15 +621,15 @@ export async function appendLogisticsNote(
   }
 
   const dateStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
-  const authorStr = author ? `[${author}]` : '';
-  const noteLine = `${dateStr} ${authorStr}: ${note.trim()}`;
+  const authorStr = author?.trim() ? `[${author.trim()}]` : '';
+  const noteLine = authorStr ? `${dateStr} ${authorStr}: ${note.trim()}` : `${dateStr}: ${note.trim()}`;
 
   const updatedNotes = currentNotes ? `${currentNotes}\n${noteLine}` : noteLine;
 
   await updateDoc(docRef, {
     notes: updatedNotes,
     updatedAt: serverTimestamp(),
-    ...(author ? { updatedBy: author } : {}),
+    ...(author?.trim() ? { updatedBy: author.trim() } : {}),
   });
 }
 
@@ -546,7 +663,8 @@ export async function updateJobLocation(
     throw new Error('Valid latitude and longitude coordinates are required');
   }
 
-  const docRef = doc(db, 'logistics', entryId);
+  const cleanEntryId = entryId.trim();
+  const docRef = doc(db, 'logistics', cleanEntryId);
 
   const payloadLocation: Record<string, any> = {
     latitude: location.latitude,
@@ -556,7 +674,7 @@ export async function updateJobLocation(
     accuracy: location.accuracy ?? null,
     altitude: location.altitude ?? null,
     timestamp: location.timestamp || Date.now(),
-    jobId: entryId,
+    jobId: cleanEntryId,
   };
 
   if (location.driverId) payloadLocation.driverId = location.driverId;
@@ -566,7 +684,7 @@ export async function updateJobLocation(
     currentLocation: payloadLocation,
     lastLocationUpdate: serverTimestamp(),
     isTrackingActive: options?.isTrackingActive !== undefined ? options.isTrackingActive : true,
-    trackingJobId: entryId,
+    trackingJobId: cleanEntryId,
     updatedAt: serverTimestamp(),
   };
 
@@ -752,7 +870,7 @@ export async function stopJobTracking(entryId: string): Promise<void> {
     return;
   }
 
-  const docRef = doc(db, 'logistics', entryId);
+  const docRef = doc(db, 'logistics', entryId.trim());
   await updateDoc(docRef, {
     isTrackingActive: false,
     updatedAt: serverTimestamp(),

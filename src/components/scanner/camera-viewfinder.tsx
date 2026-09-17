@@ -163,7 +163,7 @@ export const CameraViewfinder: React.FC<CameraViewfinderProps> = ({
       {hasCamera ? (
         <CameraView
           testID="camera-view-native"
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
           facing="back"
           enableTorch={torchEnabled}
           barcodeScannerSettings={{
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fallbackBackground: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#0F172A',
     justifyContent: 'center',
     alignItems: 'center',

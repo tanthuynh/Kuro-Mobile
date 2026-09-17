@@ -22,14 +22,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ArrowLeft,
-  Truck,
   MapPin,
-  User,
-  Radio,
-  Play,
-  Pause,
-  CheckCircle2,
-  Sliders,
   FileText,
   AlertTriangle,
 } from 'lucide-react-native';
@@ -56,7 +49,8 @@ import { ScreenHeader } from '@/components/layout/screen-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { QuickStatusSelector } from '@/components/repair/quick-status-selector';
+import { LogisticsTrackingCard } from '@/components/logistics/logistics-tracking-card';
+import { LogisticsJobOverviewCard } from '@/components/logistics/logistics-job-overview-card';
 import { LogisticsDestinationCard } from '@/components/logistics/LogisticsDestinationCard';
 import { LogisticsNotesModal } from '@/components/logistics/LogisticsNotesModal';
 import { useConsistentBack } from '@/hooks/use-consistent-back';
@@ -369,6 +363,9 @@ export default function LogisticsJobDetailScreen() {
   const userId = user?.id || (user as any)?.uid;
   const isAssignedDriver = Boolean(userId && (userId === job.assigneeId || userId === job.driverId));
 
+  const firstPendingDestination =
+    job.destinations && job.destinations.length > 0 ? job.destinations[0] : null;
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]} testID="logistics-detail-screen">
       {/* Top Header */}
@@ -428,110 +425,31 @@ export default function LogisticsJobDetailScreen() {
           </View>
         ) : null}
 
-        {/* Tracking Controls Card */}
-        <Card style={styles.card} testID="job-controls-card">
-          <CardContent style={{ padding: 14, gap: 12 }}>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
-                TRACKING
-              </Text>
-            </View>
+        {/* Modular Tracking Controls Card */}
+        <LogisticsTrackingCard
+          isTracking={isTracking}
+          isStartingTracking={isStartingTracking}
+          isPausingTracking={isPausingTracking}
+          isCompleting={isCompleting}
+          isCompleted={isCompleted}
+          isAssignedDriver={isAssignedDriver}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onFinish={handleFinish}
+          nextDestination={firstPendingDestination}
+          testID="job-controls-card"
+        />
 
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {/* Start/Pause Toggle Button */}
-              <Button
-                variant={isTracking ? 'outline' : 'primary'}
-                size="default"
-                icon={isTracking ? <Pause size={16} color={colors.foreground} /> : <Play size={16} color={colors.primaryForeground} />}
-                onPress={isTracking ? handlePause : handlePlay}
-                loading={isTracking ? isPausingTracking : isStartingTracking}
-                disabled={(isTracking ? isPausingTracking : isStartingTracking) || !isAssignedDriver}
-                style={styles.controlBtn}
-                testID={isTracking ? 'pause-job-btn' : 'play-job-btn'}
-                accessibilityLabel={isTracking ? 'Pause tracking' : 'Start tracking'}
-              >
-                {isTracking ? 'Pause' : 'Start'}
-              </Button>
-
-              {/* Finish Button */}
-              <Button
-                variant="primary"
-                size="default"
-                icon={<CheckCircle2 size={16} color={colors.primaryForeground} />}
-                onPress={handleFinish}
-                loading={isCompleting}
-                disabled={isCompleting || isCompleted || !isAssignedDriver}
-                style={[styles.controlBtn, { backgroundColor: colors.status.online }]}
-                testID="finish-job-btn"
-                accessibilityLabel="Finish and complete job"
-              >
-                Finish
-              </Button>
-            </View>
-          </CardContent>
-        </Card>
-
-        {/* Job Overview & Metadata Card */}
-        <Card style={styles.card} testID="job-overview-card">
-          <CardContent style={styles.overviewCardContent}>
-            {/* Section Header */}
-            <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
-                JOB OVERVIEW
-              </Text>
-              <Badge
-                variant={showPermissionRevokedWarning ? 'destructive' : isTracking ? 'brand' : 'secondary'}
-                icon={isTracking ? <Radio size={12} color={colors.primary} /> : undefined}
-                testID="detail-tracking-status-badge"
-              >
-                {showPermissionRevokedWarning ? 'Permission Required' : isTracking ? 'Tracking' : 'Idle'}
-              </Badge>
-            </View>
-
-            {/* Driver and Vehicle Row */}
-            <View style={styles.driverVehicleRow}>
-              {/* Driver */}
-              <View style={styles.overviewField}>
-                <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                  Driver
-                </Text>
-                <View style={styles.fieldValueRow}>
-                  <User size={15} color={colors.primary} />
-                  <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                    {job.driverName || 'Unassigned'}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Vehicle */}
-              <View style={styles.overviewField}>
-                <Text style={[styles.overviewLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm }]}>
-                  Vehicle
-                </Text>
-                <View style={styles.fieldValueRow}>
-                  <Truck size={15} color={colors.primary} />
-                  <Text style={[styles.overviewValue, { color: colors.foreground, fontSize: typography.fontSize.sm }]}>
-                    {vehicleDisplayName || job.vehicleId || 'Not Assigned'}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* QuickStatusSelector (Pending is disabled for drivers) */}
-            <View style={styles.quickStatusContainer}>
-              <QuickStatusSelector
-                currentStatus={job.status}
-                statuses={['Pending', 'Planned', 'In Progress', 'Completed', 'Cancelled']}
-                disabledStatuses={['Pending']}
-                onSelectStatus={handleQuickStatusSelect}
-                isUpdating={isUpdatingStatus}
-                showHeader={true}
-                headerTitle="STATUS"
-                testID="job-quick-status-selector"
-              />
-            </View>
-          </CardContent>
-        </Card>
+        {/* Modular Job Overview Card */}
+        <LogisticsJobOverviewCard
+          job={job}
+          vehicleDisplayName={vehicleDisplayName}
+          isTracking={isTracking}
+          showPermissionRevokedWarning={showPermissionRevokedWarning}
+          onSelectStatus={handleQuickStatusSelect}
+          isUpdatingStatus={isUpdatingStatus}
+          testID="job-overview-card"
+        />
 
         {/* Destination Stops List */}
         <View style={styles.stopsSection} testID="destination-stops-section">

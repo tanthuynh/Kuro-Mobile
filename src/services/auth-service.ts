@@ -140,7 +140,7 @@ export async function lookupAuthTenantId(email: string): Promise<TenantLookupRes
     } else if (userData.roleId) {
       try {
         const roleDocSnap = await getDoc(doc(db, 'roles', userData.roleId));
-        if (roleDocSnap.exists()) {
+        if (roleDocSnap && typeof roleDocSnap.exists === 'function' && roleDocSnap.exists()) {
           const roleData = roleDocSnap.data() as Partial<Role>;
           if (
             roleData.name === 'Super Administrator' ||

@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   lightboxBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   lightboxHeader: {
     position: 'absolute',

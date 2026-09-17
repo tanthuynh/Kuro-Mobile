@@ -34,7 +34,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { db, rtdb, auth } from '@/lib/firebase';
-import packageJson from '@/../package.json';
+import Constants from 'expo-constants';
 
 /**
  * Crew / User Avatar renderer supporting:
@@ -575,7 +575,7 @@ export default function ProfileScreen() {
               { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
             ]}
           >
-            {`Kuro RMS Mobile • Build ${packageJson.version || '0.1.4'} (Release)`}
+            {`Kuro RMS Mobile • Build ${Constants.expoConfig?.version || '0.1.5'} (Release)`}
           </Text>
         </View>
 
@@ -707,5 +707,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
-

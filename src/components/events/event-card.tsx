@@ -6,7 +6,7 @@
  * Navigates directly to the unified Event Details screen on tap.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
@@ -27,13 +27,75 @@ export interface EventCardProps {
   assigneeName?: string;
   typeName?: string;
   typeColor?: string;
-  onPress?: () => void;
+  onPress?: (event?: Event) => void;
   onOpenPullsheet?: () => void;
   onOpenScanner?: () => void;
   testID?: string;
 }
 
-export const EventCard: React.FC<EventCardProps> = ({
+/**
+ * Normalizes and compares date/timestamp representations (Date, Firestore Timestamp, ISO string, epoch ms).
+ */
+export function areDatesOrTimestampsEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  if (a instanceof Date && b instanceof Date) {
+    return a.getTime() === b.getTime();
+  }
+  if (typeof a === 'object' && typeof b === 'object') {
+    if (a.seconds !== undefined && b.seconds !== undefined) {
+      return a.seconds === b.seconds && a.nanoseconds === b.nanoseconds;
+    }
+    if (typeof a.toDate === 'function' && typeof b.toDate === 'function') {
+      return a.toDate().getTime() === b.toDate().getTime();
+    }
+  }
+  return String(a) === String(b);
+}
+
+export function areEventCardPropsEqual(
+  prevProps: Readonly<EventCardProps>,
+  nextProps: Readonly<EventCardProps>
+): boolean {
+  if (prevProps === nextProps) return true;
+
+  if (prevProps.testID !== nextProps.testID) return false;
+  if (prevProps.venueName !== nextProps.venueName) return false;
+  if (prevProps.assigneeName !== nextProps.assigneeName) return false;
+  if (prevProps.clientName !== nextProps.clientName) return false;
+  if (prevProps.typeName !== nextProps.typeName) return false;
+  if (prevProps.typeColor !== nextProps.typeColor) return false;
+  if (prevProps.onPress !== nextProps.onPress) return false;
+
+  const prev = prevProps.event;
+  const next = nextProps.event;
+  if (prev === next) return true;
+  if (!prev || !next) return false;
+
+  if (prev.id !== next.id) return false;
+  if (prev.eventName !== next.eventName) return false;
+  if (prev.eventNumber !== next.eventNumber) return false;
+  if (prev.eventStatusId !== next.eventStatusId) return false;
+  if (prev.eventTypeId !== next.eventTypeId) return false;
+  if (prev.venueId !== next.venueId) return false;
+  if ((prev as any).venueName !== (next as any).venueName) return false;
+  if (prev.assigneeId !== next.assigneeId) return false;
+  if ((prev as any).assigneeName !== (next as any).assigneeName) return false;
+  if ((prev as any).assignee?.name !== (next as any).assignee?.name) return false;
+
+  if (!areDatesOrTimestampsEqual(prev.deliveryTime, next.deliveryTime)) return false;
+  if (!areDatesOrTimestampsEqual(prev.eventStartDate, next.eventStartDate)) return false;
+  if (!areDatesOrTimestampsEqual(prev.startTime, next.startTime)) return false;
+  if (!areDatesOrTimestampsEqual(prev.packdownTime, next.packdownTime)) return false;
+  if (!areDatesOrTimestampsEqual(prev.eventFinishDate, next.eventFinishDate)) return false;
+  if (!areDatesOrTimestampsEqual(prev.finishTime, next.finishTime)) return false;
+  if (!areDatesOrTimestampsEqual(prev.updatedAt, next.updatedAt)) return false;
+
+  return true;
+}
+
+const EventCardBase: React.FC<EventCardProps> = ({
   event,
   clientName,
   venueName,
@@ -68,7 +130,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
   const handleCardPress = () => {
     if (onPress) {
-      onPress();
+      onPress(event);
     } else {
       router.push(`/events/${event.id}`);
     }
@@ -344,3 +406,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+
+export const EventCard = memo(EventCardBase, areEventCardPropsEqual);
+

@@ -9,7 +9,7 @@
  * Vehicle name/rego with Truck size 14.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import {
   View,
   Text,
@@ -39,6 +39,7 @@ import {
 } from '@/lib/logistics-engine';
 import { fetchVehicleById, formatVehicleDisplayName } from '@/services/logistics-service';
 import type { LogisticsEntry } from '@/types/logistics';
+import { areDatesOrTimestampsEqual } from '@/components/events/event-card';
 
 export interface LogisticsJobCardProps {
   job: LogisticsEntry;
@@ -46,7 +47,44 @@ export interface LogisticsJobCardProps {
   testID?: string;
 }
 
-export function LogisticsJobCard({
+export function areLogisticsJobCardPropsEqual(
+  prevProps: Readonly<LogisticsJobCardProps>,
+  nextProps: Readonly<LogisticsJobCardProps>
+): boolean {
+  if (prevProps === nextProps) return true;
+
+  if (prevProps.testID !== nextProps.testID) return false;
+  if (prevProps.onPress !== nextProps.onPress) return false;
+
+  const prev = prevProps.job;
+  const next = nextProps.job;
+  if (prev === next) return true;
+  if (!prev || !next) return false;
+
+  if (prev.id !== next.id) return false;
+  if (prev.status !== next.status) return false;
+  if (Boolean(prev.hasPendingWrites) !== Boolean(next.hasPendingWrites)) return false;
+  if (Boolean(prev.isTrackingActive) !== Boolean(next.isTrackingActive)) return false;
+  if (prev.eventName !== next.eventName) return false;
+  if (prev.eventNumber !== next.eventNumber) return false;
+  if (prev.location !== next.location) return false;
+  if (prev.driverName !== next.driverName) return false;
+  if (prev.vehicleId !== next.vehicleId) return false;
+  if (prev.vehicleName !== next.vehicleName) return false;
+  if (prev.tenantId !== next.tenantId) return false;
+
+  const prevDestCount = Array.isArray(prev.destinations) ? prev.destinations.length : 0;
+  const nextDestCount = Array.isArray(next.destinations) ? next.destinations.length : 0;
+  if (prevDestCount !== nextDestCount) return false;
+
+  if (!areDatesOrTimestampsEqual(prev.start, next.start)) return false;
+  if (!areDatesOrTimestampsEqual(prev.end, next.end)) return false;
+  if (!areDatesOrTimestampsEqual(prev.updatedAt, next.updatedAt)) return false;
+
+  return true;
+}
+
+function LogisticsJobCardBase({
   job,
   onPress,
   testID = `logistics-job-card-${job.id}`,
@@ -424,3 +462,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+
+export const LogisticsJobCard = memo(LogisticsJobCardBase, areLogisticsJobCardPropsEqual);
+

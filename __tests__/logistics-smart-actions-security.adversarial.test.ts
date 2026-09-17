@@ -437,10 +437,165 @@ describe('Adversarial Smart Actions & Security Challenge Suite', () => {
         updateLogisticsStatus(entryId, 'Completed', {
           tenantId: 'tenant-hacker',
           updatedBy: 'Hacker',
+          note: 'Malicious automated note during rogue status update',
         })
       ).rejects.toThrow(/Unauthorized: Tenant isolation mismatch/i);
 
       expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+      expect(mockFirestore.addDoc).not.toHaveBeenCalled();
+    });
+
+    it('M1-DEF-01: updateLogisticsStatus performs only one getDoc read when both tenantId and note are provided', async () => {
+      const mockSnap = {
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-123',
+          notes: 'Existing note',
+        }),
+      };
+      mockFirestore.getDoc.mockResolvedValueOnce(mockSnap);
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'msg-123' });
+
+      await updateLogisticsStatus('job-dedup-test', 'In Progress', {
+        tenantId: 'tenant-123',
+        note: 'New dispatch note',
+        updatedBy: 'Dispatcher',
+      });
+
+      // Verify getDoc was called exactly once rather than twice
+      expect(mockFirestore.getDoc).toHaveBeenCalledTimes(1);
+    });
+
+    it('ADVERSARIAL-CONCURRENCY-01: handles rapid concurrent status updates with notes under simulated network latency without clobbering or mutating notes', async () => {
+      const latencyDelays = [45, 10, 30, 15, 5];
+      let addDocCallCount = 0;
+      const createdMessages: any[] = [];
+
+      mockFirestore.updateDoc.mockImplementation(async () => {
+        const delay = latencyDelays[addDocCallCount % latencyDelays.length];
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return undefined;
+      });
+
+      mockFirestore.addDoc.mockImplementation(async (_coll: any, payload: any) => {
+        addDocCallCount++;
+        const delay = latencyDelays[addDocCallCount % latencyDelays.length];
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        createdMessages.push(payload);
+        return { id: `msg-concurrent-${addDocCallCount}` };
+      });
+
+      // Simulate mockFirestore.getDoc for the tenant check on each concurrent call
+      mockFirestore.getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({ tenantId: 'tenant-fleet', notes: 'Manual gate code: 9988' }),
+      });
+
+      const updates = [
+        updateLogisticsStatus('job-concurrent-1', 'In Progress', {
+          note: 'Driver started route and initiated GPS tracking',
+          updatedBy: 'Driver Dan',
+          userId: 'usr-dan',
+          tenantId: 'tenant-fleet',
+        }),
+        updateLogisticsStatus('job-concurrent-1', 'Planned', {
+          note: 'Route planned and vehicle assigned',
+          updatedBy: 'Driver Dan',
+          userId: 'usr-dan',
+          tenantId: 'tenant-fleet',
+        }),
+        updateLogisticsStatus('job-concurrent-1', 'In Progress', {
+          note: 'Cleared traffic congestion',
+          updatedBy: 'Driver Dan',
+          userId: 'usr-dan',
+          tenantId: 'tenant-fleet',
+        }),
+        updateLogisticsStatus('job-concurrent-1', 'Completed', {
+          note: 'Cargo delivered and signed for by dock master',
+          updatedBy: 'Driver Dan',
+          userId: 'usr-dan',
+          tenantId: 'tenant-fleet',
+        }),
+      ];
+
+      await Promise.all(updates);
+
+      // Verify all 4 status updates were sent to Firestore
+      expect(mockFirestore.updateDoc).toHaveBeenCalledTimes(4);
+
+      // Verify none of the 4 updateDoc calls mutated the notes field on the logistics document
+      for (let i = 0; i < 4; i++) {
+        const updatePayload = mockFirestore.updateDoc.mock.calls[i][1];
+        expect(updatePayload.notes).toBeUndefined();
+      }
+
+      // Verify all 4 activity log messages were created in chats/logistics-job-concurrent-1/messages
+      expect(mockFirestore.addDoc).toHaveBeenCalledTimes(4);
+      expect(createdMessages).toHaveLength(4);
+
+      // Verify chat message schema conformance across all concurrent messages
+      for (const msg of createdMessages) {
+        expect(msg.senderId).toBe('system');
+        expect(msg.userName).toBe('Driver Dan');
+        expect(msg.userId).toBe('usr-dan');
+        expect(msg.tenantId).toBe('tenant-fleet');
+        expect(msg.timestamp).toBeDefined();
+        expect(typeof msg.text).toBe('string');
+        expect(msg.text.length).toBeGreaterThan(0);
+      }
+
+      const messageTexts = createdMessages.map((m) => m.text);
+      expect(messageTexts).toContain('Driver started route and initiated GPS tracking');
+      expect(messageTexts).toContain('Route planned and vehicle assigned');
+      expect(messageTexts).toContain('Cleared traffic congestion');
+      expect(messageTexts).toContain('Cargo delivered and signed for by dock master');
+    });
+
+    it('ADVERSARIAL-CONCURRENCY-02: interleaves manual appendLogisticsNote and automated updateLogisticsStatus without corruption', async () => {
+      let storedNotes = 'Initial gate instructions';
+
+      mockFirestore.getDoc.mockImplementation(async () => ({
+        exists: () => true,
+        data: () => ({
+          tenantId: 'tenant-interleave',
+          notes: storedNotes,
+        }),
+      }));
+
+      mockFirestore.updateDoc.mockImplementation(async (_ref: any, payload: any) => {
+        if (payload.notes !== undefined) {
+          storedNotes = payload.notes;
+        }
+      });
+
+      mockFirestore.addDoc.mockResolvedValue({ id: 'msg-auto-1' });
+
+      // Interleaved concurrent execution: manual note vs automated status log
+      await Promise.all([
+        appendLogisticsNote('job-interleave', 'Driver observed detour', 'Driver Sam', 'tenant-interleave'),
+        updateLogisticsStatus('job-interleave', 'In Progress', {
+          note: 'Automated GPS tracking engaged',
+          updatedBy: 'Driver Sam',
+          userId: 'usr-sam',
+          tenantId: 'tenant-interleave',
+        }),
+      ]);
+
+      // Manual note must be persisted in document's notes field
+      expect(storedNotes).toContain('Driver observed detour');
+      // Automated status log must NOT be in document's notes field
+      expect(storedNotes).not.toContain('Automated GPS tracking engaged');
+
+      // Automated status log must be in activity log subcollection
+      expect(mockFirestore.addDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          text: 'Automated GPS tracking engaged',
+          senderId: 'system',
+          userId: 'usr-sam',
+        })
+      );
     });
 
     it('TENANT-ADV-05: appendLogisticsNote rejects note appending if document tenantId mismatches', async () => {

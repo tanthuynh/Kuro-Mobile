@@ -109,6 +109,18 @@ describe('Event Service Bounded Queries & Operational Window Protection', () => 
 
       expect(isEventWithinOperationalWindow(datelessCompleted)).toBe(true);
     });
+
+    it('retains completed event if finishTime is an invalid Date (NaN) as a fail-safe', () => {
+      const invalidDateCompleted = {
+        id: 'ev-completed-invalid-date',
+        tenantId: mockTenantId,
+        archived: false,
+        eventStatusId: 'Completed',
+        finishTime: new Date('invalid-date'),
+      } as unknown as Event;
+
+      expect(isEventWithinOperationalWindow(invalidDateCompleted)).toBe(true);
+    });
   });
 
   describe('subscribeTenantEvents', () => {

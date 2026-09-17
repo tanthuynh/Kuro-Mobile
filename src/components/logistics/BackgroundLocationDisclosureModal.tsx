@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   dialogCard: {
     width: '100%',

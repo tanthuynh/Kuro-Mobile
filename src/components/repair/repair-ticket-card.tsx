@@ -4,7 +4,7 @@
  * Displays Priority and Condition as clean normal text instead of badge pills.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import { useTheme } from '@/context/theme-context';
 import { Card, CardContent } from '@/components/ui/card';
 import { REPAIR_STATUS_CONFIG } from '@/lib/repair-engine';
 import type { RepairTicket, RepairPriority, EquipmentCondition } from '@/types/repair';
+import { areDatesOrTimestampsEqual } from '@/components/events/event-card';
 
 export interface RepairTicketCardProps {
   ticket: RepairTicket;
@@ -32,7 +33,41 @@ export interface RepairTicketCardProps {
   testID?: string;
 }
 
-export function RepairTicketCard({
+export function areRepairTicketCardPropsEqual(
+  prevProps: Readonly<RepairTicketCardProps>,
+  nextProps: Readonly<RepairTicketCardProps>
+): boolean {
+  if (prevProps === nextProps) return true;
+
+  if (prevProps.testID !== nextProps.testID) return false;
+  if (prevProps.onPress !== nextProps.onPress) return false;
+
+  const prev = prevProps.ticket;
+  const next = nextProps.ticket;
+  if (prev === next) return true;
+  if (!prev || !next) return false;
+
+  if (prev.id !== next.id) return false;
+  if (prev.repairNumber !== next.repairNumber) return false;
+  if (prev.status !== next.status) return false;
+  if (Boolean(prev.hasPendingWrites) !== Boolean(next.hasPendingWrites)) return false;
+  if (prev.priority !== next.priority) return false;
+  if (prev.condition !== next.condition) return false;
+  if (prev.owner !== next.owner) return false;
+  if (prev.requestedBy !== next.requestedBy) return false;
+  if (prev.equipment?.name !== next.equipment?.name) return false;
+
+  const prevPhotos = Array.isArray(prev.attachments) ? prev.attachments.length : 0;
+  const nextPhotos = Array.isArray(next.attachments) ? next.attachments.length : 0;
+  if (prevPhotos !== nextPhotos) return false;
+
+  if (!areDatesOrTimestampsEqual(prev.updatedAt, next.updatedAt)) return false;
+  if (!areDatesOrTimestampsEqual(prev.createdAt, next.createdAt)) return false;
+
+  return true;
+}
+
+function RepairTicketCardBase({
   ticket,
   onPress,
   testID = `repair-card-${ticket.id}`,
@@ -350,3 +385,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+
+export const RepairTicketCard = memo(RepairTicketCardBase, areRepairTicketCardPropsEqual);
+

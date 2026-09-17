@@ -4,7 +4,7 @@
  * Subscribes live to tenant tickets collection with interactive status metric cards and search.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -51,9 +51,22 @@ export default function RepairsScreen() {
     router.push('/repairs/new');
   };
 
-  const handleTicketPress = (ticket: RepairTicket) => {
+  const handleTicketPress = useCallback((ticket: RepairTicket) => {
     router.push(`/repairs/${ticket.id}` as any);
-  };
+  }, [router]);
+
+  const keyExtractor = useCallback((item: RepairTicket) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: RepairTicket }) => (
+      <RepairTicketCard
+        ticket={item}
+        onPress={handleTicketPress}
+        testID={`feed-ticket-${item.id}`}
+      />
+    ),
+    [handleTicketPress]
+  );
 
   const metricCards: Array<{
     status: string;
@@ -168,14 +181,11 @@ export default function RepairsScreen() {
       ) : (
         <FlatList
           data={filteredTickets}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <RepairTicketCard
-              ticket={item}
-              onPress={() => handleTicketPress(item)}
-              testID={`feed-ticket-${item.id}`}
-            />
-          )}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={7}
           contentContainerStyle={[styles.listContent, { padding: spacing.base }]}
           ListEmptyComponent={
             <EmptyState

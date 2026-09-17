@@ -116,9 +116,45 @@ export default function HomeScreen() {
     await Promise.all(promises);
   }, [refresh, refreshOwners, refreshCrew, refreshTypes]);
 
-  const handleEventPress = (event: Event) => {
-    router.push(`/events/${event.id}`);
-  };
+  const handleEventPress = useCallback(
+    (event?: Event) => {
+      if (event?.id) {
+        router.push(`/events/${event.id}`);
+      }
+    },
+    [router]
+  );
+
+  const keyExtractor = useCallback((item: Event) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: Event }) => {
+      const rawVenue = (item.venueName || item.venueId || '').trim();
+      const venueName = rawVenue
+        ? venuesMap.get(rawVenue.toLowerCase()) || (isRawIdentifier(rawVenue) ? '' : rawVenue)
+        : '';
+
+      const rawAssignee = (item.assigneeName || item.assigneeId || '').trim();
+      const assigneeName = rawAssignee
+        ? crewMap.get(rawAssignee.toLowerCase()) || venuesMap.get(rawAssignee.toLowerCase()) || (isRawIdentifier(rawAssignee) ? '' : rawAssignee)
+        : '';
+
+      const typeInfo = item.eventTypeId ? typesMap.get(item.eventTypeId.toLowerCase()) : undefined;
+
+      return (
+        <EventCard
+          event={item}
+          venueName={venueName}
+          assigneeName={assigneeName}
+          typeName={typeInfo?.name}
+          typeColor={typeInfo?.color}
+          onPress={handleEventPress}
+          testID={`feed-event-${item.id}`}
+        />
+      );
+    },
+    [venuesMap, crewMap, typesMap, handleEventPress]
+  );
 
   const metricCards: Array<{
     status: string;
@@ -234,32 +270,11 @@ export default function HomeScreen() {
       ) : (
         <FlatList
           data={filteredEvents}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => {
-            const rawVenue = (item.venueName || item.venueId || '').trim();
-            const venueName = rawVenue
-              ? venuesMap.get(rawVenue.toLowerCase()) || (isRawIdentifier(rawVenue) ? '' : rawVenue)
-              : '';
-
-            const rawAssignee = (item.assigneeName || item.assigneeId || '').trim();
-            const assigneeName = rawAssignee
-              ? crewMap.get(rawAssignee.toLowerCase()) || venuesMap.get(rawAssignee.toLowerCase()) || (isRawIdentifier(rawAssignee) ? '' : rawAssignee)
-              : '';
-
-            const typeInfo = item.eventTypeId ? typesMap.get(item.eventTypeId.toLowerCase()) : undefined;
-
-            return (
-              <EventCard
-                event={item}
-                venueName={venueName}
-                assigneeName={assigneeName}
-                typeName={typeInfo?.name}
-                typeColor={typeInfo?.color}
-                onPress={() => handleEventPress(item)}
-                testID={`feed-event-${item.id}`}
-              />
-            );
-          }}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={7}
           contentContainerStyle={[styles.listContent, { padding: spacing.base }]}
           refreshControl={
             <RefreshControl

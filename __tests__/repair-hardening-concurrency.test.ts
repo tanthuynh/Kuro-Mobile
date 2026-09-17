@@ -36,6 +36,8 @@ import {
   reconcilePendingRepairOperation,
   retryPendingRepairOperation,
   reconcilePendingRepairOperationsOnColdStart,
+  isOfflineError,
+  syncRepairToRtdbLedger,
 } from '@/services/repair-service';
 import * as firestore from 'firebase/firestore';
 import * as rtdb from 'firebase/database';
@@ -485,6 +487,96 @@ describe('Repair Workflow Hardening & Concurrency Test Suite', () => {
       await expect(
         createRepairTicket(tenantId, input, currentUser, { preferLocalExecution: true })
       ).rejects.toThrow(/RTDB connection timeout/i);
+    });
+
+    it('HRD-ERR-03: createRepairTicket surfaces equipment getDoc permission-denied failure without swallowing', async () => {
+      mockFirestore.setDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'act-1' });
+
+      // Simulate Firestore security rule rejection on getDoc(equipment)
+      const permErr = new Error('Missing or insufficient permissions.');
+      (permErr as any).code = 'permission-denied';
+      mockFirestore.getDoc.mockRejectedValueOnce(permErr);
+
+      const input: CreateRepairTicketInput = {
+        equipment: { id: 'eq-perm-fail', name: 'Profile Spot' },
+        priority: 'High',
+        status: 'Reported',
+      };
+
+      await expect(
+        createRepairTicket(tenantId, input, currentUser, { preferLocalExecution: true })
+      ).rejects.toThrow(/insufficient permissions/i);
+    });
+
+    it('HRD-ERR-04: createRepairTicket gracefully tolerates genuine offline error during equipment condition sync', async () => {
+      mockFirestore.setDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'act-1' });
+
+      // Simulate Firestore client offline on getDoc(equipment)
+      const offlineErr = new Error('Failed to get document because the client is offline.');
+      (offlineErr as any).code = 'unavailable';
+      mockFirestore.getDoc.mockRejectedValueOnce(offlineErr);
+
+      // RTDB sync succeeds
+      mockRtdb.set.mockResolvedValueOnce(undefined);
+
+      const input: CreateRepairTicketInput = {
+        equipment: { id: 'eq-offline-doc', name: 'LED Par 64' },
+        priority: 'Medium',
+        status: 'Reported',
+      };
+
+      const ticketId = await createRepairTicket(tenantId, input, currentUser, { preferLocalExecution: true });
+      expect(ticketId).toBeTruthy();
+    });
+
+    it('HRD-ERR-05: syncRepairToRtdbLedger rethrows non-offline errors and tolerates offline errors', async () => {
+      // 1. Permission-denied on RTDB must rethrow
+      const permErr = new Error('Permission denied');
+      (permErr as any).code = 'PERMISSION_DENIED';
+      mockRtdb.set.mockRejectedValueOnce(permErr);
+
+      await expect(
+        syncRepairToRtdbLedger(tenantId, 't-rtdb-perm', 'eq-1', 'Out of Service', 1)
+      ).rejects.toThrow(/Permission denied/i);
+
+      // 2. Offline error on RTDB must be safely ignored
+      const offlineErr = new Error('Client is offline');
+      (offlineErr as any).code = 'unavailable';
+      mockRtdb.set.mockRejectedValueOnce(offlineErr);
+
+      await expect(
+        syncRepairToRtdbLedger(tenantId, 't-rtdb-off', 'eq-1', 'Out of Service', 1)
+      ).resolves.toBeUndefined();
+    });
+
+    it('HRD-ERR-06: isOfflineError utility correctly classifies offline vs non-offline errors', () => {
+      // Genuine offline errors -> true
+      expect(isOfflineError(new Error('Failed to get document because the client is offline.'))).toBe(true);
+      expect(isOfflineError({ code: 'unavailable', message: 'Service unavailable' })).toBe(true);
+      expect(isOfflineError({ code: 'deadline-exceeded', message: 'Deadline exceeded' })).toBe(true);
+      expect(isOfflineError({ code: 'network-request-failed', message: 'Network request failed' })).toBe(true);
+      expect(isOfflineError(new Error('Network error: connection lost'))).toBe(true);
+      expect(isOfflineError(new Error('TypeError: Failed to fetch'))).toBe(true);
+
+      // Security / permission errors -> false (must never be swallowed)
+      expect(isOfflineError(new Error('Missing or insufficient permissions.'))).toBe(false);
+      expect(isOfflineError({ code: 'permission-denied', message: 'Access denied' })).toBe(false);
+      expect(isOfflineError({ code: 'PERMISSION_DENIED', message: 'Permission denied' })).toBe(false);
+      expect(isOfflineError({ code: 'unauthenticated', message: 'Unauthenticated' })).toBe(false);
+      expect(isOfflineError(new Error('Unauthorized access'))).toBe(false);
+
+      // Validation / internal / aborted errors -> false
+      expect(isOfflineError({ code: 'invalid-argument', message: 'Invalid query' })).toBe(false);
+      expect(isOfflineError({ code: 'internal', message: 'Internal server error' })).toBe(false);
+      expect(isOfflineError({ code: 'aborted', message: 'Transaction aborted' })).toBe(false);
+      expect(isOfflineError({ code: 'resource-exhausted', message: 'Quota exceeded' })).toBe(false);
+
+      // Falsy or generic unknown errors -> false
+      expect(isOfflineError(null)).toBe(false);
+      expect(isOfflineError(undefined)).toBe(false);
+      expect(isOfflineError(new Error('Unexpected runtime exception'))).toBe(false);
     });
   });
 

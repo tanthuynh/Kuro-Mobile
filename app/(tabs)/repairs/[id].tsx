@@ -91,6 +91,12 @@ import { CleaveModalInput } from '@/components/repair/cleave-modal-input';
 import { AutocompleteInput } from '@/components/repair/autocomplete-input';
 import { MobileDateScroller } from '@/components/repair/mobile-date-scroller';
 import { RepairPhotoGallery } from '@/components/repair/repair-photo-gallery';
+import { RepairPriorityConditionRow } from '@/components/repair/repair-priority-condition-row';
+import { RepairInternalNotesCard } from '@/components/repair/repair-internal-notes-card';
+import { RepairAssignmentFields } from '@/components/repair/repair-assignment-fields';
+import { RepairDocumentViewerModal } from '@/components/repair/repair-document-viewer-modal';
+import { RepairAttachmentModals } from '@/components/repair/repair-attachment-modals';
+import { RepairLegacyPickerModals } from '@/components/repair/repair-legacy-picker-modals';
 import {
   calculateRepairCostTotal,
   normalizeRepairPriority,
@@ -229,15 +235,8 @@ export default function RepairTicketDetailScreen({
   const [editedNoteContent, setEditedNoteContent] = useState('');
   const [isSavingNote, setIsSavingNote] = useState(false);
 
-  const [isEditInternalNotesModalOpen, setIsEditInternalNotesModalOpen] = useState(false);
-  const [tempInternalNotes, setTempInternalNotes] = useState('');
-
   const [isAddAttachmentOpen, setIsAddAttachmentOpen] = useState(false);
-  const [newAttachmentType, setNewAttachmentType] = useState<'Photo' | 'PDF' | 'Document'>('Photo');
-  const [newAttachmentUrl, setNewAttachmentUrl] = useState('');
-  const [newAttachmentName, setNewAttachmentName] = useState('');
   const [isSubmittingAttachment, setIsSubmittingAttachment] = useState(false);
-
   const [viewingDoc, setViewingDoc] = useState<RepairAttachment | null>(null);
   const [viewingPhoto, setViewingPhoto] = useState<RepairAttachment | { id: string; url: string; fileName?: string } | null>(null);
 
@@ -247,12 +246,6 @@ export default function RepairTicketDetailScreen({
   const [isEditInternalRefModalOpen, setIsEditInternalRefModalOpen] = useState(false);
   const [isSupplierPickerModalOpen, setIsSupplierPickerModalOpen] = useState(false);
   const [isCrewPickerModalOpen, setIsCrewPickerModalOpen] = useState(false);
-  const [supplierModalSearch, setSupplierModalSearch] = useState('');
-  const [supplierModalCustom, setSupplierModalCustom] = useState('');
-  const [crewModalSearch, setCrewModalSearch] = useState('');
-  const [crewModalCustom, setCrewModalCustom] = useState('');
-  const [equipmentModalSearch, setEquipmentModalSearch] = useState('');
-  const [equipmentModalCustom, setEquipmentModalCustom] = useState('');
 
   // Confirmation dialog state
   const [deleteConfirmState, setDeleteConfirmState] = useState<{
@@ -1332,256 +1325,16 @@ export default function RepairTicketDetailScreen({
         </Card>
 
         {/* Row 2: Priority and Condition Cards Side by Side */}
-        <View style={styles.sideBySideCardsRow} testID="combined-priority-condition-row">
-          {/* Left Card: PRIORITY */}
-          <Card style={[styles.card, styles.prioritySideCard]} testID="ticket-priority-card">
-            <CardContent style={styles.sideCardContent}>
-              <View style={styles.sectionHeaderRow}>
-                <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
-                  PRIORITY
-                </Text>
-              </View>
-
-              <View style={styles.priorityBoxRow} testID="ticket-priority-strip">
-                {/* Box 1: Low Priority */}
-                <Pressable
-                  onPress={() => handleSelectPriority('Low')}
-                  style={({ pressed }) => [
-                    styles.sideEqualBox,
-                    {
-                      backgroundColor:
-                        priority === 'Low'
-                          ? isDark
-                            ? 'rgba(59, 130, 246, 0.18)'
-                            : 'rgba(59, 130, 246, 0.10)'
-                          : colors.surface,
-                      borderColor: priority === 'Low' ? '#3B82F6' : colors.border,
-                    },
-                    pressed && { opacity: 0.8 },
-                  ]}
-                  testID="priority-btn-low"
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: priority === 'Low' }}
-                  accessibilityLabel="Set priority to Low"
-                >
-                  <View style={[styles.indicatorDot, { backgroundColor: '#3B82F6' }]} />
-                  <Text
-                    style={[
-                      styles.boxLabelText,
-                      {
-                        color: priority === 'Low' ? (isDark ? '#60A5FA' : '#1D4ED8') : colors.foreground,
-                        fontWeight: '500',
-                      },
-                    ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                  >
-                    Low
-                  </Text>
-                  {/* Hidden text for test compatibility */}
-                  <Text style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}>
-                    {priority === 'Low' ? 'Low Priority' : ''}
-                  </Text>
-                </Pressable>
-
-                {/* Box 2: Medium Priority */}
-                <Pressable
-                  onPress={() => handleSelectPriority('Medium')}
-                  style={({ pressed }) => [
-                    styles.sideEqualBox,
-                    {
-                      backgroundColor:
-                        priority === 'Medium'
-                          ? isDark
-                            ? 'rgba(245, 158, 11, 0.18)'
-                            : 'rgba(245, 158, 11, 0.10)'
-                          : colors.surface,
-                      borderColor: priority === 'Medium' ? '#F59E0B' : colors.border,
-                    },
-                    pressed && { opacity: 0.8 },
-                  ]}
-                  testID="priority-btn-medium"
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: priority === 'Medium' }}
-                  accessibilityLabel="Set priority to Medium"
-                >
-                  <View style={[styles.indicatorDot, { backgroundColor: '#F59E0B' }]} />
-                  <Text
-                    style={[
-                      styles.boxLabelText,
-                      {
-                        color: priority === 'Medium' ? (isDark ? '#FBBF24' : '#B45309') : colors.foreground,
-                        fontWeight: '500',
-                      },
-                    ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                  >
-                    Med
-                  </Text>
-                  <Text style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}>
-                    {priority === 'Medium' ? 'Medium Priority' : ''}
-                  </Text>
-                </Pressable>
-
-                {/* Box 3: High Priority */}
-                <Pressable
-                  onPress={() => handleSelectPriority('High')}
-                  style={({ pressed }) => [
-                    styles.sideEqualBox,
-                    {
-                      backgroundColor:
-                        priority === 'High'
-                          ? isDark
-                            ? 'rgba(239, 68, 68, 0.18)'
-                            : 'rgba(239, 68, 68, 0.10)'
-                          : colors.surface,
-                      borderColor: priority === 'High' ? '#EF4444' : colors.border,
-                    },
-                    pressed && { opacity: 0.8 },
-                  ]}
-                  testID="priority-btn-high"
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: priority === 'High' }}
-                  accessibilityLabel="Set priority to High"
-                >
-                  <View style={[styles.indicatorDot, { backgroundColor: '#EF4444' }]} />
-                  <Text
-                    style={[
-                      styles.boxLabelText,
-                      {
-                        color: priority === 'High' ? (isDark ? '#F87171' : '#DC2626') : colors.foreground,
-                        fontWeight: '500',
-                      },
-                    ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                  >
-                    High
-                  </Text>
-                  <Text style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}>
-                    {priority === 'High' ? 'High Priority' : ''}
-                  </Text>
-                </Pressable>
-              </View>
-            </CardContent>
-          </Card>
-
-          {/* Right Card: CONDITION */}
-          <Card style={[styles.card, styles.conditionSideCard]} testID="ticket-condition-card">
-            <CardContent style={styles.sideCardContent}>
-              <View style={styles.sectionHeaderRow}>
-                <Text style={[styles.sectionHeaderLabel, { color: colors.mutedForeground }]}>
-                  CONDITION
-                </Text>
-              </View>
-
-              <View style={styles.conditionBoxRow} testID="ticket-condition-strip">
-                {/* Box 1: Available to Use */}
-                <Pressable
-                  onPress={() => handleSelectCondition('Available to Use')}
-                  style={({ pressed }) => [
-                    styles.sideEqualBox,
-                    {
-                      flexDirection: 'column',
-                      backgroundColor:
-                        !isOutOfService
-                          ? isDark
-                            ? 'rgba(16, 185, 129, 0.18)'
-                            : 'rgba(16, 185, 129, 0.10)'
-                          : colors.surface,
-                      borderColor: !isOutOfService ? '#10B981' : colors.border,
-                    },
-                    pressed && { opacity: 0.8 },
-                  ]}
-                  testID="condition-btn-available"
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: !isOutOfService }}
-                  accessibilityLabel="Set condition to Available to Use"
-                >
-                  <CheckCircle2
-                    size={16}
-                    color={!isOutOfService ? (isDark ? '#34D399' : '#047857') : colors.mutedForeground}
-                  />
-                  <Text
-                    style={[
-                      styles.boxLabelText,
-                      {
-                        color: !isOutOfService ? (isDark ? '#34D399' : '#047857') : colors.foreground,
-                        fontWeight: '500',
-                      },
-                    ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                  >
-                    Available
-                  </Text>
-                  <Text style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}>
-                    {!isOutOfService ? 'Available to Use' : ''}
-                  </Text>
-                </Pressable>
-
-                {/* Box 2: Out of Service */}
-                <Pressable
-                  onPress={() => handleSelectCondition('Out of Service')}
-                  style={({ pressed }) => [
-                    styles.sideEqualBox,
-                    {
-                      flexDirection: 'column',
-                      backgroundColor:
-                        isOutOfService
-                          ? isDark
-                            ? 'rgba(239, 68, 68, 0.18)'
-                            : 'rgba(239, 68, 68, 0.10)'
-                          : colors.surface,
-                      borderColor: isOutOfService ? '#EF4444' : colors.border,
-                    },
-                    pressed && { opacity: 0.8 },
-                  ]}
-                  testID="condition-btn-out-of-service"
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: isOutOfService }}
-                  accessibilityLabel="Set condition to Out of Service"
-                >
-                  <ShieldAlert
-                    size={16}
-                    color={isOutOfService ? (isDark ? '#F87171' : '#DC2626') : colors.mutedForeground}
-                  />
-                  <Text
-                    style={[
-                      styles.boxLabelText,
-                      {
-                        color: isOutOfService ? (isDark ? '#F87171' : '#DC2626') : colors.foreground,
-                        fontWeight: '500',
-                      },
-                    ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                  >
-                    Out of Svc
-                  </Text>
-                  <Text style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}>
-                    {isOutOfService ? 'Out of Service' : ''}
-                  </Text>
-                </Pressable>
-              </View>
-
-              {/* Hidden condition/priority selectors for backwards test compatibility */}
-              <View style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}>
-                <Pressable testID="condition-available" onPress={() => handleSelectCondition('Available to Use')} />
-                <Pressable testID="condition-out-of-service" onPress={() => handleSelectCondition('Out of Service')} />
-                <Pressable testID="priority-pill-high" onPress={() => handleSelectPriority('High')} />
-                <Pressable testID="priority-pill-medium" onPress={() => handleSelectPriority('Medium')} />
-                <Pressable testID="priority-pill-low" onPress={() => handleSelectPriority('Low')} />
-              </View>
-            </CardContent>
-          </Card>
-        </View>
+        <RepairPriorityConditionRow
+          priority={priority}
+          condition={condition}
+          status={status}
+          onChangePriority={handleSelectPriority}
+          onChangeCondition={handleSelectCondition}
+          colors={colors}
+          typography={typography}
+          isDark={isDark}
+        />
 
         {/* Row 3: Details Card featuring Prominent Internal Notes and Cleave Dialog Pickers */}
         <Card style={styles.card} testID="ticket-info-card">
@@ -1594,59 +1347,19 @@ export default function RepairTicketDetailScreen({
 
             <View style={styles.fieldsStack}>
               {/* Prominent Top-Level Internal Notes Preview Card */}
-              <Pressable
-                onPress={() => {
-                  setTempInternalNotes(internalNotes || internalReference || '');
-                  setIsEditInternalNotesModalOpen(true);
+              <RepairInternalNotesCard
+                notes={internalNotes}
+                internalReference={internalReference}
+                onUpdateNotes={async (updated) => {
+                  handleInternalNotesChange(updated);
+                  await flushPendingUpdates();
                 }}
-                style={({ pressed }) => [
-                  styles.internalNotesCard,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.border,
-                  },
-                  pressed && { opacity: 0.85 },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Internal Notes. Tap to edit."
-                testID="ticket-internal-notes-btn"
-              >
-                <View style={styles.internalNotesHeaderRow}>
-                  <View style={styles.internalNotesTitleGroup}>
-                    <FileText size={15} color={colors.primary} style={{ marginRight: 6 }} />
-                    <Text style={[styles.fieldLabel, { color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginBottom: 0 }]}>
-                      INTERNAL NOTES
-                    </Text>
-                  </View>
-                  <Edit2 size={13} color={colors.mutedForeground} />
-                </View>
-                <Text
-                  style={[
-                    styles.internalNotesPreviewText,
-                    {
-                      color: internalNotes || internalReference ? colors.foreground : colors.mutedForeground,
-                      fontSize: typography.fontSize.base,
-                    },
-                  ]}
-                  numberOfLines={3}
-                >
-                  {internalNotes || internalReference || 'Tap to add internal notes, reference codes, or bench observations...'}
-                </Text>
+                onChangeInternalRef={handleInternalRefChange}
+                canEdit={true}
+                colors={colors}
+                typography={typography}
+              />
 
-                {/* Embedded hidden inputs for backward compatibility with existing tests */}
-                <TextInput
-                  value={internalReference}
-                  onChangeText={handleInternalRefChange}
-                  style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}
-                  testID="input-internal-ref"
-                />
-                <TextInput
-                  value={internalNotes}
-                  onChangeText={handleInternalNotesChange}
-                  style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}
-                  testID="input-internal-notes"
-                />
-              </Pressable>
 
               {/* 1. Equipment Cleave Modal Input */}
               <CleaveModalInput<Equipment>
@@ -1690,28 +1403,21 @@ export default function RepairTicketDetailScreen({
                 emptySuggestionsMessage="No registered serial numbers found on selected equipment."
               />
 
-              {/* 3. Owner Cleave Modal Input (Replaces Current Location, Populated from Contacts: Clients & Venues) */}
-              <CleaveModalInput<TenantOwner>
-                label="OWNER"
-                value={owner}
-                onChangeText={handleOwnerChange}
-                placeholder="Select owner (client / venue)..."
-                modalTitle="Select Owner"
-                modalPlaceholder="Search client or venue contacts..."
-                suggestions={tenantOwners}
-                getSuggestionLabel={(o) => o.name}
-                getSuggestionSublabel={(o) => o.fullAddress || o.email || o.phone}
-                getSuggestionBadge={(o) => o.type || 'Client'}
-                getSuggestionKey={(o, idx) => o.id || `owner-${idx}`}
-                onSelectSuggestion={handleSelectOwnerSuggestion}
-                icon={<Building2 size={15} color={colors.mutedForeground} />}
-                testID="input-owner"
-                inputTestID="input-owner-field"
-                suggestionTestIDPrefix="owner-option"
-                emptySuggestionsMessage="No client or venue contacts found in tenant database."
+              {/* Owner and Requested By Assignment Fields */}
+              <RepairAssignmentFields
+                owner={owner}
+                tenantOwners={tenantOwners}
+                onChangeOwner={handleOwnerChange}
+                onSelectOwner={handleSelectOwnerSuggestion}
+                requestedBy={requestedBy}
+                tenantCrew={tenantCrew}
+                onChangeRequestedBy={handleRequestedByChange}
+                onSelectCrew={handleSelectCrewSuggestion}
+                colors={colors}
+                typography={typography}
               />
 
-              {/* 4. Supplier Cleave Modal Input */}
+              {/* Supplier Cleave Modal Input */}
               <CleaveModalInput<TenantSupplier>
                 label="SUPPLIER"
                 value={supplierId}
@@ -1732,26 +1438,6 @@ export default function RepairTicketDetailScreen({
                 emptySuggestionsMessage="No suppliers found in tenant contacts."
               />
 
-              {/* 5. Requested By Cleave Modal Input */}
-              <CleaveModalInput<TenantCrewMember>
-                label="REQUESTED BY"
-                value={requestedBy}
-                onChangeText={handleRequestedByChange}
-                placeholder="Select requester from crew..."
-                modalTitle="Select Requester"
-                modalPlaceholder="Search crew members or enter custom name..."
-                suggestions={tenantCrew}
-                getSuggestionLabel={(c) => c.name}
-                getSuggestionSublabel={(c) => c.position || c.role || c.email}
-                getSuggestionBadge={(c) => c.role || undefined}
-                getSuggestionKey={(c, idx) => c.id || `crew-${idx}`}
-                onSelectSuggestion={handleSelectCrewSuggestion}
-                icon={<Users size={15} color={colors.mutedForeground} />}
-                testID="input-requested-by"
-                inputTestID="input-requested-by-field"
-                suggestionTestIDPrefix="crew-option"
-                emptySuggestionsMessage="No crew members found in tenant users."
-              />
 
               {/* 6. Repair Period Tile (Taps to open 3-Column Mobile Date Scroller) */}
               <Pressable
@@ -1987,227 +1673,44 @@ export default function RepairTicketDetailScreen({
         testID="edit-period-modal"
       />
 
-      {/* Internal Notes Mobile Editor Dialog */}
-      <Modal
-        visible={isEditInternalNotesModalOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsEditInternalNotesModalOpen(false)}
-        testID="edit-internal-notes-modal"
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.modalOverlay}
-        >
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsEditInternalNotesModalOpen(false)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-                Internal Notes
-              </Text>
-              <Pressable onPress={() => setIsEditInternalNotesModalOpen(false)} hitSlop={8}>
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <TextInput
-                value={tempInternalNotes}
-                onChangeText={setTempInternalNotes}
-                placeholder="Enter internal notes, workshop observations, or reference codes..."
-                placeholderTextColor={colors.mutedForeground}
-                multiline
-                numberOfLines={6}
-                autoFocus
-                style={[
-                  styles.textAreaInput,
-                  { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground, minHeight: 120 },
-                ]}
-                testID="edit-internal-notes-input"
-              />
-              <View style={styles.modalFooterRow}>
-                <Button
-                  variant="outline"
-                  size="default"
-                  onPress={() => setIsEditInternalNotesModalOpen(false)}
-                  style={{ flex: 1 }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="default"
-                  onPress={async () => {
-                    handleInternalNotesChange(tempInternalNotes);
-                    await flushPendingUpdates();
-                    setIsEditInternalNotesModalOpen(false);
-                  }}
-                  style={{ flex: 2 }}
-                  testID="save-edit-internal-notes-btn"
-                >
-                  Save Internal Notes
-                </Button>
-              </View>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-
-
-      {/* Add Attachment Modal */}
-      <Modal
+      {/* Add Attachment & Photo Lightbox Modals */}
+      <RepairAttachmentModals
         visible={isAddAttachmentOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsAddAttachmentOpen(false)}
-        testID="add-attachment-modal"
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsAddAttachmentOpen(false)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>
-                Add Image or Document
-              </Text>
-              <Pressable onPress={() => setIsAddAttachmentOpen(false)} hitSlop={8}>
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <View style={{ gap: 10 }}>
-                <Button
-                  variant="outline"
-                  size="default"
-                  icon={<Camera size={16} color={colors.primary} />}
-                  onPress={handleTakeCameraPhoto}
-                  loading={isSubmittingAttachment}
-                  testID="add-photo-evidence-btn"
-                >
-                  Take / Attach Camera Photo
-                </Button>
-                <Button
-                  variant="outline"
-                  size="default"
-                  icon={<FileText size={16} color={colors.primary} />}
-                  onPress={() => handleSimulateAddDoc('PDF')}
-                  loading={isSubmittingAttachment}
-                  testID="add-doc-evidence-btn"
-                >
-                  Attach Service PDF / Manual
-                </Button>
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setIsAddAttachmentOpen(false)}
+        onUploadPhoto={handleTakeCameraPhoto}
+        onAddAttachment={handleSimulateAddDoc}
+        isSubmitting={isSubmittingAttachment}
+        viewingPhoto={viewingPhoto}
+        onClosePhoto={() => setViewingPhoto(null)}
+        onDeletePhoto={(photo) => promptDeleteAttachment(photo as any)}
+        colors={colors}
+        typography={typography}
+      />
 
-      {/* Photo Lightbox Modal */}
-      <Modal
-        visible={!!viewingPhoto}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setViewingPhoto(null)}
-        testID="photo-lightbox-modal"
-      >
-        <View style={styles.lightboxOverlay}>
-          <Pressable style={styles.lightboxBackdrop} onPress={() => setViewingPhoto(null)} />
-          <View style={styles.lightboxHeader}>
-            <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 14 }}>
-              {viewingPhoto?.fileName || 'Image'}
-            </Text>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <Pressable
-                onPress={() => viewingPhoto && promptDeleteAttachment(viewingPhoto as any)}
-                testID="lightbox-delete-btn"
-                hitSlop={8}
-              >
-                <Trash2 size={20} color="#EF4444" />
-              </Pressable>
-              <Pressable onPress={() => setViewingPhoto(null)} hitSlop={8}>
-                <X size={22} color="#FFFFFF" />
-              </Pressable>
-            </View>
-          </View>
-          {viewingPhoto?.url ? (
-            <View style={styles.lightboxContent}>
-              <Image source={{ uri: viewingPhoto.url }} style={styles.lightboxImage} resizeMode="contain" />
-            </View>
-          ) : null}
-        </View>
-      </Modal>
-
-      {/* Document / PDF Viewer Modal with Active Open Button */}
-      <Modal
+      {/* Document / PDF Viewer Modal */}
+      <RepairDocumentViewerModal
         visible={!!viewingDoc}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setViewingDoc(null)}
-        testID="doc-viewer-modal"
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setViewingDoc(null)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]} numberOfLines={1}>
-                {viewingDoc?.fileName || 'Document'}
-              </Text>
-              <Pressable onPress={() => setViewingDoc(null)} hitSlop={8} testID="viewer-close-doc-btn">
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <View style={[styles.docPreviewCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <FileText size={32} color={colors.primary} style={{ marginBottom: 8 }} />
-                <Text style={{ color: colors.foreground, fontWeight: '600', fontSize: typography.fontSize.base, textAlign: 'center' }}>
-                  {viewingDoc?.fileName || 'Document Attachment'}
-                </Text>
-                <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.sm, marginTop: 4 }}>
-                  {viewingDoc?.type || 'PDF Document'} • {viewingDoc?.uploadedAt ? formatDate(viewingDoc.uploadedAt) : 'Attached'}
-                </Text>
-                {viewingDoc?.url ? (
-                  <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.xs, marginTop: 6, textAlign: 'center' }} numberOfLines={1}>
-                    {viewingDoc.url}
-                  </Text>
-                ) : null}
-              </View>
+        document={viewingDoc}
+        docUrl={viewingDoc?.url}
+        fileName={viewingDoc?.fileName}
+        fileType={viewingDoc?.type}
+        uploadedAt={viewingDoc?.uploadedAt}
+        onClose={() => setViewingDoc(null)}
+        onDelete={(doc) => promptDeleteAttachment(doc)}
+        onOpenDocument={async (url) => {
+          if (url) {
+            try {
+              await Linking.openURL(url);
+            } catch (err: any) {
+              console.warn('[DocViewer] openURL error:', err);
+              setActionError(`Unable to open document: ${err?.message || 'Invalid URL'}`);
+            }
+          }
+        }}
+        colors={colors}
+        typography={typography}
+      />
 
-              <View style={styles.modalFooterRow}>
-                <Button
-                  variant="primary"
-                  size="default"
-                  icon={<ExternalLink size={15} color={colors.primaryForeground} />}
-                  onPress={async () => {
-                    if (viewingDoc?.url) {
-                      try {
-                        await Linking.openURL(viewingDoc.url);
-                      } catch (err: any) {
-                        console.warn('[DocViewer] openURL error:', err);
-                        setActionError(`Unable to open document: ${err?.message || 'Invalid URL'}`);
-                      }
-                    }
-                  }}
-                  style={{ flex: 2 }}
-                  testID="open-document-btn"
-                >
-                  View / Open Document
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="default"
-                  icon={<Trash2 size={15} color="#FFFFFF" />}
-                  onPress={() => viewingDoc && promptDeleteAttachment(viewingDoc)}
-                  testID="viewer-delete-doc-btn"
-                >
-                  Delete
-                </Button>
-                <Button variant="outline" size="default" onPress={() => setViewingDoc(null)} style={{ flex: 1 }}>
-                  Close
-                </Button>
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
       {/* Confirmation Dialog */}
       <Modal
@@ -2246,358 +1749,84 @@ export default function RepairTicketDetailScreen({
         </View>
       </Modal>
 
-      {/* ========================================================================= */}
-      {/* BACKWARD-COMPATIBLE MODALS (Equipment, Serial, Internal Ref, Supplier, Crew) */}
-      {/* ========================================================================= */}
-      <Modal
-        visible={isEditEquipmentModalOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsEditEquipmentModalOpen(false)}
-        testID="edit-equipment-modal"
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsEditEquipmentModalOpen(false)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border, maxHeight: '85%' }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>Edit Equipment</Text>
-              <Pressable onPress={() => setIsEditEquipmentModalOpen(false)} hitSlop={8}>
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <TextInput
-                value={equipmentModalSearch || equipmentName}
-                onChangeText={(t) => {
-                  setEquipmentModalSearch(t);
-                  setEquipmentModalCustom(t);
-                }}
-                placeholder="Search or type equipment name..."
-                placeholderTextColor={colors.mutedForeground}
-                style={[styles.modalTextInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground, marginBottom: 8 }]}
-                testID="edit-equipment-name-input"
-              />
-              <TextInput
-                value={equipmentModalSearch}
-                onChangeText={setEquipmentModalSearch}
-                placeholder="Filter inventory equipment..."
-                placeholderTextColor={colors.mutedForeground}
-                style={{ position: 'absolute', opacity: 0, height: 0, width: 0 }}
-                testID="equipment-search-input"
-              />
-              <ScrollView style={{ maxHeight: 200 }}>
-                {tenantEquipment
-                  .filter((eq) => !equipmentModalSearch || eq.name.toLowerCase().includes(equipmentModalSearch.toLowerCase()))
-                  .map((eq, idx) => (
-                    <Pressable
-                      key={eq.id || `eq-opt-${idx}`}
-                      style={[styles.optionRow, { borderBottomColor: colors.border }]}
-                      onPress={async () => {
-                        handleSelectEquipmentSuggestion(eq);
-                        if (!isNewMode) {
-                          const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
-                          await updateRepairTicketFieldsService(ticketId, { equipmentName: eq.name, equipment: { id: eq.id, name: eq.name } }, author, tenantId);
-                        }
-                        setIsEditEquipmentModalOpen(false);
-                      }}
-                      testID={`equipment-option-${idx}`}
-                    >
-                      <Text style={{ color: colors.foreground, fontWeight: '600', fontSize: typography.fontSize.base }}>{eq.name}</Text>
-                    </Pressable>
-                  ))}
-              </ScrollView>
-              <Button
-                variant="primary"
-                size="default"
-                style={{ marginTop: 12 }}
-                onPress={async () => {
-                  const target = equipmentModalCustom || equipmentName;
-                  handleEquipmentNameChange(target);
-                  if (!isNewMode && target.trim()) {
-                    const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
-                    await updateRepairTicketFieldsService(ticketId, { equipmentName: target.trim() }, author, tenantId);
-                  }
-                  setIsEditEquipmentModalOpen(false);
-                }}
-                testID="save-edit-equipment-btn"
-              >
-                Save
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Backward-Compatible Searchable Picker Modals */}
+      <RepairLegacyPickerModals
+        isEditEquipmentModalOpen={isEditEquipmentModalOpen}
+        onCloseEditEquipmentModal={() => setIsEditEquipmentModalOpen(false)}
+        equipmentName={equipmentName}
+        tenantEquipment={tenantEquipment}
+        onSelectEquipment={async (eq) => {
+          handleSelectEquipmentSuggestion(eq);
+          if (!isNewMode) {
+            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
+            await updateRepairTicketFieldsService(ticketId, { equipmentName: eq.name, equipment: { id: eq.id, name: eq.name } }, author, tenantId);
+          }
+        }}
+        onSaveEquipmentName={async (name) => {
+          handleEquipmentNameChange(name);
+          if (!isNewMode && name.trim()) {
+            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
+            await updateRepairTicketFieldsService(ticketId, { equipmentName: name.trim() }, author, tenantId);
+          }
+        }}
+        isEditSerialModalOpen={isEditSerialModalOpen}
+        onCloseEditSerialModal={() => setIsEditSerialModalOpen(false)}
+        serialNumber={serialNumber}
+        onSaveSerialNumber={async (serial) => {
+          handleSerialChange(serial);
+          if (!isNewMode) {
+            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
+            await updateRepairTicketFieldsService(ticketId, { serialNumber: serial.trim() || null }, author, tenantId);
+          }
+        }}
+        isEditInternalRefModalOpen={isEditInternalRefModalOpen}
+        onCloseEditInternalRefModal={() => setIsEditInternalRefModalOpen(false)}
+        internalReference={internalReference || internalNotes}
+        onSaveInternalRef={async (ref) => {
+          handleInternalRefChange(ref);
+          if (!isNewMode) {
+            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
+            await updateRepairTicketFieldsService(ticketId, { internalReference: ref.trim() || null, internalNotes: ref.trim() }, author, tenantId);
+          }
+        }}
+        isSupplierPickerModalOpen={isSupplierPickerModalOpen}
+        onCloseSupplierPickerModal={() => setIsSupplierPickerModalOpen(false)}
+        tenantSuppliers={tenantSuppliers}
+        onSelectSupplier={async (s) => {
+          handleSelectSupplierSuggestion(s);
+          if (!isNewMode) {
+            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
+            await updateRepairTicketFieldsService(ticketId, { supplierId: s.name }, author, tenantId);
+          }
+        }}
+        onSaveCustomSupplier={async (custom) => {
+          setSupplierId(custom);
+          if (!isNewMode) {
+            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
+            await updateRepairTicketFieldsService(ticketId, { supplierId: custom }, author, tenantId);
+          }
+        }}
+        isCrewPickerModalOpen={isCrewPickerModalOpen}
+        onCloseCrewPickerModal={() => setIsCrewPickerModalOpen(false)}
+        tenantCrew={tenantCrew}
+        onSelectCrew={async (c) => {
+          handleSelectCrewSuggestion(c);
+          if (!isNewMode) {
+            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
+            await updateRepairTicketFieldsService(ticketId, { requestedBy: c.name }, author, tenantId);
+          }
+        }}
+        onSaveCustomCrew={async (custom) => {
+          setRequestedBy(custom);
+          if (!isNewMode) {
+            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
+            await updateRepairTicketFieldsService(ticketId, { requestedBy: custom }, author, tenantId);
+          }
+        }}
+        colors={colors}
+        typography={typography}
+      />
 
-      <Modal
-        visible={isEditSerialModalOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsEditSerialModalOpen(false)}
-        testID="edit-serial-modal"
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsEditSerialModalOpen(false)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>Edit Serial Number</Text>
-              <Pressable onPress={() => setIsEditSerialModalOpen(false)} hitSlop={8}>
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <TextInput
-                value={serialNumber}
-                onChangeText={setSerialNumber}
-                style={[styles.modalTextInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground }]}
-                testID="edit-serial-input"
-              />
-              <Button
-                variant="primary"
-                size="default"
-                style={{ marginTop: 12 }}
-                onPress={async () => {
-                  handleSerialChange(serialNumber);
-                  if (!isNewMode) {
-                    const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
-                    await updateRepairTicketFieldsService(ticketId, { serialNumber: serialNumber.trim() || null }, author, tenantId);
-                  }
-                  setIsEditSerialModalOpen(false);
-                }}
-                testID="save-edit-serial-btn"
-              >
-                Save
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal
-        visible={isEditInternalRefModalOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsEditInternalRefModalOpen(false)}
-        testID="edit-internal-ref-modal"
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsEditInternalRefModalOpen(false)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>Edit Internal Reference</Text>
-              <Pressable onPress={() => setIsEditInternalRefModalOpen(false)} hitSlop={8}>
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <TextInput
-                value={internalReference || internalNotes}
-                onChangeText={(t) => {
-                  setInternalReference(t);
-                  setInternalNotes(t);
-                }}
-                style={[styles.modalTextInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground }]}
-                testID="edit-internal-ref-input"
-              />
-              <Button
-                variant="primary"
-                size="default"
-                style={{ marginTop: 12 }}
-                onPress={async () => {
-                  const target = internalReference || internalNotes;
-                  handleInternalRefChange(target);
-                  if (!isNewMode) {
-                    const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
-                    await updateRepairTicketFieldsService(ticketId, { internalReference: target.trim() || null, internalNotes: target.trim() }, author, tenantId);
-                  }
-                  setIsEditInternalRefModalOpen(false);
-                }}
-                testID="save-edit-internal-ref-btn"
-              >
-                Save
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Supplier Modal (Legacy test fallback) */}
-      <Modal
-        visible={isSupplierPickerModalOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsSupplierPickerModalOpen(false)}
-        testID="supplier-picker-modal"
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsSupplierPickerModalOpen(false)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border, maxHeight: '88%' }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>Select Supplier</Text>
-              <Pressable onPress={() => setIsSupplierPickerModalOpen(false)} hitSlop={8} testID="close-supplier-picker-btn">
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <TextInput
-                value={supplierModalSearch}
-                onChangeText={setSupplierModalSearch}
-                placeholder="Search suppliers..."
-                placeholderTextColor={colors.mutedForeground}
-                style={[styles.modalTextInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground, marginBottom: 8 }]}
-                testID="supplier-search-input"
-              />
-              <ScrollView style={{ maxHeight: 200 }}>
-                {tenantSuppliers.length === 0 ? (
-                  <Text style={{ color: colors.mutedForeground, padding: 12, textAlign: 'center', fontSize: typography.fontSize.sm }}>
-                    No suppliers found in tenant contacts.
-                  </Text>
-                ) : tenantSuppliers.filter((s) => !supplierModalSearch || s.name.toLowerCase().includes(supplierModalSearch.toLowerCase())).length === 0 ? (
-                  <Text style={{ color: colors.mutedForeground, padding: 12, textAlign: 'center', fontSize: typography.fontSize.sm }}>
-                    No suppliers match your search.
-                  </Text>
-                ) : (
-                  tenantSuppliers
-                    .filter((s) => !supplierModalSearch || s.name.toLowerCase().includes(supplierModalSearch.toLowerCase()))
-                    .map((s, idx) => (
-                      <Pressable
-                        key={s.id || `supp-${idx}`}
-                        style={[styles.optionRow, { borderBottomColor: colors.border }]}
-                        onPress={async () => {
-                          handleSelectSupplierSuggestion(s);
-                          if (!isNewMode) {
-                            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
-                            await updateRepairTicketFieldsService(ticketId, { supplierId: s.name }, author, tenantId);
-                          }
-                          setIsSupplierPickerModalOpen(false);
-                        }}
-                        testID={`supplier-option-${idx}`}
-                      >
-                        <Text style={{ color: colors.foreground, fontWeight: '600', fontSize: typography.fontSize.base }}>{s.name}</Text>
-                      </Pressable>
-                    ))
-                )}
-              </ScrollView>
-              <TextInput
-                value={supplierModalCustom}
-                onChangeText={setSupplierModalCustom}
-                placeholder="Custom supplier name..."
-                placeholderTextColor={colors.mutedForeground}
-                style={[styles.singleTextInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground, marginTop: 8 }]}
-                testID="supplier-custom-input"
-              />
-              <Button
-                variant="primary"
-                size="default"
-                style={{ marginTop: 8 }}
-                onPress={async () => {
-                  if (supplierModalCustom.trim()) {
-                    setSupplierId(supplierModalCustom.trim());
-                    if (!isNewMode) {
-                      const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
-                      await updateRepairTicketFieldsService(ticketId, { supplierId: supplierModalCustom.trim() }, author, tenantId);
-                    }
-                  }
-                  setIsSupplierPickerModalOpen(false);
-                }}
-                testID="supplier-custom-save-btn"
-              >
-                Save Custom Supplier
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Crew Modal (Legacy test fallback) */}
-      <Modal
-        visible={isCrewPickerModalOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsCrewPickerModalOpen(false)}
-        testID="crew-picker-modal"
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setIsCrewPickerModalOpen(false)} />
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border, maxHeight: '88%' }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.foreground, fontSize: typography.fontSize.lg }]}>Select Crew Member</Text>
-              <Pressable onPress={() => setIsCrewPickerModalOpen(false)} hitSlop={8} testID="close-crew-picker-btn">
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              <TextInput
-                value={crewModalSearch}
-                onChangeText={setCrewModalSearch}
-                placeholder="Search crew members..."
-                placeholderTextColor={colors.mutedForeground}
-                style={[styles.singleTextInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground, marginBottom: 8 }]}
-                testID="crew-search-input"
-              />
-              <ScrollView style={{ maxHeight: 200 }}>
-                {tenantCrew.length === 0 ? (
-                  <Text style={{ color: colors.mutedForeground, padding: 12, textAlign: 'center', fontSize: typography.fontSize.sm }}>
-                    No crew members found in tenant users.
-                  </Text>
-                ) : tenantCrew.filter((c) => !crewModalSearch || c.name.toLowerCase().includes(crewModalSearch.toLowerCase())).length === 0 ? (
-                  <Text style={{ color: colors.mutedForeground, padding: 12, textAlign: 'center', fontSize: typography.fontSize.sm }}>
-                    No crew members match your search.
-                  </Text>
-                ) : (
-                  tenantCrew
-                    .filter((c) => !crewModalSearch || c.name.toLowerCase().includes(crewModalSearch.toLowerCase()))
-                    .map((c, idx) => (
-                      <Pressable
-                        key={c.id || `crew-${idx}`}
-                        style={[styles.optionRow, { borderBottomColor: colors.border }]}
-                        onPress={async () => {
-                          handleSelectCrewSuggestion(c);
-                          if (!isNewMode) {
-                            const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
-                            await updateRepairTicketFieldsService(ticketId, { requestedBy: c.name }, author, tenantId);
-                          }
-                          setIsCrewPickerModalOpen(false);
-                        }}
-                        testID={`crew-option-${idx}`}
-                      >
-                        <Text style={{ color: colors.foreground, fontWeight: '600', fontSize: typography.fontSize.base }}>{c.name}</Text>
-                        {c.position ? (
-                          <Text style={{ color: colors.mutedForeground, fontSize: typography.fontSize.sm }}>{c.position}</Text>
-                        ) : null}
-                      </Pressable>
-                    ))
-                )}
-              </ScrollView>
-              <TextInput
-                value={crewModalCustom}
-                onChangeText={setCrewModalCustom}
-                placeholder="Custom requester name..."
-                placeholderTextColor={colors.mutedForeground}
-                style={[styles.singleTextInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.foreground, marginTop: 8 }]}
-                testID="crew-custom-input"
-              />
-              <Button
-                variant="primary"
-                size="default"
-                style={{ marginTop: 8 }}
-                onPress={async () => {
-                  if (crewModalCustom.trim()) {
-                    setRequestedBy(crewModalCustom.trim());
-                    if (!isNewMode) {
-                      const author = { id: user?.id || 'unknown', name: user?.name || 'Technician', email: user?.email };
-                      await updateRepairTicketFieldsService(ticketId, { requestedBy: crewModalCustom.trim() }, author, tenantId);
-                    }
-                  }
-                  setIsCrewPickerModalOpen(false);
-                }}
-                testID="crew-custom-save-btn"
-              >
-                Save Custom Requester
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -2949,7 +2178,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.65)',
   },
   modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   modalContent: {
     borderTopLeftRadius: 18,
@@ -3003,7 +2232,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   lightboxBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   lightboxHeader: {
     position: 'absolute',

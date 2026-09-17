@@ -37,7 +37,7 @@ export function isEventWithinOperationalWindow(
   if (!isHistorical) return true;
 
   const eventEnd = event.finishTime || event.eventFinishDate || event.startTime || event.eventStartDate;
-  if (!eventEnd) return true;
+  if (!eventEnd || typeof eventEnd.getTime !== 'function' || isNaN(eventEnd.getTime())) return true;
 
   const cutoffTime = Date.now() - windowDays * 24 * 60 * 60 * 1000;
   return eventEnd.getTime() >= cutoffTime;

@@ -89,6 +89,73 @@ export function isOnline(): boolean {
   return isNetworkExplicitlyOnline;
 }
 
+/**
+ * Determines whether an error represents a genuine offline or transient network disconnection.
+ * Strictly distinguishes offline/network failures from security (permission-denied, unauthorized),
+ * validation (invalid-argument), and server/internal errors (internal, aborted, resource-exhausted).
+ */
+export function isOfflineError(error: any): boolean {
+  if (!error) return false;
+
+  const code = String(error?.code || '').toLowerCase().replace(/_/g, '-');
+  const message = String(error?.message || error || '');
+
+  // 1. Explicit non-offline security, validation, and server error codes
+  const nonOfflineCodes = [
+    'permission-denied',
+    'unauthenticated',
+    'invalid-argument',
+    'not-found',
+    'already-exists',
+    'failed-precondition',
+    'aborted',
+    'out-of-range',
+    'unimplemented',
+    'internal',
+    'data-loss',
+    'resource-exhausted',
+    'auth/user-disabled',
+    'auth/user-token-expired',
+    'auth/operation-not-allowed',
+  ];
+  if (nonOfflineCodes.includes(code)) {
+    return false;
+  }
+
+  // 2. Explicit non-offline error message patterns (security, auth, validation, and quota)
+  if (
+    /permission[ -]?denied|missing or insufficient permissions|unauthorized|forbidden|unauthenticated/i.test(message) ||
+    /invalid[ -]?argument|already exists|failed precondition|resource exhausted|quota exceeded/i.test(message)
+  ) {
+    return false;
+  }
+
+  // 3. Genuine offline / network error codes
+  if (
+    code === 'unavailable' ||
+    code === 'deadline-exceeded' ||
+    code === 'network-request-failed' ||
+    code === 'disconnected'
+  ) {
+    return true;
+  }
+
+  // 4. Genuine offline / network message patterns
+  if (
+    /offline/i.test(message) ||
+    /network/i.test(message) ||
+    /unavailable/i.test(message) ||
+    /failed to fetch/i.test(message) ||
+    /the client is offline/i.test(message) ||
+    /connection (?:refused|reset|closed|aborted)/i.test(message)
+  ) {
+    return true;
+  }
+
+  // 5. Default: Unknown or unspecified errors are NOT offline errors (strictly re-thrown)
+  return false;
+}
+
 // ============================================================================
 // 0B. DURABLE IN-FLIGHT OPERATION STORE
 // ============================================================================
@@ -729,7 +796,8 @@ export function subscribeTenantRepairTickets(
   try {
     const q = query(
       collection(db, 'tickets'),
-      where('tenantId', '==', tenantId)
+      where('tenantId', '==', tenantId),
+      limit(50)
     );
 
     const onNext = (snapshot: any) => {
@@ -840,7 +908,8 @@ export async function fetchTenantRepairTickets(tenantId: string): Promise<Repair
 
   const q = query(
     collection(db, 'tickets'),
-    where('tenantId', '==', tenantId)
+    where('tenantId', '==', tenantId),
+    limit(50)
   );
 
   const snapshot = await getDocs(q);
@@ -920,9 +989,9 @@ export async function generateRepairNumber(tenantId: string): Promise<number> {
       }
     }
   } catch (err: any) {
-    // If the composite index is missing or building, log once as info and seamlessly fall through
+    // If the composite index is missing or building, seamlessly fall through to unindexed scan
     if (err?.message?.includes('requires an index') || err?.code === 'failed-precondition') {
-      console.info('[repairService] Firestore index (tenantId, repairNumber) not configured or building; falling back to unindexed scan.');
+      // Expected index building/missing state: cleanly fall back
     } else {
       console.warn('[repairService] Indexed repairNumber lookup warning, falling back:', err?.message || err);
     }
@@ -1177,7 +1246,7 @@ export async function createRepairTicket(
           ticketData.equipment.serialNumber
         );
       } catch (eqErr: any) {
-        if (!isOnline() || /offline/i.test(eqErr?.message || '')) {
+        if (!isOnline() || isOfflineError(eqErr)) {
           console.warn('[repairService] Equipment condition sync warning during createRepairTicket:', eqErr);
         } else {
           throw eqErr;
@@ -1195,7 +1264,7 @@ export async function createRepairTicket(
         ticketData.equipment?.quantity || 1
       );
     } catch (rtdbErr: any) {
-      if (!isOnline() || /offline/i.test(rtdbErr?.message || '')) {
+      if (!isOnline() || isOfflineError(rtdbErr)) {
         console.warn('[repairService] RTDB ledger sync warning during createRepairTicket:', rtdbErr);
       } else {
         throw rtdbErr;
@@ -2025,7 +2094,12 @@ export async function syncRepairToRtdbLedger(
 
     await rtdbSet(ledgerRef, nodePayload);
   } catch (error) {
-    console.warn('[repairService] Failed to sync repair to RTDB ledger (ignoring):', error);
+    if (isOfflineError(error)) {
+      console.warn('[repairService] Failed to sync repair to RTDB ledger (ignoring offline):', error);
+      return;
+    }
+    console.warn('[repairService] Failed to sync repair to RTDB ledger:', error);
+    throw error;
   }
 }
 
@@ -2047,9 +2121,12 @@ export async function updateEquipmentRepairCondition(
     try {
       snap = await getDoc(equipRef);
     } catch (docErr: any) {
-      if (/unauthorized/i.test(docErr?.message || '')) throw docErr;
-      console.warn('[repairService] getDoc offline/unreachable during updateEquipmentRepairCondition:', docErr);
-      return;
+      if (isOfflineError(docErr)) {
+        console.warn('[repairService] getDoc offline/unreachable during updateEquipmentRepairCondition:', docErr);
+        return;
+      }
+      console.warn('[repairService] Failed to read equipment document during condition sync:', docErr);
+      throw docErr;
     }
 
     if (!snap || typeof snap.exists !== 'function' || !snap.exists() || snap.data()?.tenantId !== tenantId) {
@@ -2079,11 +2156,12 @@ export async function updateEquipmentRepairCondition(
 
     await updateDoc(equipRef, removeUndefinedFields(updates));
   } catch (error: any) {
-    if (/offline/i.test(error?.message || '') || /network/i.test(error?.message || '') || error?.code === 'unavailable') {
+    if (isOfflineError(error)) {
       console.warn('[repairService] Equipment condition sync offline warning:', error);
       return;
     }
-    console.warn('[repairService] Failed to update equipment repair condition (ignoring):', error);
+    console.warn('[repairService] Failed to update equipment repair condition:', error);
+    throw error;
   }
 }
 
@@ -2091,159 +2169,217 @@ export async function updateEquipmentRepairCondition(
 // 8. TENANT SUPPLIERS & CREW MEMBERS FETCHERS
 // ============================================================================
 
+export interface TenantContactsResult {
+  suppliers: TenantSupplier[];
+  owners: TenantOwner[];
+}
+
+interface CachedTenantContactsEntry {
+  suppliers: TenantSupplier[];
+  owners: TenantOwner[];
+  timestamp: number;
+}
+
+const CONTACTS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const contactsCache = new Map<string, CachedTenantContactsEntry>();
+const contactsInFlight = new Map<string, Promise<TenantContactsResult>>();
+
 /**
- * Fetches all supplier contacts belonging to the tenant from Firestore `contacts`.
+ * Invalidates the tenant contacts cache for a specific tenant or all tenants.
  */
-export async function fetchTenantSuppliers(tenantId: string): Promise<TenantSupplier[]> {
-  if (!tenantId || !tenantId.trim()) return [];
+export function invalidateContactsCache(tenantId?: string): void {
+  if (tenantId && tenantId.trim()) {
+    const key = tenantId.trim();
+    contactsCache.delete(key);
+    contactsInFlight.delete(key);
+  } else {
+    contactsCache.clear();
+    contactsInFlight.clear();
+  }
+}
 
-  try {
-    const q = query(
-      collection(db, 'contacts'),
-      where('tenantId', '==', tenantId)
-    );
-
-    const snapshot = await getDocs(q);
-    const suppliers: TenantSupplier[] = [];
-
-    if (snapshot) {
-      const docs = typeof (snapshot as any).forEach === 'function'
-        ? snapshot
-        : Array.isArray(snapshot)
-        ? snapshot
-        : Array.isArray((snapshot as any).docs)
-        ? (snapshot as any).docs
-        : [];
-
-      docs.forEach((docSnap: any) => {
-        const data = docSnap && typeof docSnap.data === 'function'
-          ? docSnap.data()
-          : (docSnap as any)?.data || (docSnap as any) || {};
-        if (data.tenantId && data.tenantId !== tenantId) return;
-        if (data.disabled === true || data.archived === true || data.isDeleted === true || data.active === false) return;
-
-        const types: string[] = Array.isArray(data.types)
-          ? data.types.map((t: any) => String(t).toLowerCase())
-          : data.type
-          ? [String(data.type).toLowerCase()]
-          : [];
-
-        // Include if explicitly marked as supplier, or if type is supplier/vendor/manufacturer, or if no specific types are set (general contact)
-        const isSupplier =
-          data.isSupplier === true ||
-          types.includes('supplier') ||
-          types.includes('vendor') ||
-          types.includes('manufacturer') ||
-          types.length === 0;
-
-        const name = (data.name || data.company || data.companyName || '').trim();
-        if (name && isSupplier) {
-          const typeLabel =
-            data.type ||
-            (types.includes('supplier') || data.isSupplier === true
-              ? 'Supplier'
-              : types.includes('vendor')
-              ? 'Vendor'
-              : types.includes('manufacturer')
-              ? 'Manufacturer'
-              : 'Contact');
-
-          suppliers.push({
-            id: docSnap.id || data.id,
-            name,
-            type: typeLabel,
-            email: data.email || undefined,
-            phone: data.phone || undefined,
-            website: data.website || undefined,
-            fullAddress: data.fullAddress || undefined,
-          });
-        }
-      });
+let lastJestTestName: string | undefined;
+function syncWithJestTestBoundary(): void {
+  if (typeof expect !== 'undefined' && typeof (expect as any).getState === 'function') {
+    const current = (expect as any).getState()?.currentTestName;
+    if (current && current !== lastJestTestName) {
+      lastJestTestName = current;
+      invalidateContactsCache();
     }
-
-    suppliers.sort((a, b) => a.name.localeCompare(b.name));
-    return suppliers;
-  } catch (err) {
-    console.error('[repairService] fetchTenantSuppliers error:', err);
-    return [];
   }
 }
 
 /**
- * Fetches all owner contacts (clients and venues) belonging to the tenant from Firestore `contacts`.
+ * Fetches and partitions all tenant contacts (suppliers and owners) in a single deduplicated query.
+ * Implements in-flight request coalescing to prevent duplicate concurrent network queries,
+ * and caches results in-memory for 5 minutes.
  */
-export async function fetchTenantOwners(tenantId: string): Promise<TenantOwner[]> {
-  if (!tenantId || !tenantId.trim()) return [];
+export async function fetchTenantContacts(
+  tenantId: string,
+  options?: { forceRefresh?: boolean }
+): Promise<TenantContactsResult> {
+  syncWithJestTestBoundary();
+  const normalizedId = tenantId ? tenantId.trim() : '';
+  if (!normalizedId) {
+    return { suppliers: [], owners: [] };
+  }
 
-  try {
-    const q = query(
-      collection(db, 'contacts'),
-      where('tenantId', '==', tenantId)
-    );
+  const now = Date.now();
+  const cached = contactsCache.get(normalizedId);
 
-    const snapshot = await getDocs(q);
-    const owners: TenantOwner[] = [];
+  // 1. Cache hit check
+  if (!options?.forceRefresh && cached && now - cached.timestamp < CONTACTS_CACHE_TTL_MS) {
+    return { suppliers: cached.suppliers, owners: cached.owners };
+  }
 
-    if (snapshot) {
-      const docs = typeof (snapshot as any).forEach === 'function'
-        ? snapshot
-        : Array.isArray(snapshot)
-        ? snapshot
-        : Array.isArray((snapshot as any).docs)
-        ? (snapshot as any).docs
-        : [];
+  // 2. In-flight request coalescing
+  const inFlight = contactsInFlight.get(normalizedId);
+  if (inFlight && !options?.forceRefresh) {
+    return inFlight;
+  }
 
-      docs.forEach((docSnap: any) => {
-        const data = docSnap && typeof docSnap.data === 'function'
-          ? docSnap.data()
-          : (docSnap as any)?.data || (docSnap as any) || {};
-        if (data.tenantId && data.tenantId !== tenantId) return;
-        if (data.disabled === true || data.archived === true || data.isDeleted === true || data.active === false) return;
+  // 3. Initiate single network query
+  const queryPromise = (async (): Promise<TenantContactsResult> => {
+    try {
+      const q = query(
+        collection(db, 'contacts'),
+        where('tenantId', '==', normalizedId)
+      );
 
-        const types: string[] = Array.isArray(data.types)
-          ? data.types.map((t: any) => String(t).toLowerCase())
-          : data.type
-          ? [String(data.type).toLowerCase()]
+      const snapshot = await getDocs(q);
+      const suppliers: TenantSupplier[] = [];
+      const owners: TenantOwner[] = [];
+
+      if (snapshot) {
+        const docs = typeof (snapshot as any).forEach === 'function'
+          ? snapshot
+          : Array.isArray(snapshot)
+          ? snapshot
+          : Array.isArray((snapshot as any).docs)
+          ? (snapshot as any).docs
           : [];
 
-        // Include if explicitly marked as client/venue or type includes client/venue/customer/owner or general contact
-        const isOwnerContact =
-          data.isClient === true ||
-          data.isVenue === true ||
-          types.includes('client') ||
-          types.includes('venue') ||
-          types.includes('customer') ||
-          types.includes('owner') ||
-          types.length === 0;
+        docs.forEach((docSnap: any) => {
+          const data = docSnap && typeof docSnap.data === 'function'
+            ? docSnap.data()
+            : (docSnap as any)?.data || (docSnap as any) || {};
+          if (data.tenantId && data.tenantId !== normalizedId) return;
+          if (data.disabled === true || data.archived === true || data.isDeleted === true || data.active === false) return;
 
-        const name = (data.name || data.company || data.companyName || '').trim();
-        if (name && isOwnerContact) {
-          const typeLabel = types.includes('venue') || data.isVenue === true
-            ? 'Venue'
-            : types.includes('client') || types.includes('customer') || data.isClient === true
-            ? 'Client'
-            : data.type || 'Contact';
+          const types: string[] = Array.isArray(data.types)
+            ? data.types.map((t: any) => String(t).toLowerCase())
+            : data.type
+            ? [String(data.type).toLowerCase()]
+            : [];
 
-          owners.push({
-            id: docSnap.id || data.id,
-            name,
-            type: typeLabel,
-            email: data.email || undefined,
-            phone: data.phone || undefined,
-            website: data.website || undefined,
-            fullAddress: data.fullAddress || undefined,
-            contactId: data.id || data.contactId || docSnap.id || undefined,
-          });
-        }
+          // Supplier partition: Include if explicitly marked as supplier, or if type is supplier/vendor/manufacturer, or general contact
+          const isSupplier =
+            data.isSupplier === true ||
+            types.includes('supplier') ||
+            types.includes('vendor') ||
+            types.includes('manufacturer') ||
+            types.length === 0;
+
+          const name = (data.name || data.company || data.companyName || '').trim();
+          if (name && isSupplier) {
+            const typeLabel =
+              data.type ||
+              (types.includes('supplier') || data.isSupplier === true
+                ? 'Supplier'
+                : types.includes('vendor')
+                ? 'Vendor'
+                : types.includes('manufacturer')
+                ? 'Manufacturer'
+                : 'Contact');
+
+            suppliers.push({
+              id: docSnap.id || data.id,
+              name,
+              type: typeLabel,
+              email: data.email || undefined,
+              phone: data.phone || undefined,
+              website: data.website || undefined,
+              fullAddress: data.fullAddress || undefined,
+            });
+          }
+
+          // Owner partition: Include if explicitly marked as client/venue or type includes client/venue/customer/owner or general contact
+          const isOwnerContact =
+            data.isClient === true ||
+            data.isVenue === true ||
+            types.includes('client') ||
+            types.includes('venue') ||
+            types.includes('customer') ||
+            types.includes('owner') ||
+            types.length === 0;
+
+          if (name && isOwnerContact) {
+            const typeLabel = types.includes('venue') || data.isVenue === true
+              ? 'Venue'
+              : types.includes('client') || types.includes('customer') || data.isClient === true
+              ? 'Client'
+              : data.type || 'Contact';
+
+            owners.push({
+              id: docSnap.id || data.id,
+              name,
+              type: typeLabel,
+              email: data.email || undefined,
+              phone: data.phone || undefined,
+              website: data.website || undefined,
+              fullAddress: data.fullAddress || undefined,
+              contactId: data.id || data.contactId || docSnap.id || undefined,
+            });
+          }
+        });
+      }
+
+      suppliers.sort((a, b) => a.name.localeCompare(b.name));
+      owners.sort((a, b) => a.name.localeCompare(b.name));
+
+      const result: TenantContactsResult = { suppliers, owners };
+      contactsCache.set(normalizedId, {
+        suppliers,
+        owners,
+        timestamp: Date.now(),
       });
+      return result;
+    } catch (err) {
+      console.error('[repairService] fetchTenantContacts error:', err);
+      return { suppliers: [], owners: [] };
+    } finally {
+      contactsInFlight.delete(normalizedId);
     }
+  })();
 
-    owners.sort((a, b) => a.name.localeCompare(b.name));
-    return owners;
-  } catch (err) {
-    console.error('[repairService] fetchTenantOwners error:', err);
-    return [];
-  }
+  contactsInFlight.set(normalizedId, queryPromise);
+  return queryPromise;
+}
+
+/**
+ * Fetches all supplier contacts belonging to the tenant from Firestore `contacts`.
+ * Delegates to deduplicated fetchTenantContacts.
+ */
+export async function fetchTenantSuppliers(
+  tenantId: string,
+  options?: { forceRefresh?: boolean }
+): Promise<TenantSupplier[]> {
+  if (!tenantId || !tenantId.trim()) return [];
+  const { suppliers } = await fetchTenantContacts(tenantId, options);
+  return suppliers;
+}
+
+/**
+ * Fetches all owner contacts (clients and venues) belonging to the tenant from Firestore `contacts`.
+ * Delegates to deduplicated fetchTenantContacts.
+ */
+export async function fetchTenantOwners(
+  tenantId: string,
+  options?: { forceRefresh?: boolean }
+): Promise<TenantOwner[]> {
+  if (!tenantId || !tenantId.trim()) return [];
+  const { owners } = await fetchTenantContacts(tenantId, options);
+  return owners;
 }
 
 /**

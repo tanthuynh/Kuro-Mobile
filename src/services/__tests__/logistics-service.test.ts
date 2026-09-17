@@ -476,29 +476,101 @@ describe('Logistics Service (Firestore)', () => {
       );
     });
 
-    it('appends formatted note when note option is provided', async () => {
+    it('writes system log to chats/logistics-{jobId}/messages and DOES NOT update notes field on logistics document', async () => {
       mockFirestore.getDoc.mockResolvedValueOnce({
         exists: () => true,
-        data: () => ({
-          id: 'job-1',
-          tenantId: 'tenant-1',
-          notes: 'Initial instruction',
-        }),
+        data: () => ({ id: 'job-1', tenantId: 'tenant-1' }),
       });
       mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'msg-1' });
 
       await updateLogisticsStatus('job-1', 'In Progress', {
-        note: 'Delayed 10 mins in traffic',
+        note: 'Driver started route and initiated GPS tracking',
         updatedBy: 'Driver Dan',
+        tenantId: 'tenant-1',
       });
 
+      // 1. Logistics document update MUST contain status and MUST NOT touch or mutate notes
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           status: 'In Progress',
-          notes: expect.stringContaining('Delayed 10 mins in traffic'),
+          updatedBy: 'Driver Dan',
+          updatedAt: expect.anything(),
         })
       );
+      const updatePayload = mockFirestore.updateDoc.mock.calls[0][1];
+      expect(updatePayload.notes).toBeUndefined();
+
+      // 2. Activity log MUST write to chats/logistics-job-1/messages subcollection
+      expect(mockFirestore.collection).toHaveBeenCalledWith(
+        expect.anything(),
+        'chats',
+        'logistics-job-1',
+        'messages'
+      );
+      expect(mockFirestore.addDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          text: 'Driver started route and initiated GPS tracking',
+          senderId: 'system',
+          userName: 'Driver Dan',
+          userId: 'Driver Dan',
+          tenantId: 'tenant-1',
+          timestamp: expect.anything(),
+        })
+      );
+    });
+
+    it('handles entryId already containing logistics- prefix without duplicating prefix in chat path', async () => {
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'msg-2' });
+
+      await updateLogisticsStatus('logistics-202', 'Completed', {
+        note: 'Driver marked job as completed',
+      });
+
+      expect(mockFirestore.collection).toHaveBeenCalledWith(
+        expect.anything(),
+        'chats',
+        'logistics-202',
+        'messages'
+      );
+      expect(mockFirestore.addDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          text: 'Driver marked job as completed',
+          senderId: 'system',
+        })
+      );
+    });
+
+    it('does not write to chats subcollection when no note is provided', async () => {
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+
+      await updateLogisticsStatus('job-1', 'In Progress');
+
+      expect(mockFirestore.updateDoc).toHaveBeenCalledTimes(1);
+      expect(mockFirestore.addDoc).not.toHaveBeenCalled();
+    });
+
+    it('does not write to chats subcollection or modify notes when note is empty or whitespace-only', async () => {
+      mockFirestore.updateDoc.mockResolvedValue(undefined);
+
+      // 1. Empty string note
+      await updateLogisticsStatus('job-1', 'In Progress', { note: '' });
+      expect(mockFirestore.addDoc).not.toHaveBeenCalled();
+      let updatePayload = mockFirestore.updateDoc.mock.calls[0][1];
+      expect(updatePayload.notes).toBeUndefined();
+
+      mockFirestore.updateDoc.mockClear();
+      mockFirestore.addDoc.mockClear();
+
+      // 2. Whitespace-only note
+      await updateLogisticsStatus('job-1', 'In Progress', { note: '     ' });
+      expect(mockFirestore.addDoc).not.toHaveBeenCalled();
+      updatePayload = mockFirestore.updateDoc.mock.calls[0][1];
+      expect(updatePayload.notes).toBeUndefined();
     });
 
     it('enforces tenant isolation check if tenantId is provided', async () => {
@@ -515,6 +587,163 @@ describe('Logistics Service (Firestore)', () => {
           tenantId: 'tenant-beta',
         })
       ).rejects.toThrow(/Unauthorized/);
+    });
+
+    it('enforces strict tenant isolation and prevents both status update and activity log write when cross-tenant update with note is attempted', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          id: 'job-victim',
+          tenantId: 'tenant-victim',
+          notes: 'Customer gate instructions',
+        }),
+      });
+
+      await expect(
+        updateLogisticsStatus('job-victim', 'In Progress', {
+          tenantId: 'tenant-intruder',
+          note: 'Malicious automated note attempt',
+          updatedBy: 'Intruder',
+        })
+      ).rejects.toThrow(/Unauthorized: Tenant isolation mismatch/i);
+
+      expect(mockFirestore.updateDoc).not.toHaveBeenCalled();
+      expect(mockFirestore.addDoc).not.toHaveBeenCalled();
+    });
+
+    it('handles uppercase LOGISTICS- prefix without duplicating prefix in chat path', async () => {
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'msg-upper' });
+
+      await updateLogisticsStatus('LOGISTICS-999', 'Completed', {
+        note: 'Driver completed route',
+      });
+
+      expect(mockFirestore.collection).toHaveBeenCalledWith(
+        expect.anything(),
+        'chats',
+        'LOGISTICS-999',
+        'messages'
+      );
+      expect(mockFirestore.addDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          userName: 'System',
+          senderId: 'system',
+        })
+      );
+    });
+
+    it('gracefully handles activity log write failure without failing the committed status update', async () => {
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockRejectedValueOnce(new Error('Network offline or rules permission denied'));
+
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // Status update MUST NOT throw even if activity log addDoc fails
+      await expect(
+        updateLogisticsStatus('job-resilience-1', 'In Progress', {
+          note: 'Driver started route',
+          updatedBy: 'Dan',
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          status: 'In Progress',
+        })
+      );
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[logisticsService] Failed to record status update to activity log:'),
+        expect.any(Error)
+      );
+
+      warnSpy.mockRestore();
+    });
+
+    it('trims leading/trailing whitespace from entryId and formats channelId correctly', async () => {
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'msg-trim' });
+
+      await updateLogisticsStatus('   job-trim-1   ', 'In Progress', {
+        note: 'Driver started route',
+      });
+
+      expect(mockFirestore.collection).toHaveBeenCalledWith(
+        expect.anything(),
+        'chats',
+        'logistics-job-trim-1',
+        'messages'
+      );
+    });
+
+    it('records explicit userId and serverTimestamp in messagePayload conforming to chat schema', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ tenantId: 'tenant-42' }),
+      });
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'msg-uid-1' });
+
+      await updateLogisticsStatus('job-uid-test', 'In Progress', {
+        note: 'Driver departed warehouse',
+        updatedBy: 'Dan Driver',
+        userId: 'usr-dan-999',
+        tenantId: 'tenant-42',
+      });
+
+      expect(mockFirestore.addDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          senderId: 'system',
+          text: 'Driver departed warehouse',
+          userName: 'Dan Driver',
+          updatedBy: 'Dan Driver',
+          userId: 'usr-dan-999',
+          tenantId: 'tenant-42',
+          timestamp: expect.objectContaining({ _methodName: 'serverTimestamp' }),
+        })
+      );
+    });
+
+    it('verifies timestamp_type_consistency: payload timestamp can be mapped by chat consumer to valid Date', async () => {
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+      mockFirestore.addDoc.mockResolvedValueOnce({ id: 'msg-ts-1' });
+
+      await updateLogisticsStatus('job-ts-test', 'Completed', {
+        note: 'Route completed',
+      });
+
+      const messagePayload = mockFirestore.addDoc.mock.calls[0][1];
+      expect(messagePayload.timestamp).toBeDefined();
+
+      // Chat readers (like useChat) convert Firestore Timestamps to JS Date:
+      // Case A: Mock/real Firestore Timestamp with .toDate()
+      const mockTimestampObj = {
+        toDate: () => new Date('2026-09-17T12:00:00Z'),
+      };
+      const parsedA = mockTimestampObj.toDate ? mockTimestampObj.toDate() : new Date();
+      expect(parsedA).toBeInstanceOf(Date);
+      expect(parsedA.toISOString()).toBe('2026-09-17T12:00:00.000Z');
+
+      // Case B: Fallback epoch or string timestamp
+      const epochTs = Date.now();
+      const parsedB = new Date(epochTs);
+      expect(parsedB).toBeInstanceOf(Date);
+      expect(isNaN(parsedB.getTime())).toBe(false);
+    });
+
+    it('throws not found if entry document does not exist when tenantId check is performed', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => false,
+      });
+
+      await expect(
+        updateLogisticsStatus('job-missing-1', 'In Progress', {
+          tenantId: 'tenant-123',
+        })
+      ).rejects.toThrow(/Logistics entry job-missing-1 not found/);
     });
   });
 
@@ -552,6 +781,29 @@ describe('Logistics Service (Firestore)', () => {
           updatedAt: expect.anything(),
         })
       );
+      expect(mockFirestore.addDoc).not.toHaveBeenCalled();
+    });
+
+    it('preserves manual internal notes on logistics document without writing to activity log', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          id: 'job-1',
+          tenantId: 'tenant-1',
+          notes: 'Customer gate code: 1234',
+        }),
+      });
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+
+      await appendLogisticsNote('job-1', 'Use loading dock B on arrival', 'Driver Sam', 'tenant-1');
+
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          notes: expect.stringContaining('Use loading dock B on arrival'),
+        })
+      );
+      expect(mockFirestore.addDoc).not.toHaveBeenCalled();
     });
 
     it('throws error if entry does not exist', async () => {
@@ -574,6 +826,57 @@ describe('Logistics Service (Firestore)', () => {
       await expect(
         appendLogisticsNote('job-1', 'Some note', 'Driver', 'tenant-1')
       ).rejects.toThrow(/Unauthorized/);
+    });
+
+    it('trims author whitespace when formatting internal note and updating updatedBy', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          id: 'job-1',
+          tenantId: 'tenant-1',
+          notes: '',
+        }),
+      });
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+
+      await appendLogisticsNote('  job-1  ', 'Test note', '   Driver Sam   ', 'tenant-1');
+
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          notes: expect.stringContaining('[Driver Sam]: Test note'),
+          updatedBy: 'Driver Sam',
+        })
+      );
+    });
+
+    it('formats note cleanly without orphaned space before colon when author is omitted', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          id: 'job-no-author',
+          tenantId: 'tenant-1',
+          notes: '',
+        }),
+      });
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+
+      await appendLogisticsNote('job-no-author', 'System automated maintenance note', undefined, 'tenant-1');
+
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          notes: expect.stringMatching(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}: System automated maintenance note$/),
+        })
+      );
+    });
+
+    it('throws not found if entry document does not exist', async () => {
+      mockFirestore.getDoc.mockResolvedValueOnce({
+        exists: () => false,
+      });
+
+      await expect(appendLogisticsNote('job-missing-snap', 'Some note')).rejects.toThrow(/not found/);
     });
   });
 
@@ -625,16 +928,43 @@ describe('Logistics Service (Firestore)', () => {
       );
     });
 
-    it('stopJobTracking sets isTrackingActive to false', async () => {
+    it('stopJobTracking sets isTrackingActive to false and trims entryId', async () => {
       mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
 
-      await stopJobTracking('job-1');
+      await stopJobTracking('   job-trim-stop   ');
 
+      expect(mockFirestore.doc).toHaveBeenCalledWith(
+        expect.anything(),
+        'logistics',
+        'job-trim-stop'
+      );
       expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           isTrackingActive: false,
           updatedAt: expect.anything(),
+        })
+      );
+    });
+
+    it('updateJobLocation trims whitespace from entryId', async () => {
+      mockFirestore.updateDoc.mockResolvedValueOnce(undefined);
+
+      await updateJobLocation('   job-trim-loc   ', {
+        latitude: -33.8688,
+        longitude: 151.2093,
+        timestamp: 1756123456000,
+      }, { skipHistory: true });
+
+      expect(mockFirestore.doc).toHaveBeenCalledWith(
+        expect.anything(),
+        'logistics',
+        'job-trim-loc'
+      );
+      expect(mockFirestore.updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          trackingJobId: 'job-trim-loc',
         })
       );
     });

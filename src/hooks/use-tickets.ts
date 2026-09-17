@@ -20,7 +20,6 @@ import {
   addRepairAttachment,
   deleteRepairAttachment,
   uploadRepairDamagePhoto,
-  fetchTenantSuppliers,
   fetchTenantOwners,
   fetchTenantCrewMembers,
   getPendingRepairOperations,
@@ -643,51 +642,6 @@ export function useSingleTicket(ticketId: string) {
     addAttachment: handleAddAttachment,
     deleteAttachment: handleDeleteAttachment,
   };
-}
-
-/**
- * Hook to fetch all suppliers belonging to the active tenant.
- */
-export function useTenantSuppliers() {
-  const { user, tenant } = useAuth();
-  const tenantId = user?.tenantId || tenant?.tenantId || '';
-  const [suppliers, setSuppliers] = useState<Array<{ id: string; name: string; type?: string }>>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Synchronously purge stale suppliers when tenantId changes
-  const currentTenantRef = useRef(tenantId);
-  if (currentTenantRef.current !== tenantId) {
-    currentTenantRef.current = tenantId;
-    setSuppliers([]);
-    setLoading(tenantId ? true : false);
-  }
-
-  const fetchSuppliers = useCallback(async () => {
-    if (!tenantId) {
-      setSuppliers([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await fetchTenantSuppliers(tenantId);
-      if (currentTenantRef.current === tenantId) {
-        setSuppliers(data);
-      }
-    } catch (err) {
-      console.warn('[useTenantSuppliers] error:', err);
-    } finally {
-      if (currentTenantRef.current === tenantId) {
-        setLoading(false);
-      }
-    }
-  }, [tenantId]);
-
-  useEffect(() => {
-    fetchSuppliers();
-  }, [fetchSuppliers]);
-
-  return { suppliers, loading, refresh: fetchSuppliers };
 }
 
 /**
